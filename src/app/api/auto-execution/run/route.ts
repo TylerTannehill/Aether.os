@@ -96,7 +96,7 @@ function buildCommandCenterInput(): Promise<CommandCenterAdapterInput> {
       last_name: contact.last_name ?? null,
       full_name:
         contact.full_name ??
-        fullName(contact.first_name ?? "", contact.last_name ?? ""),
+        contact.full_name ?? `${contact.first_name ?? ""} ${contact.last_name ?? ""}`.trim(),
       owner_id: contact.owner_id ?? null,
       assigned_to: contact.assigned_to ?? contact.owner ?? null,
       last_contacted_at:
