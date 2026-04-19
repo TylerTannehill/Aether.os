@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import {
   AlertTriangle,
   ContactRound,
@@ -276,7 +276,7 @@ function getOutreachAbeBriefing(input: {
   };
 }
 
-export default function OutreachPage() {
+function OutreachPageContent() {
   const searchParams = useSearchParams();
   const preselectedContactId = searchParams.get("contactId") || "";
   const preferredChannel = searchParams.get("channel");
@@ -1823,5 +1823,13 @@ export default function OutreachPage() {
         </section>
       )}
     </div>
+  );
+}
+
+export default function OutreachPage() {
+  return (
+    <Suspense fallback={<div className="p-6">Loading outreach...</div>}>
+      <OutreachPageContent />
+    </Suspense>
   );
 }

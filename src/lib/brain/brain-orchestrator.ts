@@ -183,7 +183,7 @@ function normalizeTaskToRawItem(
   return {
     id: String(task.id),
     title: task.title ?? "Untitled task",
-    description: buildTaskDescription(task),
+    description: buildTaskDescription(task) ?? undefined,
     type: task.task_type ?? "task",
     status: task.status ?? "open",
     source: task.route_type ?? task.task_type ?? "task",
@@ -225,7 +225,7 @@ function normalizeOpportunityToRawItem(
   return {
     id: String(opportunity.id),
     title: opportunity.title ?? "Untitled opportunity",
-    description: buildOpportunityDescription(opportunity),
+    description: buildOpportunityDescription(opportunity) ?? undefined,
     type: "opportunity",
     status: opportunity.status ?? "open",
     source: opportunity.source ?? "suggestion",

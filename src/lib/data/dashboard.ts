@@ -43,7 +43,7 @@ export async function getDashboardData(): Promise<DashboardData> {
   return {
     contacts: contactsRes.data ?? [],
     lists: listsRes.data ?? [],
-    logs: (logsRes.data as OutreachLog[]) ?? [],
+    logs: ((logsRes.data ?? []) as unknown as OutreachLog[]),
     tasks: tasksRes.data ?? [],
   };
 }

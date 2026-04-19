@@ -137,7 +137,7 @@ export default function TopActionsPanel({
 
               <div className="mt-4 space-y-2">
                 {(action.brain_reasons ?? []).length ? (
-                  action.brain_reasons.slice(0, 3).map((reason, reasonIndex) => (
+                  (action.brain_reasons ?? []).slice(0, 3).map((reason, reasonIndex) => (
                     <div
                       key={`${action.id}-reason-${reasonIndex}`}
                       className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600"

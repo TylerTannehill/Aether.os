@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import Link from "next/link";
 import { autoMapFields } from "@/lib/ingestion/mapping";
 import { parseCSV } from "@/lib/ingestion/parser";
@@ -12,7 +12,7 @@ type ImportSummaryItem = {
   count: number;
 };
 
-export default function IngestPage() {
+function IngestPageContent() {
   const searchParams = useSearchParams();
   const source = searchParams.get("source") || "outreach";
 
@@ -329,7 +329,7 @@ export default function IngestPage() {
                   </p>
 
                   <div className="mt-3 space-y-2">
-                                        {listSummary.map((item) => (
+                    {listSummary.map((item) => (
                       <Link
                         key={item.name}
                         href={`/dashboard/lists?name=${encodeURIComponent(item.name)}`}
@@ -567,5 +567,13 @@ export default function IngestPage() {
         </>
       ) : null}
     </div>
+  );
+}
+
+export default function IngestPage() {
+  return (
+    <Suspense fallback={<div className="p-6">Loading ingest...</div>}>
+      <IngestPageContent />
+    </Suspense>
   );
 }

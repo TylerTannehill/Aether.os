@@ -456,10 +456,11 @@ export default function ContactDetailPage() {
     if (membershipError) {
       setMessage(`Error loading list memberships: ${membershipError.message}`);
     } else {
-      const mappedLists =
-        (membershipData as ContactListMembership[] | null)?.flatMap((row) =>
-          row.lists ? [{ id: row.lists.id, name: row.lists.name }] : []
-        ) || [];
+   const mappedLists =
+  ((membershipData ?? []) as any[]).flatMap((row) => {
+    const linked = Array.isArray(row.lists) ? row.lists[0] : row.lists;
+    return linked ? [{ id: linked.id, name: linked.name }] : [];
+  });
 
       setContactLists(mappedLists);
     }

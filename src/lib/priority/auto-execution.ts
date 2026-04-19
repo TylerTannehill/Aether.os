@@ -110,12 +110,14 @@ export function getDefaultExecutionSettings(): ExecutionSettings {
 export function resolveExecutionSettings(
   options?: AutoExecutionOptions | Partial<ExecutionSettings>
 ): ExecutionSettings {
+  const autoOptions = options as AutoExecutionOptions | undefined;
+  const partialSettings = options as Partial<ExecutionSettings> | undefined;
+
   const confidenceThreshold =
-    typeof options?.minimumConfidence === "number"
-      ? options.minimumConfidence
-      : typeof (options as Partial<ExecutionSettings> | undefined)
-          ?.confidenceThreshold === "number"
-        ? (options as Partial<ExecutionSettings>).confidenceThreshold!
+    typeof autoOptions?.minimumConfidence === "number"
+      ? autoOptions.minimumConfidence
+      : typeof partialSettings?.confidenceThreshold === "number"
+        ? partialSettings.confidenceThreshold!
         : executionSettings.confidenceThreshold;
 
   return {

@@ -96,9 +96,10 @@ export async function getListDetail(listId: string): Promise<ListDetailData> {
   if (contactsError) throw contactsError;
 
   const assignedContacts =
-    (membershipData as ListContactRow[] | null)?.flatMap((row) =>
-      row.contacts ? [row.contacts] : []
-    ) ?? [];
+    ((membershipData ?? []) as unknown as ListContactRow[]).flatMap((row) => {
+      const linked = Array.isArray(row.contacts) ? row.contacts[0] : row.contacts;
+      return linked ? [linked] : [];
+    });
 
   return {
     list: (listData as CampaignList) ?? null,

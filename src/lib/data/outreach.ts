@@ -54,11 +54,10 @@ export async function getListContacts(listId: string): Promise<Contact[]> {
 
   if (error) throw error;
 
-  return (
-    (data as ListContactRow[] | null)?.flatMap((row) =>
-      row.contacts ? [row.contacts] : []
-    ) ?? []
-  );
+  return (((data ?? []) as unknown as ListContactRow[]).flatMap((row) => {
+    const linked = Array.isArray(row.contacts) ? row.contacts[0] : row.contacts;
+    return linked ? [linked] : [];
+  })) as Contact[];
 }
 
 export async function getOutreachLogs(listId: string): Promise<OutreachLog[]> {
@@ -73,7 +72,7 @@ export async function getOutreachLogs(listId: string): Promise<OutreachLog[]> {
 
   if (error) throw error;
 
-  return (data as OutreachLog[]) ?? [];
+  return ((data ?? []) as unknown as OutreachLog[]);
 }
 
 export function deriveStatusAndNextAction(log: OutreachLog | null) {

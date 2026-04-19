@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { ArrowRight } from "lucide-react";
 import {
   createList,
   filterLists,
@@ -38,7 +39,7 @@ function tagTone(tag: ListTag) {
   }
 }
 
-export default function DashboardListsPage() {
+function DashboardListsPageContent() {
   const searchParams = useSearchParams();
   const listFromQuery = searchParams.get("name") || "";
 
@@ -120,14 +121,13 @@ export default function DashboardListsPage() {
 
   return (
     <div className="space-y-8">
-      {/* 🔥 SYSTEM INTENT */}
       <section className="rounded-3xl border border-slate-200 bg-slate-900 p-6 text-white shadow-sm lg:p-8">
         <h1 className="text-3xl font-semibold tracking-tight lg:text-4xl">
           Lists = Routing Engine
         </h1>
-        <p className="mt-2 text-sm text-slate-300 max-w-3xl">
-          Lists determine who gets worked, when they get worked, and how execution
-          flows across Outreach, Finance, and Field.
+        <p className="mt-2 max-w-3xl text-sm text-slate-300">
+          Lists determine who gets worked, when they get worked, and how
+          execution flows across Outreach, Finance, and Field.
         </p>
       </section>
 
@@ -135,7 +135,7 @@ export default function DashboardListsPage() {
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-3">
             <p className="text-sm font-medium uppercase tracking-[0.18em] text-slate-500">
-              Lists & Call Packs
+              Lists &amp; Call Packs
             </p>
             <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
               Manage Lists
@@ -161,7 +161,9 @@ export default function DashboardListsPage() {
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-500">Saved Lists</p>
+          <p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-500">
+            Saved Lists
+          </p>
           <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
             {counts.total}
           </p>
@@ -169,7 +171,9 @@ export default function DashboardListsPage() {
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-500">Filtered</p>
+          <p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-500">
+            Filtered
+          </p>
           <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
             {counts.filtered}
           </p>
@@ -177,17 +181,19 @@ export default function DashboardListsPage() {
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-500">Ready</p>
+          <p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-500">
+            Ready
+          </p>
           <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
             {counts.ready}
           </p>
-          <p className="mt-1 text-xs text-slate-500">
-            Lists ready to route
-          </p>
+          <p className="mt-1 text-xs text-slate-500">Lists ready to route</p>
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-500">Owner Assigned</p>
+          <p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-500">
+            Owner Assigned
+          </p>
           <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
             {assignedOwnerCount}
           </p>
@@ -195,7 +201,9 @@ export default function DashboardListsPage() {
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-500">Needs Owner</p>
+          <p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-500">
+            Needs Owner
+          </p>
           <p className="mt-2 text-3xl font-semibold tracking-tight text-rose-600">
             {unassignedOwnerCount}
           </p>
@@ -204,7 +212,6 @@ export default function DashboardListsPage() {
           </p>
         </div>
       </section>
-
 
       <section className="grid gap-4 xl:grid-cols-3">
         <Link
@@ -218,7 +225,8 @@ export default function DashboardListsPage() {
             Work Lists in Outreach
           </h2>
           <p className="mt-2 text-sm text-slate-500">
-            Push active contact lists straight into outreach execution without losing routing context.
+            Push active contact lists straight into outreach execution without
+            losing routing context.
           </p>
           <div className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-slate-900">
             Open Outreach Focus
@@ -237,7 +245,8 @@ export default function DashboardListsPage() {
             Work Donor Lists
           </h2>
           <p className="mt-2 text-sm text-slate-500">
-            Move finance and donor lists into pledge collection, compliance cleanup, and follow-up.
+            Move finance and donor lists into pledge collection, compliance
+            cleanup, and follow-up.
           </p>
           <div className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-slate-900">
             Open Finance Focus
@@ -256,7 +265,8 @@ export default function DashboardListsPage() {
             Deploy Field Lists
           </h2>
           <p className="mt-2 text-sm text-slate-500">
-            Turn turf packets and call packs into active field execution with cleaner lane alignment.
+            Turn turf packets and call packs into active field execution with
+            cleaner lane alignment.
           </p>
           <div className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-slate-900">
             Open Field Focus
@@ -268,7 +278,9 @@ export default function DashboardListsPage() {
       <section className="rounded-3xl border-2 border-slate-900 bg-white p-6 shadow-md lg:p-8">
         <div className="mb-6 flex items-center justify-between gap-4">
           <div>
-            <h2 className="text-xl font-semibold text-slate-900">Saved Lists</h2>
+            <h2 className="text-xl font-semibold text-slate-900">
+              Saved Lists
+            </h2>
             <p className="mt-1 text-sm text-slate-500">
               Showing {filteredLists.length} list
               {filteredLists.length === 1 ? "" : "s"}.
@@ -408,39 +420,48 @@ export default function DashboardListsPage() {
           </table>
         </div>
 
-      <section className="rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm lg:p-8">
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold text-slate-900">List Controls</h2>
-          <p className="mt-1 text-sm text-slate-500">
-            Create a new list or narrow the current routing view.
-          </p>
-        </div>
+        <section className="rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm lg:p-8">
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold text-slate-900">
+              List Controls
+            </h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Create a new list or narrow the current routing view.
+            </p>
+          </div>
 
-        <div className="grid gap-4 lg:grid-cols-[1fr_260px_160px]">
-          <input
-            value={newListName}
-            onChange={(e) => setNewListName(e.target.value)}
-            placeholder="New list name..."
-            className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400"
-          />
+          <div className="grid gap-4 lg:grid-cols-[1fr_260px_160px]">
+            <input
+              value={newListName}
+              onChange={(e) => setNewListName(e.target.value)}
+              placeholder="New list name..."
+              className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400"
+            />
 
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search lists or owner..."
-            className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400"
-          />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search lists or owner..."
+              className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400"
+            />
 
-          <button
-            onClick={handleCreateList}
-            className="rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
-          >
-            Create List
-          </button>
-        </div>
-      </section>
-
+            <button
+              onClick={handleCreateList}
+              className="rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
+            >
+              Create List
+            </button>
+          </div>
+        </section>
       </section>
     </div>
+  );
+}
+
+export default function DashboardListsPage() {
+  return (
+    <Suspense fallback={<div className="p-6">Loading lists...</div>}>
+      <DashboardListsPageContent />
+    </Suspense>
   );
 }

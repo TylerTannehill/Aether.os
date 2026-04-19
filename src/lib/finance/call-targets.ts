@@ -232,7 +232,10 @@ function deriveSeedCallTargets(
         reason: "Active high-value pledge needs direct collection",
         suggestedAsk: buildSuggestedAsk(contact, activePledge.amount),
         script: buildScript(contact, activePledge.amount),
-        status: activePledge.status,
+        status:
+  activePledge.status === "converted"
+    ? "follow_up"
+    : activePledge.status,
         lastContact: contact.lastContact,
       });
       return;

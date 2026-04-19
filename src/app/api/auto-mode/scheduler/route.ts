@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
         last_name: contact.last_name ?? null,
         full_name:
           contact.full_name ??
-          fullName(contact.first_name ?? "", contact.last_name ?? ""),
+          contact.full_name ?? `${contact.first_name ?? ""} ${contact.last_name ?? ""}`.trim(),
         owner_id: contact.owner_id ?? null,
         assigned_to: contact.assigned_to ?? contact.owner ?? null,
         owner_name: contact.owner_name ?? contact.owner ?? null,

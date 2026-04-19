@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   AlertTriangle,
@@ -144,7 +144,7 @@ function getSuggestionPerformance(rule?: RoutingRuleRow) {
   return { label: "Unused", tone: "rose" as const };
 }
 
-export default function RoutingRulesPage() {
+function RoutingRulesPageContent() {
   const [tasks, setTasks] = useState<RoutingTask[]>([]);
   const [rules, setRules] = useState<RoutingRuleRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -1173,5 +1173,13 @@ export default function RoutingRulesPage() {
         )}
       </section>
     </div>
+  );
+}
+
+export default function RoutingRulesPage() {
+  return (
+    <Suspense fallback={<div className="p-6">Loading routing...</div>}>
+      <RoutingRulesPageContent />
+    </Suspense>
   );
 }

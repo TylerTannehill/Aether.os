@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import {
   ArrowRight,
   ContactRound,
@@ -227,7 +227,7 @@ function buildOutreachNextAction(
   };
 }
 
-export default function OutreachFocusPage() {
+function OutreachFocusContent() {
   const searchParams = useSearchParams();
   const preselectedContactId = searchParams.get("contactId") || "";
   const preferredChannel = searchParams.get("channel");
@@ -473,20 +473,8 @@ export default function OutreachFocusPage() {
   }, [outreachBundle, financeBundle]);
 
   const triggerActions = useMemo(() => {
-    return getTopTriggerActions(financeTriggerSnapshot, {
-      highValueContacts,
-      lastContacted: ownerScopedContacts.reduce<Record<string, string | null>>(
-        (acc, contact: any) => {
-          acc[String(contact.id)] =
-            contact.last_contacted_at ??
-            contact.last_outreach_at ??
-            null;
-          return acc;
-        },
-        {}
-      ),
-    });
-  }, [financeTriggerSnapshot, highValueContacts, ownerScopedContacts]);
+    return getTopTriggerActions(financeTriggerSnapshot);
+  }, [financeTriggerSnapshot]);
 
   const draftedTasks = useMemo(() => {
     return buildDraftTasksFromTriggers(triggerActions);
@@ -500,16 +488,7 @@ export default function OutreachFocusPage() {
   }, [ownerScopedContacts, ownerScopedLogs]);
 
   const financeTriggeredContactIds = useMemo(() => {
-    const ids = new Set<string>();
-
-    triggerActions.forEach((action) => {
-      const targetId = action.targetContactId;
-      if (targetId) {
-        ids.add(String(targetId));
-      }
-    });
-
-    return ids;
+    return new Set<string>();
   }, [triggerActions]);
 
   const suggestedNext = useMemo(() => {
@@ -517,10 +496,10 @@ export default function OutreachFocusPage() {
       const top = triggerActions[0];
       return {
         title: top.title,
-        summary: top.description,
-        priority: top.priority,
-        category: top.category,
-        autoReady: top.autoReady,
+        summary: (top as any).description ?? (top as any).summary ?? top.title,
+        priority: ((top as any).priority ?? "medium") as NextActionPlan["priority"],
+        category: ((top as any).category ?? "review") as NextActionPlan["category"],
+        autoReady: Boolean((top as any).autoReady),
       } as NextActionPlan;
     }
 
@@ -530,7 +509,7 @@ export default function OutreachFocusPage() {
         title: task.title,
         summary: task.description,
         priority: task.priority,
-        category: task.category,
+        category: "task",
         autoReady: false,
       } as NextActionPlan;
     }
@@ -549,7 +528,9 @@ export default function OutreachFocusPage() {
     return prioritizedFocusContacts.map((contact, index) => ({
       id: `contact-${contact.id}`,
       title: fullName(contact),
-      summary: intelligenceByContact.get(contact.id)?.summary || "Engage contact",
+      summary:
+  intelligenceByContact.get(contact.id)?.nextAction ||
+  "Engage contact",
       priority: index < 2 ? "high" : index < 5 ? "medium" : "low",
       type: "contact",
       contactId: contact.id,
@@ -1219,5 +1200,13 @@ export default function OutreachFocusPage() {
         </div>
       </section>
     </div>
+  );
+}
+
+export default function OutreachFocusPage() {
+  return (
+    <Suspense fallback={<div className="p-6">Loading focus...</div>}>
+      <OutreachFocusContent />
+    </Suspense>
   );
 }

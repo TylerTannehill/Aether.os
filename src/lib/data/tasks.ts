@@ -29,7 +29,7 @@ type RoutingRuleRow = {
 };
 
 function normalizeFallbackReason(input: CreateTaskInput): string | null {
-  if (input.task_type !== "fallback") return null;
+  if ((input.task_type as string) !== "fallback") return null;
 
   const owner = input.owner_name?.trim() || "";
   const description = input.description?.toLowerCase() || "";
