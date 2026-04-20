@@ -17,7 +17,8 @@ export async function POST(req: Request) {
     const suggestedLists: string[] = body.suggestedLists ?? [];
     const source: string = body.source ?? "outreach";
 
-    const supabase = createClient();
+    // ✅ FIX: await the client
+    const supabase = await createClient();
 
     const { data: insertedContacts, error: contactError } = await supabase
       .from("contacts")
