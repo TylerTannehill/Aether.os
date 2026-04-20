@@ -1973,9 +1973,9 @@ export default function DashboardPage() {
       </section>
 
       <section
-        className={`grid gap-6 ${
+        className={`grid gap-4 ${
           visibleLaneIds.length === 1
-            ? "xl:grid-cols-1"
+            ? "xl:grid-cols-2"
             : visibleLaneIds.length === 2
             ? "xl:grid-cols-2"
             : visibleLaneIds.length === 3
@@ -1984,20 +1984,20 @@ export default function DashboardPage() {
         }`}
       >
         {visibleLaneIds.includes("digital") ? (
-          <div className="space-y-4">
+          <>
             <button
               onClick={() =>
                 openFocusBucket("pipeline", "digital", "digital_total_impressions")
               }
-              className="min-h-[160px] rounded-3xl border border-violet-200 bg-violet-50 p-6 text-left shadow-sm transition hover:bg-violet-100"
+              className="flex min-h-[176px] flex-col rounded-3xl border border-violet-200 bg-violet-50 p-6 text-left shadow-sm transition hover:bg-violet-100"
             >
               <p className="text-sm font-medium text-violet-800">
                 Digital Reach Momentum
               </p>
-              <p className="mt-2 text-2xl font-semibold">
+              <p className="mt-4 text-2xl font-semibold text-slate-950">
                 {digitalSnapshot.impressions.toLocaleString()}
               </p>
-              <p className="mt-2 text-sm text-violet-800">
+              <p className="mt-5 max-w-[18rem] text-sm leading-7 text-violet-800">
                 Reach volume shaping digital opportunity
               </p>
             </button>
@@ -2006,36 +2006,36 @@ export default function DashboardPage() {
               onClick={() =>
                 openFocusBucket("fixNow", "digital", "digital_sentiment_pressure")
               }
-              className="min-h-[160px] rounded-3xl border border-rose-200 bg-rose-50 p-6 text-left shadow-sm transition hover:bg-rose-100"
+              className="flex min-h-[176px] flex-col rounded-3xl border border-rose-200 bg-rose-50 p-6 text-left shadow-sm transition hover:bg-rose-100"
             >
               <p className="text-sm font-medium text-rose-800">
                 Sentiment Pressure
               </p>
-              <p className="mt-2 text-2xl font-semibold">
+              <p className="mt-4 text-2xl font-semibold text-slate-950">
                 {digitalSentimentRatio.positive}% / {digitalSentimentRatio.negative}%
               </p>
-              <p className="mt-2 text-sm text-rose-800">
+              <p className="mt-5 max-w-[18rem] text-sm leading-7 text-rose-800">
                 Negative signal that may need intervention
               </p>
             </button>
-          </div>
+          </>
         ) : null}
 
         {visibleLaneIds.includes("field") ? (
-          <div className="space-y-4">
+          <>
             <button
               onClick={() =>
                 openFocusBucket("immediate", "field", "field_doors_knocked")
               }
-              className="min-h-[160px] rounded-3xl border border-emerald-200 bg-emerald-50 p-6 text-left shadow-sm transition hover:bg-emerald-100"
+              className="flex min-h-[176px] flex-col rounded-3xl border border-emerald-200 bg-emerald-50 p-6 text-left shadow-sm transition hover:bg-emerald-100"
             >
               <p className="text-sm font-medium text-emerald-800">
                 Field Contact Rate
               </p>
-              <p className="mt-2 text-2xl font-semibold">
+              <p className="mt-4 text-2xl font-semibold text-slate-950">
                 {fieldSnapshot.doors.toLocaleString()}
               </p>
-              <p className="mt-2 text-sm text-emerald-800">
+              <p className="mt-5 max-w-[18rem] text-sm leading-7 text-emerald-800">
                 Active turf volume pushing field progress
               </p>
             </button>
@@ -2044,36 +2044,36 @@ export default function DashboardPage() {
               onClick={() =>
                 openFocusBucket("routing", "field", "field_turf_completion")
               }
-              className="min-h-[160px] rounded-3xl border border-sky-200 bg-sky-50 p-6 text-left shadow-sm transition hover:bg-sky-100"
+              className="flex min-h-[176px] flex-col rounded-3xl border border-sky-200 bg-sky-50 p-6 text-left shadow-sm transition hover:bg-sky-100"
             >
               <p className="text-sm font-medium text-sky-800">
                 Turf Completion Pressure
               </p>
-              <p className="mt-2 text-2xl font-semibold">
+              <p className="mt-4 text-2xl font-semibold text-slate-950">
                 {fieldAverageCompletion}%
               </p>
-              <p className="mt-2 text-sm text-sky-800">
+              <p className="mt-5 max-w-[18rem] text-sm leading-7 text-sky-800">
                 Coverage pace that may require rebalancing
               </p>
             </button>
-          </div>
+          </>
         ) : null}
 
         {visibleLaneIds.includes("print") ? (
-          <div className="space-y-4">
+          <>
             <button
               onClick={() =>
                 openFocusBucket("routing", "print", "print_inventory_pressure")
               }
-              className="min-h-[160px] rounded-3xl border border-amber-200 bg-amber-50 p-6 text-left shadow-sm transition hover:bg-amber-100"
+              className="flex min-h-[176px] flex-col rounded-3xl border border-amber-200 bg-amber-50 p-6 text-left shadow-sm transition hover:bg-amber-100"
             >
               <p className="text-sm font-medium text-amber-800">
                 Inventory Pressure
               </p>
-              <p className="mt-2 text-2xl font-semibold">
+              <p className="mt-4 text-2xl font-semibold text-slate-950">
                 {printSnapshot.onHand.toLocaleString()}
               </p>
-              <p className="mt-2 text-sm text-amber-800">
+              <p className="mt-5 max-w-[18rem] text-sm leading-7 text-amber-800">
                 Materials currently available on hand
               </p>
             </button>
@@ -2082,37 +2082,34 @@ export default function DashboardPage() {
               onClick={() =>
                 openFocusBucket("fixNow", "print", "print_delivery_risk")
               }
-              className="min-h-[160px] rounded-3xl border border-rose-200 bg-rose-50 p-6 text-left shadow-sm transition hover:bg-rose-100"
+              className="flex min-h-[176px] flex-col rounded-3xl border border-rose-200 bg-rose-50 p-6 text-left shadow-sm transition hover:bg-rose-100"
             >
               <p className="text-sm font-medium text-rose-800">
                 Delivery Risk
               </p>
-              <p className="mt-2 text-2xl font-semibold">
+              <p className="mt-4 text-2xl font-semibold text-slate-950">
                 {printSnapshot.orders}
               </p>
-              <p className="mt-2 text-sm text-rose-800">
+              <p className="mt-5 max-w-[18rem] text-sm leading-7 text-rose-800">
                 Orders that may impact timelines
               </p>
             </button>
-          </div>
+          </>
         ) : null}
 
         {visibleLaneIds.includes("finance") ? (
-          <div className="grid auto-rows-fr gap-4">
+          <>
             <button
               onClick={() =>
                 openFocusBucket("routing", "finance", "finance_net_position")
               }
-              className="flex h-full min-h-[176px] flex-col justify-between rounded-3xl border border-sky-200 bg-sky-50 p-6 text-left shadow-sm transition hover:bg-sky-100"
+              className="flex min-h-[176px] flex-col rounded-3xl border border-sky-200 bg-sky-50 p-6 text-left shadow-sm transition hover:bg-sky-100"
             >
-              <div>
-                <p className="text-sm font-medium text-sky-800">Net Position</p>
-                <p className="mt-2 text-2xl font-semibold">
-                  ${financeSnapshot.net.toLocaleString()}
-                </p>
-              </div>
-
-              <p className="mt-4 text-sm text-sky-800">
+              <p className="text-sm font-medium text-sky-800">Net Position</p>
+              <p className="mt-4 text-2xl font-semibold text-slate-950">
+                ${financeSnapshot.net.toLocaleString()}
+              </p>
+              <p className="mt-5 max-w-[18rem] text-sm leading-7 text-sky-800">
                 Balance between incoming and outgoing cash
               </p>
             </button>
@@ -2121,22 +2118,19 @@ export default function DashboardPage() {
               onClick={() =>
                 openFocusBucket("followUp", "finance", "finance_pledges_pending")
               }
-              className="flex h-full min-h-[176px] flex-col justify-between rounded-3xl border border-amber-200 bg-amber-50 p-6 text-left shadow-sm transition hover:bg-amber-100"
+              className="flex min-h-[176px] flex-col rounded-3xl border border-amber-200 bg-amber-50 p-6 text-left shadow-sm transition hover:bg-amber-100"
             >
-              <div>
-                <p className="text-sm font-medium text-amber-800">
-                  Pledge Follow-Up Pressure
-                </p>
-                <p className="mt-2 text-2xl font-semibold">
-                  ${financeSnapshot.pledges.toLocaleString()}
-                </p>
-              </div>
-
-              <p className="mt-4 text-sm text-amber-800">
+              <p className="text-sm font-medium text-amber-800">
+                Pledge Follow-Up Pressure
+              </p>
+              <p className="mt-4 text-2xl font-semibold text-slate-950">
+                ${financeSnapshot.pledges.toLocaleString()}
+              </p>
+              <p className="mt-5 max-w-[18rem] text-sm leading-7 text-amber-800">
                 Dollars still waiting to be collected
               </p>
             </button>
-          </div>
+          </>
         ) : null}
       </section>
     </div>
