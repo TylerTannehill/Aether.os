@@ -50,6 +50,12 @@ const TIME_RANGE_LABELS: Record<TimeRange, string[]> = {
   cycle: ["Q1", "Q2", "Q3", "Q4", "Final"],
 };
 
+const CHART_LEFT = 4;
+const CHART_RIGHT = 96;
+const CHART_TOP = 16;
+const CHART_BOTTOM = 78;
+const CHART_HEIGHT = CHART_BOTTOM - CHART_TOP;
+
 export default function CrossDomainChart({
   finance,
   digital,
@@ -124,16 +130,25 @@ export default function CrossDomainChart({
 
   const maxValue = Math.max(...chartData.map((point) => point.value), 1);
 
-  const svgPoints = chartData
-    .map((point, index) => {
-      const x =
-        chartData.length === 1
-          ? 50
-          : (index / (chartData.length - 1)) * 100;
-      const y = 100 - (point.value / maxValue) * 100;
-      return `${x},${y}`;
-    })
-    .join(" ");
+  const points = chartData.map((point, index) => {
+    const x =
+      chartData.length === 1
+        ? 50
+        : CHART_LEFT +
+          (index / Math.max(chartData.length - 1, 1)) * (CHART_RIGHT - CHART_LEFT);
+
+    const y =
+      CHART_BOTTOM - (point.value / maxValue) * CHART_HEIGHT;
+
+    return {
+      ...point,
+      x,
+      y,
+    };
+  });
+
+  const linePoints = points.map((point) => `${point.x},${point.y}`).join(" ");
+  const areaPoints = `${CHART_LEFT},${CHART_BOTTOM} ${linePoints} ${CHART_RIGHT},${CHART_BOTTOM}`;
 
   const activeValueLabel = useMemo(() => {
     if (domain === "finance") {
@@ -280,10 +295,10 @@ export default function CrossDomainChart({
             key={item}
             type="button"
             onClick={() => setDomain(item)}
-            className={`rounded-full px-3 py-1 text-xs font-medium ${
+            className={`rounded-full px-3 py-1 text-xs font-medium transition ${
               domain === item
                 ? "bg-slate-900 text-white"
-                : "border border-slate-200 bg-white text-slate-700"
+                : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
             }`}
           >
             {item.toUpperCase()}
@@ -291,168 +306,194 @@ export default function CrossDomainChart({
         ))}
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-2">
-        {(["day", "week", "month", "quarter", "cycle"] as TimeRange[]).map(
-          (item) => (
-            <button
-              key={item}
-              type="button"
-              onClick={() => setTimeRange(item)}
-              className={`rounded-full px-3 py-1 text-xs font-medium ${
-                timeRange === item
-                  ? "bg-slate-900 text-white"
-                  : "border border-slate-200 bg-white text-slate-700"
-              }`}
-            >
-              {item.toUpperCase()}
-            </button>
-          )
-        )}
-      </div>
-
-      <div className="mt-4 flex flex-wrap gap-2">
-        {domain === "finance"
-          ? (["money_in", "money_out", "net", "pledges"] as FinanceMetric[]).map(
-              (item) => (
-                <button
-                  key={item}
-                  type="button"
-                  onClick={() => setFinanceMetric(item)}
-                  className={`rounded-full px-3 py-1 text-xs font-medium ${
-                    financeMetric === item
-                      ? "bg-slate-900 text-white"
-                      : "border border-slate-200 bg-white text-slate-700"
-                  }`}
-                >
-                  {item.replace("_", " ").toUpperCase()}
-                </button>
-              )
-            )
-          : null}
-
-        {domain === "digital"
-          ? (["impressions", "engagement", "sentiment", "spend"] as DigitalMetric[]).map(
-              (item) => (
-                <button
-                  key={item}
-                  type="button"
-                  onClick={() => setDigitalMetric(item)}
-                  className={`rounded-full px-3 py-1 text-xs font-medium ${
-                    digitalMetric === item
-                      ? "bg-slate-900 text-white"
-                      : "border border-slate-200 bg-white text-slate-700"
-                  }`}
-                >
-                  {item.toUpperCase()}
-                </button>
-              )
-            )
-          : null}
-
-        {domain === "field"
-          ? (["doors", "conversations", "ids", "completion"] as FieldMetric[]).map(
-              (item) => (
-                <button
-                  key={item}
-                  type="button"
-                  onClick={() => setFieldMetric(item)}
-                  className={`rounded-full px-3 py-1 text-xs font-medium ${
-                    fieldMetric === item
-                      ? "bg-slate-900 text-white"
-                      : "border border-slate-200 bg-white text-slate-700"
-                  }`}
-                >
-                  {item.toUpperCase()}
-                </button>
-              )
-            )
-          : null}
-
-        {domain === "print"
-          ? ([
-              "on_hand",
-              "orders",
-              "approval_ready",
-              "delivery_risk",
-            ] as PrintMetric[]).map((item) => (
-              <button
-                key={item}
-                type="button"
-                onClick={() => setPrintMetric(item)}
-                className={`rounded-full px-3 py-1 text-xs font-medium ${
-                  printMetric === item
-                    ? "bg-slate-900 text-white"
-                    : "border border-slate-200 bg-white text-slate-700"
-                }`}
-              >
-                {item.replaceAll("_", " ").toUpperCase()}
-              </button>
-            ))
-          : null}
-      </div>
-
-      <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-4">
-        <div className="h-64 w-full">
+      <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-5">
+        <div className="h-56 w-full">
           <svg
             viewBox="0 0 100 100"
             preserveAspectRatio="none"
             className="h-full w-full"
           >
-            {[20, 40, 60, 80].map((line) => (
-              <line
-                key={line}
-                x1="0"
-                y1={line}
-                x2="100"
-                y2={line}
-                stroke="currentColor"
-                className="text-slate-200"
-                strokeWidth="0.6"
-                vectorEffect="non-scaling-stroke"
-              />
-            ))}
+            <defs>
+              <linearGradient id="cross-domain-fill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#0f172a" stopOpacity="0.10" />
+                <stop offset="100%" stopColor="#0f172a" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+
+            {[0.25, 0.5, 0.75].map((ratio) => {
+              const y = CHART_TOP + CHART_HEIGHT * ratio;
+
+              return (
+                <line
+                  key={ratio}
+                  x1={CHART_LEFT}
+                  y1={y}
+                  x2={CHART_RIGHT}
+                  y2={y}
+                  stroke="#cbd5e1"
+                  strokeWidth="0.5"
+                  strokeDasharray="1.5 2.5"
+                  vectorEffect="non-scaling-stroke"
+                />
+              );
+            })}
+
+            <polygon fill="url(#cross-domain-fill)" points={areaPoints} />
 
             <polyline
               fill="none"
-              stroke="currentColor"
-              className="text-slate-900"
-              strokeWidth="2.5"
-              points={svgPoints}
+              stroke="#0f172a"
+              strokeOpacity="0.88"
+              strokeWidth="2.8"
+              points={linePoints}
               vectorEffect="non-scaling-stroke"
               strokeLinejoin="round"
               strokeLinecap="round"
             />
 
-            {chartData.map((point, index) => {
-              const x =
-                chartData.length === 1
-                  ? 50
-                  : (index / (chartData.length - 1)) * 100;
-              const y = 100 - (point.value / maxValue) * 100;
-
-              return (
+            {points.map((point, index) => (
+              <g key={`${point.label}-${index}`}>
                 <circle
-                  key={`${point.label}-${index}`}
-                  cx={x}
-                  cy={y}
+                  cx={point.x}
+                  cy={point.y}
                   r="2.2"
-                  fill="currentColor"
-                  className="text-slate-900"
+                  fill="#ffffff"
+                  stroke="#0f172a"
+                  strokeWidth="1.8"
+                  vectorEffect="non-scaling-stroke"
                 />
-              );
-            })}
+              </g>
+            ))}
           </svg>
         </div>
 
-        <div className="mt-4 grid grid-cols-4 gap-3 sm:grid-cols-7">
+        <div
+          className="mt-3 grid gap-3"
+          style={{
+            gridTemplateColumns: `repeat(${chartData.length}, minmax(0, 1fr))`,
+          }}
+        >
           {chartData.map((point) => (
             <div key={point.label} className="text-center">
-              <p className="text-xs font-medium text-slate-500">{point.label}</p>
-              <p className="mt-1 text-xs text-slate-700">
+              <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
+                {point.label}
+              </p>
+              <p className="mt-1 text-sm font-medium text-slate-700">
                 {formatCompactValue(point.value, domain, activeMetric)}
               </p>
             </div>
           ))}
+        </div>
+
+        <div className="mt-5 border-t border-slate-200 pt-4">
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="mr-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                Time Range
+              </p>
+              {(["day", "week", "month", "quarter", "cycle"] as TimeRange[]).map(
+                (item) => (
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() => setTimeRange(item)}
+                    className={`rounded-full px-3 py-1 text-xs font-medium transition ${
+                      timeRange === item
+                        ? "bg-slate-900 text-white"
+                        : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                    }`}
+                  >
+                    {item.toUpperCase()}
+                  </button>
+                )
+              )}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="mr-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                View
+              </p>
+
+              {domain === "finance"
+                ? (["money_in", "money_out", "net", "pledges"] as FinanceMetric[]).map(
+                    (item) => (
+                      <button
+                        key={item}
+                        type="button"
+                        onClick={() => setFinanceMetric(item)}
+                        className={`rounded-full px-3 py-1 text-xs font-medium transition ${
+                          financeMetric === item
+                            ? "bg-slate-900 text-white"
+                            : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                        }`}
+                      >
+                        {item.replace("_", " ").toUpperCase()}
+                      </button>
+                    )
+                  )
+                : null}
+
+              {domain === "digital"
+                ? (["impressions", "engagement", "sentiment", "spend"] as DigitalMetric[]).map(
+                    (item) => (
+                      <button
+                        key={item}
+                        type="button"
+                        onClick={() => setDigitalMetric(item)}
+                        className={`rounded-full px-3 py-1 text-xs font-medium transition ${
+                          digitalMetric === item
+                            ? "bg-slate-900 text-white"
+                            : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                        }`}
+                      >
+                        {item.toUpperCase()}
+                      </button>
+                    )
+                  )
+                : null}
+
+              {domain === "field"
+                ? (["doors", "conversations", "ids", "completion"] as FieldMetric[]).map(
+                    (item) => (
+                      <button
+                        key={item}
+                        type="button"
+                        onClick={() => setFieldMetric(item)}
+                        className={`rounded-full px-3 py-1 text-xs font-medium transition ${
+                          fieldMetric === item
+                            ? "bg-slate-900 text-white"
+                            : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                        }`}
+                      >
+                        {item.toUpperCase()}
+                      </button>
+                    )
+                  )
+                : null}
+
+              {domain === "print"
+                ? ([
+                    "on_hand",
+                    "orders",
+                    "approval_ready",
+                    "delivery_risk",
+                  ] as PrintMetric[]).map((item) => (
+                    <button
+                      key={item}
+                      type="button"
+                      onClick={() => setPrintMetric(item)}
+                      className={`rounded-full px-3 py-1 text-xs font-medium transition ${
+                        printMetric === item
+                          ? "bg-slate-900 text-white"
+                          : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                      }`}
+                    >
+                      {item.replaceAll("_", " ").toUpperCase()}
+                    </button>
+                  ))
+                : null}
+            </div>
+          </div>
         </div>
       </div>
     </div>

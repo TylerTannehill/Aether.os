@@ -2098,18 +2098,21 @@ export default function DashboardPage() {
         ) : null}
 
         {visibleLaneIds.includes("finance") ? (
-          <div className="space-y-4">
+          <div className="grid auto-rows-fr gap-4">
             <button
               onClick={() =>
                 openFocusBucket("routing", "finance", "finance_net_position")
               }
-              className="min-h-[160px] rounded-3xl border border-sky-200 bg-sky-50 p-6 text-left shadow-sm transition hover:bg-sky-100"
+              className="flex h-full min-h-[176px] flex-col justify-between rounded-3xl border border-sky-200 bg-sky-50 p-6 text-left shadow-sm transition hover:bg-sky-100"
             >
-              <p className="text-sm font-medium text-sky-800">Net Position</p>
-              <p className="mt-2 text-2xl font-semibold">
-                ${financeSnapshot.net.toLocaleString()}
-              </p>
-              <p className="mt-2 text-sm text-sky-800">
+              <div>
+                <p className="text-sm font-medium text-sky-800">Net Position</p>
+                <p className="mt-2 text-2xl font-semibold">
+                  ${financeSnapshot.net.toLocaleString()}
+                </p>
+              </div>
+
+              <p className="mt-4 text-sm text-sky-800">
                 Balance between incoming and outgoing cash
               </p>
             </button>
@@ -2118,15 +2121,18 @@ export default function DashboardPage() {
               onClick={() =>
                 openFocusBucket("followUp", "finance", "finance_pledges_pending")
               }
-              className="min-h-[160px] rounded-3xl border border-amber-200 bg-amber-50 p-6 text-left shadow-sm transition hover:bg-amber-100"
+              className="flex h-full min-h-[176px] flex-col justify-between rounded-3xl border border-amber-200 bg-amber-50 p-6 text-left shadow-sm transition hover:bg-amber-100"
             >
-              <p className="text-sm font-medium text-amber-800">
-                Pledge Follow-Up Pressure
-              </p>
-              <p className="mt-2 text-2xl font-semibold">
-                ${financeSnapshot.pledges.toLocaleString()}
-              </p>
-              <p className="mt-2 text-sm text-amber-800">
+              <div>
+                <p className="text-sm font-medium text-amber-800">
+                  Pledge Follow-Up Pressure
+                </p>
+                <p className="mt-2 text-2xl font-semibold">
+                  ${financeSnapshot.pledges.toLocaleString()}
+                </p>
+              </div>
+
+              <p className="mt-4 text-sm text-amber-800">
                 Dollars still waiting to be collected
               </p>
             </button>
