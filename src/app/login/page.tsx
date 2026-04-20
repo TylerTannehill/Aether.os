@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
@@ -20,7 +21,7 @@ export default function LoginPage() {
 
     setLoading(true)
 
-    const { error, data } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
@@ -29,11 +30,9 @@ export default function LoginPage() {
 
     if (error) {
       alert(error.message)
-      console.error('Login error:', error)
       return
     }
 
-    console.log('Login success:', data)
     window.location.href = '/dashboard'
   }
 
@@ -79,11 +78,23 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="rounded bg-white px-4 py-2 text-black disabled:opacity-50"
+            className="w-full rounded bg-white px-4 py-2 text-black disabled:opacity-50"
           >
             {loading ? 'Logging in...' : 'Log In'}
           </button>
         </form>
+
+        {/* ✅ Terms + Privacy */}
+        <p className="text-xs text-white/60 text-center">
+          By logging in, you agree to our{' '}
+          <Link href="/terms" className="underline hover:text-white">
+            Terms
+          </Link>{' '}
+          and{' '}
+          <Link href="/privacy" className="underline hover:text-white">
+            Privacy Policy
+          </Link>.
+        </p>
       </div>
     </div>
   )
