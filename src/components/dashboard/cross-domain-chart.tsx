@@ -42,6 +42,11 @@ type ChartPoint = {
   value: number;
 };
 
+type PositionedPoint = ChartPoint & {
+  x: number;
+  y: number;
+};
+
 const TIME_RANGE_LABELS: Record<TimeRange, string[]> = {
   day: ["6a", "9a", "12p", "3p", "6p", "9p"],
   week: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
@@ -130,25 +135,30 @@ export default function CrossDomainChart({
 
   const maxValue = Math.max(...chartData.map((point) => point.value), 1);
 
-  const points = chartData.map((point, index) => {
-    const x =
-      chartData.length === 1
-        ? 50
-        : CHART_LEFT +
-          (index / Math.max(chartData.length - 1, 1)) * (CHART_RIGHT - CHART_LEFT);
+  const points = useMemo<PositionedPoint[]>(() => {
+    return chartData.map((point, index) => {
+      const x =
+        chartData.length === 1
+          ? 50
+          : CHART_LEFT +
+            (index / Math.max(chartData.length - 1, 1)) *
+              (CHART_RIGHT - CHART_LEFT);
 
-    const y =
-      CHART_BOTTOM - (point.value / maxValue) * CHART_HEIGHT;
+      const y = CHART_BOTTOM - (point.value / maxValue) * CHART_HEIGHT;
 
-    return {
-      ...point,
-      x,
-      y,
-    };
-  });
+      return {
+        ...point,
+        x,
+        y,
+      };
+    });
+  }, [chartData, maxValue]);
 
-  const linePoints = points.map((point) => `${point.x},${point.y}`).join(" ");
-  const areaPoints = `${CHART_LEFT},${CHART_BOTTOM} ${linePoints} ${CHART_RIGHT},${CHART_BOTTOM}`;
+  const linePath = useMemo(() => buildSmoothPath(points), [points]);
+  const areaPath = useMemo(
+    () => buildAreaPath(points, CHART_BOTTOM),
+    [points]
+  );
 
   const activeValueLabel = useMemo(() => {
     if (domain === "finance") {
@@ -314,8 +324,14 @@ export default function CrossDomainChart({
             className="h-full w-full"
           >
             <defs>
-              <linearGradient id="cross-domain-fill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#0f172a" stopOpacity="0.10" />
+              <linearGradient
+                id="cross-domain-fill"
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="1"
+              >
+                <stop offset="0%" stopColor="#0f172a" stopOpacity="0.16" />
                 <stop offset="100%" stopColor="#0f172a" stopOpacity="0" />
               </linearGradient>
             </defs>
@@ -331,39 +347,26 @@ export default function CrossDomainChart({
                   x2={CHART_RIGHT}
                   y2={y}
                   stroke="#cbd5e1"
-                  strokeWidth="0.5"
-                  strokeDasharray="1.5 2.5"
+                  strokeWidth="0.45"
+                  strokeDasharray="1.25 3"
+                  opacity="0.8"
                   vectorEffect="non-scaling-stroke"
                 />
               );
             })}
 
-            <polygon fill="url(#cross-domain-fill)" points={areaPoints} />
+            <path d={areaPath} fill="url(#cross-domain-fill)" />
 
-            <polyline
+            <path
+              d={linePath}
               fill="none"
-              stroke="#0f172a"
-              strokeOpacity="0.88"
-              strokeWidth="2.8"
-              points={linePoints}
+              stroke="#1e293b"
+              strokeOpacity="0.92"
+              strokeWidth="2.4"
               vectorEffect="non-scaling-stroke"
               strokeLinejoin="round"
               strokeLinecap="round"
             />
-
-            {points.map((point, index) => (
-              <g key={`${point.label}-${index}`}>
-                <circle
-                  cx={point.x}
-                  cy={point.y}
-                  r="2.2"
-                  fill="#ffffff"
-                  stroke="#0f172a"
-                  strokeWidth="1.8"
-                  vectorEffect="non-scaling-stroke"
-                />
-              </g>
-            ))}
           </svg>
         </div>
 
@@ -613,4 +616,33 @@ function formatCompactValue(
   }
 
   return value.toLocaleString();
+}
+
+function buildSmoothPath(points: PositionedPoint[]) {
+  if (points.length === 0) return "";
+  if (points.length === 1) {
+    return `M ${points[0].x} ${points[0].y}`;
+  }
+
+  let path = `M ${points[0].x} ${points[0].y}`;
+
+  for (let i = 0; i < points.length - 1; i++) {
+    const current = points[i];
+    const next = points[i + 1];
+    const midX = (current.x + next.x) / 2;
+
+    path += ` C ${midX} ${current.y}, ${midX} ${next.y}, ${next.x} ${next.y}`;
+  }
+
+  return path;
+}
+
+function buildAreaPath(points: PositionedPoint[], baselineY: number) {
+  if (points.length === 0) return "";
+
+  const linePath = buildSmoothPath(points);
+  const first = points[0];
+  const last = points[points.length - 1];
+
+  return `${linePath} L ${last.x} ${baselineY} L ${first.x} ${baselineY} Z`;
 }
