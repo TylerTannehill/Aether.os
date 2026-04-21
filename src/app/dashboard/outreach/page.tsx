@@ -55,6 +55,7 @@ import { buildAbePatternInsights } from "@/lib/abe/abe-patterns";
 import { filterPatternsForDepartment } from "@/lib/abe/abe-filters";
 import { AbeBriefing } from "@/lib/abe/abe-briefing";
 import { updateAbeMemory } from "@/lib/abe/update-abe-memory";
+import { buildAbeOrgLayer, getOrgContextForDepartment } from "@/lib/abe/abe-org-layer";
 
 type OutreachListTag = "outreach" | "field" | "finance" | "volunteer";
 
@@ -1034,36 +1035,109 @@ function OutreachPageContent() {
     outreachCommandSignal,
   ]);
 
-  useEffect(() => {
-    setAbeMemory((current) => updateAbeMemory(current, outreachAbeBriefing));
+  const outreachOrgLayer = useMemo(() => {
+    return buildAbeOrgLayer({
+      lanes: [
+        {
+          department: "outreach",
+          strongest: outreachAbeBriefing.strongest,
+          weakest: outreachAbeBriefing.weakest,
+          primaryLane: outreachAbeBriefing.primaryLane,
+          opportunityLane: outreachAbeBriefing.opportunityLane,
+          health: outreachAbeBriefing.health,
+          campaignStatus: outreachAbeBriefing.campaignStatus,
+          whyNow: outreachAbeBriefing.whyNow,
+          crossDomainSignal: outreachAbeBriefing.crossDomainSignal,
+        },
+        {
+          department: "finance",
+          strongest: financeTriggeredDraftTasks.length > 0 ? "finance" : "outreach",
+          weakest:
+            financeTriggeredDraftTasks.length > 0 || outreachFollowUpPressure > outreachPositiveEngagement
+              ? "finance"
+              : "outreach",
+          primaryLane: financeTriggeredDraftTasks.length > 0 ? "finance" : "outreach",
+          opportunityLane: financeTriggeredDraftTasks.length > 0 ? "outreach" : "finance",
+          health:
+            financeTriggeredDraftTasks.length > 0
+              ? "Pressure is rising"
+              : "Stable overall",
+          campaignStatus:
+            financeTriggeredDraftTasks.length > 0
+              ? "Finance-triggered follow-up is active"
+              : "Stable overall",
+          crossDomainSignal:
+            financeTriggeredDraftTasks.length > 0
+              ? "FINANCE is feeding high-value follow-up work directly into OUTREACH."
+              : undefined,
+        },
+      ],
+    });
   }, [
-    outreachAbeBriefing.health,
-    outreachAbeBriefing.campaignStatus,
-    outreachAbeBriefing.primaryLane,
-    outreachAbeBriefing.strongest,
-    outreachAbeBriefing.weakest,
-    outreachAbeBriefing.opportunityLane,
-    outreachAbeBriefing.crossDomainSignal,
+    outreachAbeBriefing,
+    financeTriggeredDraftTasks.length,
+    outreachFollowUpPressure,
+    outreachPositiveEngagement,
+  ]);
+
+  const outreachOrgContext = useMemo(() => {
+    return getOrgContextForDepartment(outreachOrgLayer, "outreach");
+  }, [outreachOrgLayer]);
+
+  const outreachAbeDisplayBriefing = useMemo(() => {
+    let whyNow = outreachAbeBriefing.whyNow;
+
+    if (outreachOrgContext.departmentIsPressureLeader && outreachOrgContext.imbalanceDetected) {
+      whyNow = `${whyNow} Outreach is also shaping more of the broader campaign pressure picture right now.`;
+    } else if (
+      outreachOrgContext.departmentIsMomentumLeader &&
+      !outreachOrgContext.departmentIsPressureLeader
+    ) {
+      whyNow = `${whyNow} Outreach is also carrying some of the cleaner momentum in the broader campaign read.`;
+    }
+
+    const supportText = `${outreachAbeBriefing.supportText} ${outreachOrgContext.orgSupportLine}`.trim();
+
+    return {
+      ...outreachAbeBriefing,
+      whyNow,
+      supportText,
+      crossDomainSignal:
+        outreachAbeBriefing.crossDomainSignal ??
+        (outreachOrgContext.crossLaneTension ? outreachOrgContext.orgNarrative : undefined),
+    };
+  }, [outreachAbeBriefing, outreachOrgContext]);
+
+  useEffect(() => {
+    setAbeMemory((current) => updateAbeMemory(current, outreachAbeDisplayBriefing));
+  }, [
+    outreachAbeDisplayBriefing.health,
+    outreachAbeDisplayBriefing.campaignStatus,
+    outreachAbeDisplayBriefing.primaryLane,
+    outreachAbeDisplayBriefing.strongest,
+    outreachAbeDisplayBriefing.weakest,
+    outreachAbeDisplayBriefing.opportunityLane,
+    outreachAbeDisplayBriefing.crossDomainSignal,
   ]);
 
   const outreachPatternWatch = useMemo(() => {
     const patterns = buildAbePatternInsights({
       role: demoRole,
       demoDepartment: "outreach",
-      briefing: outreachAbeBriefing,
+      briefing: outreachAbeDisplayBriefing,
       memory: abeMemory,
     });
 
     return filterPatternsForDepartment(patterns, "outreach");
-  }, [demoRole, outreachAbeBriefing, abeMemory]);
+  }, [demoRole, outreachAbeDisplayBriefing, abeMemory]);
 
   const outreachAbeInsight = useMemo(() => {
     if (outreachPatternWatch.length > 0) {
       return outreachPatternWatch[0].detail;
     }
 
-    return outreachAbeBriefing.whyNow;
-  }, [outreachPatternWatch, outreachAbeBriefing.whyNow]);
+    return outreachAbeDisplayBriefing.whyNow;
+  }, [outreachPatternWatch, outreachAbeDisplayBriefing.whyNow]);
 
   const selectedContactPatternHint = useMemo(() => {
     if (!currentFocusContact) return null;
@@ -1281,27 +1355,27 @@ function OutreachPageContent() {
                   <div className="flex flex-wrap gap-4 text-sm text-amber-900">
                     <div>
                       <span className="font-medium text-amber-700">Health:</span>{" "}
-                      {outreachAbeBriefing.health}
+                      {outreachAbeDisplayBriefing.health}
                     </div>
                     <div>
                       <span className="font-medium text-amber-700">Strongest:</span>{" "}
-                      {departmentLabel(outreachAbeBriefing.strongest)}
+                      {departmentLabel(outreachAbeDisplayBriefing.strongest)}
                     </div>
                     <div>
                       <span className="font-medium text-amber-700">Weakest:</span>{" "}
-                      {departmentLabel(outreachAbeBriefing.weakest)}
+                      {departmentLabel(outreachAbeDisplayBriefing.weakest)}
                     </div>
                     <div>
                       <span className="font-medium text-amber-700">Status:</span>{" "}
-                      {outreachAbeBriefing.campaignStatus}
+                      {outreachAbeDisplayBriefing.campaignStatus}
                     </div>
                   </div>
 
                   <h2 className="text-2xl font-semibold text-amber-900">
-                    {outreachAbeBriefing.primaryLane === "outreach"
+                    {outreachAbeDisplayBriefing.primaryLane === "outreach"
                       ? "Outreach is the lane that needs tight execution right now."
                       : `${departmentLabel(
-                          outreachAbeBriefing.primaryLane
+                          outreachAbeDisplayBriefing.primaryLane
                         )} is shaping what outreach should do next.`}
                   </h2>
 
@@ -1313,14 +1387,14 @@ function OutreachPageContent() {
                     Why now: {outreachAbeInsight}
                   </p>
 
-                  {outreachAbeBriefing.crossDomainSignal ? (
+                  {outreachAbeDisplayBriefing.crossDomainSignal ? (
                     <p className="max-w-3xl text-sm text-amber-900/80">
-                      {outreachAbeBriefing.crossDomainSignal}
+                      {outreachAbeDisplayBriefing.crossDomainSignal}
                     </p>
                   ) : null}
 
                   <p className="max-w-3xl text-sm text-slate-600">
-                    {outreachAbeBriefing.supportText}
+                    {outreachAbeDisplayBriefing.supportText}
                   </p>
                 </div>
               </div>
@@ -1332,7 +1406,7 @@ function OutreachPageContent() {
               </p>
 
               <div className="mt-3 space-y-3">
-                {outreachAbeBriefing.actions.map((move, index) => (
+                {outreachAbeDisplayBriefing.actions.map((move, index) => (
                   <div
                     key={`${move}-${index}`}
                     className="flex items-start gap-3 text-sm text-slate-700"

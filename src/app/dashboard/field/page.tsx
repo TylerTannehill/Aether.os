@@ -22,6 +22,7 @@ import { buildAbePatternInsights } from "@/lib/abe/abe-patterns";
 import { filterPatternsForDepartment } from "@/lib/abe/abe-filters";
 import { AbeBriefing } from "@/lib/abe/abe-briefing";
 import { updateAbeMemory } from "@/lib/abe/update-abe-memory";
+import { buildAbeOrgLayer, getOrgContextForDepartment } from "@/lib/abe/abe-org-layer";
 
 type FieldTrendView = "doors" | "conversations" | "ids" | "completion";
 
@@ -144,6 +145,7 @@ function getFieldAbeBriefing(input: {
     priority: "high" | "low";
     category: "follow_up" | "turf" | "review";
   };
+  orgContext?: ReturnType<typeof getOrgContextForDepartment>;
 }): AbeBriefing {
   const highPressureTurfs = input.turfRows.filter((turf) => turf.completion < 60);
   const highCompletionTurfs = input.turfRows.filter((turf) => turf.completion >= 75);
@@ -201,12 +203,24 @@ function getFieldAbeBriefing(input: {
       "The lane has real production strength right now, so the priority is converting strong canvassing output into completion and follow-up momentum.";
   }
 
-  const supportText =
+  if (input.orgContext?.departmentIsPressureLeader) {
+    whyNow = `${whyNow} Field also looks like the lane carrying the most campaign-wide pressure right now.`;
+  } else if (input.orgContext?.departmentIsMomentumLeader) {
+    whyNow = `${whyNow} Field also appears to be one of the steadier campaign-wide support lanes right now.`;
+  } else if (input.orgContext?.imbalanceDetected) {
+    whyNow = `${whyNow} The broader campaign read also suggests this lane needs to be interpreted in the context of wider cross-lane imbalance.`;
+  }
+
+  const baseSupportText =
     input.role === "admin"
       ? "Open Field Focus Mode to work through lagging turf, strongest-canvasser allocation, and follow-up generation without losing deployment momentum."
       : input.role === "director"
       ? "Use Field Focus Mode to tighten completion, route stronger canvassers, and move the best conversations into structured follow-up."
       : "Use Field Work Mode to finish the active turf, log the best conversations clearly, and keep the next field move simple.";
+
+  const supportText = [baseSupportText, input.orgContext?.orgSupportLine]
+    .filter(Boolean)
+    .join(" ");
 
   const actions: string[] = [];
 
@@ -528,6 +542,54 @@ export default function FieldDashboardPage() {
     } as const;
   }, [generatedLists.length, turfPressure]);
 
+  const fieldOrgLayer = useMemo(() => {
+    const highCompletionTurfs = turfRows.filter((turf) => turf.completion >= 75);
+
+    return buildAbeOrgLayer({
+      lanes: [
+        {
+          department: "field",
+          strongest:
+            topLine.ids >= 300 || highCompletionTurfs.length >= 2
+              ? "field"
+              : "outreach",
+          weakest:
+            averageCompletion < 65
+              ? "field"
+              : generatedLists.length > 0
+              ? "outreach"
+              : "field",
+          primaryLane: "field",
+          opportunityLane: generatedLists.length > 0 ? "outreach" : "field",
+          health:
+            averageCompletion < 55
+              ? "Pressure is rising"
+              : averageCompletion >= 72 && topLine.ids >= 300
+              ? "Momentum building"
+              : "Stable overall",
+          campaignStatus:
+            averageCompletion < 55
+              ? "Completion risk is building"
+              : generatedLists.length > 0
+              ? "Stable with follow-up opportunity"
+              : averageCompletion >= 70
+              ? "Stable with opportunity"
+              : "Stable overall",
+          crossDomainSignal:
+            generatedLists.length > 0
+              ? "FIELD is generating follow-up work that OUTREACH should absorb quickly."
+              : fieldCommandSignal.category === "turf"
+              ? "FIELD completion is the primary constraint before downstream conversion improves."
+              : undefined,
+        },
+      ],
+    });
+  }, [turfRows, topLine.ids, averageCompletion, generatedLists.length, fieldCommandSignal.category]);
+
+  const fieldOrgContext = useMemo(() => {
+    return getOrgContextForDepartment(fieldOrgLayer, "field");
+  }, [fieldOrgLayer]);
+
   const fieldAbeBriefing = useMemo(() => {
     return getFieldAbeBriefing({
       role: demoRole,
@@ -538,6 +600,7 @@ export default function FieldDashboardPage() {
       averageCompletion,
       topLine,
       fieldCommandSignal,
+      orgContext: fieldOrgContext,
     });
   }, [
     demoRole,
@@ -548,6 +611,7 @@ export default function FieldDashboardPage() {
     averageCompletion,
     topLine,
     fieldCommandSignal,
+    fieldOrgContext,
   ]);
 
   useEffect(() => {

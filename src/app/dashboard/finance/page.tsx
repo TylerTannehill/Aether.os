@@ -26,6 +26,7 @@ import { buildAbePatternInsights } from "@/lib/abe/abe-patterns";
 import { filterPatternsForDepartment } from "@/lib/abe/abe-filters";
 import { AbeBriefing } from "@/lib/abe/abe-briefing";
 import { updateAbeMemory } from "@/lib/abe/update-abe-memory";
+import { buildAbeOrgLayer, getOrgContextForDepartment } from "@/lib/abe/abe-org-layer";
 
 type FinanceMetricCard = {
   id: string;
@@ -369,6 +370,7 @@ function getFinanceAbeBriefing(input: {
   totalMoneyOut: number;
   financeCommandSignal: FinanceCommandSignal;
   selectedContact: FinanceContactRow | null;
+  orgContext?: ReturnType<typeof getOrgContextForDepartment>;
 }): AbeBriefing {
   const strongest: AbeDepartment =
     input.totalMoneyIn > input.totalMoneyOut ? "finance" : "outreach";
@@ -420,12 +422,24 @@ function getFinanceAbeBriefing(input: {
       "Missing employer and occupation details are blocking clean reporting, so finance needs cleanup before exports can be trusted.";
   }
 
-  const supportText =
+  if (input.orgContext?.departmentIsPressureLeader) {
+    whyNow = `${whyNow} Finance also looks like the lane carrying the most campaign-wide pressure right now.`;
+  } else if (input.orgContext?.departmentIsMomentumLeader) {
+    whyNow = `${whyNow} Finance also appears to be one of the steadier campaign-wide support lanes right now.`;
+  } else if (input.orgContext?.imbalanceDetected) {
+    whyNow = `${whyNow} The broader campaign read also suggests this lane needs to be interpreted in the context of wider cross-lane imbalance.`;
+  }
+
+  const baseSupportText =
     input.role === "admin"
       ? "Use Finance Focus Mode to convert active pledges, clean up donor compliance, and keep contribution entry from falling behind."
       : input.role === "director"
       ? "Use Finance Focus Mode to move collection, compliance, and entry work in the right sequence without losing control of the lane."
       : "Use Finance Work to complete the next pledge or compliance action cleanly and move on.";
+
+  const supportText = [baseSupportText, input.orgContext?.orgSupportLine]
+    .filter(Boolean)
+    .join(" ");
 
   const actions: string[] = [];
 
@@ -812,7 +826,75 @@ export default function FinanceDashboardPage() {
         }))
     );
   }, [contactRows]);
-    const financeAbeBriefing = useMemo(() => {
+
+  const financeOrgLayer = useMemo(() => {
+    return buildAbeOrgLayer({
+      lanes: [
+        {
+          department: "finance",
+          strongest: totalMoneyIn > totalMoneyOut ? "finance" : "outreach",
+          weakest:
+            pledgeQueue.length > 0 || complianceIssues.length > 0
+              ? "finance"
+              : "outreach",
+          primaryLane: "finance",
+          opportunityLane: pledgeQueue.length > 0 ? "finance" : "outreach",
+          health:
+            pledgeQueue.length > 0 && complianceIssues.length > 0
+              ? "Pressure is rising"
+              : totalMoneyIn > totalMoneyOut * 1.5
+              ? "Momentum building"
+              : "Stable overall",
+          campaignStatus:
+            pledgeQueue.length > 0 && complianceIssues.length > 0
+              ? "Pledge and compliance pressure are active"
+              : pledgeQueue.length > 0
+              ? "Stable with pledge pressure"
+              : complianceIssues.length > 0
+              ? "Stable with compliance pressure"
+              : totalMoneyIn > totalMoneyOut
+              ? "Stable with opportunity"
+              : "Stable overall",
+          crossDomainSignal:
+            pledgeQueue.length > 0
+              ? "FINANCE has collection work active that could spill into OUTREACH follow-up if not cleared."
+              : undefined,
+        },
+        {
+          department: "outreach",
+          strongest: pledgeQueue.length > 0 ? "outreach" : "finance",
+          weakest:
+            workflowItems.filter((item) => item.status !== "done").length > 4
+              ? "outreach"
+              : "finance",
+          primaryLane: "outreach",
+          opportunityLane: pledgeQueue.length > 0 ? "finance" : "outreach",
+          health:
+            pledgeQueue.length > 0 ? "Momentum building" : "Stable overall",
+          campaignStatus:
+            pledgeQueue.length > 0
+              ? "Stable with finance-triggered opportunity"
+              : "Stable overall",
+          crossDomainSignal:
+            pledgeQueue.length > 0
+              ? "OUTREACH may need to absorb finance-triggered follow-up if the queue keeps building."
+              : undefined,
+        },
+      ],
+    });
+  }, [
+    totalMoneyIn,
+    totalMoneyOut,
+    pledgeQueue.length,
+    complianceIssues.length,
+    workflowItems,
+  ]);
+
+  const financeOrgContext = useMemo(() => {
+    return getOrgContextForDepartment(financeOrgLayer, "finance");
+  }, [financeOrgLayer]);
+
+  const financeAbeBriefing = useMemo(() => {
     return getFinanceAbeBriefing({
       role: demoRole,
       demoDepartment,
@@ -824,6 +906,7 @@ export default function FinanceDashboardPage() {
       totalMoneyOut,
       financeCommandSignal,
       selectedContact,
+      orgContext: financeOrgContext,
     });
   }, [
     demoRole,
@@ -835,6 +918,7 @@ export default function FinanceDashboardPage() {
     totalMoneyOut,
     financeCommandSignal,
     selectedContact,
+    financeOrgContext,
   ]);
 
   useEffect(() => {

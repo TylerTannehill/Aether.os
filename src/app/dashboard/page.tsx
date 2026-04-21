@@ -79,6 +79,7 @@ import {
   type FollowThroughSignals,
 } from "@/lib/abe/abe-follow-through";
 import { getOutcomeSignals } from "@/lib/abe/abe-outcomes";
+import { buildAbeOrgLayer } from "@/lib/abe/abe-org-layer";
 
 function normalizeTaskStatus(status?: string | null) {
   const value = (status || "").trim().toLowerCase();
@@ -1230,6 +1231,210 @@ export default function DashboardPage() {
     return buildAetherSummaryText(intelligenceSnapshot);
   }, [intelligenceSnapshot]);
 
+  const abeOrgLayer = useMemo(() => {
+    const outreachPressure = Math.max(
+      0,
+      (filteredData.tasks ?? []).filter((task: any) => {
+        const title = String(task.title || "").toLowerCase();
+        const status = normalizeTaskStatus(task.status);
+
+        return (
+          status !== "completed" &&
+          (title.includes("follow-up") || title.includes("follow up"))
+        );
+      }).length +
+        (filteredData.contacts ?? []).filter((contact: any) =>
+          Boolean(contact.needs_follow_up)
+        ).length
+    );
+
+    const outreachOpportunity = Math.max(
+      0,
+      (filteredData.logs ?? []).filter((log: any) => {
+        const result = String(log.result || "").toLowerCase();
+
+        return (
+          result.includes("positive") ||
+          result.includes("support") ||
+          result.includes("interested") ||
+          result.includes("pledge")
+        );
+      }).length
+    );
+
+    const financePressure = Math.max(
+      0,
+      Math.round(financeSnapshot.moneyOut > financeSnapshot.moneyIn ? 3 : 0) +
+        Math.round(financeSnapshot.pledges / 1000)
+    );
+
+    const financeOpportunity = Math.max(
+      0,
+      Math.round(financeSnapshot.moneyIn / 1000)
+    );
+
+    const fieldPressure = Math.max(0, 100 - fieldAverageCompletion);
+    const fieldOpportunity = Math.max(
+      0,
+      Math.round(fieldSnapshot.conversations / 10)
+    );
+
+    const digitalPressure = digitalSentimentRatio.negative;
+    const digitalOpportunity = Math.max(
+      0,
+      Math.round(digitalSnapshot.impressions / 5000)
+    );
+
+    const printPressure = Math.max(
+      0,
+      printSnapshot.orders * 8 - printSnapshot.approvalReady * 3
+    );
+
+    const printOpportunity = Math.max(0, printSnapshot.approvalReady * 10);
+
+    return buildAbeOrgLayer({
+      lanes: [
+        {
+          department: "outreach",
+          strongest:
+            outreachOpportunity >= outreachPressure ? "outreach" : "finance",
+          weakest:
+            outreachPressure > outreachOpportunity ? "outreach" : "finance",
+          primaryLane: "outreach",
+          opportunityLane:
+            outreachOpportunity >= outreachPressure ? "outreach" : "finance",
+          health:
+            outreachPressure > outreachOpportunity
+              ? "Pressure is rising"
+              : "Momentum building",
+          campaignStatus:
+            outreachPressure > outreachOpportunity
+              ? "Follow-up pressure is active"
+              : "Stable with opportunity",
+          whyNow: intelligenceSummary.body,
+          crossDomainSignal:
+            outreachOpportunity > outreachPressure * 1.2
+              ? "OUTREACH opportunity is strong enough to shape campaign-wide conversion."
+              : undefined,
+        },
+        {
+          department: "finance",
+          strongest:
+            financeOpportunity >= financePressure ? "finance" : "outreach",
+          weakest:
+            financePressure > financeOpportunity ? "finance" : "outreach",
+          primaryLane: "finance",
+          opportunityLane:
+            financeOpportunity >= financePressure ? "finance" : "outreach",
+          health:
+            financePressure > financeOpportunity
+              ? "Pressure is rising"
+              : "Momentum building",
+          campaignStatus:
+            financePressure > financeOpportunity
+              ? "Finance pressure is active"
+              : "Stable with opportunity",
+          whyNow:
+            financePressure > financeOpportunity
+              ? "Finance is carrying more pressure than support right now."
+              : "Finance is helping stabilize the broader campaign picture.",
+          crossDomainSignal:
+            financeSnapshot.pledges > 0
+              ? "FINANCE follow-through is shaping campaign-wide stability."
+              : undefined,
+        },
+        {
+          department: "field",
+          strongest: fieldOpportunity >= fieldPressure ? "field" : "outreach",
+          weakest: fieldPressure > fieldOpportunity ? "field" : "outreach",
+          primaryLane: "field",
+          opportunityLane:
+            fieldOpportunity >= fieldPressure ? "field" : "outreach",
+          health:
+            fieldPressure > fieldOpportunity
+              ? "Pressure is rising"
+              : "Momentum building",
+          campaignStatus:
+            fieldPressure > fieldOpportunity
+              ? "Completion pressure is active"
+              : "Stable with opportunity",
+          whyNow:
+            fieldPressure > fieldOpportunity
+              ? "Field completion is shaping operational drag right now."
+              : "Field activity is giving the campaign usable movement.",
+          crossDomainSignal:
+            fieldOpportunity > fieldPressure
+              ? "FIELD can feed usable movement into OUTREACH if conversion stays clean."
+              : undefined,
+        },
+        {
+          department: "digital",
+          strongest:
+            digitalOpportunity >= digitalPressure ? "digital" : "outreach",
+          weakest:
+            digitalPressure > digitalOpportunity ? "digital" : "outreach",
+          primaryLane: "digital",
+          opportunityLane:
+            digitalOpportunity >= digitalPressure ? "digital" : "outreach",
+          health:
+            digitalPressure > digitalOpportunity
+              ? "Pressure is rising"
+              : "Momentum building",
+          campaignStatus:
+            digitalPressure > digitalOpportunity
+              ? "Narrative pressure is active"
+              : "Stable with opportunity",
+          whyNow:
+            digitalPressure > digitalOpportunity
+              ? "Digital sentiment is creating more pressure than lift right now."
+              : "Digital is contributing usable visibility and momentum.",
+          crossDomainSignal:
+            digitalOpportunity > digitalPressure
+              ? "DIGITAL strength can support broader campaign momentum if conversion stays coordinated."
+              : undefined,
+        },
+        {
+          department: "print",
+          strongest: printOpportunity >= printPressure ? "print" : "field",
+          weakest: printPressure > printOpportunity ? "print" : "field",
+          primaryLane: "print",
+          opportunityLane:
+            printOpportunity >= printPressure ? "field" : "print",
+          health:
+            printPressure > printOpportunity
+              ? "Pressure is rising"
+              : "Momentum building",
+          campaignStatus:
+            printPressure > printOpportunity
+              ? "Timing pressure is active"
+              : "Stable with delivery opportunity",
+          whyNow:
+            printPressure > printOpportunity
+              ? "Print timing is acting like a downstream constraint."
+              : "Print readiness is helping downstream execution stay aligned.",
+          crossDomainSignal:
+            printSnapshot.approvalReady > 0
+              ? "PRINT readiness is affecting FIELD and downstream coordination."
+              : undefined,
+        },
+      ],
+    });
+  }, [
+    filteredData.tasks,
+    filteredData.contacts,
+    filteredData.logs,
+    financeSnapshot.moneyIn,
+    financeSnapshot.moneyOut,
+    financeSnapshot.pledges,
+    fieldAverageCompletion,
+    fieldSnapshot.conversations,
+    digitalSentimentRatio.negative,
+    digitalSnapshot.impressions,
+    printSnapshot.orders,
+    printSnapshot.approvalReady,
+    intelligenceSummary.body,
+  ]);
+
   const followThroughSignals = useMemo(() => {
     return getFollowThroughSignals({
       department: effectiveDepartment,
@@ -1696,7 +1901,7 @@ export default function DashboardPage() {
 
   const abeRoleHeadline = useMemo(() => {
     if (effectiveRole === "admin") {
-      return intelligenceSummary.headline;
+      return abeOrgLayer.orgNarrative;
     }
 
     if (effectiveRole === "director") {
@@ -1708,11 +1913,11 @@ export default function DashboardPage() {
     return `Your ${departmentLabel(
       effectiveDepartment
     ).toLowerCase()} work lane is what matters most right now.`;
-  }, [effectiveRole, effectiveDepartment, intelligenceSummary.headline]);
+  }, [effectiveRole, effectiveDepartment, intelligenceSummary.headline, abeOrgLayer.orgNarrative]);
 
   const abeRoleBody = useMemo(() => {
     if (effectiveRole === "admin") {
-      return intelligenceSummary.body;
+      return `${intelligenceSummary.body} ${abeOrgLayer.orgSupportLine}`;
     }
 
     if (effectiveRole === "director") {
@@ -1724,11 +1929,11 @@ export default function DashboardPage() {
     return `This view strips away cross-org noise and keeps attention on the immediate ${departmentLabel(
       effectiveDepartment
     ).toLowerCase()} work that an individual operator should understand and act on.`;
-  }, [effectiveRole, effectiveDepartment, intelligenceSummary.body]);
+  }, [effectiveRole, effectiveDepartment, intelligenceSummary.body, abeOrgLayer.orgSupportLine]);
 
   const abeWhyNowText = useMemo(() => {
     if (effectiveRole === "admin") {
-      return abeBriefing.whyNow;
+      return `${abeBriefing.whyNow} ${abeOrgLayer.orgNarrative}`;
     }
 
     if (effectiveRole === "director") {
@@ -1740,9 +1945,19 @@ export default function DashboardPage() {
     return `This perspective is scoped to ${departmentLabel(
       effectiveDepartment
     ).toLowerCase()} so the operator can stay focused on the next actions that matter most.`;
-  }, [effectiveRole, effectiveDepartment, abeBriefing.whyNow]);
+  }, [effectiveRole, effectiveDepartment, abeBriefing.whyNow, abeOrgLayer.orgNarrative]);
 
   const abeStickyLine = useMemo(() => {
+    if (effectiveRole === "admin" && abeOrgLayer.crossLaneTension) {
+      return "Right now, campaign coordination matters more than isolated wins.";
+    }
+
+    if (effectiveRole === "admin" && abeOrgLayer.imbalanceDetected) {
+      return `Right now, ${departmentLabel(
+        abeOrgLayer.orgPressureLeader
+      ).toLowerCase()} is the lane most likely to drag the broader campaign.`;
+    }
+
     if (abeBriefing.crossDomainSignal) {
       return "Right now, coordination matters more than expansion.";
     }
@@ -1768,9 +1983,16 @@ export default function DashboardPage() {
     }
 
     return "Right now, coordination matters more than expansion.";
-  }, [abeBriefing.primaryLane, abeBriefing.crossDomainSignal]);
+  }, [effectiveRole, abeBriefing.primaryLane, abeBriefing.crossDomainSignal, abeOrgLayer.crossLaneTension, abeOrgLayer.imbalanceDetected, abeOrgLayer.orgPressureLeader]);
 
   const abeConfidence = useMemo(() => {
+    if (
+      effectiveRole === "admin" &&
+      (abeOrgLayer.crossLaneTension || abeOrgLayer.imbalanceDetected)
+    ) {
+      return "High";
+    }
+
     const agreementScore = Number(Boolean(abeBriefing.crossDomainSignal)) + Number(abeBriefing.primaryLane === abeBriefing.strongest);
 
     if (agreementScore >= 2 || abePatternWatch.length >= 2) {
@@ -1782,7 +2004,7 @@ export default function DashboardPage() {
     }
 
     return "Developing";
-  }, [abeBriefing.crossDomainSignal, abeBriefing.primaryLane, abeBriefing.strongest, abePatternWatch.length]);
+  }, [effectiveRole, abeBriefing.crossDomainSignal, abeBriefing.primaryLane, abeBriefing.strongest, abePatternWatch.length, abeOrgLayer.crossLaneTension, abeOrgLayer.imbalanceDetected]);
 
   if (loading) {
     return (
@@ -2032,6 +2254,12 @@ export default function DashboardPage() {
               <p className="max-w-3xl text-sm text-slate-600">
                 {abeBriefing.supportText}
               </p>
+
+              {effectiveRole === "admin" ? (
+                <p className="max-w-3xl text-sm text-fuchsia-900/80">
+                  {abeOrgLayer.orgSupportLine}
+                </p>
+              ) : null}
 
               <p className="max-w-3xl text-xs text-slate-500">
                 Abe’s Brief is the fast read. Explore Abe expands the same read into deeper campaign intelligence.

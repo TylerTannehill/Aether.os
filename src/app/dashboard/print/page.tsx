@@ -21,6 +21,7 @@ import { buildAbePatternInsights } from "@/lib/abe/abe-patterns";
 import { filterPatternsForDepartment } from "@/lib/abe/abe-filters";
 import { AbeBriefing } from "@/lib/abe/abe-briefing";
 import { updateAbeMemory } from "@/lib/abe/update-abe-memory";
+import { buildAbeOrgLayer, getOrgContextForDepartment } from "@/lib/abe/abe-org-layer";
 
 type PrintTrendView = "inventory" | "orders" | "deliveries" | "approvals";
 
@@ -205,6 +206,7 @@ function getPrintAbeBriefing(input: {
     | (InventoryRow & { available: number; daysRemaining: number | null })
     | undefined;
   selectedTask: PrintFocusTask | null;
+  orgContext?: ReturnType<typeof getOrgContextForDepartment>;
 }): AbeBriefing {
   const candidateReviewCount = input.assetRows.filter(
     (asset) => asset.status === "candidate_review"
@@ -274,12 +276,24 @@ function getPrintAbeBriefing(input: {
       "Delivered and in-flight materials are unlocking downstream execution, so print should keep handoff timing tight while the lane is moving.";
   }
 
-  const supportText =
+  if (input.orgContext?.departmentIsPressureLeader) {
+    whyNow = `${whyNow} Print also looks like one of the broader campaign constraint lanes right now, so timing mistakes here may travel farther than usual.`;
+  } else if (input.orgContext?.departmentIsMomentumLeader) {
+    whyNow = `${whyNow} Print appears to be carrying more of the campaign's usable readiness than usual, so clean handoffs matter even more.`;
+  } else if (input.orgContext?.imbalanceDetected) {
+    whyNow = `${whyNow} The broader campaign read is a bit imbalanced right now, which means print should stay coordinated with the lanes it is supporting.`;
+  }
+
+  let supportText =
     input.role === "admin"
       ? "Use Print Focus Mode to move approvals, protect exposed inventory, and keep delivery timing aligned with field deployment."
       : input.role === "director"
       ? "Use Print Focus Mode to keep the lane moving through approvals, inventory protection, and delivery coordination without losing readiness."
       : "Use Print Work to complete the next approval, inventory, or delivery action cleanly and keep materials moving.";
+
+  if (input.orgContext?.orgSupportLine) {
+    supportText = `${supportText} ${input.orgContext.orgSupportLine}`;
+  }
 
   const actions: string[] = [];
 
@@ -298,6 +312,12 @@ function getPrintAbeBriefing(input: {
     actions.push("Confirm delivery timing so downstream execution is not waiting on print.");
   } else {
     actions.push("Keep the next print action tight and move to the next material signal.");
+  }
+
+  if (input.orgContext?.departmentIsPressureLeader) {
+    actions.push("Treat print timing like a campaign-level constraint until this lane steadies.");
+  } else if (input.orgContext?.departmentIsMomentumLeader) {
+    actions.push("Use print readiness to support the broader campaign while this lane is carrying momentum.");
   }
 
   while (actions.length < (input.role === "admin" ? 3 : 2)) {
@@ -680,6 +700,88 @@ export default function PrintDashboardPage() {
     };
   }, [readyAssets.length, deliveryUnlocks.length, mostExposedInventory]);
 
+  const candidateReviewCount = useMemo(() => {
+    return assetRows.filter((asset) => asset.status === "candidate_review").length;
+  }, [assetRows]);
+
+  const queuedOrders = useMemo(() => {
+    return orderRows.filter(
+      (order) => order.status === "queued" || order.status === "in_production"
+    ).length;
+  }, [orderRows]);
+
+  const printOrgLayer = useMemo(() => {
+    const printUnderPressure =
+      candidateReviewCount > 0 ||
+      queuedOrders > 1 ||
+      (mostExposedInventory?.daysRemaining !== null &&
+        (mostExposedInventory?.daysRemaining ?? 999) <= 5);
+
+    const printHasMomentum = readyAssets.length > 0 || deliveryUnlocks.length > 0;
+
+    return buildAbeOrgLayer({
+      lanes: [
+        {
+          department: "print",
+          strongest: printHasMomentum ? "print" : "field",
+          weakest: printUnderPressure ? "print" : "field",
+          primaryLane: "print",
+          opportunityLane: printHasMomentum ? "field" : "print",
+          health: printUnderPressure
+            ? "Pressure is rising"
+            : printHasMomentum
+            ? "Momentum building"
+            : "Stable overall",
+          campaignStatus: printUnderPressure
+            ? "Print timing is acting like a constraint"
+            : printHasMomentum
+            ? "Print readiness is supporting execution"
+            : "Stable overall",
+          crossDomainSignal:
+            deliveryUnlocks.length > 0
+              ? "PRINT delivery timing is directly shaping downstream FIELD readiness."
+              : undefined,
+        },
+        {
+          department: "field",
+          strongest: deliveryUnlocks.length > 0 ? "field" : "print",
+          weakest: printUnderPressure ? "field" : "outreach",
+          primaryLane: deliveryUnlocks.length > 0 ? "field" : "print",
+          opportunityLane: readyAssets.length > 0 ? "field" : "outreach",
+          health: deliveryUnlocks.length > 0 ? "Momentum building" : "Stable overall",
+          campaignStatus: printUnderPressure
+            ? "Field readiness depends on print timing"
+            : "Stable with support",
+          crossDomainSignal:
+            deliveryUnlocks.length > 0
+              ? "FIELD readiness is being shaped by PRINT handoff timing."
+              : undefined,
+        },
+        {
+          department: "outreach",
+          strongest: readyAssets.length > 0 ? "outreach" : "print",
+          weakest: printUnderPressure ? "outreach" : "finance",
+          primaryLane: "outreach",
+          opportunityLane: readyAssets.length > 0 ? "outreach" : "finance",
+          health: readyAssets.length > 0 ? "Stable with opportunity" : "Stable overall",
+          campaignStatus: readyAssets.length > 0
+            ? "Print readiness can support downstream persuasion"
+            : "Stable overall",
+        },
+      ],
+    });
+  }, [
+    readyAssets.length,
+    deliveryUnlocks.length,
+    mostExposedInventory,
+    candidateReviewCount,
+    queuedOrders,
+  ]);
+
+  const printOrgContext = useMemo(() => {
+    return getOrgContextForDepartment(printOrgLayer, "print");
+  }, [printOrgLayer]);
+
   const printAbeBriefing = useMemo(() => {
     return getPrintAbeBriefing({
       role: demoRole,
@@ -692,6 +794,7 @@ export default function PrintDashboardPage() {
       deliveryUnlocks,
       mostExposedInventory,
       selectedTask,
+      orgContext: printOrgContext,
     });
   }, [
     demoRole,
@@ -704,6 +807,7 @@ export default function PrintDashboardPage() {
     deliveryUnlocks,
     mostExposedInventory,
     selectedTask,
+    printOrgContext,
   ]);
 
   useEffect(() => {

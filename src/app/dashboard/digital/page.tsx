@@ -21,6 +21,7 @@ import { buildAbePatternInsights } from "@/lib/abe/abe-patterns";
 import { filterPatternsForDepartment } from "@/lib/abe/abe-filters";
 import { AbeBriefing } from "@/lib/abe/abe-briefing";
 import { updateAbeMemory } from "@/lib/abe/update-abe-memory";
+import { buildAbeOrgLayer, getOrgContextForDepartment } from "@/lib/abe/abe-org-layer";
 
 type PlatformKey = "meta" | "instagram" | "x" | "tiktok";
 type TrendView = "impressions" | "engagement" | "spend" | "sentiment";
@@ -245,12 +246,61 @@ function getDigitalAbeBriefing(input: {
       "X is weaker on sentiment than the rest of the lane, which means digital should protect momentum while containing the weakest response channel.";
   }
 
-  const supportText =
+  const crossDomainSignal =
+    input.engagementSpikes.length > 0
+      ? "DIGITAL momentum is active and may need downstream OUTREACH capture if it keeps building."
+      : undefined;
+
+  const orgLayer = buildAbeOrgLayer({
+    lanes: [
+      {
+        department: "digital",
+        strongest,
+        weakest,
+        primaryLane,
+        opportunityLane,
+        health,
+        campaignStatus,
+        whyNow,
+        crossDomainSignal,
+      },
+      {
+        department: "outreach",
+        strongest: input.engagementSpikes.length > 0 ? "outreach" : "digital",
+        weakest: input.sentimentShifts.length > 0 ? "outreach" : "digital",
+        primaryLane: "outreach",
+        opportunityLane: input.engagementSpikes.length > 0 ? "outreach" : "digital",
+        health:
+          input.engagementSpikes.length > 0 ? "Momentum building" : "Stable overall",
+        campaignStatus:
+          input.engagementSpikes.length > 0
+            ? "Stable with downstream capture opportunity"
+            : "Stable overall",
+        whyNow:
+          input.engagementSpikes.length > 0
+            ? "Digital movement may need downstream outreach capture while engagement is active."
+            : "Outreach remains the downstream conversion lane for digital movement.",
+        crossDomainSignal,
+      },
+    ],
+  });
+
+  const orgContext = getOrgContextForDepartment(orgLayer, "digital");
+
+  if (orgContext.departmentIsPressureLeader) {
+    whyNow = `${whyNow} Digital is also carrying more of the broader campaign pressure picture right now.`;
+  } else if (orgContext.departmentIsMomentumLeader) {
+    whyNow = `${whyNow} Digital is also doing more of the broader momentum-building work right now.`;
+  }
+
+  const supportTextBase =
     input.role === "admin"
       ? "Use Digital Focus Mode to move content creation, spend shifts, and response handling in the right sequence while protecting performance."
       : input.role === "director"
       ? "Use Digital Focus Mode to manage content pressure, spend movement, and weaker response lanes without losing control of momentum."
       : "Use Digital Work to keep the next content, spend, or response action clear and easy to execute.";
+
+  const supportText = `${supportTextBase} ${orgContext.orgSupportLine}`;
 
   const actions: string[] = [];
 
@@ -287,10 +337,7 @@ function getDigitalAbeBriefing(input: {
     actions: actions
       .filter((action, index, array) => array.indexOf(action) === index)
       .slice(0, input.role === "admin" ? 3 : 2),
-    crossDomainSignal:
-      input.engagementSpikes.length > 0
-        ? "DIGITAL momentum is active and may need downstream OUTREACH capture if it keeps building."
-        : undefined,
+    crossDomainSignal,
   };
 }
 
