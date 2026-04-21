@@ -73,6 +73,7 @@ import { updateAbeMemory } from "@/lib/abe/update-abe-memory";
 import { buildAbePatternInsights } from "@/lib/abe/abe-patterns";
 import { createClient } from "@/lib/supabase/client";
 import { getEffectiveContext } from "@/lib/abe/get-effective-context";
+import { buildAbeActionSet } from "@/lib/abe/abe-actions";
 
 function normalizeTaskStatus(status?: string | null) {
   const value = (status || "").trim().toLowerCase();
@@ -313,6 +314,9 @@ function buildAbeV1Briefing(input: {
   intelligenceHeadline?: string | null;
   intelligenceBody?: string | null;
   intelligenceCrossDomain?: string | null;
+  repeatedPressureCount?: number;
+  repeatedOpportunityCount?: number;
+  repeatedPrimaryCount?: number;
 }): AbeBriefing {
   const outreachPressure =
     input.filteredTasks.filter((task: any) => {
@@ -489,75 +493,13 @@ function buildAbeV1Briefing(input: {
           input.effectiveDepartment
         )} to review the supporting analytics behind this read and keep your lane moving with the right context.`;
 
-  const actions: string[] = [];
-
-  if (input.role === "admin") {
-    if (primaryLane === "outreach") {
-      actions.push(
-        "Clear the follow-up queue before active engagement cools."
-      );
-    }
-    if (input.financeSnapshot.pledges > 0) {
-      actions.push(
-        "Tighten donor follow-through where pledge dollars are still waiting."
-      );
-    }
-    if (input.fieldAverageCompletion < 65) {
-      actions.push(
-        "Support field coverage before completion pace slips further."
-      );
-    }
-    if (input.digitalSentimentNegative >= 30) {
-      actions.push("Monitor digital sentiment before pushing harder on spend.");
-    }
-    if (input.printSnapshot.approvalReady > 0) {
-      actions.push(
-        "Unlock ready print assets so downstream lanes keep moving."
-      );
-    }
-  } else if (input.role === "director") {
-    if (input.effectiveDepartment === "outreach") {
-      actions.push("Clear lane follow-up before responsiveness slips.");
-      actions.push("Work the warmest contacts before momentum cools.");
-    } else if (input.effectiveDepartment === "finance") {
-      actions.push("Collect high-probability pledges before they stall.");
-      actions.push("Tighten finance follow-through and compliance cleanup.");
-    } else if (input.effectiveDepartment === "field") {
-      actions.push("Push lagging turf to completion before pace falls behind.");
-      actions.push(
-        "Shift stronger canvassers into the highest-opportunity lane."
-      );
-    } else if (input.effectiveDepartment === "digital") {
-      actions.push("Refresh weak creative before spend efficiency softens.");
-      actions.push("Protect momentum on the strongest-performing platform.");
-    } else if (input.effectiveDepartment === "print") {
-      actions.push("Push approvals faster so production timing holds.");
-      actions.push("Protect exposed material inventory before drawdown hits.");
-    }
-  } else {
-    if (input.effectiveDepartment === "outreach") {
-      actions.push("Work the next follow-up now.");
-      actions.push("Keep the queue moving while contact energy is still warm.");
-    } else if (input.effectiveDepartment === "finance") {
-      actions.push("Collect the next available pledge.");
-      actions.push("Fix incomplete donor details before they become a block.");
-    } else if (input.effectiveDepartment === "field") {
-      actions.push("Finish the active turf before switching lanes.");
-      actions.push("Move the strongest conversation into follow-up quickly.");
-    } else if (input.effectiveDepartment === "digital") {
-      actions.push("Ship the next creative or spend decision now.");
-      actions.push("Handle weak sentiment before it spreads.");
-    } else if (input.effectiveDepartment === "print") {
-      actions.push("Move the next approval or inventory action now.");
-      actions.push("Confirm timing before downstream work waits on print.");
-    }
-  }
-
-  if (actions.length === 0) {
-    actions.push(
-      "Keep execution tight across active lanes and maintain momentum."
-    );
-  }
+  const actions = buildAbeActionSet({
+    role: input.role,
+    department: input.role === "admin" ? primaryLane : input.effectiveDepartment,
+    repeatedPressureCount: input.repeatedPressureCount,
+    repeatedOpportunityCount: input.repeatedOpportunityCount,
+    repeatedPrimaryCount: input.repeatedPrimaryCount,
+  });
 
   return {
     health,
@@ -1240,6 +1182,24 @@ export default function DashboardPage() {
     return buildAetherSummaryText(intelligenceSnapshot);
   }, [intelligenceSnapshot]);
 
+  const repeatedPressureCount = useMemo(() => {
+    return abeMemory.recentPressureLanes.filter(
+      (lane) => lane === effectiveDepartment
+    ).length;
+  }, [abeMemory.recentPressureLanes, effectiveDepartment]);
+
+  const repeatedOpportunityCount = useMemo(() => {
+    return abeMemory.recentOpportunityLanes.filter(
+      (lane) => lane === effectiveDepartment
+    ).length;
+  }, [abeMemory.recentOpportunityLanes, effectiveDepartment]);
+
+  const repeatedPrimaryCount = useMemo(() => {
+    return abeMemory.recentPrimaryLanes.filter(
+      (lane) => lane === effectiveDepartment
+    ).length;
+  }, [abeMemory.recentPrimaryLanes, effectiveDepartment]);
+
   const abeBriefing = useMemo(() => {
     return buildAbeV1Briefing({
       role: effectiveRole,
@@ -1256,6 +1216,9 @@ export default function DashboardPage() {
       intelligenceHeadline: intelligenceSummary.headline,
       intelligenceBody: intelligenceSummary.body,
       intelligenceCrossDomain: intelligenceSummary.crossDomain,
+      repeatedPressureCount,
+      repeatedOpportunityCount,
+      repeatedPrimaryCount,
     });
   }, [
     effectiveRole,
@@ -1272,6 +1235,9 @@ export default function DashboardPage() {
     intelligenceSummary.headline,
     intelligenceSummary.body,
     intelligenceSummary.crossDomain,
+    repeatedPressureCount,
+    repeatedOpportunityCount,
+    repeatedPrimaryCount,
   ]);
 
   useEffect(() => {
