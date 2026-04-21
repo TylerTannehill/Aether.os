@@ -42,6 +42,40 @@ function maybePatternTail(
   return ` ${pickVariant(variants, repeatedCount)}`;
 }
 
+function escalationLevel(count?: number) {
+  if (!count) return 0;
+  if (count >= 4) return 2;
+  if (count >= 2) return 1;
+  return 0;
+}
+
+function escalationTail(
+  input: ActionVariationInput,
+  variants: {
+    ignored?: string[];
+    attempted?: string[];
+    completed?: string[];
+  }
+) {
+  const level = escalationLevel(input.repeatedPressureCount);
+
+  if (level === 0) return "";
+
+  if (input.dominantBehavior === "ignored" && variants.ignored?.length) {
+    return ` ${pickVariant(variants.ignored, buildSeed(input) + 31)}`;
+  }
+
+  if (input.dominantBehavior === "attempted" && variants.attempted?.length) {
+    return ` ${pickVariant(variants.attempted, buildSeed(input) + 37)}`;
+  }
+
+  if (input.dominantBehavior === "completed" && variants.completed?.length) {
+    return ` ${pickVariant(variants.completed, buildSeed(input) + 41)}`;
+  }
+
+  return "";
+}
+
 function behaviorTail(
   input: ActionVariationInput,
   variants: {
@@ -131,6 +165,19 @@ function outreachActionSet(input: ActionVariationInput) {
         "The lane still does not look like it is resolving cleanly yet.",
         "Recent effort may need a slightly different shape to create relief.",
       ],
+    })}${escalationTail(input, {
+      ignored: [
+        "This has been sitting long enough that it likely needs direct pickup now.",
+        "At this point, the backlog itself is becoming part of the problem.",
+      ],
+      attempted: [
+        "The same outreach friction keeps showing up, so a different handling approach may be overdue.",
+        "Repeated effort without relief may mean the lane needs a cleaner playbook, not just more touches.",
+      ],
+      completed: [
+        "This consistency is starting to look durable enough to build around.",
+        "The lane is showing enough steadiness that Abe can lean a little further into it.",
+      ],
     })}`,
     `${pickVariant(second, seed + 1)}${behaviorTail(input, {
       ignored: [
@@ -200,6 +247,19 @@ function financeActionSet(input: ActionVariationInput) {
       declining: [
         "The lane still looks softer than the activity level suggests.",
         "This may need a cleaner conversion path, not just more touches.",
+      ],
+    })}${escalationTail(input, {
+      ignored: [
+        "This queue has lingered long enough that finance follow-through likely needs direct attention now.",
+        "The delay itself is becoming a pressure source, not just a symptom.",
+      ],
+      attempted: [
+        "Repeated effort here may mean the collection path needs to change, not just continue.",
+        "Finance is absorbing work without enough relief, which suggests a strategy adjustment may be due.",
+      ],
+      completed: [
+        "This lane is steady enough that Abe can start treating it like usable support.",
+        "There is enough consistency here to let finance carry a bit more stabilizing weight.",
       ],
     })}`,
     `${pickVariant(second, seed + 1)}${behaviorTail(input, {
@@ -271,6 +331,19 @@ function fieldActionSet(input: ActionVariationInput) {
         "The lane still looks softer than the effort level would suggest.",
         "This may respond better to rerouting than simply pushing harder.",
       ],
+    })}${escalationTail(input, {
+      ignored: [
+        "The same field softness has lingered long enough that it likely needs direct pickup now.",
+        "At this point, the gap in coverage is becoming a pattern Abe can no longer treat as temporary.",
+      ],
+      attempted: [
+        "Repeated effort without cleaner completion suggests the field approach itself may need adjustment.",
+        "This lane may need support and rerouting now, not just more push.",
+      ],
+      completed: [
+        "Field is steady enough that Abe can treat it as a lane worth leaning into.",
+        "This consistency suggests the next completion push can be a little more ambitious.",
+      ],
     })}`,
     `${pickVariant(second, seed + 1)}${behaviorTail(input, {
       ignored: [
@@ -341,6 +414,19 @@ function digitalActionSet(input: ActionVariationInput) {
         "The lane still does not look like it is converting cleanly enough.",
         "This may need refinement more than additional push.",
       ],
+    })}${escalationTail(input, {
+      ignored: [
+        "This digital drift has hung around long enough that it likely needs direct intervention now.",
+        "The longer this sits, the more likely it becomes a repeating digital drag.",
+      ],
+      attempted: [
+        "Repeated effort without cleaner conversion suggests the digital approach itself may need to change.",
+        "Abe keeps seeing work here without enough relief, which points more toward refinement than persistence.",
+      ],
+      completed: [
+        "This lane is showing enough stability that Abe can start treating it like reliable lift.",
+        "Digital is steady enough here to support a slightly bigger next move.",
+      ],
     })}`,
     `${pickVariant(second, seed + 1)}${behaviorTail(input, {
       ignored: [
@@ -410,6 +496,19 @@ function printActionSet(input: ActionVariationInput) {
       declining: [
         "The lane still looks softer than the effort level suggests.",
         "This may need a cleaner path through the bottleneck, not just more activity.",
+      ],
+    })}${escalationTail(input, {
+      ignored: [
+        "This print bottleneck has lingered long enough that it likely needs direct pickup now.",
+        "The delay itself is becoming part of the workflow pressure, not just a symptom.",
+      ],
+      attempted: [
+        "Repeated activity without cleaner timing suggests the print path itself may need adjustment.",
+        "Abe keeps seeing work here without enough relief, which points to a routing fix more than more push.",
+      ],
+      completed: [
+        "Print is steady enough here to support the next downstream dependency.",
+        "This lane is showing enough consistency that Abe can lean on it a bit more.",
       ],
     })}`,
     `${pickVariant(second, seed + 1)}${behaviorTail(input, {
@@ -506,6 +605,19 @@ function adminActionSet(input: ActionVariationInput) {
       declining: [
         "The campaign still does not seem to be getting enough resolution from that lane.",
         "This may need a strategic adjustment, not just continued motion.",
+      ],
+    })}${escalationTail(input, {
+      ignored: [
+        "That lane has lingered long enough that it likely needs direct campaign-level attention now.",
+        "Abe is treating this less like a passing dip and more like a real operating pattern now.",
+      ],
+      attempted: [
+        "The campaign has put effort into this lane repeatedly without enough relief, which points toward a strategic change.",
+        "Abe is reading this less as a work-rate issue and more as an approach issue now.",
+      ],
+      completed: [
+        "This lane is consistent enough that it may be able to carry more strategic weight.",
+        "Abe is starting to treat this as reliable support, not just a temporary bright spot.",
       ],
     })}`,
     `${pickVariant(second, seed + 1)}${maybePatternTail(
