@@ -24,7 +24,13 @@ export type AbePatternInsight = {
   label: string;
   detail: string;
   severity: "watch" | "important" | "critical";
-  lane?: AbeDepartment; // 🔥 allows department filtering
+  lane?: AbeDepartment;
+  kind?:
+    | "pressure_pattern"
+    | "opportunity_pattern"
+    | "stability_shift"
+    | "cross_domain_pattern"
+    | "lane_pattern";
 };
 
 // helpers (reusable everywhere)
