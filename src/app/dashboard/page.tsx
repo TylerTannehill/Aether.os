@@ -71,6 +71,8 @@ import {
 import { AbeBriefing } from "@/lib/abe/abe-briefing";
 import { updateAbeMemory } from "@/lib/abe/update-abe-memory";
 import { buildAbePatternInsights } from "@/lib/abe/abe-patterns";
+import { createClient } from "@/lib/supabase/client";
+import { getEffectiveContext } from "@/lib/abe/get-effective-context";
 
 function normalizeTaskStatus(status?: string | null) {
   const value = (status || "").trim().toLowerCase();
@@ -298,7 +300,7 @@ function getAbeDepartmentMeta(department: AbeDepartment) {
 
 function buildAbeV1Briefing(input: {
   role: DemoRole;
-  demoDepartment: DemoDepartment;
+  effectiveDepartment: DemoDepartment;
   financeSnapshot: FinanceSnapshot;
   fieldSnapshot: FieldSnapshot;
   printSnapshot: PrintSnapshot;
@@ -430,7 +432,7 @@ function buildAbeV1Briefing(input: {
   });
 
   const primaryLane =
-    input.role === "admin" ? summaryPrimary : input.demoDepartment;
+    input.role === "admin" ? summaryPrimary : input.effectiveDepartment;
 
   const opportunityLane =
     [...lanes].sort((a, b) => b.opportunity - a.opportunity)[0]?.key ??
@@ -484,7 +486,7 @@ function buildAbeV1Briefing(input: {
     input.role === "admin"
       ? `Open ${departmentLabel(primaryLane)} to review the supporting analytics behind this read and keep the campaign aligned around the right lane.`
       : `Open ${departmentLabel(
-          input.demoDepartment
+          input.effectiveDepartment
         )} to review the supporting analytics behind this read and keep your lane moving with the right context.`;
 
   const actions: string[] = [];
@@ -514,38 +516,38 @@ function buildAbeV1Briefing(input: {
       );
     }
   } else if (input.role === "director") {
-    if (input.demoDepartment === "outreach") {
+    if (input.effectiveDepartment === "outreach") {
       actions.push("Clear lane follow-up before responsiveness slips.");
       actions.push("Work the warmest contacts before momentum cools.");
-    } else if (input.demoDepartment === "finance") {
+    } else if (input.effectiveDepartment === "finance") {
       actions.push("Collect high-probability pledges before they stall.");
       actions.push("Tighten finance follow-through and compliance cleanup.");
-    } else if (input.demoDepartment === "field") {
+    } else if (input.effectiveDepartment === "field") {
       actions.push("Push lagging turf to completion before pace falls behind.");
       actions.push(
         "Shift stronger canvassers into the highest-opportunity lane."
       );
-    } else if (input.demoDepartment === "digital") {
+    } else if (input.effectiveDepartment === "digital") {
       actions.push("Refresh weak creative before spend efficiency softens.");
       actions.push("Protect momentum on the strongest-performing platform.");
-    } else if (input.demoDepartment === "print") {
+    } else if (input.effectiveDepartment === "print") {
       actions.push("Push approvals faster so production timing holds.");
       actions.push("Protect exposed material inventory before drawdown hits.");
     }
   } else {
-    if (input.demoDepartment === "outreach") {
+    if (input.effectiveDepartment === "outreach") {
       actions.push("Work the next follow-up now.");
       actions.push("Keep the queue moving while contact energy is still warm.");
-    } else if (input.demoDepartment === "finance") {
+    } else if (input.effectiveDepartment === "finance") {
       actions.push("Collect the next available pledge.");
       actions.push("Fix incomplete donor details before they become a block.");
-    } else if (input.demoDepartment === "field") {
+    } else if (input.effectiveDepartment === "field") {
       actions.push("Finish the active turf before switching lanes.");
       actions.push("Move the strongest conversation into follow-up quickly.");
-    } else if (input.demoDepartment === "digital") {
+    } else if (input.effectiveDepartment === "digital") {
       actions.push("Ship the next creative or spend decision now.");
       actions.push("Handle weak sentiment before it spreads.");
-    } else if (input.demoDepartment === "print") {
+    } else if (input.effectiveDepartment === "print") {
       actions.push("Move the next approval or inventory action now.");
       actions.push("Confirm timing before downstream work waits on print.");
     }
@@ -589,6 +591,48 @@ type TopActionView = {
   };
 };
 
+type LiveDashboardUserContext = {
+  email: string;
+  organizationName: string;
+  role: DemoRole | null;
+  department: DemoDepartment | null;
+  title: string | null;
+};
+
+function normalizeMembershipRole(role?: string | null): DemoRole | null {
+  if (!role) return null;
+
+  const value = String(role).trim().toLowerCase();
+
+  if (value === "admin") return "admin";
+  if (value === "director") return "director";
+  if (value === "general_user") return "general_user";
+
+  return null;
+}
+
+function normalizeMembershipDepartment(
+  department?: string | null
+): DemoDepartment | null {
+  if (!department) return null;
+
+  const value = String(department).trim().toLowerCase();
+
+  if (
+    value === "outreach" ||
+    value === "finance" ||
+    value === "field" ||
+    value === "digital" ||
+    value === "print"
+  ) {
+    return value as DemoDepartment;
+  }
+
+  if (value.includes("campaign operations")) return "outreach";
+
+  return null;
+}
+
 export default function DashboardPage() {
   const [contacts, setContacts] = useState<DashboardData["contacts"]>([]);
   const [lists, setLists] = useState<DashboardData["lists"]>([]);
@@ -627,6 +671,10 @@ export default function DashboardPage() {
     net: 0,
     pledges: 0,
   });
+
+  const [liveUserContext, setLiveUserContext] =
+    useState<LiveDashboardUserContext | null>(null);
+  const [userContextLoading, setUserContextLoading] = useState(true);
 
   const [demoRole, setDemoRole] = useState<DemoRole>("admin");
   const [demoDepartment, setDemoDepartment] =
@@ -672,20 +720,73 @@ export default function DashboardPage() {
       setLoading(true);
       setMessage("");
 
+      const supabase = createClient();
+
       const [
         data,
         liveDigitalSnapshot,
         liveFieldSnapshot,
         livePrintSnapshot,
         liveFinanceSnapshot,
+        userResult,
       ] = await Promise.all([
         getDashboardData(),
         getDigitalSnapshot(),
         getFieldSnapshot(),
         getPrintSnapshot(),
         getFinanceSnapshot(),
+        supabase.auth.getUser(),
       ]);
 
+      const user = userResult.data.user;
+
+      let nextUserContext: LiveDashboardUserContext | null = null;
+
+      if (user) {
+        const { data: membership } = await supabase
+          .from("organization_members")
+          .select(
+            `
+              role,
+              department,
+              title,
+              organizations (
+                name
+              )
+            `
+          )
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        const organizationRecord = Array.isArray(membership?.organizations)
+          ? membership?.organizations?.[0]
+          : membership?.organizations;
+
+        const normalizedRole = normalizeMembershipRole(membership?.role);
+
+        nextUserContext = {
+          email: String(user.email || ""),
+          organizationName:
+            organizationRecord?.name || "No organization assigned",
+          role: normalizedRole,
+          department: normalizeMembershipDepartment(membership?.department),
+          title: membership?.title || null,
+        };
+
+        if (normalizedRole && normalizedRole !== demoRole) {
+          setDemoRole(normalizedRole);
+        }
+
+        const normalizedDepartment = normalizeMembershipDepartment(
+          membership?.department
+        );
+
+        if (normalizedDepartment && normalizedDepartment !== demoDepartment) {
+          setDemoDepartment(normalizedDepartment);
+        }
+      }
+
+      setLiveUserContext(nextUserContext);
       setContacts(data.contacts ?? []);
       setLists(data.lists ?? []);
       setLogs(data.logs ?? []);
@@ -698,8 +799,36 @@ export default function DashboardPage() {
       setMessage(err?.message || "Failed to load dashboard");
     } finally {
       setLoading(false);
+      setUserContextLoading(false);
     }
   }
+
+  const actualRole = liveUserContext?.role ?? null;
+  const actualDepartment = liveUserContext?.department ?? null;
+  const actualOrganizationName =
+    liveUserContext?.organizationName ?? "No organization assigned";
+  const canAccessAdmin = actualRole === "admin";
+
+  const availableDemoRoles = useMemo<DemoRole[]>(() => {
+    if (actualRole === "admin") return ["admin", "director", "general_user"];
+    if (actualRole === "director") return ["director", "general_user"];
+    if (actualRole === "general_user") return ["general_user"];
+    return ["admin", "director", "general_user"];
+  }, [actualRole]);
+
+  const effectiveContext = useMemo(() => {
+    return getEffectiveContext({
+      realRole: actualRole,
+      realDepartment: actualDepartment,
+      demoRole,
+      demoDepartment,
+    });
+  }, [actualRole, actualDepartment, demoRole, demoDepartment]);
+
+  const effectiveRole = effectiveContext.role;
+  const effectiveDepartment = effectiveContext.department as DemoDepartment;
+  const isPreviewingRole = effectiveContext.isPreview;
+
     const rawData = useMemo<DashboardData>(() => {
     return {
       contacts: contacts ?? [],
@@ -1113,8 +1242,8 @@ export default function DashboardPage() {
 
   const abeBriefing = useMemo(() => {
     return buildAbeV1Briefing({
-      role: demoRole,
-      demoDepartment,
+      role: effectiveRole,
+      effectiveDepartment: effectiveDepartment,
       financeSnapshot,
       fieldSnapshot,
       printSnapshot,
@@ -1129,8 +1258,8 @@ export default function DashboardPage() {
       intelligenceCrossDomain: intelligenceSummary.crossDomain,
     });
   }, [
-    demoRole,
-    demoDepartment,
+    effectiveRole,
+    effectiveDepartment,
     financeSnapshot,
     fieldSnapshot,
     printSnapshot,
@@ -1159,12 +1288,12 @@ export default function DashboardPage() {
 
   const abePatternWatch = useMemo(() => {
     return buildAbePatternInsights({
-      role: demoRole,
-      demoDepartment,
+      role: effectiveRole,
+      demoDepartment: effectiveDepartment,
       briefing: abeBriefing,
       memory: abeMemory,
     });
-  }, [demoRole, demoDepartment, abeBriefing, abeMemory]);
+  }, [effectiveRole, effectiveDepartment, abeBriefing, abeMemory]);
 
   const abeOverview = useMemo(() => {
     const meta = getAbeDepartmentMeta(abeBriefing.primaryLane);
@@ -1237,20 +1366,20 @@ export default function DashboardPage() {
   }, [actionEngineFull]);
 
   const scopedTopActions = useMemo(() => {
-    if (demoRole === "admin") {
+    if (effectiveRole === "admin") {
       return allTopActions.slice(0, 3);
     }
 
-    if (demoRole === "director") {
+    if (effectiveRole === "director") {
       return allTopActions
-        .filter((action) => action.domain === demoDepartment)
+        .filter((action) => action.domain === effectiveDepartment)
         .slice(0, 3);
     }
 
     return allTopActions
-      .filter((action) => action.domain === demoDepartment)
+      .filter((action) => action.domain === effectiveDepartment)
       .slice(0, 2);
-  }, [allTopActions, demoRole, demoDepartment]);
+  }, [allTopActions, effectiveRole, effectiveDepartment]);
 
   const abeSignals = useMemo(() => {
     const signals: {
@@ -1436,14 +1565,14 @@ export default function DashboardPage() {
   ]);
 
   const visibleAbeSignals = useMemo(() => {
-    if (demoRole === "admin") {
+    if (effectiveRole === "admin") {
       return abeSignals;
     }
 
     return abeSignals.filter((signal) =>
-      signal.route.includes(demoDepartment)
+      signal.route.includes(effectiveDepartment)
     );
-  }, [abeSignals, demoRole, demoDepartment]);
+  }, [abeSignals, effectiveRole, effectiveDepartment]);
 
   const visibleSnapshotCards = useMemo(() => {
     const allCards = [
@@ -1480,15 +1609,15 @@ export default function DashboardPage() {
       },
     ];
 
-    if (demoRole === "admin") return allCards;
-    if (demoRole === "director") {
-      return allCards.filter((card) => card.id === demoDepartment);
+    if (effectiveRole === "admin") return allCards;
+    if (effectiveRole === "director") {
+      return allCards.filter((card) => card.id === effectiveDepartment);
     }
 
-    return allCards.filter((card) => card.id === demoDepartment).slice(0, 1);
+    return allCards.filter((card) => card.id === effectiveDepartment).slice(0, 1);
   }, [
-    demoRole,
-    demoDepartment,
+    effectiveRole,
+    effectiveDepartment,
     digitalSnapshot.issue,
     fieldSnapshot.issue,
     printSnapshot.issue,
@@ -1497,74 +1626,76 @@ export default function DashboardPage() {
   ]);
 
   const visibleLaneIds = useMemo(() => {
-    if (demoRole === "admin") {
+    if (effectiveRole === "admin") {
       return ["digital", "field", "print", "finance"];
     }
 
-    if (demoRole === "director") {
-      return demoDepartment === "outreach" ? ["finance"] : [demoDepartment];
+    if (effectiveRole === "director") {
+      return effectiveDepartment === "outreach"
+        ? ["finance"]
+        : [effectiveDepartment];
     }
 
-    if (demoDepartment === "outreach") {
+    if (effectiveDepartment === "outreach") {
       return ["finance"];
     }
 
-    return [demoDepartment];
-  }, [demoRole, demoDepartment]);
+    return [effectiveDepartment];
+  }, [effectiveRole, effectiveDepartment]);
 
   const abeRoleLabel = useMemo(() => {
-    if (demoRole === "admin") return "Admin View";
-    if (demoRole === "director") return "Director View";
+    if (effectiveRole === "admin") return isPreviewingRole ? "Admin Preview" : "Admin View";
+    if (effectiveRole === "director") return "Director View";
     return "Operator View";
-  }, [demoRole]);
+  }, [effectiveRole, isPreviewingRole]);
 
   const abeRoleHeadline = useMemo(() => {
-    if (demoRole === "admin") {
+    if (effectiveRole === "admin") {
       return intelligenceSummary.headline;
     }
 
-    if (demoRole === "director") {
+    if (effectiveRole === "director") {
       return `${departmentLabel(
-        demoDepartment
+        effectiveDepartment
       )} is your primary operating lane right now.`;
     }
 
     return `Your ${departmentLabel(
-      demoDepartment
+      effectiveDepartment
     ).toLowerCase()} work lane is what matters most right now.`;
-  }, [demoRole, demoDepartment, intelligenceSummary.headline]);
+  }, [effectiveRole, effectiveDepartment, intelligenceSummary.headline]);
 
   const abeRoleBody = useMemo(() => {
-    if (demoRole === "admin") {
+    if (effectiveRole === "admin") {
       return intelligenceSummary.body;
     }
 
-    if (demoRole === "director") {
+    if (effectiveRole === "director") {
       return `This view narrows the dashboard around ${departmentLabel(
-        demoDepartment
+        effectiveDepartment
       ).toLowerCase()} so department leaders can focus on pressure, opportunity, and execution movement inside their own lane.`;
     }
 
     return `This view strips away cross-org noise and keeps attention on the immediate ${departmentLabel(
-      demoDepartment
+      effectiveDepartment
     ).toLowerCase()} work that an individual operator should understand and act on.`;
-  }, [demoRole, demoDepartment, intelligenceSummary.body]);
+  }, [effectiveRole, effectiveDepartment, intelligenceSummary.body]);
 
   const abeWhyNowText = useMemo(() => {
-    if (demoRole === "admin") {
+    if (effectiveRole === "admin") {
       return abeBriefing.whyNow;
     }
 
-    if (demoRole === "director") {
+    if (effectiveRole === "director") {
       return `This perspective is scoped to ${departmentLabel(
-        demoDepartment
+        effectiveDepartment
       ).toLowerCase()} so the user can focus on pressure, opportunity, and execution movement inside that lane.`;
     }
 
     return `This perspective is scoped to ${departmentLabel(
-      demoDepartment
+      effectiveDepartment
     ).toLowerCase()} so the operator can stay focused on the next actions that matter most.`;
-  }, [demoRole, demoDepartment, abeBriefing.whyNow]);
+  }, [effectiveRole, effectiveDepartment, abeBriefing.whyNow]);
 
   const abeStickyLine = useMemo(() => {
     if (abeBriefing.crossDomainSignal) {
@@ -1636,6 +1767,12 @@ export default function DashboardPage() {
                 See org health, spot pressure fast, and move directly into the
                 work that needs attention.
               </p>
+              <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-700">
+                <Users className="h-3.5 w-3.5" />
+                {userContextLoading
+                  ? "Loading org context..."
+                  : `${actualOrganizationName} • ${actualRole ?? "unassigned"}`}
+              </div>
             </div>
           </div>
 
@@ -1668,69 +1805,101 @@ export default function DashboardPage() {
               Open Focus Mode
             </button>
 
-            <Link
-              href="/dashboard/admin"
-              className="inline-flex items-center gap-2 rounded-2xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm font-medium text-indigo-900 transition hover:bg-indigo-100"
-            >
-              <Settings className="h-4 w-4" />
-              Admin Control
-            </Link>
+            {canAccessAdmin ? (
+              <Link
+                href="/dashboard/admin"
+                className="inline-flex items-center gap-2 rounded-2xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm font-medium text-indigo-900 transition hover:bg-indigo-100"
+              >
+                <Settings className="h-4 w-4" />
+                Admin Control
+              </Link>
+            ) : null}
           </div>
         </div>
       </section>
 
       <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="grid gap-5 lg:grid-cols-[1fr_1fr]">
-          <div className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-              Demo role perspective
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {(["admin", "director", "general_user"] as DemoRole[]).map((role) => (
-                <button
-                  key={role}
-                  onClick={() => setDemoRole(role)}
-                  className={`rounded-full px-3 py-1 text-xs font-medium transition ${
-                    demoRole === role
-                      ? "bg-slate-900 text-white"
-                      : "border border-slate-200 bg-white text-slate-700"
+        {canAccessAdmin ? (
+          <>
+            <div className="grid gap-5 lg:grid-cols-[1fr_1fr]">
+              <div className="space-y-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                  Demo role perspective
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {availableDemoRoles.map((role) => (
+                    <button
+                      key={role}
+                      onClick={() => setDemoRole(role)}
+                      className={`rounded-full px-3 py-1 text-xs font-medium transition ${
+                        demoRole === role
+                          ? "bg-slate-900 text-white"
+                          : "border border-slate-200 bg-white text-slate-700"
+                      }`}
+                    >
+                      {role}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                  Demo department perspective
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {(
+                    ["outreach", "finance", "field", "digital", "print"] as DemoDepartment[]
+                  ).map((department) => (
+                    <button
+                      key={department}
+                      onClick={() => setDemoDepartment(department)}
+                      className={`rounded-full px-3 py-1 text-xs font-medium transition ${
+                        demoDepartment === department
+                          ? "bg-slate-900 text-white"
+                          : "border border-slate-200 bg-white text-slate-700"
+                      }`}
+                    >
+                      {department}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+              <span className="font-medium text-slate-900">
+                {userContextLoading ? "Loading user context..." : "Live user context:"}
+              </span>{" "}
+              {userContextLoading
+                ? "Resolving your organization, role, and department."
+                : `${liveUserContext?.email || "Unknown user"} • ${actualOrganizationName} • ${
+                    actualRole ? actualRole.replace("_", " ") : "No role assigned"
+                  }${
+                    actualDepartment ? ` • ${actualDepartment}` : ""
                   }`}
-                >
-                  {role}
-                </button>
-              ))}
+              <div className="mt-2 text-xs text-slate-500">
+                Demo controls below show how the dashboard can shift based on who is inside Aether.
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+            <span className="font-medium text-slate-900">
+              {userContextLoading ? "Loading user context..." : "Live user context:"}
+            </span>{" "}
+            {userContextLoading
+              ? "Resolving your organization, role, and department."
+              : `${liveUserContext?.email || "Unknown user"} • ${actualOrganizationName} • ${
+                  actualRole ? actualRole.replace("_", " ") : "No role assigned"
+                }${
+                  actualDepartment ? ` • ${actualDepartment}` : ""
+                }`}
+            <div className="mt-2 text-xs text-slate-500">
+              Demo controls are only available to admins. Your dashboard is using your real role and department context.
             </div>
           </div>
-
-          <div className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-              Demo department perspective
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {(
-                ["outreach", "finance", "field", "digital", "print"] as DemoDepartment[]
-              ).map((department) => (
-                <button
-                  key={department}
-                  onClick={() => setDemoDepartment(department)}
-                  className={`rounded-full px-3 py-1 text-xs font-medium transition ${
-                    demoDepartment === department
-                      ? "bg-slate-900 text-white"
-                      : "border border-slate-200 bg-white text-slate-700"
-                  }`}
-                >
-                  {department}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
-          <span className="font-medium text-slate-900">{abeRoleLabel}:</span>{" "}
-          This demo layer lets viewers switch roles and departments to see how
-          the dashboard shifts based on who is inside Aether.
-        </div>
+        )}
       </section>
 
       <section className="rounded-3xl border border-fuchsia-200 bg-fuchsia-50 p-6 shadow-sm">
@@ -1774,9 +1943,9 @@ export default function DashboardPage() {
                     Primary Lane:
                   </span>{" "}
                   {departmentLabel(
-                    demoRole === "admin"
+                    effectiveRole === "admin"
                       ? abeBriefing.primaryLane
-                      : demoDepartment
+                      : effectiveDepartment
                   )}
                 </div>
 
@@ -1809,7 +1978,7 @@ export default function DashboardPage() {
                 Why now: {abeWhyNowText}
               </p>
 
-              {demoRole === "admin" && abeBriefing.crossDomainSignal ? (
+              {effectiveRole === "admin" && abeBriefing.crossDomainSignal ? (
                 <p className="max-w-3xl text-sm text-fuchsia-900/80">
                   {abeBriefing.crossDomainSignal}
                 </p>
@@ -1919,7 +2088,7 @@ export default function DashboardPage() {
         </section>
       </section>
 
-      {demoRole === "admin" ? (
+      {effectiveRole === "admin" ? (
         <CrossDomainChart
           finance={{
             moneyIn: financeSnapshot.moneyIn,
