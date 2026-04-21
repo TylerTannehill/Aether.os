@@ -74,6 +74,11 @@ import { buildAbePatternInsights } from "@/lib/abe/abe-patterns";
 import { createClient } from "@/lib/supabase/client";
 import { getEffectiveContext } from "@/lib/abe/get-effective-context";
 import { buildAbeActionSet } from "@/lib/abe/abe-actions";
+import {
+  getFollowThroughSignals,
+  type FollowThroughSignals,
+} from "@/lib/abe/abe-follow-through";
+import { getOutcomeSignals } from "@/lib/abe/abe-outcomes";
 
 function normalizeTaskStatus(status?: string | null) {
   const value = (status || "").trim().toLowerCase();
@@ -317,6 +322,12 @@ function buildAbeV1Briefing(input: {
   repeatedPressureCount?: number;
   repeatedOpportunityCount?: number;
   repeatedPrimaryCount?: number;
+  followThrough?: FollowThroughSignals;
+  outcomeSignals?: {
+    trend: "improving" | "flat" | "declining";
+    delta: number;
+    meaningful: boolean;
+  };
 }): AbeBriefing {
   const outreachPressure =
     input.filteredTasks.filter((task: any) => {
@@ -486,12 +497,45 @@ function buildAbeV1Briefing(input: {
       "Print readiness can unlock downstream movement, but delivery timing is becoming the constraint.";
   }
 
+  if (input.followThrough) {
+    const behavior = input.followThrough.dominantBehavior;
+
+    if (behavior === "ignored") {
+      whyNow = `${whyNow} A noticeable portion of work in this lane doesn’t appear to be getting picked up right now.`;
+    } else if (behavior === "attempted") {
+      whyNow = `${whyNow} There’s active effort in this lane, but it doesn’t seem to be resolving the underlying pressure yet.`;
+    } else if (
+      behavior === "completed" &&
+      input.followThrough.completionRate > 0.7
+    ) {
+      whyNow = `${whyNow} Follow-through here is starting to stabilize the situation.`;
+    }
+  }
+
+  if (input.outcomeSignals?.meaningful) {
+    if (input.outcomeSignals.trend === "declining") {
+      whyNow = `${whyNow} Even with activity, progress here doesn’t look like it’s translating into resolution yet.`;
+    } else if (input.outcomeSignals.trend === "improving") {
+      whyNow = `${whyNow} There are early signs this lane is starting to stabilize with recent follow-through.`;
+    }
+  }
+
+  const followThroughNote = input.followThrough
+    ? input.followThrough.dominantBehavior === "ignored"
+      ? " There are also a few tasks in this lane that don’t appear to be getting picked up right now."
+      : input.followThrough.dominantBehavior === "attempted"
+      ? " There is movement in this lane, but it does not look like that effort is resolving the pressure yet."
+      : input.followThrough.completionRate > 0.7
+      ? " Follow-through in this lane looks steadier right now."
+      : ""
+    : "";
+
   const supportText =
     input.role === "admin"
-      ? `Open ${departmentLabel(primaryLane)} to review the supporting analytics behind this read and keep the campaign aligned around the right lane.`
+      ? `Open ${departmentLabel(primaryLane)} to review the supporting analytics behind this read and keep the campaign aligned around the right lane.${followThroughNote}`
       : `Open ${departmentLabel(
           input.effectiveDepartment
-        )} to review the supporting analytics behind this read and keep your lane moving with the right context.`;
+        )} to review the supporting analytics behind this read and keep your lane moving with the right context.${followThroughNote}`;
 
   const actions = buildAbeActionSet({
     role: input.role,
@@ -499,6 +543,8 @@ function buildAbeV1Briefing(input: {
     repeatedPressureCount: input.repeatedPressureCount,
     repeatedOpportunityCount: input.repeatedOpportunityCount,
     repeatedPrimaryCount: input.repeatedPrimaryCount,
+    dominantBehavior: input.followThrough?.dominantBehavior,
+    outcomeTrend: input.outcomeSignals?.trend,
   });
 
   return {
@@ -627,6 +673,8 @@ export default function DashboardPage() {
     recentOpportunityLanes: [],
     recentCrossDomainSignals: [],
   });
+  const [previousFollowThrough, setPreviousFollowThrough] =
+    useState<FollowThroughSignals | null>(null);
 
   const router = useRouter();
   const { ownerFilter, applyMyDashboard } = useDashboardOwner();
@@ -1182,6 +1230,29 @@ export default function DashboardPage() {
     return buildAetherSummaryText(intelligenceSnapshot);
   }, [intelligenceSnapshot]);
 
+  const followThroughSignals = useMemo(() => {
+    return getFollowThroughSignals({
+      department: effectiveDepartment,
+      tasks: filteredData.tasks ?? [],
+    });
+  }, [effectiveDepartment, filteredData.tasks]);
+
+  const outcomeSignals = useMemo(() => {
+    return getOutcomeSignals({
+      department: effectiveDepartment,
+      previous: previousFollowThrough
+        ? {
+            completionRate: previousFollowThrough.completionRate,
+            totalTasks: previousFollowThrough.totalTasks,
+          }
+        : null,
+      current: {
+        completionRate: followThroughSignals.completionRate,
+        totalTasks: followThroughSignals.totalTasks,
+      },
+    });
+  }, [effectiveDepartment, previousFollowThrough, followThroughSignals]);
+
   const repeatedPressureCount = useMemo(() => {
     return abeMemory.recentPressureLanes.filter(
       (lane) => lane === effectiveDepartment
@@ -1219,6 +1290,8 @@ export default function DashboardPage() {
       repeatedPressureCount,
       repeatedOpportunityCount,
       repeatedPrimaryCount,
+      followThrough: followThroughSignals,
+      outcomeSignals,
     });
   }, [
     effectiveRole,
@@ -1238,6 +1311,8 @@ export default function DashboardPage() {
     repeatedPressureCount,
     repeatedOpportunityCount,
     repeatedPrimaryCount,
+    followThroughSignals,
+    outcomeSignals,
   ]);
 
   useEffect(() => {
@@ -1251,6 +1326,10 @@ export default function DashboardPage() {
     abeBriefing.opportunityLane,
     abeBriefing.crossDomainSignal,
   ]);
+
+  useEffect(() => {
+    setPreviousFollowThrough(followThroughSignals);
+  }, [followThroughSignals]);
 
   const abePatternWatch = useMemo(() => {
     return buildAbePatternInsights({
