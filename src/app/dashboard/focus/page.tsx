@@ -3,22 +3,16 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import {
-  Activity,
   AlertTriangle,
   ArrowLeft,
   ArrowRight,
-  Clock3,
   Crosshair,
   Loader2,
-  Route,
-  Sparkles,
-  Target,
   Users,
   Zap,
 } from "lucide-react";
 import { getDashboardData } from "@/lib/data/dashboard";
 import { DashboardData } from "@/lib/data/types";
-import { fullName } from "@/lib/data/utils";
 import { useDashboardOwner } from "../owner-context";
 import { useFocusContext } from "@/lib/focus/focus-context";
 import { buildActionEngineAdapterResult } from "@/lib/priority/action-engine-adapter";
@@ -94,6 +88,54 @@ type BucketKey =
 
 type DemoRole = "admin" | "director" | "general_user";
 type DemoDepartment = "outreach" | "finance" | "field" | "digital" | "print";
+
+type StrategicPushType = "momentum" | "pressure" | "stabilization";
+
+type StrategicPush = {
+  id: string;
+  title: string;
+  type: StrategicPushType;
+  bucket: BucketKey;
+  lanes: DemoDepartment[];
+  trigger: string;
+  objective: string;
+  actions: string[];
+};
+
+function getStrategicPushTone(type: StrategicPushType) {
+  switch (type) {
+    case "momentum":
+      return "border-emerald-200 bg-emerald-50 text-emerald-800";
+    case "pressure":
+      return "border-amber-200 bg-amber-50 text-amber-800";
+    case "stabilization":
+    default:
+      return "border-sky-200 bg-sky-50 text-sky-800";
+  }
+}
+
+function pushMatchesAction(push: StrategicPush, action: any) {
+  const itemDepartment = getFocusItemDepartment(action);
+  const itemBucket = String(action?.bucket ?? "immediate").replace("_", "");
+
+  const bucketMatch =
+    push.bucket === "immediate"
+      ? itemBucket === "immediate"
+      : push.bucket === "fixNow"
+      ? itemBucket in {"fixnow": 1}
+      : push.bucket === "followUp"
+      ? itemBucket in {"followup": 1}
+      : push.bucket === "routing"
+      ? itemBucket in {"routing": 1}
+      : push.bucket === "owner"
+      ? itemBucket in {"owner": 1}
+      : itemBucket in {"pipeline": 1};
+
+  const laneMatch =
+    itemDepartment === "system" || push.lanes.includes(itemDepartment);
+
+  return bucketMatch && laneMatch;
+}
 
 function getActionReasonLines(action: any): string[] {
   if (Array.isArray(action?.brain_reasons) && action.brain_reasons.length) {
@@ -229,6 +271,7 @@ export default function FocusModePage() {
   const [demoRole, setDemoRole] = useState<DemoRole>("admin");
   const [demoDepartment, setDemoDepartment] =
     useState<DemoDepartment>("outreach");
+  const [activePushId, setActivePushId] = useState<string | null>(null);
 
   const { ownerFilter, applyMyDashboard } = useDashboardOwner();
   const { focusContext, clearFocusContext } = useFocusContext();
@@ -493,23 +536,7 @@ export default function FocusModePage() {
     }
   }, [activeBucket, scopedFocusBoard]);
 
-  const openTaskCount = useMemo(() => {
-    const allScopedItems = [
-      ...scopedFocusBoard.immediate,
-      ...scopedFocusBoard.fixNow,
-      ...scopedFocusBoard.followUp,
-      ...scopedFocusBoard.routing,
-      ...scopedFocusBoard.owner,
-      ...scopedFocusBoard.pipeline,
-    ];
 
-    const uniqueIds = new Set(allScopedItems.map((item: any) => String(item.id)));
-    return uniqueIds.size;
-  }, [scopedFocusBoard]);
-
-  const fallbackTaskCount = useMemo(() => {
-    return queue.filter((task: any) => isFallbackTask(task.task_type)).length;
-  }, [queue]);
 
   const followUpCount = useMemo(() => {
     return scopedFocusBoard.followUp.length;
@@ -517,7 +544,7 @@ export default function FocusModePage() {
 
   const focusRoleHeadline = useMemo(() => {
     if (demoRole === "admin") {
-      return "Work the right things across the campaign.";
+      return "Move the campaign forward.";
     }
 
     if (demoRole === "director") {
@@ -531,9 +558,109 @@ export default function FocusModePage() {
     ).toLowerCase()} work lane and keep the queue moving.`;
   }, [demoRole, demoDepartment]);
 
+  const strategicPushes = useMemo<StrategicPush[]>(() => {
+    const pushes: StrategicPush[] = [];
+
+    if (demoRole === "admin") {
+      pushes.push({
+        id: "outreach-momentum",
+        title: "Reinforce Outreach Momentum",
+        type: "momentum",
+        bucket: "followUp",
+        lanes: ["outreach", "finance", "digital"],
+        trigger:
+          "Engagement is building while follow-up pressure is starting to concentrate.",
+        objective:
+          "Convert warm engagement into outcomes without losing responsiveness.",
+        actions: [
+          "Tighten follow-up loop",
+          "Convert pending pledges",
+          "Align digital signal",
+        ],
+      });
+
+      pushes.push({
+        id: "print-field-gap",
+        title: "Resolve Print → Field Delay",
+        type: "pressure",
+        bucket: "routing",
+        lanes: ["print", "field"],
+        trigger:
+          "Print readiness is available while field deployment still looks exposed.",
+        objective:
+          "Close the timing gap between ready materials and field movement.",
+        actions: [
+          "Confirm delivery timing",
+          "Adjust turf assignment",
+          "Route deployment cleanly",
+        ],
+      });
+
+      pushes.push({
+        id: "finance-stability",
+        title: "Stabilize Finance Conversion",
+        type: "stabilization",
+        bucket: "immediate",
+        lanes: ["finance", "outreach"],
+        trigger:
+          "Pledge pressure and donor follow-through both need cleaner conversion.",
+        objective:
+          "Keep revenue movement clean while reducing finance drag.",
+        actions: [
+          "Work donor follow-up",
+          "Clear pledge backlog",
+          "Protect clean record flow",
+        ],
+      });
+    } else if (demoRole === "director") {
+      pushes.push({
+        id: `${demoDepartment}-lane-push`,
+        title: `Strengthen ${getFocusDepartmentLabel(demoDepartment)} Coordination`,
+        type: "stabilization",
+        bucket: "immediate",
+        lanes: demoDepartment === "outreach" ? ["outreach", "finance"] : [demoDepartment],
+        trigger:
+          demoDepartment === "outreach"
+            ? "Follow-up work and downstream conversion need tighter coordination."
+            : `${getFocusDepartmentLabel(demoDepartment)} work needs cleaner coordination inside the lane.`,
+        objective:
+          demoDepartment === "outreach"
+            ? "Keep engagement moving into the next useful action."
+            : `Tighten how ${getFocusDepartmentLabel(demoDepartment).toLowerCase()} work is getting worked right now.`,
+        actions:
+          demoDepartment === "outreach"
+            ? ["Tighten follow-up", "Clear finance handoff", "Keep contact flow moving"]
+            : ["Review top queue", "Clear exposed blockers", "Keep the lane moving"],
+      });
+    } else {
+      pushes.push({
+        id: `${demoDepartment}-operator-push`,
+        title: `Keep ${getFocusDepartmentLabel(demoDepartment)} Moving`,
+        type: "stabilization",
+        bucket: "immediate",
+        lanes: [demoDepartment],
+        trigger: "The lane needs clean follow-through more than broader visibility.",
+        objective: "Stay inside the next useful work and keep the queue moving.",
+        actions: ["Start with the top action", "Clear the next blocker", "Keep momentum clean"],
+      });
+    }
+
+    return pushes.slice(0, 3);
+  }, [demoRole, demoDepartment]);
+
+
+  const activePush = useMemo(() => {
+    return strategicPushes.find((push) => push.id === activePushId) ?? null;
+  }, [strategicPushes, activePushId]);
+
+  const executionQueue = useMemo(() => {
+    if (!activePush) return queue;
+    return queue.filter((action: any) => pushMatchesAction(activePush, action));
+  }, [queue, activePush]);
+
   const focusRoleSubheadline = useMemo(() => {
     if (demoRole === "admin") {
-      return "This is the full action-engine execution surface with broad campaign visibility.";
+      return "Coordinate across lanes. Resolve pressure. Push momentum where it matters.";
     }
 
     if (demoRole === "director") {
@@ -545,68 +672,7 @@ export default function FocusModePage() {
     return `This view strips away cross-org noise and keeps only the actions an individual operator should understand and execute.`;
   }, [demoRole, demoDepartment]);
 
-  const visibleBucketButtons = useMemo(() => {
-    if (demoRole === "admin") {
-      return [
-        "immediate",
-        "fixNow",
-        "followUp",
-        "routing",
-        "owner",
-        "pipeline",
-      ] as BucketKey[];
-    }
 
-    if (demoRole === "director") {
-      return ["immediate", "fixNow", "followUp", "routing"] as BucketKey[];
-    }
-
-    return ["immediate", "followUp", "pipeline"] as BucketKey[];
-  }, [demoRole]);
-
-  const focusLinks = useMemo(() => {
-    const departmentHref =
-      demoDepartment === "finance"
-        ? "/dashboard/finance"
-        : demoDepartment === "field"
-        ? "/dashboard/field"
-        : demoDepartment === "digital"
-        ? "/dashboard/digital"
-        : demoDepartment === "print"
-        ? "/dashboard/print"
-        : "/dashboard/outreach";
-
-    const departmentLabel =
-      demoDepartment === "finance"
-        ? "Open Finance"
-        : demoDepartment === "field"
-        ? "Open Field"
-        : demoDepartment === "digital"
-        ? "Open Digital"
-        : demoDepartment === "print"
-        ? "Open Print"
-        : "Open Outreach";
-
-    const links = [
-      {
-        label: departmentLabel,
-        href: departmentHref,
-      },
-      {
-        label: "Return to Command Center",
-        href: "/dashboard",
-      },
-    ];
-
-    if (demoRole !== "general_user") {
-      links.splice(1, 0, {
-        label: "Open Routing Rules",
-        href: "/dashboard/routing",
-      });
-    }
-
-    return links;
-  }, [demoRole, demoDepartment]);
 
   async function handlePreviewAction(action: ActionItem) {
     try {
@@ -730,14 +796,6 @@ export default function FocusModePage() {
             >
               My Focus
             </button>
-
-            <Link
-              href="/dashboard"
-              className="inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-medium text-slate-900 transition hover:bg-slate-100"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Dashboard
-            </Link>
           </div>
         </div>
       </section>
@@ -748,558 +806,299 @@ export default function FocusModePage() {
         </div>
       ) : null}
 
-      <section className="grid gap-6 xl:grid-cols-[1.35fr_0.65fr]">
+
+      <section className="space-y-6">
+        <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+          <div className="mb-6 flex items-center justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-semibold text-slate-900">
+                Strategic Pushes
+              </h2>
+              <p className="mt-1 text-sm text-slate-500">
+                Start here. These are the coordinated moves most likely to change the campaign’s trajectory.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+              {strategicPushes.length} pushes
+            </div>
+          </div>
+
+          <div className="grid gap-4 xl:grid-cols-3">
+            {strategicPushes.map((push) => {
+              const isActivePush = activePush?.id === push.id;
+
+              return (
+                <div
+                  key={push.id}
+                  className={`rounded-3xl border p-5 shadow-sm ${
+                    isActivePush
+                      ? "border-slate-900 bg-slate-50"
+                      : "border-slate-200 bg-white"
+                  }`}
+                >
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span
+                      className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${getStrategicPushTone(
+                        push.type
+                      )}`}
+                    >
+                      {push.type}
+                    </span>
+                    <span className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600">
+                      {push.lanes
+                        .map((lane) => getFocusDepartmentLabel(lane))
+                        .join(" / ")}
+                    </span>
+                  </div>
+
+                  <p className="mt-4 text-lg font-semibold text-slate-900">
+                    {push.title}
+                  </p>
+                  <p className="mt-2 text-sm text-slate-600">{push.trigger}</p>
+
+                  <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Objective
+                    </p>
+                    <p className="mt-2 text-sm text-slate-700">
+                      {push.objective}
+                    </p>
+                  </div>
+
+                  <div className="mt-4 space-y-2">
+                    {push.actions.map((actionLine) => (
+                      <div
+                        key={`${push.id}-${actionLine}`}
+                        className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600"
+                      >
+                        {actionLine}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-5 flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActivePushId(push.id);
+                        setActiveBucket(push.bucket);
+                      }}
+                      className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-slate-900 bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
+                    >
+                      {isActivePush ? "Push Active" : "Activate Push"}
+                      <Zap className="h-4 w-4" />
+                    </button>
+
+                    {isActivePush ? (
+                      <button
+                        type="button"
+                        onClick={() => setActivePushId(null)}
+                        className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+                      >
+                        Clear
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
         <div className="rounded-3xl border-2 border-slate-900 bg-white p-8 shadow-lg">
           <div className="mb-6 flex items-center justify-between gap-4">
             <div>
               <h2 className="text-xl font-semibold text-slate-900">
-                Ranked Action Queue
+                Execution Surface
               </h2>
               <p className="mt-1 text-sm text-slate-500">
-                Start here. This queue is the highest-value work in your current execution surface.
+                {activePush
+                  ? "This execution surface is scoped to the active strategic push."
+                  : "Select a strategic push to begin coordinated work."}
               </p>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-              {queue.length} actions
-            </div>
+            {activePush ? (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                {executionQueue.length} actions
+              </div>
+            ) : null}
           </div>
 
-          <div className="space-y-4">
-            {queue.length === 0 ? (
-              <div className="rounded-2xl border border-slate-300 bg-slate-50 p-6 text-slate-500">
-                No actions in this lane right now.
+          {activePush ? (
+            <>
+              <div className="mb-6 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Active Push
+                </p>
+                <p className="mt-2 text-lg font-semibold text-slate-900">
+                  {activePush.title}
+                </p>
+                <p className="mt-1 text-sm text-slate-600">
+                  {activePush.objective}
+                </p>
               </div>
-            ) : (
-              queue.map((action: any) => {
-                const isExecuting = executingActionId === action.id;
-                const isPreviewing = previewingActionId === action.id;
-                const reasonLines = getActionReasonLines(action);
-                const itemDepartment = getFocusItemDepartment(action);
 
-                return (
-                  <div
-                    key={action.id}
-                    className="rounded-2xl border border-slate-300 bg-slate-50 p-6"
-                  >
-                    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                      <div className="space-y-3">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span
-                            className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${formatPriorityTone(
-                              action.level ??
-                                action.brain_tier ??
-                                action.priority
-                            )}`}
-                          >
-                            {action.level ??
-                              action.brain_tier ??
-                              action.priority ??
-                              "open"}
-                          </span>
+              <div className="space-y-4">
+                {executionQueue.length === 0 ? (
+                  <div className="rounded-2xl border border-slate-300 bg-slate-50 p-6 text-slate-500">
+                    No actions are available in this execution surface right now.
+                  </div>
+                ) : (
+                  executionQueue.map((action: any) => {
+                    const isExecuting = executingActionId === action.id;
+                    const isPreviewing = previewingActionId === action.id;
+                    const reasonLines = getActionReasonLines(action);
+                    const itemDepartment = getFocusItemDepartment(action);
 
-                          <span
-                            className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${formatBucketTone(
-                              action.bucket ?? "immediate"
-                            )}`}
-                          >
-                            {String(action.bucket ?? "immediate").replace(
-                              "_",
-                              " "
-                            )}
-                          </span>
+                    return (
+                      <div
+                        key={action.id}
+                        className="rounded-2xl border border-slate-300 bg-slate-50 p-6"
+                      >
+                        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                          <div className="space-y-3">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span
+                                className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${formatPriorityTone(
+                                  action.level ??
+                                    action.brain_tier ??
+                                    action.priority
+                                )}`}
+                              >
+                                {action.level ??
+                                  action.brain_tier ??
+                                  action.priority ??
+                                  "open"}
+                              </span>
 
-                          <span className="inline-flex rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-600">
-                            {itemDepartment === "system"
-                              ? "system"
-                              : getFocusDepartmentLabel(itemDepartment)}
-                          </span>
-                        </div>
+                              <span
+                                className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${formatBucketTone(
+                                  action.bucket ?? "immediate"
+                                )}`}
+                              >
+                                {String(action.bucket ?? "immediate").replace(
+                                  "_",
+                                  " "
+                                )}
+                              </span>
 
-                        <div>
-                          <p className="text-lg font-semibold text-slate-900">
-                            {action.title}
-                          </p>
-                          <p className="mt-1 text-sm text-slate-600">
-                            {action.summary ??
-                              action.recommendedAction ??
-                              reasonLines[0] ??
-                              "No summary available."}
-                          </p>
-                        </div>
+                              <span className="inline-flex rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-600">
+                                {itemDepartment === "system"
+                                  ? "system"
+                                  : getFocusDepartmentLabel(itemDepartment)}
+                              </span>
+                            </div>
 
-                        <div className="space-y-2">
-                          <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                            Why Aether picked this
+                            <div>
+                              <p className="text-lg font-semibold text-slate-900">
+                                {action.title}
+                              </p>
+                              <p className="mt-1 text-sm text-slate-600">
+                                {action.summary ??
+                                  action.recommendedAction ??
+                                  reasonLines[0] ??
+                                  "No summary available."}
+                              </p>
+                            </div>
+
+                            <div className="space-y-2">
+                              <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                                Why this now
+                              </div>
+
+                              {reasonLines.map((reason) => (
+                                <div
+                                  key={`${action.id}-${reason}`}
+                                  className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-600"
+                                >
+                                  {reason}
+                                </div>
+                              ))}
+                            </div>
                           </div>
 
-                          {reasonLines.map((reason) => (
-                            <div
-                              key={`${action.id}-${reason}`}
-                              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-600"
-                            >
-                              {reason}
+                          <div className="space-y-3 lg:w-[300px]">
+                            <div className="rounded-2xl border border-slate-300 bg-white p-4 text-sm font-medium text-slate-700">
+                              {action.recommendedAction ??
+                                reasonLines[0] ??
+                                "Review this action before execution."}
                             </div>
-                          ))}
-                        </div>
-                      </div>
 
-                      <div className="space-y-3 lg:w-[300px]">
-                        <div className="rounded-2xl border border-slate-300 bg-white p-4 text-sm font-medium text-slate-700">
-                          {action.recommendedAction ??
-                            reasonLines[0] ??
-                            "Review this action before execution."}
-                        </div>
-
-                        <div className="flex gap-2">
-                          {"type" in action ? (
-                            <>
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  handlePreviewAction(action as ActionItem)
-                                }
-                                disabled={isExecuting || isPreviewing}
-                                className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
-                              >
-                                {isPreviewing ? (
-                                  <>
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                    Previewing
-                                  </>
-                                ) : (
-                                  <>
-                                    Preview
-                                    <ArrowRight className="h-4 w-4" />
-                                  </>
-                                )}
-                              </button>
-                                                            <button
-                                type="button"
-                                onClick={() =>
-                                  handleExecuteAction(action as ActionItem)
-                                }
-                                disabled={isExecuting || isPreviewing}
-                                className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-slate-900 bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-                              >
-                                {isExecuting ? (
-                                  <>
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                    Working
-                                  </>
-                                ) : (
-                                  <>
-                                    {demoRole === "general_user"
-                                      ? "Do this next"
-                                      : "Work this action"}
-                                    <Zap className="h-4 w-4" />
-                                  </>
-                                )}
-                              </button>
-                            </>
-                          ) : (
-                            <div className="w-full rounded-2xl border border-slate-200 bg-slate-100 px-4 py-3 text-center text-sm font-medium text-slate-500">
-                              Brain-ranked task view only
+                            <div className="flex gap-2">
+                              {"type" in action ? (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      handlePreviewAction(action as ActionItem)
+                                    }
+                                    disabled={isExecuting || isPreviewing}
+                                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+                                  >
+                                    {isPreviewing ? (
+                                      <>
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                        Previewing
+                                      </>
+                                    ) : (
+                                      <>
+                                        Preview
+                                        <ArrowRight className="h-4 w-4" />
+                                      </>
+                                    )}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      handleExecuteAction(action as ActionItem)
+                                    }
+                                    disabled={isExecuting || isPreviewing}
+                                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-slate-900 bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                                  >
+                                    {isExecuting ? (
+                                      <>
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                        Working
+                                      </>
+                                    ) : (
+                                      <>
+                                        {demoRole === "general_user"
+                                          ? "Do this next"
+                                          : "Work this action"}
+                                        <Zap className="h-4 w-4" />
+                                      </>
+                                    )}
+                                  </button>
+                                </>
+                              ) : (
+                                <div className="w-full rounded-2xl border border-slate-200 bg-slate-100 px-4 py-3 text-center text-sm font-medium text-slate-500">
+                                  Brain-ranked task view only
+                                </div>
+                              )}
                             </div>
-                          )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </div>
-
-        <div className="space-y-6">
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold text-slate-900">
-                Immediate Queue Summary
-              </h2>
-              <p className="mt-1 text-sm text-slate-500">
-                Fast visibility into what the engine wants worked first.
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              {scopedFocusBoard.immediate.slice(0, getRoleQueueLimit(demoRole, "immediate")).map((action: any) => {
-                const reasonLines = getActionReasonLines(action);
-                const itemDepartment = getFocusItemDepartment(action);
-
-                return (
-                  <div
-                    key={action.id}
-                    className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="font-semibold text-slate-900">
-                          {action.title}
-                        </p>
-                        <p className="mt-1 text-sm text-slate-500">
-                          {action.recommendedAction ??
-                            reasonLines[0] ??
-                            "No recommendation available."}
-                        </p>
-                        <p className="mt-2 text-xs text-slate-400">
-                          Why: {reasonLines[0]}
-                        </p>
-                        <p className="mt-1 text-xs text-slate-400">
-                          Lane:{" "}
-                          {itemDepartment === "system"
-                            ? "system"
-                            : getFocusDepartmentLabel(itemDepartment)}
-                        </p>
-                      </div>
-
-                      <span
-                        className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${formatPriorityTone(
-                          action.level ?? action.brain_tier ?? action.priority
-                        )}`}
-                      >
-                        {action.level ??
-                          action.brain_tier ??
-                          action.priority ??
-                          "open"}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-
-              {scopedFocusBoard.immediate.length === 0 ? (
-                <div className="rounded-2xl border border-slate-300 bg-slate-50 p-6 text-slate-500">
-                  Immediate queue is clear.
-                </div>
-              ) : null}
-            </div>
-          </div>
-
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold text-slate-900">
-                Last Execution
-              </h2>
-              <p className="mt-1 text-sm text-slate-500">
-                Latest preview or action execution result.
-              </p>
-            </div>
-
-            {lastExecution ? (
-              <div className="space-y-4">
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="font-semibold text-slate-900">
-                      {lastExecution.message}
-                    </p>
-
-                    <span
-                      className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${
-                        lastExecution.ok
-                          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                          : "border-rose-200 bg-rose-50 text-rose-700"
-                      }`}
-                    >
-                      {lastExecution.ok ? "Success" : "Issue"}
-                    </span>
-                  </div>
-
-                  <p className="mt-2 text-sm text-slate-500">
-                    {lastExecution.dryRun
-                      ? "Dry run only — no database changes were made."
-                      : "Execution attempted against the action API."}
-                  </p>
-                </div>
-
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
-                  {lastExecution.mutations.length} mutation(s) planned ·{" "}
-                  {lastExecution.results.length} result record(s)
-                </div>
+                    );
+                  })
+                )}
               </div>
-            ) : (
-              <div className="rounded-2xl border border-slate-300 bg-slate-50 p-6 text-slate-500">
-                No action previewed or executed yet.
-              </div>
-            )}
-          </div>
-
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold text-slate-900">
-                Focus Links
-              </h2>
-              <p className="mt-1 text-sm text-slate-500">
-                Jump straight into the systems behind the action engine.
+            </>
+          ) : (
+            <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center">
+              <p className="text-lg font-semibold text-slate-900">
+                Select a strategic push to begin coordinated work.
+              </p>
+              <p className="mt-2 text-sm text-slate-500">
+                Dashboard Focus should start with campaign direction, then open into execution.
               </p>
             </div>
-
-            <div className="space-y-3">
-              {focusLinks.map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
-                >
-                  {item.label}
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="mb-4 flex items-center justify-between">
-              <p className="text-sm font-medium text-slate-500">
-                Focus Mode Status
-              </p>
-              <Sparkles className="h-5 w-5 text-slate-500" />
-            </div>
-
-            <p className="text-lg font-semibold text-slate-900">
-              {demoRole === "admin"
-                ? focusPage.hero.headline
-                : `${getFocusDepartmentLabel(demoDepartment)} execution lane active`}
-            </p>
-            <p className="mt-2 text-sm text-slate-500">
-              {ownerFilter
-                ? "You are viewing a filtered, owner-scoped execution lane."
-                : demoRole === "admin"
-                ? "You are viewing the full action-engine execution lane."
-                : `You are viewing a ${getFocusRoleLabel(
-                    demoRole
-                  ).toLowerCase()} narrowed to the ${getFocusDepartmentLabel(
-                    demoDepartment
-                  ).toLowerCase()} lane.`}
-            </p>
-
-            <div className="mt-4 flex flex-wrap gap-2">
-              <span className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600">
-                {openTaskCount} scoped actions
-              </span>
-              <span className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600">
-                {scopedFocusBoard.fixNow.length} fix now
-              </span>
-              <span className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600">
-                {scopedFocusBoard.immediate.length} immediate
-              </span>
-            </div>
-          </div>
+          )}
         </div>
       </section>
 
-            <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="grid gap-5 lg:grid-cols-[1fr_1fr]">
-          <div className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-              Demo role perspective
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {(["admin", "director", "general_user"] as DemoRole[]).map(
-                (role) => (
-                  <button
-                    key={role}
-                    onClick={() => setDemoRole(role)}
-                    className={`rounded-full px-3 py-1 text-xs font-medium transition ${
-                      demoRole === role
-                        ? "bg-slate-900 text-white"
-                        : "border border-slate-200 bg-white text-slate-700"
-                    }`}
-                  >
-                    {role}
-                  </button>
-                )
-              )}
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-              Demo department perspective
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {(
-                ["outreach", "finance", "field", "digital", "print"] as DemoDepartment[]
-              ).map((department) => (
-                <button
-                  key={department}
-                  onClick={() => setDemoDepartment(department)}
-                  className={`rounded-full px-3 py-1 text-xs font-medium transition ${
-                    demoDepartment === department
-                      ? "bg-slate-900 text-white"
-                      : "border border-slate-200 bg-white text-slate-700"
-                  }`}
-                >
-                  {department}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
-          <span className="font-medium text-slate-900">
-            {getFocusRoleLabel(demoRole)}:
-          </span>{" "}
-          This demo layer lets viewers switch roles and departments to see how
-          the execution surface narrows around who is using Aether.
-        </div>
-      </section>
-
-      <section className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
-        <div className="flex flex-wrap items-center gap-3">
-          <span className="text-xs font-medium uppercase tracking-wide text-slate-400">
-            Action Buckets
-          </span>
-
-          <div className="flex flex-wrap items-center gap-2">
-            {visibleBucketButtons.includes("immediate") ? (
-              <button
-                type="button"
-                onClick={() => setActiveBucket("immediate")}
-                className={`rounded-full px-3 py-1 text-xs font-medium ${
-                  activeBucket === "immediate"
-                    ? "bg-slate-900 text-white"
-                    : "border border-slate-200 bg-white text-slate-700"
-                }`}
-              >
-                Immediate
-              </button>
-            ) : null}
-
-            {visibleBucketButtons.includes("fixNow") ? (
-              <button
-                type="button"
-                onClick={() => setActiveBucket("fixNow")}
-                className={`rounded-full px-3 py-1 text-xs font-medium ${
-                  activeBucket === "fixNow"
-                    ? "bg-slate-900 text-white"
-                    : "border border-slate-200 bg-white text-slate-700"
-                }`}
-              >
-                Fix Now
-              </button>
-            ) : null}
-
-            {visibleBucketButtons.includes("followUp") ? (
-              <button
-                type="button"
-                onClick={() => setActiveBucket("followUp")}
-                className={`rounded-full px-3 py-1 text-xs font-medium ${
-                  activeBucket === "followUp"
-                    ? "bg-slate-900 text-white"
-                    : "border border-slate-200 bg-white text-slate-700"
-                }`}
-              >
-                Follow Up
-              </button>
-            ) : null}
-
-            {visibleBucketButtons.includes("routing") ? (
-              <button
-                type="button"
-                onClick={() => setActiveBucket("routing")}
-                className={`rounded-full px-3 py-1 text-xs font-medium ${
-                  activeBucket === "routing"
-                    ? "bg-slate-900 text-white"
-                    : "border border-slate-200 bg-white text-slate-700"
-                }`}
-              >
-                Routing
-              </button>
-            ) : null}
-
-            {visibleBucketButtons.includes("owner") ? (
-              <button
-                type="button"
-                onClick={() => setActiveBucket("owner")}
-                className={`rounded-full px-3 py-1 text-xs font-medium ${
-                  activeBucket === "owner"
-                    ? "bg-slate-900 text-white"
-                    : "border border-slate-200 bg-white text-slate-700"
-                }`}
-              >
-                Owner
-              </button>
-            ) : null}
-
-            {visibleBucketButtons.includes("pipeline") ? (
-              <button
-                type="button"
-                onClick={() => setActiveBucket("pipeline")}
-                className={`rounded-full px-3 py-1 text-xs font-medium ${
-                  activeBucket === "pipeline"
-                    ? "bg-slate-900 text-white"
-                    : "border border-slate-200 bg-white text-slate-700"
-                }`}
-              >
-                Pipeline
-              </button>
-            ) : null}
-          </div>
-        </div>
-      </section>
-
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="mb-3 flex items-center justify-between">
-            <p className="text-sm font-medium text-slate-500">Primary Action</p>
-            <Target className="h-5 w-5 text-slate-500" />
-          </div>
-          <p className="text-lg font-semibold tracking-tight text-slate-900">
-            {demoRole === "admin"
-              ? focusPage.hero.headline
-              : `${getFocusDepartmentLabel(demoDepartment)} lane is active`}
-          </p>
-          <p className="mt-2 text-sm text-slate-500">
-            {demoRole === "admin"
-              ? focusPage.hero.subheadline
-              : `This view is trimmed for ${getFocusRoleLabel(
-                  demoRole
-                ).toLowerCase()} inside the ${getFocusDepartmentLabel(
-                  demoDepartment
-                ).toLowerCase()} lane.`}
-          </p>
-        </div>
-
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="mb-3 flex items-center justify-between">
-            <p className="text-sm font-medium text-slate-500">Open Tasks</p>
-            <Clock3 className="h-5 w-5 text-slate-500" />
-          </div>
-          <p className="text-3xl font-semibold tracking-tight text-slate-900">
-            {openTaskCount}
-          </p>
-          <p className="mt-2 text-sm text-slate-500">Open work in this view</p>
-        </div>
-
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="mb-3 flex items-center justify-between">
-            <p className="text-sm font-medium text-slate-500">Fallback Work</p>
-            <Route className="h-5 w-5 text-amber-500" />
-          </div>
-          <p className="text-3xl font-semibold tracking-tight text-amber-600">
-            {fallbackTaskCount}
-          </p>
-          <p className="mt-2 text-sm text-slate-500">
-            Routing misses still active
-          </p>
-        </div>
-
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="mb-3 flex items-center justify-between">
-            <p className="text-sm font-medium text-slate-500">Follow-Up Queue</p>
-            <Activity className="h-5 w-5 text-emerald-600" />
-          </div>
-          <p className="text-3xl font-semibold tracking-tight text-emerald-600">
-            {followUpCount}
-          </p>
-          <p className="mt-2 text-sm text-slate-500">
-            Contacts that need action
-          </p>
-        </div>
-      </section>
+            
     </div>
   );
 }

@@ -78,9 +78,9 @@ export default function FieldFocusModePage() {
   const nowLine = useMemo(() => {
     return {
       headline:
-        "Finish turf, move top canvassers, and convert the best conversations.",
+        "Stay in field flow.",
       body:
-        "Field focus mode narrows attention to the few actions that can materially improve coverage, IDs, and follow-up quality right now.",
+        "Finish coverage. Support your strongest operators. Convert the best conversations.",
     };
   }, []);
 
@@ -413,65 +413,7 @@ export default function FieldFocusModePage() {
         </div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-4">
-        <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-sky-800">Turf Priority</p>
-            <MapPinned className="h-5 w-5 text-sky-700" />
-          </div>
-          <p className="mt-3 text-xl font-semibold text-sky-900">
-            {grouped.turf.length}
-          </p>
-          <p className="mt-2 text-sm text-sky-800">
-            Turf tasks requiring immediate execution
-          </p>
-        </div>
-
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-emerald-800">
-              Canvasser Moves
-            </p>
-            <Users className="h-5 w-5 text-emerald-700" />
-          </div>
-          <p className="mt-3 text-xl font-semibold text-emerald-900">
-            {grouped.canvass.length}
-          </p>
-          <p className="mt-2 text-sm text-emerald-800">
-            Allocation and execution changes
-          </p>
-        </div>
-
-        <div className="rounded-2xl border border-purple-200 bg-purple-50 p-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-purple-800">
-              Follow-Up Queue
-            </p>
-            <ClipboardList className="h-5 w-5 text-purple-700" />
-          </div>
-          <p className="mt-3 text-2xl font-semibold text-purple-900">
-            {grouped.follow_up.length}
-          </p>
-          <p className="mt-2 text-sm text-purple-800">
-            Conversation-driven follow-up actions
-          </p>
-        </div>
-
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-amber-800">
-              Actions Saved
-            </p>
-            <ListChecks className="h-5 w-5 text-amber-700" />
-          </div>
-          <p className="mt-3 text-2xl font-semibold text-amber-900">
-            {completedLaneActions}
-          </p>
-          <p className="mt-2 text-sm text-amber-800">
-            Confirmed field actions this session
-          </p>
-        </div>
-      </section>
+      
 
       {generatedLists.length > 0 ? (
         <section className="rounded-3xl border border-purple-200 bg-purple-50 p-6 shadow-sm">
@@ -537,7 +479,7 @@ export default function FieldFocusModePage() {
             <div>
               <p className="text-sm font-medium text-sky-700">Turf Lane</p>
               <h2 className="text-xl font-semibold text-slate-900">
-                Finish Coverage
+                Finish active turf
               </h2>
             </div>
             <MapPinned className="h-5 w-5 text-sky-600" />
@@ -619,7 +561,7 @@ export default function FieldFocusModePage() {
             <div>
               <p className="text-sm font-medium text-slate-500">Canvass Lane</p>
               <h2 className="text-xl font-semibold text-slate-900">
-                Move Strongest Operators
+                Support strongest operators
               </h2>
             </div>
             <Users className="h-5 w-5 text-emerald-600" />
@@ -751,7 +693,7 @@ export default function FieldFocusModePage() {
             <div>
               <p className="text-sm font-medium text-slate-500">Follow-Up Lane</p>
               <h2 className="text-xl font-semibold text-slate-900">
-                Convert Good Conversations
+                Convert strong conversations
               </h2>
             </div>
             <ClipboardList className="h-5 w-5 text-purple-600" />
@@ -881,12 +823,72 @@ export default function FieldFocusModePage() {
         </div>
       </section>
 
+<section className="grid gap-4 md:grid-cols-4">
+        <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4 shadow-sm">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-sky-800">Turf Priority</p>
+            <MapPinned className="h-5 w-5 text-sky-700" />
+          </div>
+          <p className="mt-3 text-xl font-semibold text-sky-900">
+            {grouped.turf.length}
+          </p>
+          <p className="mt-2 text-sm text-sky-800">
+            Turf tasks requiring immediate execution
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-emerald-800">
+              Canvasser Moves
+            </p>
+            <Users className="h-5 w-5 text-emerald-700" />
+          </div>
+          <p className="mt-3 text-xl font-semibold text-emerald-900">
+            {grouped.canvass.length}
+          </p>
+          <p className="mt-2 text-sm text-emerald-800">
+            Allocation and execution changes
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-purple-200 bg-purple-50 p-4 shadow-sm">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-purple-800">
+              Follow-Up Queue
+            </p>
+            <ClipboardList className="h-5 w-5 text-purple-700" />
+          </div>
+          <p className="mt-3 text-2xl font-semibold text-purple-900">
+            {grouped.follow_up.length}
+          </p>
+          <p className="mt-2 text-sm text-purple-800">
+            Conversation-driven follow-up actions
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-amber-800">
+              Actions Saved
+            </p>
+            <ListChecks className="h-5 w-5 text-amber-700" />
+          </div>
+          <p className="mt-3 text-2xl font-semibold text-amber-900">
+            {completedLaneActions}
+          </p>
+          <p className="mt-2 text-sm text-amber-800">
+            Confirmed field actions this session
+          </p>
+        </div>
+      </section>
+
       <section className="rounded-3xl border border-amber-200 bg-amber-50 p-6 shadow-sm">
         <div className="flex items-start gap-3">
           <Sparkles className="mt-0.5 h-5 w-5 text-amber-700" />
           <div>
             <h2 className="text-lg font-semibold text-amber-900">
-              Focus Mode Rule
+              Field Operating Pattern
             </h2>
             <p className="mt-2 text-sm text-amber-800">
               This page should stay ruthless: finish turf first, move strongest

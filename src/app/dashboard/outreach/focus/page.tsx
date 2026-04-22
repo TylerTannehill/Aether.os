@@ -9,7 +9,6 @@ import {
   List,
   ListChecks,
   Phone,
-  Sparkles,
   User,
   Users,
   Zap,
@@ -36,8 +35,6 @@ import {
   getFinanceSignals,
 } from "@/lib/intelligence/signals";
 import { aggregateAetherIntelligence } from "@/lib/intelligence/aggregator";
-import { getTopTriggerActions } from "@/lib/intelligence/action-triggers";
-import { buildDraftTasksFromTriggers } from "@/lib/intelligence/task-drafts";
 
 type ListTag = "outreach" | "field" | "finance" | "volunteer";
 
@@ -80,13 +77,6 @@ type OutreachOutcome =
   | "wrong_time"
   | "completed";
 
-type NextActionPlan = {
-  title: string;
-  summary: string;
-  priority: "high" | "medium" | "low";
-  category: "conversion" | "retry" | "task" | "review";
-  autoReady: boolean;
-};
 
 function normalizeOwner(value?: string | null) {
   return value?.trim() || "Unassigned";
@@ -150,82 +140,7 @@ function priorityTone(priority: "high" | "medium" | "low") {
   }
 }
 
-function nextActionTone(category: NextActionPlan["category"]) {
-  switch (category) {
-    case "conversion":
-      return "border-emerald-200 bg-emerald-50 text-emerald-800";
-    case "retry":
-      return "border-sky-200 bg-sky-50 text-sky-800";
-    case "task":
-      return "border-amber-200 bg-amber-50 text-amber-900";
-    case "review":
-    default:
-      return "border-purple-200 bg-purple-50 text-purple-800";
-  }
-}
 
-function buildOutreachNextAction(
-  outcome: OutreachOutcome,
-  contactName: string
-): NextActionPlan {
-  if (outcome === "connected_positive") {
-    return {
-      title: "Push to conversion",
-      summary: `${contactName} engaged positively. Keep momentum high and route this contact into the strongest next-touch path now.`,
-      priority: "high",
-      category: "conversion",
-      autoReady: true,
-    };
-  }
-
-  if (outcome === "follow_up_needed") {
-    return {
-      title: "Schedule follow-up",
-      summary: `${contactName} needs another touch. Preserve context and move this contact into the active follow-up lane.`,
-      priority: "high",
-      category: "task",
-      autoReady: true,
-    };
-  }
-
-  if (outcome === "wrong_time") {
-    return {
-      title: "Retry at better time",
-      summary: `${contactName} was reached at a poor time. Requeue with timing context instead of dropping the thread.`,
-      priority: "medium",
-      category: "retry",
-      autoReady: true,
-    };
-  }
-
-  if (outcome === "no_answer") {
-    return {
-      title: "Requeue contact",
-      summary: `${contactName} did not answer. Keep this contact active in the retry pool without losing attention.`,
-      priority: "medium",
-      category: "retry",
-      autoReady: true,
-    };
-  }
-
-  if (outcome === "connected_neutral") {
-    return {
-      title: "Review persuasion path",
-      summary: `${contactName} connected but did not convert. Review whether the next move should be persuasion, education, or another touch.`,
-      priority: "medium",
-      category: "review",
-      autoReady: false,
-    };
-  }
-
-  return {
-    title: "Close and review",
-    summary: `${contactName} has a completed touch. Review whether this contact remains active, shifts lanes, or can be deprioritized.`,
-    priority: "low",
-    category: "review",
-    autoReady: false,
-  };
-}
 
 function OutreachFocusContent() {
   const searchParams = useSearchParams();
@@ -252,10 +167,7 @@ function OutreachFocusContent() {
   );
   const [activeList, setActiveList] = useState<ActiveList | null>(null);
 
-  const [completedCount, setCompletedCount] = useState(0);
-  const [streakCount, setStreakCount] = useState(0);
   const [message, setMessage] = useState("");
-  const [nextAction, setNextAction] = useState<NextActionPlan | null>(null);
   const [notes, setNotes] = useState("");
 
   useEffect(() => {
@@ -363,18 +275,6 @@ function OutreachFocusContent() {
     return buildContactIntelligence(ownerScopedContacts, ownerScopedLogs);
   }, [ownerScopedContacts, ownerScopedLogs]);
 
-  const highValueContacts = useMemo(() => {
-    return ownerScopedContacts.map((contact) => ({
-      id: String(contact.id),
-      full_name: fullName(contact),
-      donation_total: Number((contact as any).donation_total ?? 0),
-      pledge_amount: Number((contact as any).pledge_amount ?? 0),
-      last_contacted_at:
-        (contact as any).last_contacted_at ??
-        (contact as any).last_outreach_at ??
-        null,
-    }));
-  }, [ownerScopedContacts]);
 
   const outreachBundle = useMemo(() => {
     const staleContacts = ownerScopedContacts.filter((contact: any) =>
@@ -435,50 +335,91 @@ function OutreachFocusContent() {
       cashOnHandPressure: highValueDonorsPending > 3 ? 7 : 4,
     });
   }, [ownerScopedContacts]);
-    const financeTriggerSnapshot = useMemo(() => {
-    return aggregateAetherIntelligence([outreachBundle, financeBundle], {
-      finance: {
-        overduePledges:
-          (financeBundle.risks.find(
-            (item) => item.id === "finance-overdue-pledges"
-          )?.metadata?.overduePledges as number) || 0,
-        highValueDonorsPending:
-          (financeBundle.opportunities.find(
-            (item) => item.id === "finance-high-value-donors"
-          )?.metadata?.highValueDonorsPending as number) || 0,
-      },
-      outreach: {
-        pendingFollowUps:
-          (outreachBundle.risks.find(
-            (item) => item.id === "outreach-pending-followups"
-          )?.metadata?.pendingFollowUps as number) || 0,
-        positiveContacts:
-          (outreachBundle.opportunities.find(
-            (item) => item.id === "outreach-positive-contacts"
-          )?.metadata?.positiveContacts as number) || 0,
-      },
-      field: {
-        strongIdRateZones: 0,
-        incompleteTurfs: 0,
-      },
-      digital: {
-        strongPerformingPlatforms: 0,
-        negativeSentimentThreads: 0,
-      },
-      print: {
-        readyAssets: 0,
-        deliveryRisks: 0,
-      },
-    });
-  }, [outreachBundle, financeBundle]);
 
-  const triggerActions = useMemo(() => {
-    return getTopTriggerActions(financeTriggerSnapshot);
-  }, [financeTriggerSnapshot]);
 
-  const draftedTasks = useMemo(() => {
-    return buildDraftTasksFromTriggers(triggerActions);
-  }, [triggerActions]);
+  const outreachContextItems = useMemo(() => {
+    const items: Array<{
+      id: string;
+      label: string;
+      summary: string;
+      tone: "rose" | "emerald" | "sky";
+    }> = [];
+
+    const pendingFollowUps =
+      (outreachBundle.risks.find(
+        (item) => item.id === "outreach-pending-followups"
+      )?.metadata?.pendingFollowUps as number) || 0;
+
+    const positiveContacts =
+      (outreachBundle.opportunities.find(
+        (item) => item.id === "outreach-positive-contacts"
+      )?.metadata?.positiveContacts as number) || 0;
+
+    const staleContacts =
+      (outreachBundle.risks.find(
+        (item) => item.id === "outreach-stale-contacts"
+      )?.metadata?.staleContacts as number) || 0;
+
+    const overduePledges =
+      (financeBundle.risks.find(
+        (item) => item.id === "finance-overdue-pledges"
+      )?.metadata?.overduePledges as number) || 0;
+
+    const highValueDonorsPending =
+      (financeBundle.opportunities.find(
+        (item) => item.id === "finance-high-value-donors"
+      )?.metadata?.highValueDonorsPending as number) || 0;
+
+    if (pendingFollowUps > 0) {
+      items.push({
+        id: "follow-up-pressure",
+        label: "Follow-up pressure",
+        summary: `${pendingFollowUps} active follow-up ${pendingFollowUps === 1 ? "thread is" : "threads are"} sitting in outreach right now.`,
+        tone: "rose",
+      });
+    }
+
+    if (positiveContacts > 0) {
+      items.push({
+        id: "conversion-opportunity",
+        label: "Conversion opportunity",
+        summary: `${positiveContacts} recent positive ${positiveContacts === 1 ? "contact is" : "contacts are"} ready for tighter follow-through.`,
+        tone: "emerald",
+      });
+    }
+
+    if (overduePledges > 0 || highValueDonorsPending > 0) {
+      const donorPressure = Math.max(overduePledges, highValueDonorsPending);
+      items.push({
+        id: "finance-linked-demand",
+        label: "Finance-linked demand",
+        summary: `${donorPressure} donor ${donorPressure === 1 ? "record is" : "records are"} creating outreach-adjacent follow-up demand.`,
+        tone: "sky",
+      });
+    }
+
+    if (staleContacts > 0 && items.length < 3) {
+      items.push({
+        id: "re-engagement-window",
+        label: "Re-engagement window",
+        summary: `${staleContacts} stale ${staleContacts === 1 ? "contact remains" : "contacts remain"} available for reactivation without disrupting live flow.`,
+        tone: "sky",
+      });
+    }
+
+    if (items.length === 0) {
+      items.push({
+        id: "steady-cadence",
+        label: "Stable cadence",
+        summary: "Outreach is currently in a steady state with room to continue contact and follow-up work cleanly.",
+        tone: "emerald",
+      });
+    }
+
+    return items.slice(0, 3);
+  }, [financeBundle, outreachBundle]);
+
+
 
   const prioritizedFocusContacts = useMemo(() => {
     return getSortedWorkflowContacts(ownerScopedContacts, ownerScopedLogs).slice(
@@ -487,42 +428,7 @@ function OutreachFocusContent() {
     );
   }, [ownerScopedContacts, ownerScopedLogs]);
 
-  const financeTriggeredContactIds = useMemo(() => {
-    return new Set<string>();
-  }, [triggerActions]);
 
-  const suggestedNext = useMemo(() => {
-    if (triggerActions.length > 0) {
-      const top = triggerActions[0];
-      return {
-        title: top.title,
-        summary: (top as any).description ?? (top as any).summary ?? top.title,
-        priority: ((top as any).priority ?? "medium") as NextActionPlan["priority"],
-        category: ((top as any).category ?? "review") as NextActionPlan["category"],
-        autoReady: Boolean((top as any).autoReady),
-      } as NextActionPlan;
-    }
-
-    if (draftedTasks.length > 0) {
-      const task = draftedTasks[0];
-      return {
-        title: task.title,
-        summary: task.description,
-        priority: task.priority,
-        category: "task",
-        autoReady: false,
-      } as NextActionPlan;
-    }
-
-    return {
-      title: "Maintain outreach cadence",
-      summary:
-        "Continue working through the outreach queue, keeping follow-ups tight and engagement consistent.",
-      priority: "medium",
-      category: "review",
-      autoReady: false,
-    } as NextActionPlan;
-  }, [triggerActions, draftedTasks]);
 
   const contactLaneItems = useMemo<FocusLaneItem[]>(() => {
     return prioritizedFocusContacts.map((contact, index) => ({
@@ -663,12 +569,7 @@ function OutreachFocusContent() {
         ownerName: contact.owner_name || "Outreach Team",
       });
 
-      setCompletedCount((prev) => prev + 1);
-      setStreakCount((prev) => prev + 1);
       setNotes("");
-
-      const next = buildOutreachNextAction(outcome, fullName(contact));
-      setNextAction(next);
 
       const nextContact = getNextContactFromQueue(contact.id);
 
@@ -718,14 +619,10 @@ function OutreachFocusContent() {
 
             <div className="space-y-4">
               <h1 className="text-3xl font-semibold tracking-tight lg:text-4xl">
-                Execute outreach, follow signals, and keep momentum high.
+                Stay in outreach flow.
               </h1>
               <p className="max-w-3xl text-sm text-slate-300 lg:text-base">
-                Work through contacts, follow-up pressure, and list routing without
-                breaking flow.
-              </p>
-              <p className="text-sm font-medium text-slate-200">
-                Contacts first. Follow-up second. List routing third.
+                Contacts first. Follow-ups stay active. Lists stay within reach.
               </p>
 
               {selectedList ? (
@@ -761,77 +658,50 @@ function OutreachFocusContent() {
               <ContactRound className="h-4 w-4" />
               Contacts
             </Link>
-
-            <Link
-              href="/dashboard"
-              className="inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-medium text-slate-900 hover:bg-slate-100"
-            >
-              Dashboard
-              <ArrowRight className="h-4 w-4" />
-            </Link>
           </div>
         </div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-3">
-        <div className="rounded-2xl border bg-white p-3 shadow-sm">
-          <p className="text-xs font-medium text-slate-500">Execution Streak</p>
-          <p className="mt-1 text-2xl font-semibold text-slate-900">
-            {streakCount}
-          </p>
-        </div>
-
-        <div className="rounded-2xl border bg-white p-3 shadow-sm">
-          <p className="text-xs font-medium text-slate-500">Completed This Session</p>
-          <p className="mt-1 text-2xl font-semibold text-slate-900">
-            {completedCount}
-          </p>
-        </div>
-
-        <div className="rounded-2xl border bg-white p-3 shadow-sm">
-          <p className="text-xs font-medium text-slate-500">Current Operating Mode</p>
-          <p className="mt-1 text-base font-semibold text-slate-900">
-            {selectedList ? "List Focus" : "Hybrid Guidance"}
-          </p>
-        </div>
-      </section>
-
-      <section
-        className={`rounded-2xl border p-4 ${nextActionTone(
-          suggestedNext.category
-        )}`}
-      >
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide">
-              Aether Suggested Next Move
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+              Outreach Context
             </p>
-            <p className="mt-2 text-lg font-semibold">{suggestedNext.title}</p>
-            <p className="mt-1 text-sm">{suggestedNext.summary}</p>
-
-            <div className="mt-3 flex flex-wrap gap-2">
-              <span
-                className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${priorityTone(
-                  suggestedNext.priority
-                )}`}
-              >
-                {suggestedNext.priority}
-              </span>
-              <span className="inline-flex rounded-full border border-current/20 bg-white/70 px-3 py-1 text-xs font-semibold">
-                {suggestedNext.category}
-              </span>
-              <span className="inline-flex rounded-full border border-current/20 bg-white/70 px-3 py-1 text-xs font-semibold">
-                {suggestedNext.autoReady ? "auto-ready" : "manual review"}
-              </span>
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-current/20 bg-white/70 px-4 py-3 text-sm">
-            Live queue, follow-up pressure, contacts, and lists stay connected in
-            one execution workspace.
+            <h2 className="mt-2 text-lg font-semibold text-slate-900">
+              Outreach Context
+            </h2>
+            <p className="mt-1 max-w-2xl text-sm text-slate-600">
+              Contact flow is steady. Follow-up demand is manageable.
+            </p>
           </div>
         </div>
+
+        <div className="mt-4 grid gap-3 lg:grid-cols-3">
+          {outreachContextItems.map((item) => {
+            const tone =
+              item.tone === "rose"
+                ? "border-rose-200 bg-rose-50 text-rose-900"
+                : item.tone === "sky"
+                ? "border-sky-200 bg-sky-50 text-sky-900"
+                : "border-emerald-200 bg-emerald-50 text-emerald-900";
+
+            return (
+              <div
+                key={item.id}
+                className={`rounded-2xl border p-4 ${tone}`}
+              >
+                <p className="text-xs font-semibold uppercase tracking-wide">
+                  {item.label}
+                </p>
+                <p className="mt-2 text-sm leading-6">{item.summary}</p>
+              </div>
+            );
+          })}
+        </div>
       </section>
+
+
 
       {message ? (
         <section className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-700 shadow-sm">
@@ -848,7 +718,7 @@ function OutreachFocusContent() {
                 Contact Lane
               </h2>
               <p className="text-xs text-slate-500">
-                Primary execution lane · top 3 active contacts
+                Active contact work
               </p>
             </div>
             <Users className="h-5 w-5 text-slate-500" />
@@ -857,7 +727,7 @@ function OutreachFocusContent() {
           <div className="space-y-3">
             {visibleContactLaneItems.length === 0 && (
               <div className="rounded-2xl border border-dashed border-slate-200 p-3 text-xs text-slate-500">
-                No active contacts right now. New contacts will route in automatically.
+                No active contacts right now.
               </div>
             )}
 
@@ -923,7 +793,7 @@ function OutreachFocusContent() {
                 Follow-Up Lane
               </h2>
               <p className="text-xs text-slate-500">
-                Secondary lane · top 3 follow-ups in queue
+                Ongoing conversations
               </p>
             </div>
             <User className="h-4 w-4 text-slate-500" />
@@ -932,7 +802,7 @@ function OutreachFocusContent() {
           <div className="space-y-3">
             {visibleFollowUpLaneItems.length === 0 && (
               <div className="rounded-2xl border border-dashed border-slate-200 p-3 text-xs text-slate-500">
-                No active follow-ups right now. Follow-ups will surface here when needed.
+                No active follow-ups right now.
               </div>
             )}
 
@@ -1000,7 +870,7 @@ function OutreachFocusContent() {
                 List Lane
               </h2>
               <p className="text-xs text-slate-500">
-                Tertiary lane · top 3 active list routes
+                Source lists
               </p>
             </div>
             <List className="h-4 w-4 text-slate-500" />
@@ -1009,7 +879,7 @@ function OutreachFocusContent() {
           <div className="space-y-3">
             {visibleListLaneItems.length === 0 && (
               <div className="rounded-2xl border border-dashed border-slate-200 p-3 text-xs text-slate-500">
-                No active list routing right now. Lists will appear here when routing is active.
+                No active list routing right now.
               </div>
             )}
 
@@ -1083,17 +953,17 @@ function OutreachFocusContent() {
               Active Panel
             </h2>
             <p className="text-xs text-slate-500">
-              Execute the currently selected item
+              Execute the selected item
             </p>
           </div>
           <p className="text-sm font-medium text-slate-700">
-            This is the live execution surface. Cards route work here. The next action happens here.
+            Work happens here. Select a contact, follow-up, or list to begin.
           </p>
         </div>
 
         {!activeContact && !activeFollowUp && !activeList ? (
           <p className="text-sm text-slate-500">
-            Select a card to begin execution. Your active work will appear here.
+            
           </p>
         ) : null}
 
@@ -1193,12 +1063,6 @@ function OutreachFocusContent() {
         ) : null}
       </section>
 
-      <section className="rounded-3xl border-2 border-amber-200 bg-amber-50 p-5 text-sm text-amber-900 shadow-sm">
-        <div className="flex items-center gap-2">
-          <Sparkles className="h-4 w-4" />
-          Outreach rule: contacts first, follow-up second, list routing third. Follow the signal, but stay in control.
-        </div>
-      </section>
     </div>
   );
 }

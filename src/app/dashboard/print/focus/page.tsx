@@ -139,9 +139,9 @@ export default function PrintFocusModePage() {
   const nowLine = useMemo(() => {
     return {
       headline:
-        "Get approvals cleared, protect inventory, and keep deliveries on time.",
+        "Stay in print flow.",
       body:
-        "Print focus mode narrows attention to the few actions that can materially improve material readiness for field, outreach, and campaign execution right now.",
+        "Clear approvals. Protect inventory. Keep deliveries moving.",
     };
   }, []);
 
@@ -441,7 +441,7 @@ export default function PrintFocusModePage() {
                 {nowLine.body}
               </p>
               <p className="text-sm font-medium text-slate-200">
-                Clear approvals first. Everything else follows.
+                Approvals lead everything in print.
               </p>
             </div>
           </div>
@@ -466,52 +466,7 @@ export default function PrintFocusModePage() {
         </div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-3">
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-amber-800">
-              Approval Priority
-            </p>
-            <ClipboardCheck className="h-4 w-4 text-amber-700" />
-          </div>
-          <p className="mt-2 text-xl font-semibold text-amber-900">
-            {grouped.approval.length}
-          </p>
-          <p className="mt-1 text-xs text-amber-800">
-            Immediate approval actions
-          </p>
-        </div>
-
-        <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-sky-800">
-              Inventory Pressure
-            </p>
-            <Boxes className="h-4 w-4 text-sky-700" />
-          </div>
-          <p className="mt-2 text-xl font-semibold text-sky-900">
-            {grouped.inventory.length}
-          </p>
-          <p className="mt-1 text-xs text-sky-800">
-            Protection moves
-          </p>
-        </div>
-
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-emerald-800">
-              Delivery Queue
-            </p>
-            <Truck className="h-4 w-4 text-emerald-700" />
-          </div>
-          <p className="mt-2 text-xl font-semibold text-emerald-900">
-            {grouped.delivery.length}
-          </p>
-          <p className="mt-1 text-xs text-emerald-800">
-            ETA checks
-          </p>
-        </div>
-      </section>
+      
 
       {(readyAssets.length > 0 ||
         inventoryActions.length > 0 ||
@@ -609,7 +564,7 @@ export default function PrintFocusModePage() {
             <div>
               <p className="text-sm font-medium text-slate-500">Approval Lane</p>
               <h2 className="text-xl font-semibold text-slate-900">
-                Clear Bottlenecks
+                Clear approvals
               </h2>
             </div>
             <ClipboardCheck className="h-5 w-5 text-amber-600" />
@@ -889,7 +844,7 @@ export default function PrintFocusModePage() {
             <div>
               <p className="text-sm font-medium text-slate-500">Delivery Lane</p>
               <h2 className="text-xl font-semibold text-slate-900">
-                Keep Materials Flowing
+                Confirm delivery
               </h2>
             </div>
             <Truck className="h-5 w-5 text-emerald-600" />
@@ -1028,12 +983,59 @@ export default function PrintFocusModePage() {
         </div>
       </section>
 
+<section className="grid gap-4 md:grid-cols-3">
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-medium text-amber-800">
+              Approval Priority
+            </p>
+            <ClipboardCheck className="h-4 w-4 text-amber-700" />
+          </div>
+          <p className="mt-2 text-xl font-semibold text-amber-900">
+            {grouped.approval.length}
+          </p>
+          <p className="mt-1 text-xs text-amber-800">
+            Immediate approval actions
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4 shadow-sm">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-medium text-sky-800">
+              Inventory Pressure
+            </p>
+            <Boxes className="h-4 w-4 text-sky-700" />
+          </div>
+          <p className="mt-2 text-xl font-semibold text-sky-900">
+            {grouped.inventory.length}
+          </p>
+          <p className="mt-1 text-xs text-sky-800">
+            Protection moves
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-medium text-emerald-800">
+              Delivery Queue
+            </p>
+            <Truck className="h-4 w-4 text-emerald-700" />
+          </div>
+          <p className="mt-2 text-xl font-semibold text-emerald-900">
+            {grouped.delivery.length}
+          </p>
+          <p className="mt-1 text-xs text-emerald-800">
+            ETA checks
+          </p>
+        </div>
+      </section>
+
       <section className="rounded-3xl border border-amber-200 bg-amber-50 p-6 shadow-sm">
         <div className="flex items-start gap-3">
           <Sparkles className="mt-0.5 h-5 w-5 text-amber-700" />
           <div>
             <h2 className="text-lg font-semibold text-amber-900">
-              Focus Mode Rule
+              Print Operating Pattern
             </h2>
             <p className="mt-2 text-sm text-amber-800">
               Clear approvals first, protect inventory second, and confirm

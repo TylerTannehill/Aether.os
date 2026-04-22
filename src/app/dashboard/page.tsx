@@ -1917,13 +1917,13 @@ export default function DashboardPage() {
 
   const abeRoleBody = useMemo(() => {
     if (effectiveRole === "admin") {
-      return `${intelligenceSummary.body} ${abeOrgLayer.orgSupportLine}`;
+      return intelligenceSummary.body;
     }
 
     if (effectiveRole === "director") {
       return `This view narrows the dashboard around ${departmentLabel(
         effectiveDepartment
-      ).toLowerCase()} so department leaders can focus on pressure, opportunity, and execution movement inside their own lane.`;
+      ).toLowerCase()} so department leaders can read pressure, opportunity, and movement inside their lane.`;
     }
 
     return `This view strips away cross-org noise and keeps attention on the immediate ${departmentLabel(
@@ -2031,8 +2031,8 @@ export default function DashboardPage() {
                 Daily Command Center
               </h1>
               <p className="max-w-3xl text-sm text-slate-600 lg:text-base">
-                See org health, spot pressure fast, and move directly into the
-                work that needs attention.
+                See org health, spot pressure fast, and understand where attention is
+                needed before moving into execution.
               </p>
               <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-700">
                 <Users className="h-3.5 w-3.5" />
@@ -2177,59 +2177,12 @@ export default function DashboardPage() {
               Honest Abe
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-4">
               <p className="text-sm font-medium uppercase tracking-[0.2em] text-fuchsia-700/80">
                 {abeRoleLabel}
               </p>
 
-              <div className="flex flex-wrap gap-4 text-sm text-fuchsia-900">
-                <div>
-                  <span className="font-medium text-fuchsia-700">Health:</span>{" "}
-                  {abeBriefing.health}
-                </div>
-
-                <div>
-                  <span className="font-medium text-fuchsia-700">Strongest:</span>{" "}
-                  {departmentLabel(abeBriefing.strongest)}
-                </div>
-
-                <div>
-                  <span className="font-medium text-fuchsia-700">Weakest:</span>{" "}
-                  {departmentLabel(abeBriefing.weakest)}
-                </div>
-
-                <div>
-                  <span className="font-medium text-fuchsia-700">
-                    Campaign Status:
-                  </span>{" "}
-                  {abeBriefing.campaignStatus}
-                </div>
-
-                <div>
-                  <span className="font-medium text-fuchsia-700">
-                    Primary Lane:
-                  </span>{" "}
-                  {departmentLabel(
-                    effectiveRole === "admin"
-                      ? abeBriefing.primaryLane
-                      : effectiveDepartment
-                  )}
-                </div>
-
-                <div>
-                  <span className="font-medium text-fuchsia-700">
-                    Opportunity Lane:
-                  </span>{" "}
-                  {departmentLabel(abeBriefing.opportunityLane)}
-                </div>
-
-                <div>
-                  <span className="font-medium text-fuchsia-700">Confidence:</span>{" "}
-                  {abeConfidence}
-                </div>
-              </div>
-
-              <h2 className="text-2xl font-semibold text-fuchsia-900">
+              <h2 className="text-3xl font-semibold text-fuchsia-900">
                 {abeRoleHeadline}
               </h2>
 
@@ -2241,28 +2194,19 @@ export default function DashboardPage() {
                 {abeStickyLine}
               </p>
 
-              <p className="max-w-3xl text-sm italic text-slate-600">
-                Why now: {abeWhyNowText}
-              </p>
-
               {effectiveRole === "admin" && abeBriefing.crossDomainSignal ? (
-                <p className="max-w-3xl text-sm text-fuchsia-900/80">
-                  {abeBriefing.crossDomainSignal}
-                </p>
-              ) : null}
-
-              <p className="max-w-3xl text-sm text-slate-600">
-                {abeBriefing.supportText}
-              </p>
-
-              {effectiveRole === "admin" ? (
-                <p className="max-w-3xl text-sm text-fuchsia-900/80">
-                  {abeOrgLayer.orgSupportLine}
-                </p>
+                <div className="max-w-3xl rounded-2xl border border-fuchsia-200 bg-white/80 px-4 py-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-fuchsia-700">
+                    Cross-domain signal
+                  </p>
+                  <p className="mt-2 text-sm text-fuchsia-950">
+                    {abeBriefing.crossDomainSignal}
+                  </p>
+                </div>
               ) : null}
 
               <p className="max-w-3xl text-xs text-slate-500">
-                Abe’s Brief is the fast read. Explore Abe expands the same read into deeper campaign intelligence.
+                Abe keeps the dashboard light. Abe’s Brief carries the fast strategic read. Explore Abe opens deeper campaign intelligence.
               </p>
             </div>
           </div>
@@ -2288,47 +2232,9 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="mt-5 rounded-2xl border border-white/70 bg-white/70 p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-fuchsia-700">
-            What Abe Would Do
-          </p>
+        
 
-          <div className="mt-3 space-y-3">
-            {abeBriefing.actions.map((move, index) => (
-              <div
-                key={`${move}-${index}`}
-                className="flex items-start gap-3 text-sm text-slate-700"
-              >
-                <div className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-fuchsia-200 bg-fuchsia-100 text-xs font-semibold text-fuchsia-800">
-                  {index + 1}
-                </div>
-                <p>{move}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {abePatternWatch.length > 0 ? (
-          <div className="mt-5 rounded-2xl border border-white/70 bg-white/70 p-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-fuchsia-700">
-              Pattern Watch
-            </p>
-
-            <div className="mt-3 space-y-3">
-              {abePatternWatch.map((insight, index) => (
-                <div
-                  key={`${insight.label}-${index}`}
-                  className={`rounded-2xl border p-4 ${getPatternSeverityTone(
-                    insight.severity
-                  )}`}
-                >
-                  <p className="text-sm font-semibold">{insight.label}</p>
-                  <p className="mt-1 text-sm opacity-90">{insight.detail}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : null}
+        
       </section>
 
       <section className="space-y-4">

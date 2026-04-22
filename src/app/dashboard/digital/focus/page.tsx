@@ -137,9 +137,9 @@ export default function DigitalFocusModePage() {
   const nowLine = useMemo(() => {
     return {
       headline:
-        "Create stronger content and move spend into what is already winning.",
+        "Stay in digital flow.",
       body:
-        "Digital focus mode narrows attention to the few actions that can materially improve reach, engagement, and paid efficiency right now.",
+        "Create content. Move spend into what’s working. Shape the conversation.",
     };
   }, []);
 
@@ -439,9 +439,7 @@ export default function DigitalFocusModePage() {
               <p className="max-w-3xl text-sm text-slate-300 lg:text-base">
                 {nowLine.body}
               </p>
-              <p className="text-sm font-medium text-slate-200">
-                Focus on content first. Everything else follows.
-              </p>
+              
             </div>
           </div>
 
@@ -453,58 +451,11 @@ export default function DigitalFocusModePage() {
               Back to Digital
               <ArrowRight className="h-4 w-4" />
             </Link>
-
-            <Link
-              href="/dashboard"
-              className="inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-medium text-slate-900 transition hover:bg-slate-100"
-            >
-              Dashboard
-              <ArrowRight className="h-4 w-4" />
-            </Link>
           </div>
         </div>
       </section>
 
-      <section className="grid gap-3 md:grid-cols-3">
-        <div className="rounded-3xl border border-sky-200 bg-sky-50 p-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-sky-800">Content Priority</p>
-            <PenSquare className="h-5 w-5 text-sky-700" />
-          </div>
-          <p className="mt-3 text-2xl font-semibold text-sky-900">
-            {grouped.content.length}
-          </p>
-          <p className="mt-2 text-sm text-sky-800">
-            Content tasks requiring focused execution
-          </p>
-        </div>
-
-        <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-emerald-800">Spend Moves</p>
-            <CircleDollarSign className="h-5 w-5 text-emerald-700" />
-          </div>
-          <p className="mt-3 text-2xl font-semibold text-emerald-900">
-            {grouped.spend.length}
-          </p>
-          <p className="mt-2 text-sm text-emerald-800">
-            Budget shifts and allocation decisions
-          </p>
-        </div>
-
-        <div className="rounded-3xl border border-purple-200 bg-purple-50 p-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-purple-800">Reply Queue</p>
-            <MessageSquare className="h-5 w-5 text-purple-700" />
-          </div>
-          <p className="mt-3 text-2xl font-semibold text-purple-900">
-            {grouped.reply.length}
-          </p>
-          <p className="mt-2 text-sm text-purple-800">
-            Responses and comment handling items
-          </p>
-        </div>
-      </section>
+      
 
       {(contentDrops.length > 0 ||
         engagementSpikes.length > 0 ||
@@ -553,7 +504,7 @@ export default function DigitalFocusModePage() {
 
             <div className="rounded-2xl border border-indigo-200 bg-white p-4">
               <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700">
-                Spend Moves
+                Amplify what’s working
               </p>
               <div className="mt-3 space-y-3">
                 {engagementSpikes.length === 0 ? (
@@ -602,7 +553,7 @@ export default function DigitalFocusModePage() {
         <div className="rounded-3xl border-2 border-sky-300 bg-white p-6 shadow-md">
           <div className="mb-5 flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-sky-700">Primary Execution Lane</p>
+              <p className="text-sm font-medium text-sky-700"></p>
               <h2 className="text-2xl font-semibold text-slate-900">
                 Content Lane · Create + Ship
               </h2>
@@ -612,10 +563,10 @@ export default function DigitalFocusModePage() {
 
           <div className="mb-5 rounded-2xl border border-sky-200 bg-sky-50 p-4">
             <p className="text-xs font-semibold uppercase tracking-wide text-sky-700">
-              Digital Focus Rule
+              Digital Operating Pattern
             </p>
             <p className="mt-2 text-sm font-medium text-slate-900">
-              Content carries this lane first. Make the creative stronger before you move the money.
+              Content creates momentum. Spend amplifies what works. Responses shape the conversation.
             </p>
           </div>
 
@@ -775,7 +726,7 @@ export default function DigitalFocusModePage() {
               <div>
                 <p className="text-sm font-medium text-emerald-700">Secondary Lane</p>
                 <h2 className="text-xl font-semibold text-slate-900">
-                  Spend Moves
+                  Amplify what’s working
                 </h2>
               </div>
               <CircleDollarSign className="h-5 w-5 text-emerald-700" />
@@ -933,7 +884,7 @@ export default function DigitalFocusModePage() {
               <div>
                 <p className="text-sm font-medium text-purple-700">Tertiary Lane</p>
                 <h2 className="text-xl font-semibold text-slate-900">
-                  Reply Queue
+                  Shape the conversation
                 </h2>
               </div>
               <MessageSquare className="h-5 w-5 text-purple-700" />
@@ -1080,16 +1031,56 @@ export default function DigitalFocusModePage() {
         </div>
       </section>
 
+<section className="grid gap-3 md:grid-cols-3">
+        <div className="rounded-3xl border border-sky-200 bg-sky-50 p-4 shadow-sm">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-sky-800">Content Priority</p>
+            <PenSquare className="h-5 w-5 text-sky-700" />
+          </div>
+          <p className="mt-3 text-2xl font-semibold text-sky-900">
+            {grouped.content.length}
+          </p>
+          <p className="mt-2 text-sm text-sky-800">
+            Content tasks requiring focused execution
+          </p>
+        </div>
+
+        <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-emerald-800">Amplify what’s working</p>
+            <CircleDollarSign className="h-5 w-5 text-emerald-700" />
+          </div>
+          <p className="mt-3 text-2xl font-semibold text-emerald-900">
+            {grouped.spend.length}
+          </p>
+          <p className="mt-2 text-sm text-emerald-800">
+            Budget shifts and allocation decisions
+          </p>
+        </div>
+
+        <div className="rounded-3xl border border-purple-200 bg-purple-50 p-4 shadow-sm">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-purple-800">Shape the conversation</p>
+            <MessageSquare className="h-5 w-5 text-purple-700" />
+          </div>
+          <p className="mt-3 text-2xl font-semibold text-purple-900">
+            {grouped.reply.length}
+          </p>
+          <p className="mt-2 text-sm text-purple-800">
+            Responses and comment handling items
+          </p>
+        </div>
+      </section>
+
       <section className="rounded-3xl border-2 border-amber-300 bg-amber-50 p-6 shadow-sm">
         <div className="flex items-start gap-3">
           <Sparkles className="mt-0.5 h-5 w-5 text-amber-700" />
           <div>
             <h2 className="text-lg font-semibold text-amber-900">
-              Focus Mode Rule
+              Digital Operating Pattern
             </h2>
             <p className="mt-2 text-sm font-medium text-amber-900">
-              Content creation first, spend adjustments second, response handling third.
-              Digital should create campaign momentum, not just report on it.
+              Content creates momentum. Spend amplifies what works. Responses shape the conversation.
             </p>
           </div>
         </div>

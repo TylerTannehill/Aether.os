@@ -276,9 +276,9 @@ export default function FinanceFocusModePage() {
   const nowLine = useMemo(() => {
     return {
       headline:
-        "Collect pledges, run finance call time, clear compliance, and keep records moving.",
+        "Stay in finance flow.",
       body:
-        "Finance focus mode narrows attention to the few actions that materially improve cash flow, pledge conversion, call throughput, and compliance health right now.",
+        "Call time comes first. Everything else supports clean records and compliance.",
     };
   }, []);
 
@@ -640,7 +640,7 @@ export default function FinanceFocusModePage() {
                 {nowLine.body}
               </p>
               <p className="text-sm text-slate-400">
-                Call time first. Everything else in Finance supports conversion, compliance, and clean record flow.
+                
               </p>
             </div>
           </div>
@@ -668,14 +668,6 @@ export default function FinanceFocusModePage() {
             >
               <ContactRound className="h-4 w-4" />
               Contacts
-            </Link>
-
-            <Link
-              href="/dashboard"
-              className="inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-medium text-slate-900 transition hover:bg-slate-100"
-            >
-              Dashboard
-              <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         </div>
@@ -1032,67 +1024,7 @@ export default function FinanceFocusModePage() {
         ) : null}
       </section>
 
-      <section className="grid gap-4 md:grid-cols-4">
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-emerald-800">
-              Pledge Pressure
-            </p>
-            <HandCoins className="h-5 w-5 text-emerald-700" />
-          </div>
-          <p className="mt-2 text-xl font-semibold text-emerald-900">
-            {grouped.pledge.length}
-          </p>
-          <p className="mt-1 text-xs text-emerald-800">
-            Collection and follow-up actions
-          </p>
-        </div>
-
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-amber-800">
-              Compliance Cleanup
-            </p>
-            <CheckCircle2 className="h-5 w-5 text-amber-700" />
-          </div>
-          <p className="mt-2 text-xl font-semibold text-amber-900">
-            {grouped.compliance.length}
-          </p>
-          <p className="mt-1 text-xs text-amber-800">
-            Missing data and export-readiness work
-          </p>
-        </div>
-
-        <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-sky-800">
-              Manual Entry Queue
-            </p>
-            <FileSpreadsheet className="h-5 w-5 text-sky-700" />
-          </div>
-          <p className="mt-2 text-xl font-semibold text-sky-900">
-            {grouped.entry.length}
-          </p>
-          <p className="mt-1 text-xs text-sky-800">
-            Contribution and receipt entry actions
-          </p>
-        </div>
-
-        <div className="rounded-2xl border border-emerald-200 bg-white p-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-slate-500">Call Targets</p>
-            <Phone className="h-5 w-5 text-emerald-600" />
-          </div>
-          <p className="mt-2 text-xl font-semibold text-slate-900">
-            {callTargets.length}
-          </p>
-          <p className="mt-2 text-sm text-slate-600">
-            {loadingTargets
-              ? "Loading live finance targets"
-              : "Native finance call session queue"}
-          </p>
-        </div>
-      </section>
+      
             <section className="grid gap-6 xl:grid-cols-[1.5fr_1fr_1fr]">
         <div className="rounded-3xl border-2 border-emerald-300 bg-white p-6 shadow-md">
           <div className="mb-5 flex items-center justify-between">
@@ -1673,12 +1605,74 @@ export default function FinanceFocusModePage() {
         </div>
       </section>
 
+<section className="grid gap-4 md:grid-cols-4">
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-emerald-800">
+              Pledge
+            </p>
+            <HandCoins className="h-5 w-5 text-emerald-700" />
+          </div>
+          <p className="mt-2 text-xl font-semibold text-emerald-900">
+            {grouped.pledge.length}
+          </p>
+          <p className="mt-1 text-xs text-emerald-800">
+            Collection and follow-up actions
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-medium text-amber-800">
+              Compliance
+            </p>
+            <CheckCircle2 className="h-5 w-5 text-amber-700" />
+          </div>
+          <p className="mt-2 text-xl font-semibold text-amber-900">
+            {grouped.compliance.length}
+          </p>
+          <p className="mt-1 text-xs text-amber-800">
+            Missing data and export-readiness work
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4 shadow-sm">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-medium text-sky-800">
+              Entry
+            </p>
+            <FileSpreadsheet className="h-5 w-5 text-sky-700" />
+          </div>
+          <p className="mt-2 text-xl font-semibold text-sky-900">
+            {grouped.entry.length}
+          </p>
+          <p className="mt-1 text-xs text-sky-800">
+            Contribution and receipt entry actions
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-emerald-200 bg-white p-4 shadow-sm">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-medium text-slate-500">Call Targets</p>
+            <Phone className="h-5 w-5 text-emerald-600" />
+          </div>
+          <p className="mt-2 text-xl font-semibold text-slate-900">
+            {callTargets.length}
+          </p>
+          <p className="mt-2 text-sm text-slate-600">
+            {loadingTargets
+              ? "Loading live finance targets"
+              : "Native finance call session queue"}
+          </p>
+        </div>
+      </section>
+
       <section className="rounded-3xl border border-amber-200 bg-amber-50 p-6 shadow-sm">
         <div className="flex items-start gap-3">
           <Sparkles className="mt-0.5 h-5 w-5 text-amber-700" />
           <div>
             <h2 className="text-lg font-semibold text-amber-900">
-              Focus Mode Rule
+              Finance Operating Pattern
             </h2>
             <p className="mt-2 text-sm text-amber-800">
               This page should stay ruthless: finance call time and pledge
