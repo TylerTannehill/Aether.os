@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import {
   Activity,
@@ -405,6 +404,37 @@ const [adminCommandMessage, setAdminCommandMessage] = useState("");
 
 const [selectedAdminFocusTaskId, setSelectedAdminFocusTaskId] =
   useState("admin-focus-1");
+const [advancedOpen, setAdvancedOpen] = useState(false);
+const [inviteEmail, setInviteEmail] = useState("");
+const [inviteRole, setInviteRole] = useState<"admin" | "director" | "general_user">("general_user");
+const [orgMembers, setOrgMembers] = useState<
+  { id: string; email: string; role: "admin" | "director" | "general_user" }[]
+>([
+  { id: "member-1", email: "admin@aetherdemo.com", role: "admin" },
+  { id: "member-2", email: "director@aetherdemo.com", role: "director" },
+]);
+
+function handleMockInviteUser() {
+  const normalized = inviteEmail.trim().toLowerCase();
+
+  if (!normalized) {
+    setMessage("Enter an email to invite a user.");
+    return;
+  }
+
+  setOrgMembers((current) => [
+    {
+      id: `member-${current.length + 1}`,
+      email: normalized,
+      role: inviteRole,
+    },
+    ...current,
+  ]);
+  setInviteEmail("");
+  setInviteRole("general_user");
+  setMessage(`Mock invite created for ${normalized}.`);
+}
+
   const { ownerFilter } = useDashboardOwner();
 
   useEffect(() => {
@@ -1283,49 +1313,7 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
 
   return (
     <div className="space-y-8">
-      {/* ADMIN COMMAND BAR */}
-<section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-  <div className="flex flex-wrap gap-3">
-    <button
-      onClick={() => setAdminFocusMode((prev) => !prev)}
-      className={
-        adminFocusMode
-          ? "rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white"
-          : "rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700"
-      }
-    >
-      {adminFocusMode ? "Focus Mode On" : "Enable Focus Mode"}
-    </button>
 
-    <button
-      onClick={() => runSystemCommand("fundraising_push")}
-      className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800"
-    >
-      Fundraising Push
-    </button>
-
-    <button
-      onClick={() => runSystemCommand("outreach_push")}
-      className="rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-medium text-blue-800"
-    >
-      Outreach Push
-    </button>
-
-    <button
-      onClick={() => runSystemCommand("stability")}
-      className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800"
-    >
-      Stabilize
-    </button>
-  </div>
-</section>
-
-{/* ADMIN MESSAGE */}
-{adminCommandMessage ? (
-  <div className="rounded-2xl border border-indigo-200 bg-indigo-50 p-4 text-sm text-indigo-900">
-    {adminCommandMessage}
-  </div>
-) : null}
       <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-3">
@@ -1339,8 +1327,7 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
                 Admin Control Center
               </h1>
               <p className="max-w-3xl text-sm text-slate-600 lg:text-base">
-                Governance, autonomy, execution health, policy decisions, and
-                system-level review for Aether.
+                Manage your organization, shape system behavior, and confirm the system is healthy without digging through the machine.
               </p>
             </div>
           </div>
@@ -1360,14 +1347,6 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
             >
               {auditLoading ? "Refreshing Log..." : "Refresh Execution Log"}
             </button>
-
-            <Link
-              href="/dashboard"
-              className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
-            >
-              Back to Dashboard
-              <ArrowRight className="h-4 w-4" />
-            </Link>
           </div>
         </div>
       </section>
@@ -1384,867 +1363,575 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
         </div>
       ) : null}
 
-      <section className="rounded-3xl border border-indigo-200 bg-indigo-50 p-6 shadow-sm">
-        <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-sm font-medium text-indigo-800">
-              Autonomy Control
-            </p>
-            <h2 className="text-2xl font-semibold text-indigo-900">
-              System Behavior & Strategy
+      <section className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="mb-5">
+            <p className="text-sm font-medium text-slate-500">Organization Control</p>
+            <h2 className="text-2xl font-semibold text-slate-900">
+              Manage users and org access
             </h2>
-            <p className="mt-2 text-sm text-indigo-800">
-              Control how Aether operates — suggestion mode, safe automation,
-              and strategy behavior.
+            <p className="mt-2 text-sm text-slate-600">
+              Add users to the organization and assign their access level. This invite flow is mocked for now so the surface exists before backend wiring.
             </p>
           </div>
 
-          <div className="rounded-2xl border border-indigo-200 bg-white px-4 py-3 text-sm text-indigo-900">
-            Mode: {autonomyConfig.mode.toUpperCase()}
-          </div>
-        </div>
+          <div className="grid gap-3 md:grid-cols-[1.2fr_0.8fr_auto]">
+            <input
+              value={inviteEmail}
+              onChange={(event) => setInviteEmail(event.target.value)}
+              placeholder="name@campaign.org"
+              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none ring-0 placeholder:text-slate-400"
+            />
 
-        <div className="grid gap-3 md:grid-cols-3">
-          {["off", "suggest", "auto_safe"].map((mode) => (
-            <button
-              key={mode}
-              onClick={() => handleSetAutonomyMode(mode as AutonomyConfig["mode"])}
-              className={`rounded-2xl px-4 py-3 text-sm font-medium ${
-                autonomyConfig.mode === mode
-                  ? "bg-indigo-900 text-white"
-                  : "border border-indigo-200 bg-white text-indigo-900"
-              }`}
+            <select
+              value={inviteRole}
+              onChange={(event) =>
+                setInviteRole(event.target.value as "admin" | "director" | "general_user")
+              }
+              className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none"
             >
-              {mode}
+              <option value="admin">admin</option>
+              <option value="director">director</option>
+              <option value="general_user">general user</option>
+            </select>
+
+            <button
+              onClick={handleMockInviteUser}
+              className="rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
+            >
+              Invite User
             </button>
-          ))}
-        </div>
+          </div>
 
-        <div className="mt-6">
-          <p className="mb-2 text-sm font-medium text-indigo-800">
-            Strategy Mode
-          </p>
+          <div className="mt-5 space-y-3">
+            {orgMembers.map((member) => (
+              <div
+                key={member.id}
+                className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div>
+                  <p className="text-sm font-medium text-slate-900">{member.email}</p>
+                  <p className="mt-1 text-xs text-slate-500">Org member</p>
+                </div>
 
-          <div className="flex flex-wrap gap-2">
-            {[
-              "balanced",
-              "cleanup",
-              "fundraising_push",
-              "outreach_push",
-              "stability",
-            ].map((strategy) => (
+                <span className="inline-flex w-fit rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-700">
+                  {member.role.replaceAll("_", " ")}
+                </span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="rounded-3xl border border-indigo-200 bg-indigo-50 p-6 shadow-sm">
+          <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="text-sm font-medium text-indigo-800">System Behavior</p>
+              <h2 className="text-2xl font-semibold text-indigo-900">
+                Control autonomy and strategy
+              </h2>
+              <p className="mt-2 text-sm text-indigo-800">
+                Set how assertive Aether should be, then decide which strategy the system should favor.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-indigo-200 bg-white px-4 py-3 text-sm text-indigo-900">
+              Mode: {autonomyConfig.mode.toUpperCase()}
+            </div>
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-3">
+            {["off", "suggest", "auto_safe"].map((mode) => (
               <button
-                key={strategy}
-                onClick={() =>
-                  handleSetStrategy(strategy as AutonomyConfig["strategy"])
-                }
-                className={`rounded-full px-3 py-1 text-xs font-medium ${
-                  autonomyConfig.strategy === strategy
+                key={mode}
+                onClick={() => handleSetAutonomyMode(mode as AutonomyConfig["mode"])}
+                className={`rounded-2xl px-4 py-3 text-sm font-medium ${
+                  autonomyConfig.mode === mode
                     ? "bg-indigo-900 text-white"
-                    : "border border-indigo-200 bg-white text-indigo-800"
+                    : "border border-indigo-200 bg-white text-indigo-900"
                 }`}
               >
-                {strategy.replaceAll("_", " ")}
+                {mode}
               </button>
             ))}
           </div>
 
-          <div className="mt-4 flex flex-wrap gap-3">
-            <button
-              onClick={handleAutoShiftToSuggestedStrategy}
-              className="rounded-xl border border-indigo-200 bg-white px-3 py-2 text-xs text-indigo-900"
-            >
-              Apply Suggested Strategy
-            </button>
-          </div>
-
-          <div className="mt-4 text-sm text-indigo-900">
-            Suggested Strategy:{" "}
-            <span className="font-semibold">
-              {strategyDecision.strategy.replaceAll("_", " ")}
-            </span>
-          </div>
-          <div className="text-xs text-indigo-700">
-            {strategyDecision.reason}
-          </div>
-        </div>
-      </section>
-
-      <section className="grid gap-4 xl:grid-cols-2">
-        <section className="rounded-3xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm">
-          <div className="mb-4">
-            <h2 className="text-xl font-semibold text-emerald-900">
-              Execution Health
-            </h2>
-            <p className="text-sm text-emerald-800">
-              Based on normalized execution summary
-            </p>
-          </div>
-
-          <div className="flex items-center gap-6">
-            <div className="text-3xl font-bold text-emerald-900">
-              {executionFeedback.executionHealthScore}
-            </div>
-            <div className="text-sm text-emerald-800">
-              {executionFeedback.recommendation}
-            </div>
-          </div>
-
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <div className="rounded-2xl border border-emerald-200 bg-white p-4">
-              <p className="text-xs uppercase tracking-wide text-emerald-700">
-                Success Rate
-              </p>
-              <p className="mt-2 text-xl font-semibold text-slate-900">
-                {executionSummary.successRate}%
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-emerald-200 bg-white p-4">
-              <p className="text-xs uppercase tracking-wide text-emerald-700">
-                Failure Rate
-              </p>
-              <p className="mt-2 text-xl font-semibold text-slate-900">
-                {executionSummary.failureRate}%
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-emerald-200 bg-white p-4">
-              <p className="text-xs uppercase tracking-wide text-emerald-700">
-                Blocked Rate
-              </p>
-              <p className="mt-2 text-xl font-semibold text-slate-900">
-                {executionSummary.blockedRate}%
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-emerald-200 bg-white p-4">
-              <p className="text-xs uppercase tracking-wide text-emerald-700">
-                Live Runs
-              </p>
-              <p className="mt-2 text-xl font-semibold text-slate-900">
-                {executionSummary.liveRuns}
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="mb-4">
-            <h2 className="text-xl font-semibold text-slate-900">
-              System Snapshot
-            </h2>
-            <p className="text-sm text-slate-600">
-              Admin-level summary of current operating pressure
-            </p>
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-xs uppercase tracking-wide text-slate-500">
-                Total Contacts
-              </p>
-              <p className="mt-2 text-xl font-semibold text-slate-900">
-                {metrics.totalContacts}
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-xs uppercase tracking-wide text-slate-500">
-                Unassigned Contacts
-              </p>
-              <p className="mt-2 text-xl font-semibold text-slate-900">
-                {metrics.unassignedContactCount}
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-xs uppercase tracking-wide text-slate-500">
-                Urgent Tasks
-              </p>
-              <p className="mt-2 text-xl font-semibold text-slate-900">
-                {(todaySnapshot.urgentTasks ?? []).length}
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-xs uppercase tracking-wide text-slate-500">
-                Finance Net
-              </p>
-              <p className="mt-2 text-xl font-semibold text-slate-900">
-                ${financeSnapshot.net.toLocaleString()}
-              </p>
-            </div>
-          </div>
-        </section>
-      </section>
-
-  
-<section className="rounded-3xl border border-rose-200 bg-rose-50 p-6 shadow-sm">
-  <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-    <div>
-      <p className="text-sm font-medium text-rose-800">System Risk</p>
-      <h2 className="text-2xl font-semibold text-rose-900">
-        Unified Risk Panel
-      </h2>
-      <p className="mt-2 text-sm text-rose-800">
-        Combined view of failures, blocked actions, and unstable domains.
-      </p>
-    </div>
-
-    <div className="rounded-2xl border border-rose-200 bg-white px-4 py-3 text-sm text-rose-900">
-      Failure rate:{" "}
-      <span className="font-semibold">
-        {executionSummary.failureRate}%
-      </span>
-    </div>
-</div>
-  <div className="grid gap-4 lg:grid-cols-3">
-    <div className="rounded-2xl border border-rose-200 bg-white p-5">
-      <p className="text-sm font-medium text-rose-900">Failure Hotspots</p>
-      <div className="mt-4 space-y-3">
-        {executionSummary.repeatedFailureActionTypes.slice(0, 5).map((item) => (
-          <div key={item.key} className="rounded-2xl border border-rose-200 bg-rose-50 p-4">
-            <p className="font-medium text-slate-900">{item.key}</p>
-            <p className="mt-1 text-xs text-slate-600">
-              {item.count} repeated failure{item.count === 1 ? "" : "s"}
-            </p>
-          </div>
-        ))}
-
-        {executionSummary.repeatedFailureActionTypes.length === 0 ? (
-          <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-slate-500">
-            No repeated failure hotspots surfaced yet.
-          </div>
-        ) : null}
-</div>
-</div>
-    <div className="rounded-2xl border border-amber-200 bg-white p-5">
-      <p className="text-sm font-medium text-amber-900">Blocked Hotspots</p>
-      <div className="mt-4 space-y-3">
-        {executionSummary.repeatedBlockedReasons.slice(0, 5).map((item) => (
-          <div key={item.key} className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
-            <p className="font-medium text-slate-900">
-              {formatPolicyReason(item.key)}
-            </p>
-            <p className="mt-1 text-xs text-slate-600">
-              {item.count} repeated block{item.count === 1 ? "" : "s"}
-            </p>
-          </div>
-        ))}
-
-        {executionSummary.repeatedBlockedReasons.length === 0 ? (
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-slate-500">
-            No repeated blocked hotspots surfaced yet.
-          </div>
-        ) : null}
-      </div>
-    </div>
-
-    <div className="rounded-2xl border border-sky-200 bg-white p-5">
-      <p className="text-sm font-medium text-sky-900">Unstable Domains</p>
-      <div className="mt-4 space-y-3">
-        {executionSummary.unstableDomains.slice(0, 5).map((item) => (
-          <div key={item.key} className="rounded-2xl border border-sky-200 bg-sky-50 p-4">––
-            <p className="font-medium text-slate-900">
-              {item.key.toUpperCase()}
-            </p>
-            <p className="mt-1 text-xs text-slate-600">
-              {item.count} instability signal{item.count === 1 ? "" : "s"}
-            </p>
-          </div>
-        ))}
-
-        {executionSummary.unstableDomains.length === 0 ? (
-          <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sm text-slate-500">
-            No unstable domains surfaced yet.
-          </div>
-        ) : null}
-      </div>
-      </div>
-    </div>
-</section>
-            <section className="rounded-3xl border border-fuchsia-200 bg-fuchsia-50 p-6 shadow-sm">
-        <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-sm font-medium text-fuchsia-800">
-              Aether Intelligence Layer
-            </p>
-            <h2 className="text-2xl font-semibold text-fuchsia-900">
-              System Brain Snapshot
-            </h2>
-            <p className="mt-2 max-w-3xl text-sm text-fuchsia-900/80">
-              The system is now aggregating domain pressure, top signals, and
-              cross-domain dependencies into one intelligence layer.
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-fuchsia-200 bg-white px-4 py-3 text-sm text-fuchsia-900">
-            System risk:{" "}
-            <span className="font-semibold">
-              {intelligenceSnapshot.systemRiskLevel}/10
-            </span>
-          </div>
-        </div>
-
-        <div className="mb-6 rounded-2xl border border-fuchsia-200 bg-white p-5">
-          <p className="text-lg font-semibold text-slate-900">
-            {intelligenceSummary.headline}
-          </p>
-          <p className="mt-2 text-sm text-slate-600">{intelligenceSummary.body}</p>
-          <p className="mt-2 text-sm text-slate-600">
-            {intelligenceSummary.crossDomain}
-          </p>
-          <p className="mt-2 text-sm font-medium text-fuchsia-900">
-            {intelligenceSummary.risk}
-          </p>
-        </div>
-
-        <div className="grid gap-6 xl:grid-cols-3">
-          <div className="rounded-2xl border border-fuchsia-200 bg-white p-5">
-            <p className="text-sm font-medium text-slate-500">Top Domains</p>
-            <div className="mt-4 space-y-3">
-              {intelligenceSnapshot.topDomains.slice(0, 5).map((item) => (
-                <div
-                  key={item.domain}
-                  className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 p-3"
-                >
-                  <span className="font-medium text-slate-900">
-                    {item.domain.toUpperCase()}
-                  </span>
-                  <span className="text-sm text-slate-600">
-                    Pressure {item.pressureScore}/10
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-fuchsia-200 bg-white p-5">
-            <p className="text-sm font-medium text-slate-500">
-              Unified Admin Actions
-            </p>
-            <div className="mt-4 space-y-3">
-              {allAdminActions.slice(0, 4).map((action) => (
-                <div
-                  key={action.id}
-                  className="rounded-2xl border border-slate-200 bg-slate-50 p-3"
-                >
-                  <p className="font-medium text-slate-900">{action.title}</p>
-                  <p className="mt-1 text-xs text-slate-500">
-                    {action.domain.toUpperCase()} · Score {action.score}/100
-                  </p>
-                  <p className="mt-1 text-xs text-slate-600">{action.whyNow}</p>
-                </div>
-              ))}
-
-              {allAdminActions.length === 0 ? (
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-500">
-                  No unified admin actions surfaced yet.
-                </div>
-              ) : null}
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-fuchsia-200 bg-white p-5">
-            <p className="text-sm font-medium text-slate-500">
-              Cross-Domain Links
-            </p>
-            <div className="mt-4 space-y-3">
-              {(intelligenceSnapshot.crossDomainLinks || []).slice(0, 4).map((link) => (
-                <div
-                  key={link.id}
-                  className="rounded-2xl border border-slate-200 bg-slate-50 p-3"
-                >
-                  <p className="font-medium text-slate-900">{link.label}</p>
-                  <p className="mt-1 text-xs text-slate-500">
-                    {link.from.toUpperCase()} → {link.to.toUpperCase()}
-                  </p>
-                  <p className="mt-1 text-xs text-slate-600">{link.action}</p>
-                </div>
-              ))}
-
-              {(intelligenceSnapshot.crossDomainLinks || []).length === 0 ? (
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-500">
-                  No strong cross-domain link surfaced yet.
-                </div>
-              ) : null}
-            </div>
-          </div>
-        </div>
-
-   <div className="mt-6 grid gap-6 xl:grid-cols-3">
-
-        
-
-          <div className="rounded-2xl border border-fuchsia-200 bg-white p-5">
-            <p className="text-sm font-medium text-slate-500">Strategy Hook</p>
-            <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="font-medium text-slate-900">
-                Suggested: {strategyHook.strategy.replaceAll("_", " ")}
-              </p>
-              <p className="mt-1 text-xs text-slate-600">{strategyHook.reason}</p>
-              <p className="mt-2 text-xs text-slate-500">
-                Confidence {(strategyHook.confidence * 100).toFixed(0)}%
-              </p>
-            </div>
-
-            <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="font-medium text-slate-900">
-                Auto-shift {autoShiftHook.shouldShift ? "recommended" : "not recommended"}
-              </p>
-              <p className="mt-1 text-xs text-slate-600">{autoShiftHook.reason}</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="rounded-3xl border border-blue-200 bg-blue-50 p-6 shadow-sm">
-        <div className="mb-4">
-          <h2 className="text-xl font-semibold text-blue-900">
-            Policy Recommendations
-          </h2>
-          <p className="text-sm text-blue-700">
-            Suggested improvements based on repeated system friction
-          </p>
-        </div>
-
-        {policyRecommendations.length === 0 ? (
-          <p className="text-sm text-slate-600">
-            No strong recommendations yet.
-          </p>
-        ) : (
-          <div className="space-y-3">
-            {policyRecommendations.map((rec) => (
-              <div
-                key={rec.id}
-                className="rounded-xl border border-blue-200 bg-white p-4"
-              >
-                <div className="flex items-center justify-between gap-4">
-                  <div className="text-sm font-medium text-slate-900">
-                    {rec.message}
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <div className="text-xs text-blue-700">
-                      {(rec.confidence * 100).toFixed(0)}%
-                    </div>
-
-                    <button
-                      onClick={() => handleApplyRecommendation(rec.id)}
-                      className="rounded-lg bg-blue-900 px-3 py-1 text-xs text-white"
-                    >
-                      Apply
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
-
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="mb-4">
-          <h2 className="text-xl font-semibold text-slate-900">
-            Policy History
-          </h2>
-          <p className="text-sm text-slate-600">
-            Track changes and rollback safely
-          </p>
-        </div>
-
-        {policyVersionHistory.length === 0 ? (
-          <p className="text-sm text-slate-500">
-            No policy changes recorded yet.
-          </p>
-        ) : (
-          <div className="space-y-3">
-            {policyVersionHistory.map((item) => (
-              <div
-                key={item.id}
-                className="rounded-xl border border-slate-200 p-4"
-              >
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <div className="text-sm font-medium text-slate-900">
-                      {item.note}
-                    </div>
-                    <div className="text-xs text-slate-500">
-                      {new Date(item.createdAt).toLocaleString()}
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => handleRollbackPolicy(item.id)}
-                    className="rounded-lg border border-slate-200 px-3 py-1 text-xs text-slate-700"
-                  >
-                    Rollback
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
-
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-sm font-medium text-slate-500">
-              Governed Action Queue
-            </p>
-            <h2 className="text-2xl font-semibold text-slate-900">
-              Unified Auto Execution Queue
-            </h2>
-            <p className="mt-2 max-w-3xl text-sm text-slate-600">
-              Review what is safe to run, what needs manual review, and what
-              remains blocked under governance.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            <button
-              onClick={handlePreviewAutoExecution}
-              disabled={previewingAutoExecution || runningAutoExecution}
-              className="inline-flex items-center gap-2 rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm font-medium text-sky-900 transition hover:bg-sky-100 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              <Eye className="h-4 w-4" />
-              {previewingAutoExecution ? "Previewing Auto..." : "Preview Auto"}
-            </button>
-
-            <button
-              onClick={handleRunAutoExecution}
-              disabled={runningAutoExecution || previewingAutoExecution}
-              className="inline-flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-900 transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              <Play className="h-4 w-4" />
-              {runningAutoExecution ? "Running Auto..." : "Run Auto Execution"}
-            </button>
-
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
-              {autoExecutionPlan.summary.autoExecutable} auto executable
-            </div>
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
-              {autoExecutionPlan.summary.manualReview} manual review
-            </div>
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
-              {autoExecutionPlan.summary.blocked} blocked
-            </div>
-          </div>
-        </div>
-
-        <div className="grid gap-4 xl:grid-cols-3">
-          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
-            <p className="text-sm font-medium text-emerald-800">Auto Executable</p>
-            <div className="mt-4 space-y-3">
-              {autoActions.map((action) => (
-                <div
-                  key={action.id}
-                  className="rounded-2xl border border-emerald-200 bg-white p-4"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="font-medium text-slate-900">{action.title}</p>
-                      <p className="mt-1 text-xs text-slate-600">{action.whyNow}</p>
-                    </div>
-                    <span className={`rounded-full px-2 py-1 text-xs font-medium ${getActionModeClasses(action.mode)}`}>
-                      {action.mode}
-                    </span>
-                  </div>
-
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    <button
-                      onClick={() => handlePreviewUnifiedAction(action)}
-                      disabled={executingActionId === action.id}
-                      className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700"
-                    >
-                      Preview
-                    </button>
-                    <button
-                      onClick={() => handleRunUnifiedAction(action)}
-                      disabled={executingActionId === action.id}
-                      className="rounded-xl bg-slate-900 px-3 py-2 text-xs text-white"
-                    >
-                      Run
-                    </button>
-                    <button
-                      onClick={() => setSelectedActionId(action.id)}
-                      className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700"
-                    >
-                      Inspect
-                    </button>
-                  </div>
-                </div>
-              ))}
-
-              {autoActions.length === 0 ? (
-                <div className="rounded-2xl border border-emerald-200 bg-white p-4 text-sm text-slate-500">
-                  No auto-executable unified actions surfaced yet.
-                </div>
-              ) : null}
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
-            <p className="text-sm font-medium text-amber-800">Manual Review</p>
-            <div className="mt-4 space-y-3">
-              {manualActions.map((action) => (
-                <div
-                  key={action.id}
-                  className="rounded-2xl border border-amber-200 bg-white p-4"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="font-medium text-slate-900">{action.title}</p>
-                      <p className="mt-1 text-xs text-slate-600">
-                        {action.governance.reason}
-                      </p>
-                    </div>
-                    <span className={`rounded-full px-2 py-1 text-xs font-medium ${getActionModeClasses(action.mode)}`}>
-                      {action.mode}
-                    </span>
-                  </div>
-
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    <button
-                      onClick={() => handlePreviewUnifiedAction(action)}
-                      disabled={executingActionId === action.id}
-                      className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700"
-                    >
-                      Preview
-                    </button>
-                    <button
-                      onClick={() => setSelectedActionId(action.id)}
-                      className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700"
-                    >
-                      Inspect
-                    </button>
-                  </div>
-                </div>
-              ))}
-
-              {manualActions.length === 0 ? (
-                <div className="rounded-2xl border border-amber-200 bg-white p-4 text-sm text-slate-500">
-                  No manual-review unified actions surfaced yet.
-                </div>
-              ) : null}
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-rose-200 bg-rose-50 p-5">
-            <p className="text-sm font-medium text-rose-800">Blocked</p>
-            <div className="mt-4 space-y-3">
-              {blockedActions.map((action) => (
-                <div
-                  key={action.id}
-                  className="rounded-2xl border border-rose-200 bg-white p-4"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="font-medium text-slate-900">{action.title}</p>
-                      <p className="mt-1 text-xs text-slate-600">
-                        {action.governance.reason}
-                      </p>
-                    </div>
-                    <span className={`rounded-full px-2 py-1 text-xs font-medium ${getActionModeClasses(action.mode)}`}>
-                      {action.mode}
-                    </span>
-                  </div>
-
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    <button
-                      onClick={() => setSelectedActionId(action.id)}
-                      className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700"
-                    >
-                      Inspect
-                    </button>
-                  </div>
-                </div>
-              ))}
-
-              {blockedActions.length === 0 ? (
-                <div className="rounded-2xl border border-rose-200 bg-white p-4 text-sm text-slate-500">
-                  No blocked unified actions surfaced yet.
-                </div>
-              ) : null}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="rounded-3xl border border-amber-200 bg-amber-50 p-6 shadow-sm">
-        <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-sm font-medium text-amber-800">
-              Governance Pattern Detection
-            </p>
-            <h2 className="text-2xl font-semibold text-amber-900">
-              Recent Governance Blocks
-            </h2>
-            <p className="mt-2 max-w-3xl text-sm text-amber-800">
-              Surface recent executions or attempted executions that were blocked
-              by policy, timing rules, or manual-only governance.
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-amber-200 bg-white px-4 py-3 text-sm text-amber-900">
-            {policyAuditRecords.length} recent block
-            {policyAuditRecords.length === 1 ? "" : "s"}
-          </div>
-        </div>
-
-        {auditError ? (
-          <div className="rounded-2xl border border-rose-200 bg-white p-4 text-sm text-rose-700">
-            {auditError}
-          </div>
-        ) : policyAuditRecords.length === 0 ? (
-          <div className="rounded-2xl border border-amber-200 bg-white p-4 text-sm text-amber-900">
-            No recent governance blocks detected.
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {policyAuditRecords.map((record, index) => {
-              const metadata = record.metadata ?? {};
-              const policyReason =
-                typeof metadata.policyReason === "string"
-                  ? metadata.policyReason
-                  : typeof metadata.policy_reason === "string"
-                    ? metadata.policy_reason
-                    : typeof metadata.blockedReason === "string"
-                      ? metadata.blockedReason
-                      : typeof metadata.reason === "string"
-                        ? metadata.reason
-                        : null;
-
-              return (
-                <div
-                  key={record.id || `${record.action_id || "record"}-${index}`}
-                  className="rounded-2xl border border-amber-200 bg-white p-4"
-                >
-                  <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                    <div>
-                      <p className="font-medium text-slate-900">
-                        {record.action_type || "Blocked action"}
-                      </p>
-                      <p className="mt-1 text-sm text-slate-600">
-                        {record.message || "Blocked by governance"}
-                      </p>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2">
-                      <span className="inline-flex rounded-full border border-amber-200 bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
-                        {formatPolicyReason(policyReason)}
-                      </span>
-                      <span className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">
-                        {formatAuditTimestamp(record.created_at)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {policySuggestions.length > 0 ? (
-          <div className="mt-6 rounded-2xl border border-white/60 bg-white p-4">
-            <div className="mb-3 flex items-center gap-2 text-sm font-medium text-amber-900">
-              <Sparkles className="h-4 w-4" />
-              Suggested Policy Tightening
-            </div>
-
-            <div className="space-y-2">
-              {policySuggestions.map((suggestion, index) => (
-                <div
-                  key={`${suggestion}-${index}`}
-                  className="text-sm text-slate-700"
-                >
-                  • {suggestion}
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : null}
-      </section>
-
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="mb-5 flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-slate-500">Selected Action</p>
-            <h2 className="text-2xl font-semibold text-slate-900">
-              Unified control surface
-            </h2>
-          </div>
-
-          {selectedAction ? (
-            <div className={`rounded-full px-3 py-1 text-xs font-medium ${getActionModeClasses(selectedAction.mode)}`}>
-              {selectedAction.mode.toUpperCase()}
-            </div>
-          ) : null}
-        </div>
-
-        {selectedAction ? (
-          <div className="space-y-4">
-            <div>
-              <p className="text-lg font-semibold text-slate-900">
-                {selectedAction.title}
-              </p>
-              <p className="mt-2 text-sm text-slate-600">
-                {selectedAction.whyNow}
-              </p>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <p className="text-sm text-slate-500">Engine score</p>
-                <p className="mt-1 text-base font-semibold text-slate-900">
-                  {selectedAction.score}/100
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <p className="text-sm text-slate-500">Governance confidence</p>
-                <p className="mt-1 text-base font-semibold text-slate-900">
-                  {selectedAction.governance.confidence}
-                </p>
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-sm text-slate-500">Governance reason</p>
-              <p className="mt-2 text-sm text-slate-700">
-                {selectedAction.governance.reason}
-              </p>
-            </div>
-
-            <div className="flex flex-wrap gap-3">
-              <button
-                onClick={() => handlePreviewUnifiedAction(selectedAction)}
-                disabled={executingActionId === selectedAction.id}
-                className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
-              >
-                <Eye className="h-4 w-4" />
-                Preview
-              </button>
-
-              {selectedAction.mode === "auto" ? (
+          <div className="mt-6">
+            <p className="mb-2 text-sm font-medium text-indigo-800">Strategy</p>
+            <div className="flex flex-wrap gap-2">
+              {["balanced", "cleanup", "fundraising_push", "outreach_push", "stability"].map((strategy) => (
                 <button
-                  onClick={() => handleRunUnifiedAction(selectedAction)}
-                  disabled={executingActionId === selectedAction.id}
-                  className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800 disabled:opacity-50"
+                  key={strategy}
+                  onClick={() => handleSetStrategy(strategy as AutonomyConfig["strategy"])}
+                  className={`rounded-full px-3 py-1 text-xs font-medium ${
+                    autonomyConfig.strategy === strategy
+                      ? "bg-indigo-900 text-white"
+                      : "border border-indigo-200 bg-white text-indigo-800"
+                  }`}
                 >
-                  <Zap className="h-4 w-4" />
-                  Run
+                  {strategy.replaceAll("_", " ")}
                 </button>
-              ) : null}
+              ))}
             </div>
+
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <button
+                onClick={handleAutoShiftToSuggestedStrategy}
+                className="rounded-xl border border-indigo-200 bg-white px-3 py-2 text-xs text-indigo-900"
+              >
+                Apply Suggested Strategy
+              </button>
+
+              <div className="text-sm text-indigo-900">
+                Suggested: <span className="font-semibold">{strategyDecision.strategy.replaceAll("_", " ")}</span>
+              </div>
+            </div>
+
+            <p className="mt-2 text-xs text-indigo-700">{strategyDecision.reason}</p>
           </div>
-        ) : (
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
-            Select an action from the unified admin queue to inspect it here.
+        </section>
+      </section>
+
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="mb-5">
+          <p className="text-sm font-medium text-slate-500">System Health</p>
+          <h2 className="text-2xl font-semibold text-slate-900">
+            Confirm the system is stable
+          </h2>
+          <p className="mt-2 text-sm text-slate-600">
+            High-level health first. Deep risk and governance detail only appears if you open Advanced System.
+          </p>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <p className="text-xs uppercase tracking-wide text-slate-500">Execution Score</p>
+            <p className="mt-2 text-3xl font-semibold text-slate-900">
+              {executionFeedback.executionHealthScore}
+            </p>
           </div>
-        )}
+
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <p className="text-xs uppercase tracking-wide text-slate-500">Failure Rate</p>
+            <p className="mt-2 text-3xl font-semibold text-slate-900">
+              {executionSummary.failureRate}%
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <p className="text-xs uppercase tracking-wide text-slate-500">Blocked Rate</p>
+            <p className="mt-2 text-3xl font-semibold text-slate-900">
+              {executionSummary.blockedRate}%
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <p className="text-xs uppercase tracking-wide text-slate-500">Finance Net</p>
+            <p className="mt-2 text-3xl font-semibold text-slate-900">
+              ${financeSnapshot.net.toLocaleString()}
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+          {executionFeedback.recommendation}
+        </div>
+      </section>
+
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="text-sm font-medium text-slate-500">Advanced System</p>
+            <h2 className="text-2xl font-semibold text-slate-900">
+              Policy, governed execution, and deep diagnostics
+            </h2>
+            <p className="mt-2 text-sm text-slate-600">
+              Keep this collapsed until you need to inspect system internals.
+            </p>
+          </div>
+
+          <button
+            onClick={() => setAdvancedOpen((prev) => !prev)}
+            className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+          >
+            {advancedOpen ? "Hide Advanced System" : "Show Advanced System"}
+          </button>
+        </div>
+
+        {advancedOpen ? (
+          <div className="mt-6 space-y-5">
+            <section className="rounded-3xl border border-rose-200 bg-rose-50 p-6">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                <div>
+                  <p className="text-sm font-medium text-rose-800">Risk</p>
+                  <h3 className="text-xl font-semibold text-rose-900">Unified Risk Panel</h3>
+                </div>
+                <div className="rounded-2xl border border-rose-200 bg-white px-4 py-3 text-sm text-rose-900">
+                  Failure rate <span className="font-semibold">{executionSummary.failureRate}%</span>
+                </div>
+              </div>
+
+              <div className="mt-4 grid gap-4 xl:grid-cols-3">
+                <div className="rounded-2xl border border-rose-200 bg-white p-4">
+                  <p className="text-sm font-medium text-slate-900">Failure Hotspots</p>
+                  <div className="mt-4 space-y-3">
+                    {executionSummary.repeatedFailureActionTypes.slice(0, 3).map((item) => (
+                      <div key={item.key} className="rounded-2xl border border-rose-200 bg-rose-50 p-4">
+                        <p className="text-sm font-medium text-slate-900">{item.key}</p>
+                        <p className="mt-1 text-xs text-slate-600">
+                          {item.count} repeated failure{item.count === 1 ? "" : "s"}
+                        </p>
+                      </div>
+                    ))}
+                    {executionSummary.repeatedFailureActionTypes.length === 0 ? (
+                      <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-slate-500">
+                        No repeated failure hotspots surfaced yet.
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-amber-200 bg-white p-4">
+                  <p className="text-sm font-medium text-slate-900">Blocked Hotspots</p>
+                  <div className="mt-4 space-y-3">
+                    {executionSummary.repeatedBlockedReasons.slice(0, 3).map((item) => (
+                      <div key={item.key} className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                        <p className="text-sm font-medium text-slate-900">{formatPolicyReason(item.key)}</p>
+                        <p className="mt-1 text-xs text-slate-600">
+                          {item.count} repeated block{item.count === 1 ? "" : "s"}
+                        </p>
+                      </div>
+                    ))}
+                    {executionSummary.repeatedBlockedReasons.length === 0 ? (
+                      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-slate-500">
+                        No repeated governance blocks surfaced yet.
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-sky-200 bg-white p-4">
+                  <p className="text-sm font-medium text-slate-900">Unstable Domains</p>
+                  <div className="mt-4 space-y-3">
+                    {executionSummary.unstableDomains.slice(0, 3).map((item) => (
+                      <div key={item.key} className="rounded-2xl border border-sky-200 bg-sky-50 p-4">
+                        <p className="text-sm font-medium text-slate-900">{item.key.toUpperCase()}</p>
+                        <p className="mt-1 text-xs text-slate-600">
+                          {item.count} instability signal{item.count === 1 ? "" : "s"}
+                        </p>
+                      </div>
+                    ))}
+                    {executionSummary.unstableDomains.length === 0 ? (
+                      <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sm text-slate-500">
+                        No unstable domains surfaced yet.
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section className="space-y-5">
+              <div className="grid gap-5 xl:grid-cols-2">
+              <section className="rounded-3xl border border-blue-200 bg-blue-50 p-6">
+                  <div className="mb-4">
+                    <h3 className="text-xl font-semibold text-blue-900">
+                      Policy Recommendations
+                    </h3>
+                    <p className="text-sm text-blue-700">
+                      Suggested improvements based on repeated system friction.
+                    </p>
+                  </div>
+
+                  {policyRecommendations.length === 0 ? (
+                    <p className="text-sm text-slate-600">No strong recommendations yet.</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {policyRecommendations.map((rec) => (
+                        <div key={rec.id} className="rounded-xl border border-blue-200 bg-white p-4">
+                          <div className="flex items-center justify-between gap-4">
+                            <div className="text-sm font-medium text-slate-900">{rec.message}</div>
+                            <div className="flex items-center gap-3">
+                              <div className="text-xs text-blue-700">
+                                {(rec.confidence * 100).toFixed(0)}%
+                              </div>
+                              <button
+                                onClick={() => handleApplyRecommendation(rec.id)}
+                                className="rounded-lg bg-blue-900 px-3 py-1 text-xs text-white"
+                              >
+                                Apply
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </section>
+
+              <section className="rounded-3xl border border-slate-200 bg-white p-6">
+                  <div className="mb-4">
+                    <h3 className="text-xl font-semibold text-slate-900">
+                      Policy History
+                    </h3>
+                    <p className="text-sm text-slate-600">
+                      Track changes and rollback safely.
+                    </p>
+                  </div>
+
+                  {policyVersionHistory.length === 0 ? (
+                    <p className="text-sm text-slate-500">No policy changes recorded yet.</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {policyVersionHistory.map((item) => (
+                        <div key={item.id} className="rounded-xl border border-slate-200 p-4">
+                          <div className="flex items-center justify-between gap-4">
+                            <div>
+                              <div className="text-sm font-medium text-slate-900">{item.note}</div>
+                              <div className="text-xs text-slate-500">
+                                {new Date(item.createdAt).toLocaleString()}
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => handleRollbackPolicy(item.id)}
+                              className="rounded-lg border border-slate-200 px-3 py-1 text-xs text-slate-700"
+                            >
+                              Rollback
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </section>
+              </div>
+
+              <section className="rounded-3xl border border-slate-200 bg-white p-6">
+                <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-slate-500">
+                      Governed Action Queue
+                    </p>
+                    <h3 className="text-2xl font-semibold text-slate-900">
+                      Unified Auto Execution Queue
+                    </h3>
+                    <p className="mt-2 max-w-3xl text-sm text-slate-600">
+                      Review what is safe to run, what needs manual review, and what remains blocked under governance.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      onClick={handlePreviewAutoExecution}
+                      disabled={previewingAutoExecution || runningAutoExecution}
+                      className="inline-flex items-center gap-2 rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm font-medium text-sky-900 transition hover:bg-sky-100 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      <Eye className="h-4 w-4" />
+                      {previewingAutoExecution ? "Previewing Auto..." : "Preview Auto"}
+                    </button>
+
+                    <button
+                      onClick={handleRunAutoExecution}
+                      disabled={runningAutoExecution || previewingAutoExecution}
+                      className="inline-flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-900 transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      <Play className="h-4 w-4" />
+                      {runningAutoExecution ? "Running Auto..." : "Run Auto Execution"}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="mb-4 flex flex-wrap gap-3">
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                    {autoExecutionPlan.summary.autoExecutable} auto executable
+                  </div>
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                    {autoExecutionPlan.summary.manualReview} manual review
+                  </div>
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                    {autoExecutionPlan.summary.blocked} blocked
+                  </div>
+                </div>
+
+                <div className="grid gap-4 xl:grid-cols-3">
+                  <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
+                    <p className="text-sm font-medium text-emerald-800">Auto Executable</p>
+                    <div className="mt-4 space-y-3">
+                      {autoActions.slice(0, 3).map((action) => (
+                        <div key={action.id} className="rounded-2xl border border-emerald-200 bg-white p-4">
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <p className="font-medium text-slate-900">{action.title}</p>
+                              <p className="mt-1 text-xs text-slate-600">{action.whyNow}</p>
+                            </div>
+                            <span className={`rounded-full px-2 py-1 text-xs font-medium ${getActionModeClasses(action.mode)}`}>
+                              {action.mode}
+                            </span>
+                          </div>
+
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            <button
+                              onClick={() => handlePreviewUnifiedAction(action)}
+                              disabled={executingActionId === action.id}
+                              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700"
+                            >
+                              Preview
+                            </button>
+                            <button
+                              onClick={() => handleRunUnifiedAction(action)}
+                              disabled={executingActionId === action.id}
+                              className="rounded-xl bg-slate-900 px-3 py-2 text-xs text-white"
+                            >
+                              Run
+                            </button>
+                            <button
+                              onClick={() => setSelectedActionId(action.id)}
+                              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700"
+                            >
+                              Inspect
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
+                    <p className="text-sm font-medium text-amber-800">Manual Review</p>
+                    <div className="mt-4 space-y-3">
+                      {manualActions.slice(0, 3).map((action) => (
+                        <div key={action.id} className="rounded-2xl border border-amber-200 bg-white p-4">
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <p className="font-medium text-slate-900">{action.title}</p>
+                              <p className="mt-1 text-xs text-slate-600">{action.governance.reason}</p>
+                            </div>
+                            <span className={`rounded-full px-2 py-1 text-xs font-medium ${getActionModeClasses(action.mode)}`}>
+                              {action.mode}
+                            </span>
+                          </div>
+
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            <button
+                              onClick={() => handlePreviewUnifiedAction(action)}
+                              disabled={executingActionId === action.id}
+                              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700"
+                            >
+                              Preview
+                            </button>
+                            <button
+                              onClick={() => setSelectedActionId(action.id)}
+                              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700"
+                            >
+                              Inspect
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl border border-rose-200 bg-rose-50 p-5">
+                    <p className="text-sm font-medium text-rose-800">Blocked</p>
+                    <div className="mt-4 space-y-3">
+                      {blockedActions.slice(0, 3).map((action) => (
+                        <div key={action.id} className="rounded-2xl border border-rose-200 bg-white p-4">
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <p className="font-medium text-slate-900">{action.title}</p>
+                              <p className="mt-1 text-xs text-slate-600">{action.governance.reason}</p>
+                            </div>
+                            <span className={`rounded-full px-2 py-1 text-xs font-medium ${getActionModeClasses(action.mode)}`}>
+                              {action.mode}
+                            </span>
+                          </div>
+
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            <button
+                              onClick={() => setSelectedActionId(action.id)}
+                              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700"
+                            >
+                              Inspect
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {selectedAction ? (
+                  <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="text-sm font-medium text-slate-500">Selected Action</p>
+                        <h4 className="mt-1 text-lg font-semibold text-slate-900">
+                          {selectedAction.title}
+                        </h4>
+                        <p className="mt-2 text-sm text-slate-600">{selectedAction.whyNow}</p>
+                      </div>
+
+                      <span className={`rounded-full px-2 py-1 text-xs font-medium ${getActionModeClasses(selectedAction.mode)}`}>
+                        {selectedAction.mode}
+                      </span>
+                    </div>
+
+                    <div className="mt-4 grid gap-3 md:grid-cols-3">
+                      <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                        <p className="text-xs uppercase tracking-wide text-slate-500">Domain</p>
+                        <p className="mt-2 text-sm font-medium text-slate-900">
+                          {selectedAction.domain.toUpperCase()}
+                        </p>
+                      </div>
+                      <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                        <p className="text-xs uppercase tracking-wide text-slate-500">Score</p>
+                        <p className="mt-2 text-sm font-medium text-slate-900">
+                          {selectedAction.score}/100
+                        </p>
+                      </div>
+                      <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                        <p className="text-xs uppercase tracking-wide text-slate-500">Governance</p>
+                        <p className="mt-2 text-sm font-medium text-slate-900">
+                          {selectedAction.governance.reason}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+              </section>
+            </section>
+
+            <section className="rounded-3xl border border-fuchsia-200 bg-fuchsia-50 p-6">
+              <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                <div>
+                  <p className="text-sm font-medium text-fuchsia-800">
+                    Intelligence Layer
+                  </p>
+                  <h3 className="text-2xl font-semibold text-fuchsia-900">
+                    System Brain Snapshot
+                  </h3>
+                  <p className="mt-2 max-w-3xl text-sm text-fuchsia-900/80">
+                    The intelligence layer is still here, but it stays below the primary admin controls.
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-fuchsia-200 bg-white px-4 py-3 text-sm text-fuchsia-900">
+                  System risk: <span className="font-semibold">{intelligenceSnapshot.systemRiskLevel}/10</span>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-fuchsia-200 bg-white p-5">
+                <p className="text-lg font-semibold text-slate-900">
+                  {intelligenceSummary.headline}
+                </p>
+                <p className="mt-2 text-sm text-slate-600">{intelligenceSummary.body}</p>
+                <p className="mt-2 text-sm text-slate-600">{intelligenceSummary.crossDomain}</p>
+                <p className="mt-2 text-sm font-medium text-fuchsia-900">
+                  {intelligenceSummary.risk}
+                </p>
+              </div>
+            </section>
+          </div>
+        ) : null}
       </section>
     </div>
   );
