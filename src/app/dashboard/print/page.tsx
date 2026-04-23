@@ -193,6 +193,12 @@ function getDepartmentLabel(department: DemoDepartment) {
   }
 }
 
+function applyWhyNowGovernor(base: string, modifiers: string[]) {
+  const cleanModifiers = modifiers.filter(Boolean);
+  if (!cleanModifiers.length) return base;
+  return `${base} ${cleanModifiers[0]}`;
+}
+
 function getPrintAbeBriefing(input: {
   role: DemoRole;
   demoDepartment: DemoDepartment;
@@ -276,20 +282,24 @@ function getPrintAbeBriefing(input: {
       "Delivered and in-flight materials are unlocking downstream execution, so print should keep handoff timing tight while the lane is moving.";
   }
 
+  const whyNowModifiers:string[] = [];
+
   if (input.orgContext?.departmentIsPressureLeader) {
-    whyNow = `${whyNow} Print also looks like one of the broader campaign constraint lanes right now, so timing mistakes here may travel farther than usual.`;
+    whyNowModifiers.push("Print is acting as a broader campaign constraint lane right now.");
   } else if (input.orgContext?.departmentIsMomentumLeader) {
-    whyNow = `${whyNow} Print appears to be carrying more of the campaign's usable readiness than usual, so clean handoffs matter even more.`;
+    whyNowModifiers.push("Print is carrying more campaign readiness than usual.");
   } else if (input.orgContext?.imbalanceDetected) {
-    whyNow = `${whyNow} The broader campaign read is a bit imbalanced right now, which means print should stay coordinated with the lanes it is supporting.`;
+    whyNowModifiers.push("Cross-lane imbalance is shaping how this print signal should be read.");
   }
+
+  whyNow = applyWhyNowGovernor(whyNow, whyNowModifiers);
 
   let supportText =
     input.role === "admin"
-      ? "Use Print Focus Mode to move approvals, protect exposed inventory, and keep delivery timing aligned with field deployment."
+      ? "Use Print Focus to protect timing and reinforce readiness."
       : input.role === "director"
-      ? "Use Print Focus Mode to keep the lane moving through approvals, inventory protection, and delivery coordination without losing readiness."
-      : "Use Print Work to complete the next approval, inventory, or delivery action cleanly and keep materials moving.";
+      ? "Use Print Focus to sequence approvals and delivery cleanly."
+      : "Finish the next print action cleanly and keep materials moving.";
 
   if (input.orgContext?.orgSupportLine) {
     supportText = `${supportText} ${input.orgContext.orgSupportLine}`;
@@ -612,7 +622,7 @@ export default function PrintDashboardPage() {
         headline:
           "Print operations are moving, but approvals and inventory timing need tighter control.",
         body:
-          "The system is producing and shipping, but approval bottlenecks and looming inventory pressure could create avoidable field delays.",
+          "Approvals and inventory pressure are creating drag in the print lane.",
         recommendation:
           "Push candidate approvals faster, protect sign inventory before depletion, and track delivery timing more aggressively on active orders.",
       };
@@ -623,7 +633,7 @@ export default function PrintDashboardPage() {
         headline:
           "Your print lane is moving, but approvals and inventory timing need tighter control.",
         body:
-          "The lane is producing and shipping, but approval drag and inventory pressure could slow field deployment if left untouched.",
+          "Print execution is moving, but approvals and inventory need tighter control.",
         recommendation:
           "Push approvals faster, protect critical inventory, and confirm delivery timing before it causes downstream drag.",
       };
@@ -632,7 +642,7 @@ export default function PrintDashboardPage() {
     return {
       headline: "Your print lane needs clean approvals and protected inventory.",
       body:
-        "Focus on the immediate print work that keeps assets moving and prevents deployment delays.",
+        "Keep the next print actions tight and protect timing.",
       recommendation:
         "Push approvals, protect inventory, and confirm delivery timing on critical items.",
     };

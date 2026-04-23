@@ -39,6 +39,11 @@ function maybePatternTail(
   variants: string[]
 ) {
   if (!repeatedCount || repeatedCount < 2) return "";
+
+  // Tail governor: once a pattern becomes highly repeated, let escalation
+  // language carry the weight instead of stacking multiple clauses.
+  if (repeatedCount >= 4) return "";
+
   return ` ${pickVariant(variants, repeatedCount)}`;
 }
 
@@ -84,6 +89,10 @@ function behaviorTail(
     completed?: string[];
   }
 ) {
+  // Tail governor: when opportunity is already repeating, let the
+  // opportunity-pattern line speak instead of adding another behavior clause.
+  if ((input.repeatedOpportunityCount ?? 0) >= 2) return "";
+
   if (input.dominantBehavior === "ignored" && variants.ignored?.length) {
     return ` ${pickVariant(variants.ignored, buildSeed(input) + 1)}`;
   }
@@ -106,6 +115,10 @@ function outcomeTail(
     declining?: string[];
   }
 ) {
+  // Tail governor: if repeated pressure is already being named, avoid stacking
+  // outcome commentary onto the same action sentence.
+  if (escalationLevel(input.repeatedPressureCount) > 0) return "";
+
   if (input.outcomeTrend === "improving" && variants.improving?.length) {
     return ` ${pickVariant(variants.improving, buildSeed(input) + 4)}`;
   }

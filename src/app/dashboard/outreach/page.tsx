@@ -162,6 +162,12 @@ function getDepartmentLabel(department: DemoDepartment) {
   }
 }
 
+function applyWhyNowGovernor(base: string, modifiers: string[]) {
+  const cleanModifiers = modifiers.filter(Boolean);
+  if (!cleanModifiers.length) return base;
+  return `${base} ${cleanModifiers[0]}`;
+}
+
 function getOutreachAbeBriefing(input: {
   role: DemoRole;
   demoDepartment: DemoDepartment;
@@ -236,10 +242,10 @@ function getOutreachAbeBriefing(input: {
 
   const supportText =
     input.role === "admin"
-      ? "Use Outreach Focus Mode to clear follow-ups, work finance-triggered contacts, and convert the warmest engagement before pressure builds."
+      ? "Use Outreach Focus to clear pressure and work warm contacts first."
       : input.role === "director"
-      ? "Use Outreach Focus Mode to tighten queue health, direct the lane toward the warmest contacts, and keep follow-up work from spilling over."
-      : "Use Outreach Work to stay on the next contact, keep the lane moving, and convert the best responses quickly.";
+      ? "Use Outreach Focus to keep queue health tight and sequence warm contacts."
+      : "Stay on the next contact and keep the lane moving.";
 
   const actions: string[] = [];
 
@@ -932,14 +938,14 @@ function OutreachPageContent() {
 
   const perspectiveSubheadline = useMemo(() => {
     if (demoRole === "admin") {
-      return "Manage calls, texts, lists, follow-ups, and engagement signals across your contacts.";
+      return "Manage engagement, follow-up pressure, and conversion signals from one surface.";
     }
 
     if (demoRole === "director") {
-      return "Lead the outreach lane with tighter visibility into queue health, follow-up pressure, and conversion movement.";
+      return "Lead the outreach lane with cleaner visibility into pressure and conversion.";
     }
 
-    return "Stay focused on the next outreach actions that need to move right now without carrying the full control layer.";
+    return "Stay focused on the next outreach actions that need to move right now.";
   }, [demoRole]);
 
   const commandSignalCtaLabel = useMemo(() => {
@@ -1087,14 +1093,16 @@ function OutreachPageContent() {
   const outreachAbeDisplayBriefing = useMemo(() => {
     let whyNow = outreachAbeBriefing.whyNow;
 
+    const whyNowModifiers:string[] = [];
     if (outreachOrgContext.departmentIsPressureLeader && outreachOrgContext.imbalanceDetected) {
-      whyNow = `${whyNow} Outreach is also shaping more of the broader campaign pressure picture right now.`;
+      whyNowModifiers.push("Outreach is shaping more of the broader campaign pressure picture.");
     } else if (
       outreachOrgContext.departmentIsMomentumLeader &&
       !outreachOrgContext.departmentIsPressureLeader
     ) {
-      whyNow = `${whyNow} Outreach is also carrying some of the cleaner momentum in the broader campaign read.`;
+      whyNowModifiers.push("Outreach is carrying cleaner momentum in the broader campaign read.");
     }
+    whyNow = applyWhyNowGovernor(whyNow, whyNowModifiers);
 
     const supportText = `${outreachAbeBriefing.supportText} ${outreachOrgContext.orgSupportLine}`.trim();
 

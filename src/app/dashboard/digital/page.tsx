@@ -169,6 +169,12 @@ function getDepartmentLabel(department: DemoDepartment) {
   }
 }
 
+function applyWhyNowGovernor(base: string, modifiers: string[]) {
+  const cleanModifiers = modifiers.filter(Boolean);
+  if (!cleanModifiers.length) return base;
+  return `${base} ${cleanModifiers[0]}`;
+}
+
 function getDigitalAbeBriefing(input: {
   role: DemoRole;
   demoDepartment: DemoDepartment;
@@ -287,18 +293,22 @@ function getDigitalAbeBriefing(input: {
 
   const orgContext = getOrgContextForDepartment(orgLayer, "digital");
 
+  const whyNowModifiers:string[] = [];
+
   if (orgContext.departmentIsPressureLeader) {
-    whyNow = `${whyNow} Digital is also carrying more of the broader campaign pressure picture right now.`;
+    whyNowModifiers.push("Digital is carrying more of the broader campaign pressure picture right now.");
   } else if (orgContext.departmentIsMomentumLeader) {
-    whyNow = `${whyNow} Digital is also doing more of the broader momentum-building work right now.`;
+    whyNowModifiers.push("Digital is doing more of the broader momentum-building work right now.");
   }
+
+  whyNow = applyWhyNowGovernor(whyNow, whyNowModifiers);
 
   const supportTextBase =
     input.role === "admin"
-      ? "Use Digital Focus Mode to move content creation, spend shifts, and response handling in the right sequence while protecting performance."
+      ? "Use Digital Focus to shape allocation and protect momentum."
       : input.role === "director"
-      ? "Use Digital Focus Mode to manage content pressure, spend movement, and weaker response lanes without losing control of momentum."
-      : "Use Digital Work to keep the next content, spend, or response action clear and easy to execute.";
+      ? "Use Digital Focus to manage pressure and reinforce momentum."
+      : "Keep the next digital action clear and easy to execute.";
 
   const supportText = `${supportTextBase} ${orgContext.orgSupportLine}`;
 
@@ -552,7 +562,7 @@ export default function DigitalDashboardPage() {
         headline:
           "Digital momentum is positive, but allocation needs refinement.",
         body:
-          "TikTok and Instagram are carrying engagement strength, while X is underperforming on sentiment and Meta likely needs fresh creative to protect spend efficiency.",
+          "Digital momentum is strong, but sentiment and allocation need shaping.",
         recommendation:
           "Create new creative for Meta, move additional spend toward TikTok, and tighten response strategy on X.",
       };
@@ -563,7 +573,7 @@ export default function DigitalDashboardPage() {
         headline:
           "Your digital lane is moving, but allocation and response strategy need tightening.",
         body:
-          "The strongest digital momentum is sitting in TikTok and Instagram, while X needs better response handling and Meta needs fresher creative.",
+          "Momentum is moving, but response pressure and allocation need tighter control.",
         recommendation:
           "Refresh Meta creative, keep budget moving toward TikTok, and control the weaker response lane on X.",
       };
@@ -572,7 +582,7 @@ export default function DigitalDashboardPage() {
     return {
       headline: "Your digital lane needs clear content and spend decisions.",
       body:
-        "Focus on the immediate digital work that protects momentum and keeps weaker channels from dragging performance down.",
+        "Keep the next digital actions tight and protect momentum.",
       recommendation:
         "Ship stronger content, protect spend efficiency, and handle weak sentiment carefully.",
     };

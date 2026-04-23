@@ -360,6 +360,12 @@ function getChartDataForTimeframe(
   }
 }
 
+function applyWhyNowGovernor(base: string, modifiers: string[]) {
+  const cleanModifiers = modifiers.filter(Boolean);
+  if (!cleanModifiers.length) return base;
+  return `${base} ${cleanModifiers[0]}`;
+}
+
 function getFinanceAbeBriefing(input: {
   role: DemoRole;
   demoDepartment: DemoDepartment;
@@ -422,20 +428,24 @@ function getFinanceAbeBriefing(input: {
       "Missing employer and occupation details are blocking clean reporting, so finance needs cleanup before exports can be trusted.";
   }
 
+  const whyNowModifiers:string[] = [];
+
   if (input.orgContext?.departmentIsPressureLeader) {
-    whyNow = `${whyNow} Finance also looks like the lane carrying the most campaign-wide pressure right now.`;
+    whyNowModifiers.push("Finance is carrying the most campaign-wide pressure right now.");
   } else if (input.orgContext?.departmentIsMomentumLeader) {
-    whyNow = `${whyNow} Finance also appears to be one of the steadier campaign-wide support lanes right now.`;
+    whyNowModifiers.push("Finance is acting as a steadier campaign-wide support lane.");
   } else if (input.orgContext?.imbalanceDetected) {
-    whyNow = `${whyNow} The broader campaign read also suggests this lane needs to be interpreted in the context of wider cross-lane imbalance.`;
+    whyNowModifiers.push("Cross-lane imbalance is shaping how this finance signal should be read.");
   }
+
+  whyNow = applyWhyNowGovernor(whyNow, whyNowModifiers);
 
   const baseSupportText =
     input.role === "admin"
-      ? "Use Finance Focus Mode to convert active pledges, clean up donor compliance, and keep contribution entry from falling behind."
+      ? "Use Finance Focus to clear collection pressure and protect compliance."
       : input.role === "director"
-      ? "Use Finance Focus Mode to move collection, compliance, and entry work in the right sequence without losing control of the lane."
-      : "Use Finance Work to complete the next pledge or compliance action cleanly and move on.";
+      ? "Use Finance Focus to sequence collection and compliance cleanly."
+      : "Finish the next finance action cleanly and move on.";
 
   const supportText = [baseSupportText, input.orgContext?.orgSupportLine]
     .filter(Boolean)
@@ -1046,14 +1056,14 @@ export default function FinanceDashboardPage() {
 
   const aiSummaryBody = useMemo(() => {
     if (demoRole === "admin") {
-      return "Money is moving through the system, but open pledges and incomplete records create drag on both cash flow and export readiness.";
+      return "Open pledges and compliance gaps are creating drag in the finance lane.";
     }
 
     if (demoRole === "director") {
-      return "The lane is moving, but open pledges and incomplete donor records are slowing clean execution inside finance.";
+      return "Finance execution is moving, but collection and compliance need tighter control.";
     }
 
-    return "Focus on collecting active pledges and fixing incomplete donor records before they become larger reporting problems.";
+    return "Keep pledge collection and compliance actions tight.";
   }, [demoRole]);
 
   const aiSummaryNext = useMemo(() => {

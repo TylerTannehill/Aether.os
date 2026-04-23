@@ -126,6 +126,12 @@ function getDepartmentLabel(department: DemoDepartment) {
   }
 }
 
+function applyWhyNowGovernor(base: string, modifiers: string[]) {
+  const cleanModifiers = modifiers.filter(Boolean);
+  if (!cleanModifiers.length) return base;
+  return `${base} ${cleanModifiers[0]}`;
+}
+
 function getFieldAbeBriefing(input: {
   role: DemoRole;
   demoDepartment: DemoDepartment;
@@ -203,20 +209,24 @@ function getFieldAbeBriefing(input: {
       "The lane has real production strength right now, so the priority is converting strong canvassing output into completion and follow-up momentum.";
   }
 
+  const whyNowModifiers:string[] = [];
+
   if (input.orgContext?.departmentIsPressureLeader) {
-    whyNow = `${whyNow} Field also looks like the lane carrying the most campaign-wide pressure right now.`;
+    whyNowModifiers.push("Field is carrying the most campaign-wide pressure right now.");
   } else if (input.orgContext?.departmentIsMomentumLeader) {
-    whyNow = `${whyNow} Field also appears to be one of the steadier campaign-wide support lanes right now.`;
+    whyNowModifiers.push("Field is acting as a steadier campaign-wide support lane.");
   } else if (input.orgContext?.imbalanceDetected) {
-    whyNow = `${whyNow} The broader campaign read also suggests this lane needs to be interpreted in the context of wider cross-lane imbalance.`;
+    whyNowModifiers.push("Cross-lane imbalance is shaping how this field signal should be read.");
   }
+
+  whyNow = applyWhyNowGovernor(whyNow, whyNowModifiers);
 
   const baseSupportText =
     input.role === "admin"
-      ? "Open Field Focus Mode to work through lagging turf, strongest-canvasser allocation, and follow-up generation without losing deployment momentum."
+      ? "Use Field Focus to tighten completion and protect momentum."
       : input.role === "director"
-      ? "Use Field Focus Mode to tighten completion, route stronger canvassers, and move the best conversations into structured follow-up."
-      : "Use Field Work Mode to finish the active turf, log the best conversations clearly, and keep the next field move simple.";
+      ? "Use Field Focus to tighten deployment and move follow-up."
+      : "Finish active turf and keep next actions simple.";
 
   const supportText = [baseSupportText, input.orgContext?.orgSupportLine]
     .filter(Boolean)
@@ -482,7 +492,7 @@ export default function FieldDashboardPage() {
         headline:
           "Field production is healthy, but turf completion needs tightening.",
         body:
-          "The team is generating solid door volume and conversation rates, but lower-completion turf is creating drag on the overall field picture.",
+          "Strong canvassing volume is being slowed by completion drag.",
         recommendation:
           "Concentrate stronger canvassers in lagging turf, push unfinished packets to completion, and convert the highest-quality conversations into follow-up actions.",
         action:
@@ -495,7 +505,7 @@ export default function FieldDashboardPage() {
         headline:
           "Your field lane is productive, but lagging turf needs tighter control.",
         body:
-          "Door volume is moving, but slower-completion turf is creating drag inside the lane and needs stronger deployment decisions.",
+          "Field production is moving, but lagging turf needs tighter deployment.",
         recommendation:
           "Tighten canvasser allocation, complete lagging packets, and convert stronger conversations into follow-up.",
         action:
@@ -506,7 +516,7 @@ export default function FieldDashboardPage() {
     return {
       headline: "Your field lane needs clean completion and quick follow-up.",
       body:
-        "The work is moving, but the next few field actions matter more than the full department surface.",
+        "Keep the next field actions tight and completion clean.",
       recommendation:
         "Stay on the active turf, log good conversations clearly, and move the best interactions into follow-up.",
       action: "Focus next on completion, IDs, and immediate follow-up.",

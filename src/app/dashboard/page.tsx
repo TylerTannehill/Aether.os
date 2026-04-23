@@ -305,6 +305,16 @@ function getAbeDepartmentMeta(department: AbeDepartment) {
   }
 }
 
+function applyWhyNowGovernor(base: string, modifiers: string[]) {
+  const cleanModifiers = modifiers.filter(Boolean);
+
+  if (!cleanModifiers.length) {
+    return base;
+  }
+
+  return `${base} ${cleanModifiers[0]}`;
+}
+
 function buildAbeV1Briefing(input: {
   role: DemoRole;
   effectiveDepartment: DemoDepartment;
@@ -498,28 +508,42 @@ function buildAbeV1Briefing(input: {
       "Print readiness can unlock downstream movement, but delivery timing is becoming the constraint.";
   }
 
+  const whyNowModifiers: string[] = [];
+
   if (input.followThrough) {
     const behavior = input.followThrough.dominantBehavior;
 
     if (behavior === "ignored") {
-      whyNow = `${whyNow} A noticeable portion of work in this lane doesn’t appear to be getting picked up right now.`;
+      whyNowModifiers.push(
+        "Some work in this lane is not getting picked up."
+      );
     } else if (behavior === "attempted") {
-      whyNow = `${whyNow} There’s active effort in this lane, but it doesn’t seem to be resolving the underlying pressure yet.`;
+      whyNowModifiers.push(
+        "Effort is active, but pressure is not resolving yet."
+      );
     } else if (
       behavior === "completed" &&
       input.followThrough.completionRate > 0.7
     ) {
-      whyNow = `${whyNow} Follow-through here is starting to stabilize the situation.`;
+      whyNowModifiers.push(
+        "Follow-through is starting to stabilize the lane."
+      );
     }
   }
 
   if (input.outcomeSignals?.meaningful) {
     if (input.outcomeSignals.trend === "declining") {
-      whyNow = `${whyNow} Even with activity, progress here doesn’t look like it’s translating into resolution yet.`;
+      whyNowModifiers.push(
+        "Activity is not translating into resolution yet."
+      );
     } else if (input.outcomeSignals.trend === "improving") {
-      whyNow = `${whyNow} There are early signs this lane is starting to stabilize with recent follow-through.`;
+      whyNowModifiers.push(
+        "Recent follow-through is starting to create lift."
+      );
     }
   }
+
+  whyNow = applyWhyNowGovernor(whyNow, whyNowModifiers);
 
   const followThroughNote = input.followThrough
     ? input.followThrough.dominantBehavior === "ignored"
@@ -1921,14 +1945,14 @@ export default function DashboardPage() {
     }
 
     if (effectiveRole === "director") {
-      return `This view narrows the dashboard around ${departmentLabel(
+      return `This view narrows to ${departmentLabel(
         effectiveDepartment
-      ).toLowerCase()} so department leaders can read pressure, opportunity, and movement inside their lane.`;
+      ).toLowerCase()} so pressure and opportunity stay legible.`;
     }
 
-    return `This view strips away cross-org noise and keeps attention on the immediate ${departmentLabel(
+    return `This view strips away cross-org noise so ${departmentLabel(
       effectiveDepartment
-    ).toLowerCase()} work that an individual operator should understand and act on.`;
+    ).toLowerCase()} execution stays clear.`;
   }, [effectiveRole, effectiveDepartment, intelligenceSummary.body, abeOrgLayer.orgSupportLine]);
 
   const abeWhyNowText = useMemo(() => {
@@ -2206,7 +2230,7 @@ export default function DashboardPage() {
               ) : null}
 
               <p className="max-w-3xl text-xs text-slate-500">
-                Abe keeps the dashboard light. Abe’s Brief carries the fast strategic read. Explore Abe opens deeper campaign intelligence.
+                Dashboard shows signal. Abe’s Brief carries judgment. Explore Abe opens reasoning.
               </p>
             </div>
           </div>
