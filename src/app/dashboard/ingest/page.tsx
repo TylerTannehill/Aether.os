@@ -5,7 +5,7 @@ import { Suspense, useMemo, useState } from "react";
 import Link from "next/link";
 import { autoMapFields } from "@/lib/ingestion/mapping";
 import { parseCSV } from "@/lib/ingestion/parser";
-import { transformToContacts } from "@/lib/ingestion/activate";
+import { transformToContacts, transformToFecRecords } from "@/lib/ingestion/activate";
 
 type ImportSummaryItem = {
   name: string;
@@ -56,10 +56,18 @@ function IngestPageContent() {
     setListsCreated(0);
     setListSummary([]);
 
-    const contacts = transformToContacts(data.rows, mapping).map((contact: any) => ({
-      ...contact,
-      owner_name: ownerAssignment.trim() || contact.owner_name || null,
-    }));
+    const contacts =
+      source === "fec"
+        ? []
+        : transformToContacts(data.rows, mapping).map((contact: any) => ({
+            ...contact,
+            owner_name: ownerAssignment.trim() || contact.owner_name || null,
+          }));
+
+    const fecRecords =
+      source === "fec"
+        ? transformToFecRecords(data.rows, mapping)
+        : [];
 
     try {
       const res = await fetch("/api/actions/ingest/import", {
@@ -69,6 +77,7 @@ function IngestPageContent() {
         },
         body: JSON.stringify({
           contacts,
+          fecRecords,
           suggestedLists: interpretation?.suggestedLists || [],
           source,
         }),
@@ -216,7 +225,9 @@ function IngestPageContent() {
 
     const suggestedLists =
       (
-        source === "finance"
+        source === "fec"
+          ? []
+          : source === "finance"
           ? [
               likelyDonors > 0 ? "Likely Donors" : null,
               highValueTargets > 0 ? "High Value Donors" : null,
@@ -248,16 +259,20 @@ function IngestPageContent() {
   }, [data, source]);
 
   const primaryActionLabel =
-    source === "finance" ? "Start Donor Follow-Up" : "Start Outreach";
+    source === "finance" ? "Start Donor Follow-Up" : source === "fec" ? "Open Finance Focus" : "Start Outreach";
 
   const successBody =
     source === "finance"
       ? "Aether pushed these records into your live contact system. Start donor follow-up now, review contacts directly, or inspect lists next."
+      : source === "fec"
+      ? "Aether imported FEC records, attempted contact matching, and updated donor intelligence signals."
       : "Aether pushed these records into your live contact system. Start outreach now, review contacts directly, or inspect lists next.";
 
   const primaryActionHref =
     source === "finance"
       ? "/dashboard/outreach?channel=call"
+      : source === "fec"
+      ? "/dashboard/finance"
       : "/dashboard/outreach";
 
   return (
@@ -266,6 +281,8 @@ function IngestPageContent() {
         <h1 className="text-2xl font-semibold text-slate-900">
           {source === "finance"
             ? "Finance Data Ingestion"
+            : source === "fec"
+            ? "FEC Donor Intelligence Ingestion"
             : "Outreach Data Ingestion"}
         </h1>
         <p className="text-sm text-slate-600">
@@ -279,7 +296,7 @@ function IngestPageContent() {
           <div>
             <p className="text-sm font-medium text-slate-900">Upload CSV</p>
             <p className="mt-1 text-sm text-slate-500">
-              Bring in messy outside data and let Aether organize it.
+              {source === "fec" ? "Upload FEC-style donor contribution files for matching and anomaly detection." : "Bring in messy outside data and let Aether organize it."}
             </p>
           </div>
 
@@ -561,7 +578,7 @@ function IngestPageContent() {
               onClick={handleImport}
               className="rounded-2xl bg-slate-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
             >
-              Import Data
+              {source === "fec" ? "Import FEC Records" : "Import Data"}
             </button>
           </div>
         </>

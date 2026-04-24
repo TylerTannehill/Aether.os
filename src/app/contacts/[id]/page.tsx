@@ -7,7 +7,6 @@ import {
   ArrowRight,
   CheckCircle2,
   ClipboardList,
-  ContactRound,
   Landmark,
   ListChecks,
   MessageSquare,
@@ -20,7 +19,14 @@ import {
   createAutoTaskForOutcome,
   saveOutreachLog,
 } from "@/lib/data/outreach";
-import { ContributionRecord, PledgeRecord } from "@/lib/data/types";
+import {
+  ContactDonorIntelligence,
+  ContributionRecord,
+  PledgeRecord,
+} from "@/lib/data/types";
+import {
+  buildContactDonorIntelligence,
+} from "@/lib/finance/donor-intelligence";
 
 type Contact = {
   id: string;
@@ -33,6 +39,16 @@ type Contact = {
   party?: string | null;
   contact_code?: string | null;
   owner_name?: string | null;
+  donor_intelligence?: ContactDonorIntelligence | null;
+  fec_match_status?: ContactDonorIntelligence["fec_match_status"];
+  fec_confidence_score?: ContactDonorIntelligence["fec_confidence_score"];
+  fec_total_given?: ContactDonorIntelligence["fec_total_given"];
+  fec_last_donation_date?: ContactDonorIntelligence["fec_last_donation_date"];
+  fec_recent_activity?: ContactDonorIntelligence["fec_recent_activity"];
+  fec_donor_tier?: ContactDonorIntelligence["fec_donor_tier"];
+  jackpot_candidate?: ContactDonorIntelligence["jackpot_candidate"];
+  jackpot_anomaly_type?: ContactDonorIntelligence["jackpot_anomaly_type"];
+  jackpot_reason?: ContactDonorIntelligence["jackpot_reason"];
 };
 
 type List = {
@@ -227,6 +243,133 @@ function listTagClasses(tag: ContactListTag) {
   }
 }
 
+function fecMatchClasses(status?: ContactDonorIntelligence["fec_match_status"] | null) {
+  switch (status) {
+    case "matched":
+      return "border border-emerald-200 bg-emerald-100 text-emerald-700";
+    case "probable":
+      return "border border-amber-200 bg-amber-100 text-amber-800";
+    case "unresolved":
+      return "border border-rose-200 bg-rose-100 text-rose-700";
+    case "none":
+    default:
+      return "border border-slate-200 bg-slate-100 text-slate-700";
+  }
+}
+
+function donorTierClasses(tier?: ContactDonorIntelligence["fec_donor_tier"] | null) {
+  switch (tier) {
+    case "maxed":
+      return "border border-purple-200 bg-purple-100 text-purple-700";
+    case "major":
+      return "border border-emerald-200 bg-emerald-100 text-emerald-700";
+    case "mid":
+      return "border border-blue-200 bg-blue-100 text-blue-700";
+    case "base":
+      return "border border-slate-200 bg-slate-100 text-slate-700";
+    case "none":
+    default:
+      return "border border-slate-200 bg-slate-100 text-slate-600";
+  }
+}
+
+function formatDonorTier(tier?: ContactDonorIntelligence["fec_donor_tier"] | null) {
+  switch (tier) {
+    case "maxed":
+      return "Maxed";
+    case "major":
+      return "Major";
+    case "mid":
+      return "Mid-Level";
+    case "base":
+      return "Base";
+    case "none":
+    default:
+      return "None";
+  }
+}
+
+function formatFecMatchStatus(status?: ContactDonorIntelligence["fec_match_status"] | null) {
+  switch (status) {
+    case "matched":
+      return "Matched";
+    case "probable":
+      return "Probable";
+    case "unresolved":
+      return "Unresolved";
+    case "none":
+    default:
+      return "No Match";
+  }
+}
+
+function buildDemoDonorIntelligence(args: {
+  contact: Contact | null;
+  lifetimeContributionTotal: number;
+  activePledgeTotal: number;
+  nonCompliantContributionCount: number;
+  latestLog: OutreachLog | null;
+}): ContactDonorIntelligence {
+  const contactIntelligence = args.contact?.donor_intelligence;
+
+  if (contactIntelligence) {
+    return contactIntelligence;
+  }
+
+  const directTotal = args.lifetimeContributionTotal;
+  const fecTotal = Number(args.contact?.fec_total_given ?? directTotal + 2500);
+  const lastDonationDate =
+    args.contact?.fec_last_donation_date ??
+    (directTotal > 0 ? "2026-04-08" : null);
+  const matchStatus = args.contact?.fec_match_status ?? (directTotal > 0 ? "probable" : "none");
+  const confidenceScore = args.contact?.fec_confidence_score ?? (directTotal > 0 ? 84 : null);
+
+  const donorTier =
+    args.contact?.fec_donor_tier ??
+    (fecTotal >= 6600
+      ? "maxed"
+      : fecTotal >= 2500
+      ? "major"
+      : fecTotal >= 500
+      ? "mid"
+      : fecTotal > 0
+      ? "base"
+      : "none");
+
+  const jackpotCandidate =
+    Boolean(args.contact?.jackpot_candidate) ||
+    (fecTotal >= 2500 && !args.latestLog) ||
+    (args.activePledgeTotal > 0 && args.nonCompliantContributionCount > 0);
+
+  const jackpotType =
+    args.contact?.jackpot_anomaly_type ??
+    (jackpotCandidate
+      ? args.activePledgeTotal > 0
+        ? "pledge_gap"
+        : "high_value_unworked"
+      : "none");
+
+  const jackpotReason =
+    args.contact?.jackpot_reason ??
+    (jackpotCandidate
+      ? args.activePledgeTotal > 0
+        ? "Active pledge and compliance pressure make this contact worth working now."
+        : "High giving capacity is visible, but recent outreach is not."
+      : null);
+
+  return {
+    fec_match_status: matchStatus,
+    fec_confidence_score: confidenceScore,
+    fec_total_given: fecTotal,
+    fec_last_donation_date: lastDonationDate,
+    fec_recent_activity: Boolean(lastDonationDate),
+    fec_donor_tier: donorTier,
+    jackpot_candidate: jackpotCandidate,
+    jackpot_anomaly_type: jackpotType,
+    jackpot_reason: jackpotReason,
+  };
+}
+
 function buildContactPrioritySignal(args: {
   contactId: string;
   latestLog: OutreachLog | null;
@@ -235,6 +378,7 @@ function buildContactPrioritySignal(args: {
   nonCompliantContributionCount: number;
   openTasksCount: number;
   listCount: number;
+  donorIntelligence?: ContactDonorIntelligence | null;
 }) {
   const {
     contactId,
@@ -244,7 +388,20 @@ function buildContactPrioritySignal(args: {
     nonCompliantContributionCount,
     openTasksCount,
     listCount,
+    donorIntelligence,
   } = args;
+
+  if (donorIntelligence?.jackpot_candidate) {
+    return {
+      label: "Jackpot Anomaly",
+      description:
+        donorIntelligence.jackpot_reason ||
+        "A high-value donor signal needs attention before the opportunity cools.",
+      classes: "border border-yellow-300 bg-yellow-100 text-yellow-900",
+      actionLabel: "Open Finance Context",
+      actionHref: `#finance-overview`,
+    } satisfies ContactPrioritySignal;
+  }
 
   if (activePledgeTotal > 0) {
     return {
@@ -333,6 +490,7 @@ function buildSignalBreakdown(args: {
   nonCompliantContributionCount: number;
   openTasksCount: number;
   listCount: number;
+  donorIntelligence?: ContactDonorIntelligence | null;
 }) {
   const {
     latestLog,
@@ -340,6 +498,7 @@ function buildSignalBreakdown(args: {
     nonCompliantContributionCount,
     openTasksCount,
     listCount,
+    donorIntelligence,
   } = args;
 
   return [
@@ -373,6 +532,17 @@ function buildSignalBreakdown(args: {
         listCount > 0
           ? `Present in ${listCount} active list${listCount === 1 ? "" : "s"}`
           : "No list memberships yet",
+    },
+    {
+      label: "FEC",
+      value:
+        donorIntelligence?.fec_match_status && donorIntelligence.fec_match_status !== "none"
+          ? `${formatFecMatchStatus(donorIntelligence.fec_match_status)}${
+              donorIntelligence.fec_confidence_score
+                ? ` · ${donorIntelligence.fec_confidence_score}%`
+                : ""
+            }`
+          : "No FEC match yet",
     },
   ];
 }
@@ -683,6 +853,15 @@ export default function ContactDetailPage() {
     };
   }, [contributionHistory, pledgeHistory]);
 
+  const donorIntelligence = useMemo(() => {
+    return buildContactDonorIntelligence({
+      contact,
+      contributionHistory,
+      pledgeHistory,
+      latestLog,
+    });
+  }, [contact, contributionHistory, pledgeHistory, latestLog]);
+
   const openTasksCount = useMemo(
     () =>
       tasks.filter(
@@ -723,8 +902,9 @@ export default function ContactDetailPage() {
         nonCompliantContributionCount: financeSummary.nonCompliantContributionCount,
         openTasksCount,
         listCount: contactLists.length,
+        donorIntelligence,
       }),
-    [contactId, latestLog, financeSummary, openTasksCount, contactLists.length]
+    [contactId, latestLog, financeSummary, openTasksCount, contactLists.length, donorIntelligence]
   );
 
   const signalBreakdown = useMemo(
@@ -735,6 +915,7 @@ export default function ContactDetailPage() {
         nonCompliantContributionCount: financeSummary.nonCompliantContributionCount,
         openTasksCount,
         listCount: contactLists.length,
+        donorIntelligence,
       }),
     [
       latestLog,
@@ -742,6 +923,7 @@ export default function ContactDetailPage() {
       financeSummary.nonCompliantContributionCount,
       openTasksCount,
       contactLists.length,
+      donorIntelligence,
     ]
   );
 
@@ -848,7 +1030,7 @@ export default function ContactDetailPage() {
                   </Link>
                 </div>
 
-                <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
                   {signalBreakdown.map((signal) => (
                     <div
                       key={signal.label}
@@ -1138,6 +1320,90 @@ export default function ContactDetailPage() {
                 {financeSummary.contributionCount + financeSummary.pledgeCount}
               </p>
             </div>
+          </div>
+
+          <div className="mt-6 rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div>
+                <p className="text-sm font-medium text-emerald-800">
+                  FEC Intelligence
+                </p>
+                <h3 className="mt-1 text-xl font-semibold text-emerald-950">
+                  External donor signal attached to this contact
+                </h3>
+                <p className="mt-2 max-w-3xl text-sm text-emerald-900/80">
+                  This is the first Phase 5 receiving surface. Matching and ingestion
+                  will wire into these fields next.
+                </p>
+              </div>
+
+              {donorIntelligence.jackpot_candidate ? (
+                <span className="inline-flex rounded-full border border-yellow-300 bg-yellow-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-yellow-900">
+                  Jackpot Anomaly
+                </span>
+              ) : null}
+            </div>
+
+            <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+              <div className="rounded-2xl border border-emerald-200 bg-white p-4">
+                <p className="text-xs font-medium text-slate-500">FEC Match</p>
+                <span
+                  className={`mt-2 inline-flex rounded-full px-3 py-1 text-xs font-semibold ${fecMatchClasses(
+                    donorIntelligence.fec_match_status
+                  )}`}
+                >
+                  {formatFecMatchStatus(donorIntelligence.fec_match_status)}
+                </span>
+                <p className="mt-2 text-xs text-slate-500">
+                  {donorIntelligence.fec_confidence_score
+                    ? `${donorIntelligence.fec_confidence_score}% confidence`
+                    : "Awaiting match"}
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-emerald-200 bg-white p-4">
+                <p className="text-xs font-medium text-slate-500">FEC Lifetime</p>
+                <p className="mt-2 text-xl font-semibold text-slate-900">
+                  {currency.format(donorIntelligence.fec_total_given ?? 0)}
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-emerald-200 bg-white p-4">
+                <p className="text-xs font-medium text-slate-500">Last FEC Gift</p>
+                <p className="mt-2 text-sm font-semibold text-slate-900">
+                  {donorIntelligence.fec_last_donation_date || "—"}
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-emerald-200 bg-white p-4">
+                <p className="text-xs font-medium text-slate-500">Donor Tier</p>
+                <span
+                  className={`mt-2 inline-flex rounded-full px-3 py-1 text-xs font-semibold ${donorTierClasses(
+                    donorIntelligence.fec_donor_tier
+                  )}`}
+                >
+                  {formatDonorTier(donorIntelligence.fec_donor_tier)}
+                </span>
+              </div>
+
+              <div className="rounded-2xl border border-emerald-200 bg-white p-4">
+                <p className="text-xs font-medium text-slate-500">Opportunity</p>
+                <p className="mt-2 text-sm font-semibold text-slate-900">
+                  {donorIntelligence.jackpot_candidate
+                    ? "Review now"
+                    : donorIntelligence.fec_recent_activity
+                    ? "Recently active"
+                    : "No active anomaly"}
+                </p>
+              </div>
+            </div>
+
+            {donorIntelligence.jackpot_reason ? (
+              <div className="mt-4 rounded-2xl border border-yellow-300 bg-yellow-100 p-4 text-sm text-yellow-950">
+                <span className="font-semibold">Jackpot read:</span>{" "}
+                {donorIntelligence.jackpot_reason}
+              </div>
+            ) : null}
           </div>
 
           <div className="mt-6 grid gap-6 lg:grid-cols-2">

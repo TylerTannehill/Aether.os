@@ -8,6 +8,61 @@ export type TaskType =
   | "data_cleanup"
   | "other";
 
+export type FecMatchStatus = "matched" | "probable" | "unresolved" | "none";
+
+export type FecDonorTier = "none" | "base" | "mid" | "major" | "maxed";
+
+export type JackpotAnomalyType =
+  | "dormant_high_value_donor"
+  | "recent_external_giving"
+  | "high_value_unworked"
+  | "pledge_gap"
+  | "compliance_blocked"
+  | "none";
+
+export type ContactDonorIntelligence = {
+  fec_match_status?: FecMatchStatus | null;
+  fec_confidence_score?: number | null;
+  fec_total_given?: number | null;
+  fec_last_donation_date?: string | null;
+  fec_recent_activity?: boolean | null;
+  fec_donor_tier?: FecDonorTier | null;
+  jackpot_candidate?: boolean | null;
+  jackpot_anomaly_type?: JackpotAnomalyType | null;
+  jackpot_reason?: string | null;
+};
+
+export type FecRawRecord = {
+  id: string;
+  source_file_id?: string | null;
+  source_record_id?: string | null;
+  contributor_name: string;
+  street?: string | null;
+  city?: string | null;
+  state?: string | null;
+  zip?: string | null;
+  employer?: string | null;
+  occupation?: string | null;
+  donation_amount: number;
+  donation_date: string;
+  committee_name?: string | null;
+  committee_cycle?: string | null;
+  raw_payload?: Record<string, unknown> | null;
+  created_at?: string | null;
+};
+
+export type FecContactMatch = {
+  id: string;
+  contact_id: string;
+  fec_record_id: string;
+  match_status: FecMatchStatus;
+  confidence_score: number;
+  matched_on?: string[] | null;
+  reviewed?: boolean | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+};
+
 export type Contact = {
   id: string;
   first_name?: string | null;
@@ -18,6 +73,16 @@ export type Contact = {
   state?: string | null;
   party?: string | null;
   owner_name?: string | null;
+  donor_intelligence?: ContactDonorIntelligence | null;
+  fec_match_status?: FecMatchStatus | null;
+  fec_confidence_score?: number | null;
+  fec_total_given?: number | null;
+  fec_last_donation_date?: string | null;
+  fec_recent_activity?: boolean | null;
+  fec_donor_tier?: FecDonorTier | null;
+  jackpot_candidate?: boolean | null;
+  jackpot_anomaly_type?: JackpotAnomalyType | null;
+  jackpot_reason?: string | null;
 };
 
 export type CampaignList = {
@@ -50,6 +115,8 @@ export type ContactIntelligence = {
   nextAction: string;
   nextActionClasses: string;
   priority: number;
+  donorIntelligence?: ContactDonorIntelligence | null;
+  jackpotCandidate?: boolean;
 };
 
 export type Task = {
