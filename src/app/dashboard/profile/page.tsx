@@ -14,6 +14,7 @@ import {
   Shield,
   Trophy,
   UserCircle2,
+  Sparkles,
   Zap,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -152,7 +153,7 @@ export default function DashboardProfilePage() {
           department: departmentLabel,
           title: titleLabel,
           organizationName,
-          status: "Active today",
+          status: "Micro-reset in progress",
           tagline: "Building the operating system for execution.",
         });
       } catch (err: any) {
@@ -354,9 +355,9 @@ export default function DashboardProfilePage() {
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
-                <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-800">
-                  <CheckCircle2 className="h-3.5 w-3.5" />
-                  {profileLoading ? "Loading..." : identity.status}
+                <div className="inline-flex items-center gap-2 rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-900">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  🥔 {profileLoading ? "Loading..." : identity.status}
                 </div>
 
                 <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-900">
@@ -368,6 +369,11 @@ export default function DashboardProfilePage() {
                   <Zap className="h-3.5 w-3.5" />
                   {streaks.outreachDays} Day Outreach Streak
                 </div>
+              </div>
+
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                <span className="font-semibold">Potato status:</span> Brief reset to restore focus.
+                <span className="ml-2 text-amber-800/80">Preserving signal quality before returning to execution.</span>
               </div>
 
               <div className="flex flex-wrap gap-2">

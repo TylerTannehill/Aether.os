@@ -673,7 +673,59 @@ export default function FinanceFocusModePage() {
         </div>
       </section>
 
-      <section className="rounded-3xl border-2 border-emerald-300 bg-emerald-50 p-6 shadow-md">
+
+      <section className="rounded-3xl border-2 border-amber-300 bg-gradient-to-br from-amber-50 via-yellow-50 to-white p-6 shadow-md">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-amber-300 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-amber-800">
+              <Sparkles className="h-3.5 w-3.5" />
+              Jackpot Priority Bridge
+            </div>
+            <h2 className="mt-4 text-2xl font-semibold text-slate-900">
+              Neglected opportunity detected
+            </h2>
+            <p className="mt-2 max-w-3xl text-sm text-slate-700">
+              Aether has identified donor value currently underworked. Route high-opportunity signals into execution before normal call flow.
+            </p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div className="rounded-2xl border border-amber-200 bg-white p-4">
+              <p className="text-xs text-slate-500">Latent Value</p>
+              <p className="mt-2 text-xl font-semibold text-amber-800">$18,400</p>
+            </div>
+            <div className="rounded-2xl border border-amber-200 bg-white p-4">
+              <p className="text-xs text-slate-500">Priority Donors</p>
+              <p className="mt-2 text-xl font-semibold text-slate-900">2</p>
+            </div>
+            <div className="rounded-2xl border border-amber-200 bg-white p-4">
+              <p className="text-xs text-slate-500">Conversion Risk</p>
+              <p className="mt-2 text-xl font-semibold text-rose-700">1</p>
+            </div>
+          </div>
+        </div>
+        <div className="mt-5 rounded-2xl border border-amber-200 bg-white p-5">
+          <p className="text-xs uppercase tracking-wide text-amber-700">Abe Read</p>
+          <p className="mt-2 text-sm text-slate-700">
+            Jackpot Priority Bridge sees latent donor value sitting idle. Recommended first action: call Michael Ross pledge now.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link
+              href="/dashboard/finance/jackpot"
+              className="rounded-xl bg-amber-500 px-3 py-2 text-xs font-medium text-white transition hover:bg-amber-600"
+            >
+              Open Jackpot Queue
+            </Link>
+            <a
+              href="#finance-call-time"
+              className="rounded-xl border border-amber-300 bg-white px-3 py-2 text-xs font-medium text-amber-800 transition hover:bg-amber-50"
+            >
+              Route to Call Session
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section id="finance-call-time" className="rounded-3xl border-2 border-emerald-300 bg-emerald-50 p-6 shadow-md">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-xs font-medium text-emerald-800">
