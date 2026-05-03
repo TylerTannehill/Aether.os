@@ -176,6 +176,98 @@ type AdminActionView = {
   };
 };
 
+type OperatingDepartment =
+  | "admin"
+  | "campaign"
+  | "outreach"
+  | "finance"
+  | "field"
+  | "digital"
+  | "print";
+
+type OperatingRoleLevel = "admin" | "campaign_manager" | "director" | "user";
+
+type OrgMemberRole = {
+  id?: string;
+  organization_member_id: string;
+  organization_id?: string | null;
+  department: OperatingDepartment | string;
+  role_level: OperatingRoleLevel | string;
+  is_primary: boolean;
+};
+
+type OrgMemberRecord = {
+  id: string;
+  user_id?: string | null;
+  email?: string | null;
+  role?: string | null;
+  department?: string | null;
+  title?: string | null;
+  organization_id?: string | null;
+};
+
+type RoleDraft = {
+  department: OperatingDepartment;
+  role_level: OperatingRoleLevel;
+  is_primary: boolean;
+};
+
+const DEPARTMENT_OPTIONS: { value: OperatingDepartment; label: string }[] = [
+  { value: "admin", label: "Admin" },
+  { value: "campaign", label: "Campaign" },
+  { value: "finance", label: "Finance" },
+  { value: "field", label: "Field" },
+  { value: "outreach", label: "Outreach" },
+  { value: "digital", label: "Digital" },
+  { value: "print", label: "Print" },
+];
+
+const ROLE_LEVEL_OPTIONS: { value: OperatingRoleLevel; label: string }[] = [
+  { value: "admin", label: "Admin" },
+  { value: "campaign_manager", label: "Campaign Manager" },
+  { value: "director", label: "Director" },
+  { value: "user", label: "User" },
+];
+
+function formatRoleText(value?: string | null) {
+  if (!value) return "Unassigned";
+
+  return value
+    .split("_")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function getMemberDisplayName(member: OrgMemberRecord) {
+  return (
+    member.email ||
+    member.title ||
+    member.user_id ||
+    `Member ${member.id.slice(0, 6)}`
+  );
+}
+
+function buildDefaultRoleFromMember(member?: OrgMemberRecord | null): RoleDraft {
+  const department = String(member?.department || "campaign").toLowerCase();
+  const role = String(member?.role || "user").toLowerCase();
+
+  return {
+    department: DEPARTMENT_OPTIONS.some((item) => item.value === department)
+      ? (department as OperatingDepartment)
+      : "campaign",
+    role_level:
+      role === "admin"
+        ? "admin"
+        : role === "director"
+          ? "director"
+          : role === "campaign_manager"
+            ? "campaign_manager"
+            : "user",
+    is_primary: false,
+  };
+}
+
 const AUTONOMY_CONFIG_STORAGE_KEY = "aether_autonomy_config";
 const POLICY_VERSION_STORAGE_KEY = "aether_policy_versions";
 
@@ -405,34 +497,179 @@ const [adminCommandMessage, setAdminCommandMessage] = useState("");
 const [selectedAdminFocusTaskId, setSelectedAdminFocusTaskId] =
   useState("admin-focus-1");
 const [advancedOpen, setAdvancedOpen] = useState(false);
-const [inviteEmail, setInviteEmail] = useState("");
-const [inviteRole, setInviteRole] = useState<"admin" | "director" | "general_user">("general_user");
-const [orgMembers, setOrgMembers] = useState<
-  { id: string; email: string; role: "admin" | "director" | "general_user" }[]
->([
-  { id: "member-1", email: "admin@aetherdemo.com", role: "admin" },
-  { id: "member-2", email: "director@aetherdemo.com", role: "director" },
-]);
+const [orgMembersLoading, setOrgMembersLoading] = useState(false);
+const [organizationId, setOrganizationId] = useState<string | null>(null);
+const [orgMembers, setOrgMembers] = useState<OrgMemberRecord[]>([]);
+const [orgMemberRoles, setOrgMemberRoles] = useState<OrgMemberRole[]>([]);
+const [roleDrafts, setRoleDrafts] = useState<Record<string, RoleDraft>>({});
+const [savingMemberId, setSavingMemberId] = useState<string | null>(null);
 
-function handleMockInviteUser() {
-  const normalized = inviteEmail.trim().toLowerCase();
+async function loadOrgMembers() {
+  try {
+    setOrgMembersLoading(true);
 
-  if (!normalized) {
-    setMessage("Enter an email to invite a user.");
+    const response = await fetch("/api/admin/org-members", {
+      method: "GET",
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      setMessage(data?.error || "Failed to load organization members.");
+      return;
+    }
+
+    const members = Array.isArray(data.members) ? data.members : [];
+
+    setOrganizationId(data.organizationId || null);
+    setOrgMembers(members);
+    setOrgMemberRoles(Array.isArray(data.roles) ? data.roles : []);
+    setRoleDrafts((current) => {
+      const next = { ...current };
+
+      members.forEach((member: OrgMemberRecord) => {
+        if (!next[member.id]) {
+          next[member.id] = buildDefaultRoleFromMember(member);
+        }
+      });
+
+      return next;
+    });
+  } catch (err: any) {
+    setMessage(err?.message || "Failed to load organization members.");
+  } finally {
+    setOrgMembersLoading(false);
+  }
+}
+
+function getRolesForMember(memberId: string) {
+  return orgMemberRoles.filter(
+    (role) => role.organization_member_id === memberId
+  );
+}
+
+function updateRoleDraft(memberId: string, updates: Partial<RoleDraft>) {
+  setRoleDrafts((current) => ({
+    ...current,
+    [memberId]: {
+      ...(current[memberId] || buildDefaultRoleFromMember()),
+      ...updates,
+    },
+  }));
+}
+
+async function saveRolesForMember(member: OrgMemberRecord, roles: OrgMemberRole[]) {
+  if (!organizationId && !member.organization_id) {
+    setMessage("No organization id found for this member.");
+    return false;
+  }
+
+  try {
+    setSavingMemberId(member.id);
+    setMessage("");
+
+    const response = await fetch("/api/admin/member-roles", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        organization_member_id: member.id,
+        organization_id: organizationId || member.organization_id,
+        roles: roles.map((role) => ({
+          department: role.department,
+          role_level: role.role_level,
+          is_primary: Boolean(role.is_primary),
+        })),
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      setMessage(data?.error || "Failed to save member roles.");
+      return false;
+    }
+
+    await loadOrgMembers();
+    setMessage(`Roles updated for ${getMemberDisplayName(member)}.`);
+    return true;
+  } catch (err: any) {
+    setMessage(err?.message || "Failed to save member roles.");
+    return false;
+  } finally {
+    setSavingMemberId(null);
+  }
+}
+
+async function handleAddRole(member: OrgMemberRecord) {
+  const draft = roleDrafts[member.id] || buildDefaultRoleFromMember(member);
+  const existingRoles = getRolesForMember(member.id);
+  const roleExists = existingRoles.some(
+    (role) =>
+      role.department === draft.department &&
+      role.role_level === draft.role_level
+  );
+
+  if (roleExists) {
+    setMessage("That operating role already exists for this member.");
     return;
   }
 
-  setOrgMembers((current) => [
+  const nextRoles = [
+    ...existingRoles.map((role) => ({
+      ...role,
+      is_primary: draft.is_primary ? false : role.is_primary,
+    })),
     {
-      id: `member-${current.length + 1}`,
-      email: normalized,
-      role: inviteRole,
+      organization_member_id: member.id,
+      organization_id: organizationId || member.organization_id,
+      department: draft.department,
+      role_level: draft.role_level,
+      is_primary: draft.is_primary || existingRoles.length === 0,
     },
-    ...current,
-  ]);
-  setInviteEmail("");
-  setInviteRole("general_user");
-  setMessage(`Mock invite created for ${normalized}.`);
+  ];
+
+  await saveRolesForMember(member, nextRoles);
+}
+
+async function handleRemoveRole(member: OrgMemberRecord, roleId?: string) {
+  if (!roleId) return;
+
+  try {
+    setSavingMemberId(member.id);
+    setMessage("");
+
+    const response = await fetch(
+      `/api/admin/member-roles?role_id=${encodeURIComponent(roleId)}`,
+      { method: "DELETE" }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      setMessage(data?.error || "Failed to remove member role.");
+      return;
+    }
+
+    await loadOrgMembers();
+    setMessage(`Role removed for ${getMemberDisplayName(member)}.`);
+  } catch (err: any) {
+    setMessage(err?.message || "Failed to remove member role.");
+  } finally {
+    setSavingMemberId(null);
+  }
+}
+
+async function handleSetPrimaryRole(member: OrgMemberRecord, primaryRole: OrgMemberRole) {
+  const existingRoles = getRolesForMember(member.id);
+
+  const nextRoles = existingRoles.map((role) => ({
+    ...role,
+    is_primary: role.id === primaryRole.id,
+  }));
+
+  await saveRolesForMember(member, nextRoles);
 }
 
   const { ownerFilter } = useDashboardOwner();
@@ -448,6 +685,10 @@ function handleMockInviteUser() {
 
   useEffect(() => {
     loadAuditLog();
+  }, []);
+
+  useEffect(() => {
+    loadOrgMembers();
   }, []);
 
   useEffect(() => {
@@ -1365,60 +1606,168 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
 
       <section className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="mb-5">
-            <p className="text-sm font-medium text-slate-500">Organization Control</p>
-            <h2 className="text-2xl font-semibold text-slate-900">
-              Manage users and org access
-            </h2>
-            <p className="mt-2 text-sm text-slate-600">
-              Add users to the organization and assign their access level. This invite flow is mocked for now so the surface exists before backend wiring.
-            </p>
-          </div>
-
-          <div className="grid gap-3 md:grid-cols-[1.2fr_0.8fr_auto]">
-            <input
-              value={inviteEmail}
-              onChange={(event) => setInviteEmail(event.target.value)}
-              placeholder="name@campaign.org"
-              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none ring-0 placeholder:text-slate-400"
-            />
-
-            <select
-              value={inviteRole}
-              onChange={(event) =>
-                setInviteRole(event.target.value as "admin" | "director" | "general_user")
-              }
-              className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none"
-            >
-              <option value="admin">admin</option>
-              <option value="director">director</option>
-              <option value="general_user">general user</option>
-            </select>
+          <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="text-sm font-medium text-slate-500">Organization Control</p>
+              <h2 className="text-2xl font-semibold text-slate-900">
+                Manage operating roles
+              </h2>
+              <p className="mt-2 text-sm text-slate-600">
+                Assign the real operating lanes that drive visibility, Focus routing, and under-the-surface coordination. Members can hold multiple roles across departments.
+              </p>
+            </div>
 
             <button
-              onClick={handleMockInviteUser}
-              className="rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
+              onClick={loadOrgMembers}
+              disabled={orgMembersLoading}
+              className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Invite User
+              {orgMembersLoading ? "Refreshing Members..." : "Refresh Members"}
             </button>
           </div>
 
-          <div className="mt-5 space-y-3">
-            {orgMembers.map((member) => (
-              <div
-                key={member.id}
-                className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between"
-              >
-                <div>
-                  <p className="text-sm font-medium text-slate-900">{member.email}</p>
-                  <p className="mt-1 text-xs text-slate-500">Org member</p>
-                </div>
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+            <span className="font-semibold">Role model:</span> assign department + level pairs, not a single user type. A finance director can also be a field user, print user, or campaign manager while the org grows.
+          </div>
 
-                <span className="inline-flex w-fit rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-700">
-                  {member.role.replaceAll("_", " ")}
-                </span>
+          <div className="mt-5 space-y-4">
+            {orgMembers.length === 0 ? (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                {orgMembersLoading
+                  ? "Loading organization members..."
+                  : "No organization members found yet. Confirm the signed-in user has an organization_members row."}
               </div>
-            ))}
+            ) : null}
+
+            {orgMembers.map((member) => {
+              const roles = getRolesForMember(member.id);
+              const primaryRole = roles.find((role) => role.is_primary) || roles[0];
+              const draft = roleDrafts[member.id] || buildDefaultRoleFromMember(member);
+              const isSaving = savingMemberId === member.id;
+
+              return (
+                <div
+                  key={member.id}
+                  className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                >
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900">
+                        {getMemberDisplayName(member)}
+                      </p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        Member ID: {member.id}
+                      </p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        Base membership: {formatRoleText(member.role)} • {member.department || "No department"}
+                      </p>
+                    </div>
+
+                    <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700">
+                      Primary: {primaryRole ? `${formatRoleText(primaryRole.department)} / ${formatRoleText(primaryRole.role_level)}` : "Not set"}
+                    </div>
+                  </div>
+
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {roles.length === 0 ? (
+                      <span className="inline-flex rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600">
+                        No operating roles assigned
+                      </span>
+                    ) : null}
+
+                    {roles.map((role) => (
+                      <span
+                        key={role.id || `${role.organization_member_id}-${role.department}-${role.role_level}`}
+                        className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${
+                          role.is_primary
+                            ? "border-indigo-200 bg-indigo-50 text-indigo-900"
+                            : "border-slate-200 bg-white text-slate-700"
+                        }`}
+                      >
+                        {formatRoleText(role.department)} / {formatRoleText(role.role_level)}
+                        {role.is_primary ? " • primary" : ""}
+                        {!role.is_primary ? (
+                          <button
+                            type="button"
+                            onClick={() => handleSetPrimaryRole(member, role)}
+                            disabled={isSaving}
+                            className="text-indigo-700 underline-offset-2 hover:underline disabled:opacity-50"
+                          >
+                            make primary
+                          </button>
+                        ) : null}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveRole(member, role.id)}
+                          disabled={isSaving}
+                          className="text-rose-700 underline-offset-2 hover:underline disabled:opacity-50"
+                        >
+                          remove
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="mt-4 grid gap-3 md:grid-cols-[1fr_1fr_auto_auto]">
+                    <select
+                      value={draft.department}
+                      onChange={(event) =>
+                        updateRoleDraft(member.id, {
+                          department: event.target.value as OperatingDepartment,
+                        })
+                      }
+                      className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none"
+                    >
+                      {DEPARTMENT_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+
+                    <select
+                      value={draft.role_level}
+                      onChange={(event) =>
+                        updateRoleDraft(member.id, {
+                          role_level: event.target.value as OperatingRoleLevel,
+                        })
+                      }
+                      className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none"
+                    >
+                      {ROLE_LEVEL_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        updateRoleDraft(member.id, {
+                          is_primary: !draft.is_primary,
+                        })
+                      }
+                      className={`rounded-2xl border px-4 py-3 text-sm font-medium transition ${
+                        draft.is_primary
+                          ? "border-indigo-200 bg-indigo-50 text-indigo-900"
+                          : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                      }`}
+                    >
+                      {draft.is_primary ? "Primary" : "Set Primary"}
+                    </button>
+
+                    <button
+                      onClick={() => handleAddRole(member)}
+                      disabled={isSaving}
+                      className="rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {isSaving ? "Saving..." : "Add Role"}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </section>
 

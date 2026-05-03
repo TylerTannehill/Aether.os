@@ -9,6 +9,12 @@ import {
   decideBrainItems,
 } from "./decision-engine";
 
+export type AbeAlignmentContext = {
+  primaryLane?: string | null;
+  pressureLane?: string | null;
+  opportunityLane?: string | null;
+};
+
 export type BrainOrchestratorTaskInput = {
   id: string;
   title: string;
@@ -85,6 +91,7 @@ export type BrainOrchestratorInput = {
   opportunities?: BrainOrchestratorOpportunityInput[];
   ownerDirectory?: Record<string, string>;
   weights?: BrainDecisionWeights;
+  abeContext?: AbeAlignmentContext | null;
 };
 
 export type BrainRankedTask = BrainOrchestratorTaskInput & {
@@ -131,6 +138,7 @@ export type BrainOrchestratorResult = {
   autoExecutableNow: BrainDecisionResult[];
   summary: BrainTopLineSummary;
 };
+
 function safeText(value: string | null | undefined): string | null {
   const trimmed = (value ?? "").trim();
   return trimmed.length ? trimmed : null;
@@ -152,7 +160,9 @@ function buildTaskDescription(task: BrainOrchestratorTaskInput): string | null {
 function buildOpportunityDescription(
   opportunity: BrainOrchestratorOpportunityInput
 ): string | null {
-  if (safeText(opportunity.description)) return safeText(opportunity.description);
+  if (safeText(opportunity.description)) {
+    return safeText(opportunity.description);
+  }
 
   const parts = [
     opportunity.department ? `Department: ${opportunity.department}` : null,
@@ -234,7 +244,9 @@ function normalizeOpportunityToRawItem(
     ownerName,
     ownerRole: opportunity.owner_role ?? null,
     metric:
-      typeof opportunity.estimated_value === "number" ? "estimated_value" : null,
+      typeof opportunity.estimated_value === "number"
+        ? "estimated_value"
+        : null,
     dueAt: opportunity.due_at ?? null,
     createdAt: opportunity.created_at ?? null,
     updatedAt: opportunity.updated_at ?? null,
@@ -280,6 +292,7 @@ function attachDecisionToOpportunity(
     brain_auto_execute: decision.shouldAutoExecute,
   };
 }
+
 function buildSummary(decisions: BrainDecisionResult[]): BrainTopLineSummary {
   return decisions.reduce<BrainTopLineSummary>(
     (summary, decision) => {
@@ -292,7 +305,9 @@ function buildSummary(decisions: BrainDecisionResult[]): BrainTopLineSummary {
 
       if (decision.shouldSurface) summary.surfaced += 1;
       if (decision.shouldAutoExecute) summary.autoExecutable += 1;
-      if (decision.context.failureType === "blocked_dependency") summary.blocked += 1;
+      if (decision.context.failureType === "blocked_dependency") {
+        summary.blocked += 1;
+      }
       if (decision.context.hasFallback) summary.fallback += 1;
 
       return summary;
@@ -329,10 +344,12 @@ export function buildBrainOrchestratorResult(
   );
 
   const rawItems = [...taskRawItems, ...opportunityRawItems];
-  const contexts = enrichBrainItems(rawItems);
+  const contexts = (enrichBrainItems as any)(rawItems, input.abeContext ?? null) as BrainContext[];
   const decisions = decideBrainItems(contexts, input.weights);
 
-  const decisionMap = new Map(decisions.map((decision) => [decision.itemId, decision]));
+  const decisionMap = new Map(
+    decisions.map((decision) => [decision.itemId, decision])
+  );
 
   const rankedTasks = tasks
     .map((task) => {
@@ -350,10 +367,13 @@ export function buildBrainOrchestratorResult(
     })
     .filter((item): item is BrainRankedOpportunity => Boolean(item));
 
-  const topActions = decisions.filter((decision) => decision.shouldSurface).slice(0, 10);
+  const topActions = decisions
+    .filter((decision) => decision.shouldSurface)
+    .slice(0, 10);
 
   const criticalQueue = decisions.filter(
-    (decision) => decision.tier === "critical" || decision.context.failureType !== null
+    (decision) =>
+      decision.tier === "critical" || decision.context.failureType !== null
   );
 
   const reviewQueue = decisions.filter(

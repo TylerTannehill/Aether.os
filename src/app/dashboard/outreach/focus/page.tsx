@@ -77,6 +77,43 @@ type OutreachOutcome =
   | "wrong_time"
   | "completed";
 
+type OrgMemberRole = {
+  id?: string;
+  organization_member_id: string;
+  organization_id?: string | null;
+  department: string;
+  role_level: string;
+  is_primary?: boolean | null;
+};
+
+type OrgMemberRecord = {
+  id: string;
+  user_id?: string | null;
+  role?: string | null;
+  department?: string | null;
+  title?: string | null;
+  organization_id?: string | null;
+};
+
+function normalizeRoleText(value?: string | null) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "_");
+}
+
+function formatRoleText(value?: string | null) {
+  const normalized = normalizeRoleText(value);
+
+  if (!normalized) return "Member";
+
+  return normalized
+    .split("_")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
 
 function normalizeOwner(value?: string | null) {
   return value?.trim() || "Unassigned";
@@ -169,9 +206,112 @@ function OutreachFocusContent() {
 
   const [message, setMessage] = useState("");
   const [notes, setNotes] = useState("");
+  const [roleLoading, setRoleLoading] = useState(true);
+  const [hasOutreachAccess, setHasOutreachAccess] = useState(false);
+  const [hasOutreachDirector, setHasOutreachDirector] = useState(false);
+  const [outreachAccessLabel, setOutreachAccessLabel] =
+    useState("Checking access");
 
   useEffect(() => {
     loadWorkspace();
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadRoleContext() {
+      try {
+        const response = await fetch("/api/admin/org-members");
+        const payload = await response.json();
+
+        if (!mounted) return;
+
+        if (!response.ok) {
+          setHasOutreachAccess(false);
+          setHasOutreachDirector(false);
+          setOutreachAccessLabel("No org role detected");
+          return;
+        }
+
+        const currentMember = payload.currentMember as OrgMemberRecord | null;
+        const roles = Array.isArray(payload.roles)
+          ? (payload.roles as OrgMemberRole[])
+          : [];
+
+        if (!currentMember?.id) {
+          setHasOutreachAccess(false);
+          setHasOutreachDirector(false);
+          setOutreachAccessLabel("No org role detected");
+          return;
+        }
+
+        const myRoles = roles.filter(
+          (role) => role.organization_member_id === currentMember.id
+        );
+
+        const normalizedBaseRole = normalizeRoleText(currentMember.role);
+        const isAdmin = normalizedBaseRole === "admin";
+        const isDirector = normalizedBaseRole === "director";
+        const hasAssignedRoles = myRoles.length > 0;
+        const hasOutreachRole = myRoles.some(
+          (role) => normalizeRoleText(role.department) === "outreach"
+        );
+        const hasDirectorRole = myRoles.some((role) => {
+          const department = normalizeRoleText(role.department);
+          const level = normalizeRoleText(role.role_level);
+
+          return (
+            department === "outreach" &&
+            ["director", "admin", "campaign_manager"].includes(level)
+          );
+        });
+
+        // Outreach is the shared contact/list/call execution hub, so any
+        // real org member or assigned operating role should be allowed in.
+        const accessAllowed = Boolean(
+          isAdmin || isDirector || hasAssignedRoles || hasOutreachRole
+        );
+
+        setHasOutreachAccess(accessAllowed);
+        setHasOutreachDirector(Boolean(isAdmin || isDirector || hasDirectorRole));
+
+        if (isAdmin) {
+          setOutreachAccessLabel("Admin Access");
+        } else if (hasDirectorRole || isDirector) {
+          setOutreachAccessLabel("Outreach Director Access");
+        } else if (hasOutreachRole) {
+          setOutreachAccessLabel("Outreach Role Access");
+        } else if (hasAssignedRoles) {
+          const primaryRole =
+            myRoles.find((role) => role.is_primary) || myRoles[0];
+          setOutreachAccessLabel(
+            `${formatRoleText(primaryRole.department)} ${formatRoleText(
+              primaryRole.role_level
+            )} Access`
+          );
+        } else {
+          setOutreachAccessLabel(`${formatRoleText(currentMember.role)} Access`);
+        }
+      } catch (error) {
+        console.error("Failed to load outreach role context:", error);
+
+        if (!mounted) return;
+
+        setHasOutreachAccess(false);
+        setHasOutreachDirector(false);
+        setOutreachAccessLabel("Access unavailable");
+      } finally {
+        if (mounted) {
+          setRoleLoading(false);
+        }
+      }
+    }
+
+    loadRoleContext();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   async function loadWorkspace() {
@@ -597,11 +737,40 @@ function OutreachFocusContent() {
     }
   }
 
-  if (loading) {
+  if (loading || roleLoading) {
     return (
       <div className="space-y-8">
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <p className="text-slate-600">Loading outreach focus workspace...</p>
+        </section>
+      </div>
+    );
+  }
+
+  if (!hasOutreachAccess) {
+    return (
+      <div className="space-y-8">
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-sm">
+          <div className="mx-auto max-w-xl">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-600">
+              <Users className="h-5 w-5" />
+            </div>
+            <h1 className="mt-4 text-2xl font-semibold text-slate-900">
+              No Outreach Access Available
+            </h1>
+            <p className="mt-2 text-sm text-slate-600">
+              Outreach is the shared contact, list, and call execution hub. You
+              need an active organization role before this workspace can route
+              work to you.
+            </p>
+            <Link
+              href="/dashboard"
+              className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
+            >
+              Back to Dashboard
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         </section>
       </div>
     );
@@ -625,12 +794,19 @@ function OutreachFocusContent() {
                 Contacts first. Follow-ups stay active. Lists stay within reach.
               </p>
 
-              {selectedList ? (
-                <div className="inline-flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-900">
-                  <ListChecks className="h-4 w-4" />
-                  Focusing list: {selectedList.name}
+              <div className="flex flex-wrap gap-2">
+                {selectedList ? (
+                  <div className="inline-flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-900">
+                    <ListChecks className="h-4 w-4" />
+                    Focusing list: {selectedList.name}
+                  </div>
+                ) : null}
+
+                <div className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-3 py-2 text-sm font-medium text-slate-100">
+                  <Users className="h-4 w-4" />
+                  {outreachAccessLabel}
                 </div>
-              ) : null}
+              </div>
             </div>
           </div>
 
@@ -673,6 +849,11 @@ function OutreachFocusContent() {
             </h2>
             <p className="mt-1 max-w-2xl text-sm text-slate-600">
               Contact flow is steady. Follow-up demand is manageable.
+            </p>
+            <p className="mt-2 text-xs text-slate-500">
+              {hasOutreachDirector
+                ? "Director-level outreach context is available for this operator."
+                : "Shared outreach execution is scoped through this operator’s assigned roles."}
             </p>
           </div>
         </div>

@@ -5,16 +5,18 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Activity,
   ArrowRight,
+  AlertTriangle,
   Bell,
   Bot,
   Briefcase,
-  CheckCircle2,
   Clock3,
   Flame,
+  ListChecks,
   Shield,
   Trophy,
   UserCircle2,
   Sparkles,
+  TrendingUp,
   Zap,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -33,6 +35,30 @@ type LiveProfile = {
   tagline: string;
 };
 
+type OrgRole = {
+  id: string;
+  organization_member_id: string;
+  organization_id: string;
+  department: string;
+  role_level: string;
+  is_primary?: boolean | null;
+};
+
+type AbeProfileLane = {
+  key: string;
+  label: string;
+  detail: string;
+  href: string;
+  tone: string;
+};
+
+type AbeProfileRead = {
+  primary: AbeProfileLane;
+  pressure: AbeProfileLane;
+  opportunity: AbeProfileLane;
+  whyNow: string;
+};
+
 function formatRoleLabel(role?: string | null) {
   if (!role) return "Member";
 
@@ -42,6 +68,39 @@ function formatRoleLabel(role?: string | null) {
     .split("_")
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
+}
+
+function formatDepartmentLabel(department?: string | null) {
+  const value = String(department || "").trim();
+  if (!value) return "General";
+
+  return value
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function buildRoleBadgeLabel(role: OrgRole) {
+  const department = formatDepartmentLabel(role.department);
+  const level = formatRoleLabel(role.role_level);
+
+  if (department.toLowerCase() === "admin") {
+    return level === "Admin" ? "Admin" : level;
+  }
+
+  return `${department} ${level}`;
+}
+
+function roleTone(role: OrgRole) {
+  const department = String(role.department || "").toLowerCase();
+
+  if (department === "finance") return "border-emerald-200 bg-emerald-50 text-emerald-900";
+  if (department === "field") return "border-sky-200 bg-sky-50 text-sky-900";
+  if (department === "digital") return "border-purple-200 bg-purple-50 text-purple-900";
+  if (department === "print") return "border-amber-200 bg-amber-50 text-amber-900";
+  if (department === "admin") return "border-slate-300 bg-slate-900 text-white";
+
+  return "border-slate-200 bg-slate-50 text-slate-800";
 }
 
 function buildInitials(name: string) {
@@ -54,6 +113,58 @@ function buildInitials(name: string) {
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
 
   return `${parts[0][0] ?? ""}${parts[1][0] ?? ""}`.toUpperCase();
+}
+
+function buildLaneMeta(department: string): AbeProfileLane {
+  const key = String(department || "outreach").toLowerCase();
+
+  if (key.includes("finance")) {
+    return {
+      key: "finance",
+      label: "Finance",
+      detail: "Donor follow-through",
+      href: "/dashboard/finance/focus",
+      tone: "border-emerald-200 bg-emerald-50 text-emerald-900",
+    };
+  }
+
+  if (key.includes("field")) {
+    return {
+      key: "field",
+      label: "Field",
+      detail: "Coverage and follow-up",
+      href: "/dashboard/field/focus",
+      tone: "border-sky-200 bg-sky-50 text-sky-900",
+    };
+  }
+
+  if (key.includes("digital")) {
+    return {
+      key: "digital",
+      label: "Digital",
+      detail: "Content and conversation shaping",
+      href: "/dashboard/digital/focus",
+      tone: "border-purple-200 bg-purple-50 text-purple-900",
+    };
+  }
+
+  if (key.includes("print")) {
+    return {
+      key: "print",
+      label: "Print",
+      detail: "Approvals and delivery",
+      href: "/dashboard/print/focus",
+      tone: "border-amber-200 bg-amber-50 text-amber-900",
+    };
+  }
+
+  return {
+    key: "outreach",
+    label: "Outreach",
+    detail: "Contact and list movement",
+    href: "/dashboard/outreach/focus",
+    tone: "border-slate-200 bg-slate-50 text-slate-900",
+  };
 }
 
 function getDisplayNameFromUser(user: any) {
@@ -86,6 +197,7 @@ export default function DashboardProfilePage() {
   const [profileLoading, setProfileLoading] = useState(true);
   const [profileError, setProfileError] = useState("");
   const [liveProfile, setLiveProfile] = useState<LiveProfile | null>(null);
+  const [orgRoles, setOrgRoles] = useState<OrgRole[]>([]);
 
   useEffect(() => {
     let isMounted = true;
@@ -129,6 +241,24 @@ export default function DashboardProfilePage() {
           throw membershipError;
         }
 
+        let currentUserRoles: OrgRole[] = [];
+
+        try {
+          const roleResponse = await fetch("/api/admin/org-members");
+          const roleData = await roleResponse.json();
+
+          if (roleResponse.ok) {
+            const currentMemberId = roleData?.currentMember?.id;
+            const roles = Array.isArray(roleData?.roles) ? roleData.roles : [];
+
+            currentUserRoles = roles.filter(
+              (role: OrgRole) => role.organization_member_id === currentMemberId
+            );
+          }
+        } catch (roleError) {
+          console.error("Failed to load profile role badges:", roleError);
+        }
+
         const displayName = getDisplayNameFromUser(user);
         const orgRecord = Array.isArray(membership?.organizations)
           ? membership?.organizations?.[0]
@@ -144,6 +274,8 @@ export default function DashboardProfilePage() {
         const titleLabel = membership?.title || "No title assigned";
 
         if (!isMounted) return;
+
+        setOrgRoles(currentUserRoles);
 
         setLiveProfile({
           email: String(user.email || ""),
@@ -189,6 +321,40 @@ export default function DashboardProfilePage() {
     );
   }, [liveProfile]);
 
+  const primaryRole = useMemo(() => {
+    return orgRoles.find((role) => role.is_primary) ?? orgRoles[0] ?? null;
+  }, [orgRoles]);
+
+  const roleBadges = useMemo(() => {
+    if (orgRoles.length === 0) {
+      return [
+        {
+          label: `${identity.department} ${identity.role}`.trim(),
+          tone: "border-slate-200 bg-slate-50 text-slate-800",
+          isPrimary: true,
+        },
+      ];
+    }
+
+    return orgRoles.map((role) => ({
+      label: buildRoleBadgeLabel(role),
+      tone: roleTone(role),
+      isPrimary: Boolean(role.is_primary),
+    }));
+  }, [identity.department, identity.role, orgRoles]);
+
+  const activeDepartments = useMemo(() => {
+    const departments = orgRoles
+      .map((role) => String(role.department || "").toLowerCase())
+      .filter((department) => department && department !== "admin");
+
+    if (departments.length === 0 && identity.department) {
+      return [identity.department.toLowerCase()];
+    }
+
+    return Array.from(new Set(departments));
+  }, [identity.department, orgRoles]);
+
   const operatorStats = useMemo(() => {
     return {
       completedActions: 42,
@@ -208,6 +374,148 @@ export default function DashboardProfilePage() {
     };
   }, []);
 
+  const currentFocus = useMemo(() => {
+    const department = String(primaryRole?.department || identity.department).toLowerCase();
+
+    if (department.includes("finance")) {
+      return {
+        lane: "Finance",
+        detail: "Donor Calls",
+        priorityCount: 3,
+        note: "High-value follow-ups are ready for execution in Focus Mode.",
+        href: "/dashboard/finance/focus",
+      };
+    }
+
+    if (department.includes("field")) {
+      return {
+        lane: "Field",
+        detail: "Coverage Push",
+        priorityCount: 2,
+        note: "Active turf and follow-up work are queued for execution.",
+        href: "/dashboard/field/focus",
+      };
+    }
+
+    if (department.includes("print")) {
+      return {
+        lane: "Print",
+        detail: "Asset Support",
+        priorityCount: 2,
+        note: "Approval, inventory, and delivery work are queued for execution.",
+        href: "/dashboard/print/focus",
+      };
+    }
+
+    return {
+      lane: "Operations",
+      detail: "Focus Queue",
+      priorityCount: operatorStats.openItems,
+      note: "Open work is ready in Focus Mode based on your role and department context.",
+      href: "/dashboard/focus",
+    };
+  }, [identity.department, operatorStats.openItems, primaryRole]);
+
+  const activeWorkContext = useMemo(() => {
+    const contexts = [
+      {
+        key: "finance",
+        name: "Donor Calls",
+        count: 12,
+        lane: "Finance",
+        summary: "Primary donor call and pledge conversion lane tied to Finance Focus.",
+        href: "/dashboard/finance/focus",
+        tone: "border-emerald-200 bg-emerald-50 text-emerald-900",
+      },
+      {
+        key: "field",
+        name: "Turf Completion",
+        count: 48,
+        lane: "Field",
+        summary: "Coverage and follow-up work currently shaping Field Focus.",
+        href: "/dashboard/field/focus",
+        tone: "border-sky-200 bg-sky-50 text-sky-900",
+      },
+      {
+        key: "digital",
+        name: "Content + Replies",
+        count: 6,
+        lane: "Digital",
+        summary: "Content creation and conversation-shaping work available in Digital Focus.",
+        href: "/dashboard/digital/focus",
+        tone: "border-purple-200 bg-purple-50 text-purple-900",
+      },
+      {
+        key: "print",
+        name: "Approvals + Delivery",
+        count: 4,
+        lane: "Print",
+        summary: "Print approvals and delivery checks supporting downstream execution.",
+        href: "/dashboard/print/focus",
+        tone: "border-amber-200 bg-amber-50 text-amber-900",
+      },
+    ];
+
+    const visibleContexts = contexts.filter((context) =>
+      activeDepartments.some((department) => department.includes(context.key))
+    );
+
+    if (visibleContexts.length > 0) {
+      return visibleContexts.slice(0, 3);
+    }
+
+    return [
+      {
+        key: "outreach",
+        name: "Priority Outreach Targets",
+        count: 18,
+        lane: "Outreach",
+        summary: "Shared contact and list execution layer available across roles.",
+        href: "/dashboard/outreach/focus",
+        tone: "border-emerald-200 bg-emerald-50 text-emerald-900",
+      },
+      {
+        key: "lists",
+        name: "Live Lists",
+        count: 64,
+        lane: "Routing",
+        summary: "Lists and segments currently feeding contact, field, and finance execution.",
+        href: "/dashboard/lists",
+        tone: "border-sky-200 bg-sky-50 text-sky-900",
+      },
+      {
+        key: "cleanup",
+        name: "Data Cleanup",
+        count: 7,
+        lane: "Cleanup",
+        summary: "Data quality segment that keeps execution lanes clean.",
+        href: "/dashboard/lists?name=Missing%20Phone%20Numbers",
+        tone: "border-amber-200 bg-amber-50 text-amber-900",
+      },
+    ];
+  }, [activeDepartments]);
+
+  const abeProfileRead = useMemo<AbeProfileRead>(() => {
+    const departments = activeDepartments.length > 0 ? activeDepartments : ["outreach"];
+    const primaryDepartment = String(primaryRole?.department || departments[0] || "outreach").toLowerCase();
+    const pressureDepartment = departments.find((department) => department !== primaryDepartment) || primaryDepartment;
+    const opportunityDepartment = departments.find((department) => department === "finance") || departments.find((department) => department === "digital") || primaryDepartment;
+
+    const primary = buildLaneMeta(primaryDepartment);
+    const pressure = buildLaneMeta(pressureDepartment);
+    const opportunity = buildLaneMeta(opportunityDepartment);
+
+    return {
+      primary,
+      pressure,
+      opportunity,
+      whyNow:
+        primary.key === pressure.key
+          ? `${primary.label} is carrying the main operating read right now. ABE and Brain alignment should keep this lane prioritized without adding extra noise.`
+          : `${primary.label} is the operator's primary lane, while ${pressure.label} is the lane to watch for pressure. ${opportunity.label} is the cleanest place to look for near-term lift.`,
+    };
+  }, [activeDepartments, primaryRole]);
+
   const badges = useMemo(() => {
     return [
       {
@@ -226,14 +534,23 @@ export default function DashboardProfilePage() {
   }, []);
 
   const accessSummary = useMemo(() => {
+    const roleLines = roleBadges.map((badge) =>
+      badge.isPrimary ? `${badge.label} · primary operating lane` : badge.label
+    );
+
     const base = [
-      `${identity.role}-level visibility inside the current organization`,
-      `Primary operating department: ${identity.department}`,
-      `Title in current org: ${identity.title}`,
       `Organization context: ${identity.organizationName}`,
+      `Title in current org: ${identity.title}`,
+      roleLines.length > 0
+        ? `Assigned roles: ${roleLines.join(", ")}`
+        : `Legacy role context: ${identity.role} · ${identity.department}`,
     ];
 
-    if (identity.role.toLowerCase() === "admin") {
+    const hasAdmin = roleBadges.some((badge) =>
+      badge.label.toLowerCase().includes("admin")
+    );
+
+    if (hasAdmin || identity.role.toLowerCase() === "admin") {
       return [
         ...base,
         "Admin-level visibility across dashboard, departments, and governance surfaces",
@@ -241,8 +558,11 @@ export default function DashboardProfilePage() {
       ];
     }
 
-    return base;
-  }, [identity]);
+    return [
+      ...base,
+      "Department access and Focus surfaces are shaped by assigned roles",
+    ];
+  }, [identity, roleBadges]);
 
   const orgContext = useMemo(() => {
     return {
@@ -371,9 +691,31 @@ export default function DashboardProfilePage() {
                 </div>
               </div>
 
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                  Assigned roles
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {roleBadges.map((badge) => (
+                    <div
+                      key={`${badge.label}-${badge.isPrimary ? "primary" : "secondary"}`}
+                      className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${badge.tone}`}
+                    >
+                      <Shield className="h-3.5 w-3.5" />
+                      {badge.label}
+                      {badge.isPrimary ? (
+                        <span className="rounded-full border border-current/20 bg-white/40 px-2 py-0.5 text-[10px] uppercase tracking-wide">
+                          primary
+                        </span>
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                <span className="font-semibold">Potato status:</span> Brief reset to restore focus.
-                <span className="ml-2 text-amber-800/80">Preserving signal quality before returning to execution.</span>
+                <span className="font-semibold">Potato status:</span> {identity.status}.
+                <span className="ml-2 text-amber-800/80">Brief reset to restore focus and preserve signal quality before returning to execution.</span>
               </div>
 
               <div className="flex flex-wrap gap-2">
@@ -448,6 +790,145 @@ export default function DashboardProfilePage() {
             </p>
           </div>
         </div>
+
+        <div className="mt-6 rounded-3xl border border-amber-200 bg-gradient-to-br from-amber-50 via-white to-sky-50 p-5 shadow-sm">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-amber-800">
+                <Zap className="h-3.5 w-3.5" />
+                Current Focus
+              </div>
+              <h2 className="mt-3 text-xl font-semibold text-slate-900">
+                {currentFocus.lane} → {currentFocus.detail}
+              </h2>
+              <p className="mt-1 max-w-2xl text-sm text-slate-600">
+                {currentFocus.priorityCount} priority item
+                {currentFocus.priorityCount === 1 ? "" : "s"} queued. {currentFocus.note}
+              </p>
+            </div>
+
+            <Link
+              href={currentFocus.href}
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-amber-300 bg-white px-4 py-3 text-sm font-medium text-amber-900 transition hover:bg-amber-100"
+            >
+              Open Focus Mode
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+
+
+          <div className="mt-6 rounded-3xl border border-indigo-200 bg-indigo-50 p-5 shadow-sm">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+              <div>
+                <div className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-indigo-800">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  ABE-Aligned Read
+                </div>
+                <h2 className="mt-3 text-xl font-semibold text-slate-900">
+                  Strategy and execution are reading the same profile context
+                </h2>
+                <p className="mt-1 max-w-3xl text-sm text-slate-600">
+                  This profile now reflects the same lane structure ABE uses to shape attention and the Brain uses to prioritize work.
+                </p>
+              </div>
+
+              <Link
+                href={abeProfileRead.primary.href}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-indigo-300 bg-white px-4 py-3 text-sm font-medium text-indigo-900 transition hover:bg-indigo-100"
+              >
+                Open Primary Lane
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+
+            <div className="mt-5 grid gap-3 lg:grid-cols-3">
+              <Link
+                href={abeProfileRead.primary.href}
+                className={`rounded-2xl border p-4 transition hover:shadow-sm ${abeProfileRead.primary.tone}`}
+              >
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] opacity-80">
+                  <Zap className="h-3.5 w-3.5" />
+                  Primary Lane
+                </div>
+                <p className="mt-3 text-lg font-semibold">{abeProfileRead.primary.label}</p>
+                <p className="mt-1 text-sm opacity-90">{abeProfileRead.primary.detail}</p>
+              </Link>
+
+              <Link
+                href={abeProfileRead.pressure.href}
+                className={`rounded-2xl border p-4 transition hover:shadow-sm ${abeProfileRead.pressure.tone}`}
+              >
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] opacity-80">
+                  <AlertTriangle className="h-3.5 w-3.5" />
+                  Pressure Lane
+                </div>
+                <p className="mt-3 text-lg font-semibold">{abeProfileRead.pressure.label}</p>
+                <p className="mt-1 text-sm opacity-90">{abeProfileRead.pressure.detail}</p>
+              </Link>
+
+              <Link
+                href={abeProfileRead.opportunity.href}
+                className={`rounded-2xl border p-4 transition hover:shadow-sm ${abeProfileRead.opportunity.tone}`}
+              >
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] opacity-80">
+                  <TrendingUp className="h-3.5 w-3.5" />
+                  Opportunity Lane
+                </div>
+                <p className="mt-3 text-lg font-semibold">{abeProfileRead.opportunity.label}</p>
+                <p className="mt-1 text-sm opacity-90">{abeProfileRead.opportunity.detail}</p>
+              </Link>
+            </div>
+
+            <div className="mt-4 rounded-2xl border border-indigo-200 bg-white px-4 py-3 text-sm text-indigo-950">
+              <span className="font-semibold">Why now:</span> {abeProfileRead.whyNow}
+            </div>
+          </div>
+
+        <div className="mt-6 rounded-3xl border border-sky-200 bg-sky-50 p-5 shadow-sm">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-sky-800">
+                <ListChecks className="h-3.5 w-3.5" />
+                Active Work Context
+              </div>
+              <h2 className="mt-3 text-xl font-semibold text-slate-900">
+                Active work context from assigned roles
+              </h2>
+              <p className="mt-1 max-w-3xl text-sm text-slate-600">
+                These are the lanes currently shaping what this operator sees, clicks into, and executes inside Aether.
+              </p>
+            </div>
+
+            <Link
+              href="/dashboard/lists"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-sky-300 bg-white px-4 py-3 text-sm font-medium text-sky-900 transition hover:bg-sky-100"
+            >
+              Review Lists
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+
+          <div className="mt-5 grid gap-3 lg:grid-cols-3">
+            {activeWorkContext.map((context) => (
+              <Link
+                key={context.name}
+                href={context.href}
+                className={`rounded-2xl border p-4 transition hover:shadow-sm ${context.tone}`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold">{context.name}</p>
+                    <p className="mt-1 text-xs opacity-80">{context.lane}</p>
+                  </div>
+                  <span className="rounded-full border border-current/20 bg-white/60 px-2.5 py-1 text-xs font-semibold">
+                    {context.count}
+                  </span>
+                </div>
+                <p className="mt-3 text-sm opacity-90">{context.summary}</p>
+              </Link>
+            ))}
+          </div>
+        </div>        </div>
       </section>
 
       <section className="grid gap-4 xl:grid-cols-2">
@@ -645,8 +1126,8 @@ export default function DashboardProfilePage() {
               </div>
               <p className="mt-2 text-sm text-slate-600">
                 This page is meant to become your personal operating layer inside
-                Aether — not just an account page, but a reflection of how the
-                system sees you as an active operator.
+                Aether — not just an account page, but a reflection of your
+                momentum, role context, and active execution lane.
               </p>
             </div>
           </div>
@@ -657,7 +1138,7 @@ export default function DashboardProfilePage() {
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm xl:col-span-1">
           <div className="flex items-center gap-2 text-sm text-slate-500">
             <Activity className="h-4 w-4" />
-            Operator snapshot
+            Today’s momentum
           </div>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">

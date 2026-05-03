@@ -12,6 +12,16 @@ type ImportSummaryItem = {
   count: number;
 };
 
+type ImportResult = {
+  success?: boolean;
+  source?: string;
+  count?: number;
+  matchedCount?: number;
+  updatedContacts?: number;
+  listsCreated?: number;
+  listSummary?: ImportSummaryItem[];
+};
+
 function IngestPageContent() {
   const searchParams = useSearchParams();
   const source = searchParams.get("source") || "outreach";
@@ -23,6 +33,7 @@ function IngestPageContent() {
   const [importCount, setImportCount] = useState(0);
   const [listsCreated, setListsCreated] = useState(0);
   const [listSummary, setListSummary] = useState<ImportSummaryItem[]>([]);
+  const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [ownerAssignment, setOwnerAssignment] = useState("");
 
   function handleFile(e: any) {
@@ -42,6 +53,7 @@ function IngestPageContent() {
       setImportCount(0);
       setListsCreated(0);
       setListSummary([]);
+      setImportResult(null);
     };
 
     reader.readAsText(file);
@@ -55,6 +67,7 @@ function IngestPageContent() {
     setImportCount(0);
     setListsCreated(0);
     setListSummary([]);
+    setImportResult(null);
 
     const contacts =
       source === "fec"
@@ -96,8 +109,9 @@ function IngestPageContent() {
       setImportCount(result.count || 0);
       setListsCreated(result.listsCreated || 0);
       setListSummary(result.listSummary || []);
+      setImportResult(result || null);
 
-      alert(`Imported ${result.count} contacts`);
+      alert(source === "fec" ? `Imported ${result.count} FEC records` : `Imported ${result.count} contacts`);
     } catch (err: any) {
       const message = err?.message || "Import failed";
       setErrorMessage(message);
@@ -258,6 +272,51 @@ function IngestPageContent() {
     };
   }, [data, source]);
 
+  const systemImpact = useMemo(() => {
+    if (!importSuccess || !interpretation) return null;
+
+    const topList = listSummary[0] || null;
+    const recommendedListName =
+      topList?.name ||
+      (source === "finance"
+        ? "High Value Donors"
+        : source === "fec"
+        ? "Finance donor intelligence"
+        : "Priority Outreach Targets");
+
+    const issueHighlights = [
+      interpretation.contactsMissingPhone > 0
+        ? `${interpretation.contactsMissingPhone} contact${
+            interpretation.contactsMissingPhone === 1 ? "" : "s"
+          } missing phone numbers`
+        : null,
+      interpretation.contactsMissingEmail > 0
+        ? `${interpretation.contactsMissingEmail} contact${
+            interpretation.contactsMissingEmail === 1 ? "" : "s"
+          } missing email addresses`
+        : null,
+      interpretation.possibleDuplicates > 0
+        ? `${interpretation.possibleDuplicates} possible duplicate record${
+            interpretation.possibleDuplicates === 1 ? "" : "s"
+          } detected before import`
+        : null,
+    ].filter(Boolean) as string[];
+
+    const listAssignmentCount = listSummary.reduce(
+      (sum, item) => sum + item.count,
+      0
+    );
+
+    return {
+      recommendedListName,
+      issueHighlights,
+      matchedCount: importResult?.matchedCount ?? 0,
+      updatedContacts: importResult?.updatedContacts ?? 0,
+      highValueTargets: interpretation.highValueTargets,
+      listAssignmentCount,
+    };
+  }, [importSuccess, interpretation, importResult, listSummary, source]);
+
   const primaryActionLabel =
     source === "finance" ? "Start Donor Follow-Up" : source === "fec" ? "Open Finance Focus" : "Start Outreach";
 
@@ -312,17 +371,18 @@ function IngestPageContent() {
                 Import Complete
               </p>
               <h2 className="text-2xl font-semibold text-emerald-900">
-                {importCount} contact{importCount === 1 ? "" : "s"} imported
-                successfully
+                {source === "fec"
+                  ? `${importCount} FEC record${importCount === 1 ? "" : "s"} imported successfully`
+                  : `${importCount} contact${importCount === 1 ? "" : "s"} saved successfully`}
               </h2>
               <p className="max-w-3xl text-sm text-emerald-900/80">
                 {successBody}
               </p>
 
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 <div className="rounded-2xl border border-emerald-200 bg-white p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                    Contacts Imported
+                    {source === "fec" ? "FEC Records Imported" : "Contacts Saved"}
                   </p>
                   <p className="mt-2 text-3xl font-semibold text-slate-900">
                     {importCount}
@@ -331,13 +391,94 @@ function IngestPageContent() {
 
                 <div className="rounded-2xl border border-emerald-200 bg-white p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                    Lists Created
+                    {source === "fec" ? "Contacts Matched" : "Lists Ready"}
                   </p>
                   <p className="mt-2 text-3xl font-semibold text-slate-900">
-                    {listsCreated}
+                    {source === "fec" ? systemImpact?.matchedCount || 0 : listsCreated}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-emerald-200 bg-white p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                    High Value Signals
+                  </p>
+                  <p className="mt-2 text-3xl font-semibold text-slate-900">
+                    {systemImpact?.highValueTargets || 0}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-emerald-200 bg-white p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                    Data Issues Flagged
+                  </p>
+                  <p className="mt-2 text-3xl font-semibold text-slate-900">
+                    {systemImpact?.issueHighlights.length || 0}
                   </p>
                 </div>
               </div>
+
+              {systemImpact ? (
+                <div className="mt-4 grid gap-3 lg:grid-cols-[1fr_1fr]">
+                  <div className="rounded-2xl border border-emerald-200 bg-white p-4">
+                    <p className="text-sm font-medium text-slate-900">
+                      System Impact
+                    </p>
+                    <div className="mt-3 space-y-2 text-sm text-slate-700">
+                      <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                        {source === "fec"
+                          ? `${systemImpact.updatedContacts} contact${
+                              systemImpact.updatedContacts === 1 ? "" : "s"
+                            } updated with donor intelligence`
+                          : `${importCount} contact${
+                              importCount === 1 ? "" : "s"
+                            } normalized and saved into the contact layer`}
+                      </div>
+                      <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                        {source === "fec"
+                          ? `${systemImpact.matchedCount} FEC match${
+                              systemImpact.matchedCount === 1 ? "" : "es"
+                            } created or refreshed`
+                          : `${systemImpact.listAssignmentCount} list assignment${
+                              systemImpact.listAssignmentCount === 1 ? "" : "s"
+                            } prepared for routing`}
+                      </div>
+                      <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                        {systemImpact.highValueTargets > 0
+                          ? `${systemImpact.highValueTargets} high-value target${
+                              systemImpact.highValueTargets === 1 ? "" : "s"
+                            } surfaced for downstream execution`
+                          : "No high-value donor or priority amount signal detected in this upload"}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl border border-emerald-200 bg-white p-4">
+                    <p className="text-sm font-medium text-slate-900">
+                      Recommended Next Move
+                    </p>
+                    <p className="mt-2 text-sm text-slate-600">
+                      Start by reviewing {systemImpact.recommendedListName}. That is the cleanest place to verify the import before tomorrow’s full pressure test.
+                    </p>
+
+                    {systemImpact.issueHighlights.length > 0 ? (
+                      <div className="mt-4 space-y-2">
+                        {systemImpact.issueHighlights.slice(0, 3).map((issue) => (
+                          <div
+                            key={issue}
+                            className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900"
+                          >
+                            {issue}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900">
+                        No obvious cleanup flags surfaced from this upload.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : null}
 
               {listSummary.length > 0 ? (
                 <div className="mt-4 rounded-2xl border border-emerald-200 bg-white p-4">

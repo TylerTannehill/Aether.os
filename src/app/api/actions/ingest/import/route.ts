@@ -5,9 +5,9 @@ function isBlank(value: unknown) {
   return value === null || value === undefined || String(value).trim() === "";
 }
 
-function donationTotal(contact: Record<string, any>) {
-  const value = Number(contact.donation_total ?? 0);
-  return Number.isNaN(value) ? 0 : value;
+function cleanString(value: unknown) {
+  const cleaned = String(value ?? "").trim();
+  return cleaned.length > 0 ? cleaned : null;
 }
 
 function normalizeText(value: unknown) {
@@ -16,6 +16,86 @@ function normalizeText(value: unknown) {
     .toLowerCase()
     .replace(/[^a-z0-9\s]/g, "")
     .replace(/\s+/g, " ");
+}
+
+function normalizePhone(value: unknown) {
+  const digits = String(value || "").replace(/\D/g, "");
+
+  if (!digits) return null;
+  if (digits.length === 11 && digits.startsWith("1")) return digits.slice(1);
+
+  return digits;
+}
+
+function normalizeEmail(value: unknown) {
+  const email = String(value || "").trim().toLowerCase();
+  return email.includes("@") ? email : null;
+}
+
+function normalizeState(value: unknown) {
+  const state = String(value || "").trim();
+  if (!state) return null;
+
+  const normalized = state.toLowerCase();
+  const stateMap: Record<string, string> = {
+    alabama: "AL",
+    alaska: "AK",
+    arizona: "AZ",
+    arkansas: "AR",
+    california: "CA",
+    colorado: "CO",
+    connecticut: "CT",
+    delaware: "DE",
+    florida: "FL",
+    georgia: "GA",
+    hawaii: "HI",
+    idaho: "ID",
+    illinois: "IL",
+    indiana: "IN",
+    iowa: "IA",
+    kansas: "KS",
+    kentucky: "KY",
+    louisiana: "LA",
+    maine: "ME",
+    maryland: "MD",
+    massachusetts: "MA",
+    michigan: "MI",
+    minnesota: "MN",
+    mississippi: "MS",
+    missouri: "MO",
+    montana: "MT",
+    nebraska: "NE",
+    nevada: "NV",
+    "new hampshire": "NH",
+    "new jersey": "NJ",
+    "new mexico": "NM",
+    "new york": "NY",
+    "north carolina": "NC",
+    "north dakota": "ND",
+    ohio: "OH",
+    oklahoma: "OK",
+    oregon: "OR",
+    pennsylvania: "PA",
+    "rhode island": "RI",
+    "south carolina": "SC",
+    "south dakota": "SD",
+    tennessee: "TN",
+    texas: "TX",
+    utah: "UT",
+    vermont: "VT",
+    virginia: "VA",
+    washington: "WA",
+    "west virginia": "WV",
+    wisconsin: "WI",
+    wyoming: "WY",
+  };
+
+  return state.length === 2 ? state.toUpperCase() : stateMap[normalized] || state;
+}
+
+function normalizeZip(value: unknown) {
+  const zip = String(value || "").replace(/\D/g, "").slice(0, 5);
+  return zip || null;
 }
 
 function splitName(value: unknown) {
@@ -29,12 +109,132 @@ function splitName(value: unknown) {
   };
 }
 
+function donationTotal(contact: Record<string, any>) {
+  const value = Number(contact.donation_total ?? contact.fec_total_given ?? 0);
+  return Number.isNaN(value) ? 0 : value;
+}
+
 function calculateDonorTier(totalGiven: number) {
   if (totalGiven >= 6600) return "maxed";
   if (totalGiven >= 2500) return "major";
   if (totalGiven >= 500) return "mid";
   if (totalGiven > 0) return "base";
   return "none";
+}
+
+function normalizeImportedContact(contact: Record<string, any>) {
+  const normalized: Record<string, any> = { ...contact };
+
+  Object.entries(normalized).forEach(([key, value]) => {
+    if (typeof value === "string") {
+      normalized[key] = value.trim();
+    }
+  });
+
+  const full = cleanString(normalized.full_name);
+  if (full && (!normalized.first_name || !normalized.last_name)) {
+    const parts = String(full).trim().split(/\s+/).filter(Boolean);
+
+    if (!normalized.first_name && parts[0]) {
+      normalized.first_name = parts[0];
+    }
+
+    if (!normalized.last_name && parts.length > 1) {
+      normalized.last_name = parts[parts.length - 1];
+    }
+  }
+
+  delete normalized.full_name;
+
+  if ("first_name" in normalized) normalized.first_name = cleanString(normalized.first_name);
+  if ("last_name" in normalized) normalized.last_name = cleanString(normalized.last_name);
+  if ("phone" in normalized) normalized.phone = normalizePhone(normalized.phone);
+  if ("email" in normalized) normalized.email = normalizeEmail(normalized.email);
+  if ("city" in normalized) normalized.city = cleanString(normalized.city);
+  if ("state" in normalized) normalized.state = normalizeState(normalized.state);
+  if ("zip" in normalized) normalized.zip = normalizeZip(normalized.zip);
+  if ("owner_name" in normalized) normalized.owner_name = cleanString(normalized.owner_name);
+
+  if ("donation_total" in normalized) {
+    const total = Number(normalized.donation_total || 0);
+    normalized.donation_total = Number.isNaN(total) ? 0 : total;
+  }
+
+  Object.keys(normalized).forEach((key) => {
+    if (normalized[key] === "") normalized[key] = null;
+  });
+
+  return normalized;
+}
+
+function buildContactSearchKey(contact: Record<string, any>) {
+  const email = normalizeEmail(contact.email);
+  if (email) return `email:${email}`;
+
+  const phone = normalizePhone(contact.phone);
+  if (phone) return `phone:${phone}`;
+
+  const first = normalizeText(contact.first_name);
+  const last = normalizeText(contact.last_name);
+  const city = normalizeText(contact.city);
+  const state = normalizeText(contact.state);
+  const zip = normalizeZip(contact.zip);
+
+  if (first && last && zip) return `name_zip:${first}:${last}:${zip}`;
+  if (first && last && city && state) return `name_city_state:${first}:${last}:${city}:${state}`;
+  if (first && last) return `name:${first}:${last}`;
+
+  return null;
+}
+
+function buildExistingContactIndex(contacts: Record<string, any>[]) {
+  const index = new Map<string, Record<string, any>>();
+
+  contacts.forEach((contact) => {
+    const email = normalizeEmail(contact.email);
+    const phone = normalizePhone(contact.phone);
+    const first = normalizeText(contact.first_name);
+    const last = normalizeText(contact.last_name);
+    const city = normalizeText(contact.city);
+    const state = normalizeText(contact.state);
+    const zip = normalizeZip(contact.zip);
+
+    if (email) index.set(`email:${email}`, contact);
+    if (phone) index.set(`phone:${phone}`, contact);
+    if (first && last && zip) index.set(`name_zip:${first}:${last}:${zip}`, contact);
+    if (first && last && city && state) index.set(`name_city_state:${first}:${last}:${city}:${state}`, contact);
+    if (first && last) index.set(`name:${first}:${last}`, contact);
+  });
+
+  return index;
+}
+
+function mergeContact(existing: Record<string, any>, incoming: Record<string, any>) {
+  const merged: Record<string, any> = {};
+
+  Object.entries(incoming).forEach(([key, value]) => {
+    if (key === "id") return;
+
+    const existingValue = existing[key];
+
+    if (key === "donation_total") {
+      const existingTotal = Number(existingValue || 0);
+      const incomingTotal = Number(value || 0);
+      merged[key] = Math.max(
+        Number.isNaN(existingTotal) ? 0 : existingTotal,
+        Number.isNaN(incomingTotal) ? 0 : incomingTotal
+      );
+      return;
+    }
+
+    if (!isBlank(value)) {
+      merged[key] = value;
+    } else if (!isBlank(existingValue)) {
+      merged[key] = existingValue;
+    }
+  });
+
+  return merged;
 }
 
 function buildMatchScore(contact: Record<string, any>, fecRecord: Record<string, any>) {
@@ -84,6 +284,24 @@ function buildMatchScore(contact: Record<string, any>, fecRecord: Record<string,
     matchedOn.push("state");
   }
 
+  if (
+    contact.zip &&
+    fecRecord.zip &&
+    normalizeZip(contact.zip) === normalizeZip(fecRecord.zip)
+  ) {
+    score += 10;
+    matchedOn.push("zip");
+  }
+
+  if (
+    contact.street &&
+    fecRecord.street &&
+    normalizeText(contact.street) === normalizeText(fecRecord.street)
+  ) {
+    score += 15;
+    matchedOn.push("street");
+  }
+
   return {
     confidence_score: Math.min(score, 100),
     matched_on: matchedOn,
@@ -97,12 +315,140 @@ function getMatchStatus(score: number) {
   return "none";
 }
 
+async function upsertContactsSafely(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  contacts: Record<string, any>[]
+) {
+  const normalizedContacts = contacts
+    .map(normalizeImportedContact)
+    .filter((contact) => {
+      return (
+        !isBlank(contact.first_name) ||
+        !isBlank(contact.last_name) ||
+        !isBlank(contact.email) ||
+        !isBlank(contact.phone)
+      );
+    });
+
+  if (normalizedContacts.length === 0) {
+    return [] as Record<string, any>[];
+  }
+
+  const { data: existingContacts, error: existingError } = await supabase
+    .from("contacts")
+    .select("*");
+
+  if (existingError) throw existingError;
+
+  const index = buildExistingContactIndex((existingContacts as Record<string, any>[]) || []);
+  const savedContacts: Record<string, any>[] = [];
+
+  for (const contact of normalizedContacts) {
+    const key = buildContactSearchKey(contact);
+    const existing = key ? index.get(key) : null;
+
+    if (existing?.id) {
+      const merged = mergeContact(existing, contact);
+
+      const { data: updated, error: updateError } = await supabase
+        .from("contacts")
+        .update(merged)
+        .eq("id", existing.id)
+        .select()
+        .single();
+
+      if (updateError) throw updateError;
+
+      if (updated) {
+        savedContacts.push(updated);
+
+        const updatedKeys = [
+          buildContactSearchKey(updated),
+          normalizeEmail(updated.email) ? `email:${normalizeEmail(updated.email)}` : null,
+          normalizePhone(updated.phone) ? `phone:${normalizePhone(updated.phone)}` : null,
+        ].filter(Boolean) as string[];
+
+        updatedKeys.forEach((updatedKey) => index.set(updatedKey, updated));
+      }
+
+      continue;
+    }
+
+    const { data: inserted, error: insertError } = await supabase
+      .from("contacts")
+      .insert([contact])
+      .select()
+      .single();
+
+    if (insertError) throw insertError;
+
+    if (inserted) {
+      savedContacts.push(inserted);
+
+      const insertedKeys = [
+        buildContactSearchKey(inserted),
+        normalizeEmail(inserted.email) ? `email:${normalizeEmail(inserted.email)}` : null,
+        normalizePhone(inserted.phone) ? `phone:${normalizePhone(inserted.phone)}` : null,
+      ].filter(Boolean) as string[];
+
+      insertedKeys.forEach((insertedKey) => index.set(insertedKey, inserted));
+    }
+  }
+
+  return savedContacts;
+}
+
+async function getOrCreateSuggestedLists(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  suggestedLists: string[]
+) {
+  const uniqueNames = Array.from(
+    new Set(suggestedLists.map((name) => String(name || "").trim()).filter(Boolean))
+  );
+
+  if (uniqueNames.length === 0) return [] as Record<string, any>[];
+
+  const { data: existingLists, error: existingError } = await supabase
+    .from("lists")
+    .select("id, name")
+    .in("name", uniqueNames);
+
+  if (existingError) throw existingError;
+
+  const existingByName = new Map(
+    ((existingLists as Record<string, any>[]) || []).map((list) => [String(list.name), list])
+  );
+
+  const missingNames = uniqueNames.filter((name) => !existingByName.has(name));
+  let createdLists: Record<string, any>[] = [];
+
+  if (missingNames.length > 0) {
+    const { data: insertedLists, error: insertError } = await supabase
+      .from("lists")
+      .insert(missingNames.map((name) => ({ name })))
+      .select("id, name");
+
+    if (insertError) throw insertError;
+    createdLists = (insertedLists as Record<string, any>[]) || [];
+  }
+
+  return [...((existingLists as Record<string, any>[]) || []), ...createdLists];
+}
+
+function buildFecImportBatchId() {
+  return `fec-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const contacts = body.contacts ?? [];
-    const fecRecords = body.fecRecords ?? body.records ?? [];
-    const suggestedLists: string[] = body.suggestedLists ?? [];
+    const contacts = Array.isArray(body.contacts) ? body.contacts : [];
+    const fecRecords = Array.isArray(body.fecRecords ?? body.records)
+      ? body.fecRecords ?? body.records
+      : [];
+    const suggestedLists: string[] = Array.isArray(body.suggestedLists)
+      ? body.suggestedLists
+      : [];
     const source: string = body.source ?? "outreach";
 
     const supabase = await createClient();
@@ -115,25 +461,27 @@ export async function POST(req: Request) {
         );
       }
 
+      const batchId = buildFecImportBatchId();
+
       const sanitizedRecords = fecRecords
         .map((record: Record<string, any>) => ({
-          source_file_id: record.source_file_id || null,
-          source_record_id: record.source_record_id || null,
-          import_batch_id: record.import_batch_id || `fec-${Date.now()}`,
+          source_file_id: cleanString(record.source_file_id),
+          source_record_id: cleanString(record.source_record_id),
+          import_batch_id: record.import_batch_id || batchId,
           contributor_name: String(record.contributor_name || "").trim(),
-          contributor_first_name: record.contributor_first_name || null,
-          contributor_last_name: record.contributor_last_name || null,
-          street: record.street || null,
-          city: record.city || null,
-          state: record.state || null,
-          zip: record.zip || null,
-          employer: record.employer || null,
-          occupation: record.occupation || null,
+          contributor_first_name: cleanString(record.contributor_first_name),
+          contributor_last_name: cleanString(record.contributor_last_name),
+          street: cleanString(record.street),
+          city: cleanString(record.city),
+          state: normalizeState(record.state),
+          zip: normalizeZip(record.zip),
+          employer: cleanString(record.employer),
+          occupation: cleanString(record.occupation),
           donation_amount: Number(record.donation_amount || 0),
           donation_date:
             record.donation_date || new Date().toISOString().slice(0, 10),
-          committee_name: record.committee_name || null,
-          committee_cycle: record.committee_cycle || null,
+          committee_name: cleanString(record.committee_name),
+          committee_cycle: cleanString(record.committee_cycle),
           raw_payload: record.raw_payload || record,
         }))
         .filter((record: Record<string, any>) => record.contributor_name);
@@ -144,15 +492,12 @@ export async function POST(req: Request) {
         .select();
 
       if (fecError) {
-        return NextResponse.json(
-          { error: fecError.message },
-          { status: 500 }
-        );
+        return NextResponse.json({ error: fecError.message }, { status: 500 });
       }
 
       const { data: existingContacts, error: contactsError } = await supabase
         .from("contacts")
-        .select("id, first_name, last_name, city, state, fec_total_given");
+        .select("*");
 
       if (contactsError) {
         return NextResponse.json(
@@ -195,7 +540,8 @@ export async function POST(req: Request) {
           reviewed: false,
         });
 
-        const previousTotal = contactTotals.get(bestContact.id) || Number(bestContact.fec_total_given || 0);
+        const previousTotal =
+          contactTotals.get(bestContact.id) || Number(bestContact.fec_total_given || 0);
         const nextTotal = previousTotal + Number(fecRecord.donation_amount || 0);
         contactTotals.set(bestContact.id, nextTotal);
 
@@ -232,9 +578,7 @@ export async function POST(req: Request) {
         const lastGift = contactLastGift.get(contactId) || null;
         const donorTier = calculateDonorTier(totalGiven);
         const jackpotCandidate = totalGiven >= 2500;
-        const jackpotType = jackpotCandidate
-          ? "high_value_unworked"
-          : "none";
+        const jackpotType = jackpotCandidate ? "high_value_unworked" : "none";
 
         const { error: updateError } = await supabase
           .from("contacts")
@@ -272,119 +616,54 @@ export async function POST(req: Request) {
       });
     }
 
-    const { data: insertedContacts, error: contactError } = await supabase
-      .from("contacts")
-      .upsert(contacts, { onConflict: "phone" })
-      .select();
-
-    if (contactError) {
+    if (!Array.isArray(contacts) || contacts.length === 0) {
       return NextResponse.json(
-        { error: contactError.message },
-        { status: 500 }
+        { error: "No contacts provided for import." },
+        { status: 400 }
       );
     }
 
-    let createdLists: any[] = [];
-
-    if (suggestedLists.length > 0) {
-      const listInserts = suggestedLists.map((name) => ({
-        name,
-      }));
-
-      const { data: lists, error: listError } = await supabase
-        .from("lists")
-        .insert(listInserts)
-        .select();
-
-      if (listError) {
-        return NextResponse.json(
-          { error: listError.message },
-          { status: 500 }
-        );
-      }
-
-      createdLists = lists || [];
-    }
+    const savedContacts = await upsertContactsSafely(supabase, contacts);
+    const lists = await getOrCreateSuggestedLists(supabase, suggestedLists);
 
     const summaryCounts: Record<string, number> = {};
 
-    if (createdLists.length > 0 && insertedContacts?.length > 0) {
+    if (lists.length > 0 && savedContacts.length > 0) {
       const assignments: { contact_id: string; list_id: string }[] = [];
+      const seenAssignments = new Set<string>();
 
-      const listByName = new Map(
-        createdLists.map((list) => [String(list.name), list])
-      );
+      const listByName = new Map(lists.map((list) => [String(list.name), list]));
 
-      const increment = (listName: string) => {
+      const assign = (contactId: string, listName: string) => {
+        const list = listByName.get(listName);
+        if (!list?.id) return;
+
+        const key = `${contactId}:${list.id}`;
+        if (seenAssignments.has(key)) return;
+
+        seenAssignments.add(key);
+        assignments.push({ contact_id: contactId, list_id: list.id });
         summaryCounts[listName] = (summaryCounts[listName] || 0) + 1;
       };
 
-      for (const contact of insertedContacts) {
+      for (const contact of savedContacts) {
         const total = donationTotal(contact);
 
         const generalListName =
-          source === "finance"
-            ? "General Finance Follow-Up"
-            : "General Outreach Pool";
+          source === "finance" ? "General Finance Follow-Up" : "General Outreach Pool";
 
-        const generalList = listByName.get(generalListName);
-        if (generalList) {
-          assignments.push({
-            contact_id: contact.id,
-            list_id: generalList.id,
-          });
-          increment(generalListName);
-        }
+        assign(contact.id, generalListName);
 
-        const missingPhoneList = listByName.get("Missing Phone Numbers");
-        if (missingPhoneList && isBlank(contact.phone)) {
-          assignments.push({
-            contact_id: contact.id,
-            list_id: missingPhoneList.id,
-          });
-          increment("Missing Phone Numbers");
-        }
-
-        const missingEmailList = listByName.get("Missing Email Addresses");
-        if (missingEmailList && isBlank(contact.email)) {
-          assignments.push({
-            contact_id: contact.id,
-            list_id: missingEmailList.id,
-          });
-          increment("Missing Email Addresses");
-        }
-
-        const priorityOutreachList = listByName.get("Priority Outreach Targets");
-        if (priorityOutreachList && total >= 250) {
-          assignments.push({
-            contact_id: contact.id,
-            list_id: priorityOutreachList.id,
-          });
-          increment("Priority Outreach Targets");
-        }
-
-        const highValueDonorsList = listByName.get("High Value Donors");
-        if (highValueDonorsList && total >= 250) {
-          assignments.push({
-            contact_id: contact.id,
-            list_id: highValueDonorsList.id,
-          });
-          increment("High Value Donors");
-        }
-
-        const likelyDonorsList = listByName.get("Likely Donors");
-        if (likelyDonorsList && total > 0) {
-          assignments.push({
-            contact_id: contact.id,
-            list_id: likelyDonorsList.id,
-          });
-          increment("Likely Donors");
-        }
+        if (isBlank(contact.phone)) assign(contact.id, "Missing Phone Numbers");
+        if (isBlank(contact.email)) assign(contact.id, "Missing Email Addresses");
+        if (total >= 250) assign(contact.id, "Priority Outreach Targets");
+        if (total >= 250) assign(contact.id, "High Value Donors");
+        if (total > 0) assign(contact.id, "Likely Donors");
       }
 
       if (assignments.length > 0) {
         const { error: joinError } = await supabase
-          .from("contact_lists")
+          .from("list_contacts")
           .upsert(assignments, { onConflict: "contact_id,list_id" });
 
         if (joinError) {
@@ -398,8 +677,8 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       success: true,
-      count: insertedContacts?.length || 0,
-      listsCreated: createdLists.length,
+      count: savedContacts.length,
+      listsCreated: lists.length,
       listSummary: Object.entries(summaryCounts).map(([name, count]) => ({
         name,
         count,

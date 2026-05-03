@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowRight,
   CircleDollarSign,
@@ -133,6 +133,78 @@ export default function DigitalFocusModePage() {
     []
   );
   const [sentimentShifts, setSentimentShifts] = useState<SentimentShift[]>([]);
+
+  const [roleLoading, setRoleLoading] = useState(true);
+  const [hasDigitalAccess, setHasDigitalAccess] = useState(false);
+  const [hasDigitalDirector, setHasDigitalDirector] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadRoleContext() {
+      try {
+        const response = await fetch("/api/admin/org-members");
+        const data = await response.json();
+
+        if (!mounted) return;
+
+        const roles = Array.isArray(data?.roles) ? data.roles : [];
+        const currentMember = data?.currentMember;
+        const currentMemberId = currentMember?.id;
+
+        const myRoles = currentMemberId
+          ? roles.filter(
+              (role: any) => role.organization_member_id === currentMemberId
+            )
+          : [];
+
+        const baseRole = String(currentMember?.role || "").toLowerCase();
+        const baseDepartment = String(
+          currentMember?.department || ""
+        ).toLowerCase();
+
+        const isAdmin =
+          baseRole === "admin" ||
+          myRoles.some((role: any) => {
+            const department = String(role.department || "").toLowerCase();
+            const roleLevel = String(role.role_level || "").toLowerCase();
+            return department === "admin" || roleLevel === "admin";
+          });
+
+        const hasDigitalRole =
+          baseDepartment === "digital" ||
+          myRoles.some(
+            (role: any) => String(role.department || "").toLowerCase() === "digital"
+          );
+
+        const isDigitalDirector =
+          isAdmin ||
+          myRoles.some((role: any) => {
+            const department = String(role.department || "").toLowerCase();
+            const roleLevel = String(role.role_level || "").toLowerCase();
+            return department === "digital" && roleLevel === "director";
+          });
+
+        setHasDigitalAccess(isAdmin || hasDigitalRole);
+        setHasDigitalDirector(isDigitalDirector);
+      } catch (error) {
+        console.error("Failed to load digital role context:", error);
+        if (!mounted) return;
+        setHasDigitalAccess(false);
+        setHasDigitalDirector(false);
+      } finally {
+        if (mounted) {
+          setRoleLoading(false);
+        }
+      }
+    }
+
+    loadRoleContext();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const nowLine = useMemo(() => {
     return {
@@ -422,6 +494,43 @@ export default function DigitalFocusModePage() {
     setReplyConfirmed(null);
   }
 
+  if (roleLoading) {
+    return (
+      <div className="space-y-8">
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <p className="text-slate-600">Loading digital context...</p>
+        </section>
+      </div>
+    );
+  }
+
+  if (!hasDigitalAccess) {
+    return (
+      <div className="space-y-8">
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-sm">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-600">
+            <Zap className="h-5 w-5" />
+          </div>
+          <h1 className="mt-4 text-2xl font-semibold text-slate-900">
+            No Digital Role Assigned
+          </h1>
+          <p className="mx-auto mt-2 max-w-xl text-sm text-slate-600">
+            You are not currently assigned to Digital. Ask your campaign admin to add a Digital role if this work should be part of your operating lane.
+          </p>
+          <div className="mt-5 flex justify-center">
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+            >
+              Back to Dashboard
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <section className="rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-6 text-white shadow-sm lg:p-8">
@@ -432,12 +541,16 @@ export default function DigitalFocusModePage() {
               Digital Focus Mode
             </div>
 
+            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-sky-300/30 bg-sky-400/10 px-3 py-1 text-xs font-semibold text-sky-100">
+              {hasDigitalDirector ? "Digital Director Access" : "Digital User Access"}
+            </div>
+
             <div className="space-y-3">
               <h1 className="text-3xl font-semibold tracking-tight lg:text-4xl">
                 {nowLine.headline}
               </h1>
               <p className="max-w-3xl text-sm text-slate-300 lg:text-base">
-                {nowLine.body}
+                {hasDigitalDirector ? nowLine.body : "Create content. Respond clearly. Keep the digital queue moving."}
               </p>
               
             </div>
@@ -566,7 +679,9 @@ export default function DigitalFocusModePage() {
               Digital Operating Pattern
             </p>
             <p className="mt-2 text-sm font-medium text-slate-900">
-              Content creates momentum. Spend amplifies what works. Responses shape the conversation.
+              {hasDigitalDirector
+                ? "Content creates momentum. Spend amplifies what works. Responses shape the conversation."
+                : "Content creates momentum. Responses shape the conversation. Keep execution clean."}
             </p>
           </div>
 
@@ -721,6 +836,7 @@ export default function DigitalFocusModePage() {
         </div>
 
         <div className="space-y-6">
+          {hasDigitalDirector ? (
           <div className="rounded-3xl border border-emerald-200 bg-white p-5 shadow-sm">
             <div className="mb-4 flex items-center justify-between">
               <div>
@@ -878,6 +994,7 @@ export default function DigitalFocusModePage() {
               })}
             </div>
           </div>
+          ) : null}
 
           <div className="rounded-3xl border border-purple-200 bg-white p-5 shadow-sm">
             <div className="mb-4 flex items-center justify-between">
@@ -1031,7 +1148,7 @@ export default function DigitalFocusModePage() {
         </div>
       </section>
 
-<section className="grid gap-3 md:grid-cols-3">
+<section className={`grid gap-3 ${hasDigitalDirector ? "md:grid-cols-3" : "md:grid-cols-2"}`}>
         <div className="rounded-3xl border border-sky-200 bg-sky-50 p-4 shadow-sm">
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium text-sky-800">Content Priority</p>
@@ -1045,6 +1162,7 @@ export default function DigitalFocusModePage() {
           </p>
         </div>
 
+        {hasDigitalDirector ? (
         <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm">
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium text-emerald-800">Amplify what’s working</p>
@@ -1057,6 +1175,7 @@ export default function DigitalFocusModePage() {
             Budget shifts and allocation decisions
           </p>
         </div>
+        ) : null}
 
         <div className="rounded-3xl border border-purple-200 bg-purple-50 p-4 shadow-sm">
           <div className="flex items-center justify-between">

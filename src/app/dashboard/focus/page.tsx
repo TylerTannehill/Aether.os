@@ -89,6 +89,31 @@ type BucketKey =
 type DemoRole = "admin" | "director" | "general_user";
 type DemoDepartment = "outreach" | "finance" | "field" | "digital" | "print";
 
+type OrgMemberRole = {
+  id?: string;
+  organization_member_id: string;
+  organization_id?: string;
+  department: string;
+  role_level: string;
+  is_primary?: boolean;
+};
+
+type OrgMemberRecord = {
+  id: string;
+  user_id?: string;
+  role?: string | null;
+  department?: string | null;
+  title?: string | null;
+  organization_id?: string | null;
+};
+
+function normalizeRoleValue(value?: string | null) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
+}
+
 type StrategicPushType = "momentum" | "pressure" | "stabilization";
 
 type StrategicPush = {
@@ -272,12 +297,24 @@ export default function FocusModePage() {
   const [demoDepartment, setDemoDepartment] =
     useState<DemoDepartment>("outreach");
   const [activePushId, setActivePushId] = useState<string | null>(null);
+  const [roleLoading, setRoleLoading] = useState(true);
+  const [dashboardFocusAccess, setDashboardFocusAccess] = useState(false);
+  const [dashboardFocusRoleLabel, setDashboardFocusRoleLabel] = useState(
+    "Campaign leadership"
+  );
+  const [assignedDepartmentRoutes, setAssignedDepartmentRoutes] = useState<
+    DemoDepartment[]
+  >([]);
 
   const { ownerFilter, applyMyDashboard } = useDashboardOwner();
   const { focusContext, clearFocusContext } = useFocusContext();
 
   useEffect(() => {
     loadData();
+  }, []);
+
+  useEffect(() => {
+    loadDashboardFocusAccess();
   }, []);
 
   useEffect(() => {
@@ -301,6 +338,98 @@ export default function FocusModePage() {
       setMessage(err?.message || "Failed to load focus mode");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function loadDashboardFocusAccess() {
+    try {
+      setRoleLoading(true);
+
+      const response = await fetch("/api/admin/org-members", {
+        method: "GET",
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.error || "Failed to load role context");
+      }
+
+      const currentMember = data?.currentMember as OrgMemberRecord | undefined;
+      const roles = Array.isArray(data?.roles)
+        ? (data.roles as OrgMemberRole[])
+        : [];
+
+      const currentMemberId = currentMember?.id || "";
+      const myRoles = roles.filter(
+        (role) => role.organization_member_id === currentMemberId
+      );
+
+      const baseRole = normalizeRoleValue(currentMember?.role);
+      const baseDepartment = normalizeRoleValue(currentMember?.department);
+      const baseTitle = normalizeRoleValue(currentMember?.title);
+
+      const roleValues = myRoles.map((role) =>
+        normalizeRoleValue(role.role_level)
+      );
+      const departmentValues = myRoles.map((role) =>
+        normalizeRoleValue(role.department)
+      );
+
+      const hasAdminAccess =
+        baseRole === "admin" ||
+        baseDepartment === "admin" ||
+        roleValues.includes("admin") ||
+        departmentValues.includes("admin");
+
+      const hasCampaignManagerAccess =
+        baseRole === "campaign_manager" ||
+        baseTitle.includes("campaign_manager") ||
+        baseTitle === "cm" ||
+        roleValues.includes("campaign_manager") ||
+        roleValues.includes("cm") ||
+        myRoles.some((role) => {
+          const department = normalizeRoleValue(role.department);
+          const level = normalizeRoleValue(role.role_level);
+          return (
+            department === "campaign" &&
+            ["manager", "campaign_manager", "director", "admin"].includes(
+              level
+            )
+          );
+        });
+
+      const nextAssignedDepartments = Array.from(
+        new Set(
+          myRoles
+            .map((role) => normalizeRoleValue(role.department))
+            .filter((department): department is DemoDepartment =>
+              ["outreach", "finance", "field", "digital", "print"].includes(
+                department
+              )
+            )
+        )
+      );
+
+      setAssignedDepartmentRoutes(nextAssignedDepartments);
+      setDashboardFocusAccess(hasAdminAccess || hasCampaignManagerAccess);
+
+      if (hasAdminAccess) {
+        setDashboardFocusRoleLabel("Admin / Campaign Manager Focus");
+        setDemoRole("admin");
+      } else if (hasCampaignManagerAccess) {
+        setDashboardFocusRoleLabel("Campaign Manager Focus");
+        setDemoRole("admin");
+      } else if (nextAssignedDepartments[0]) {
+        setDemoDepartment(nextAssignedDepartments[0]);
+        setDemoRole("general_user");
+        setDashboardFocusRoleLabel("Department Focus Required");
+      }
+    } catch (err: any) {
+      setDashboardFocusAccess(false);
+      setMessage(err?.message || "Failed to load dashboard focus access");
+    } finally {
+      setRoleLoading(false);
     }
   }
 
@@ -735,12 +864,76 @@ export default function FocusModePage() {
     }
   }
 
-  if (loading) {
+  if (loading || roleLoading) {
     return (
       <div className="space-y-6">
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <p className="text-slate-600">Loading focus mode...</p>
         </div>
+      </div>
+    );
+  }
+
+  if (!dashboardFocusAccess) {
+    const departmentLinks = assignedDepartmentRoutes.length
+      ? assignedDepartmentRoutes
+      : [demoDepartment];
+
+    return (
+      <div className="space-y-8">
+        <section className="rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-6 text-white shadow-sm lg:p-8">
+          <div className="space-y-4">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200">
+              <Crosshair className="h-3.5 w-3.5" />
+              Dashboard Focus
+            </div>
+
+            <div className="space-y-2">
+              <h1 className="text-3xl font-semibold tracking-tight lg:text-4xl">
+                Dashboard Focus is reserved for campaign leadership.
+              </h1>
+              <p className="max-w-3xl text-sm text-slate-300 lg:text-base">
+                You can still review overall campaign health from the dashboard.
+                Execution work should happen inside your assigned department Focus Mode.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-slate-900">
+                Open your department focus lane
+              </h2>
+              <p className="mt-2 max-w-3xl text-sm text-slate-600">
+                Department users should work from their assigned lane. Dashboard
+                Focus stays clean for admin and campaign manager-level decisions.
+              </p>
+            </div>
+
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Dashboard
+            </Link>
+          </div>
+
+          <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+            {departmentLinks.map((department) => (
+              <Link
+                key={department}
+                href={`/dashboard/${department}/focus`}
+                className="inline-flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+              >
+                {getFocusDepartmentLabel(department)} Focus
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            ))}
+          </div>
+        </section>
       </div>
     );
   }
@@ -752,7 +945,7 @@ export default function FocusModePage() {
           <div className="space-y-4">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200">
               <Crosshair className="h-3.5 w-3.5" />
-              Focus Mode • {getFocusRoleLabel(demoRole)}
+              Focus Mode • {dashboardFocusRoleLabel}
             </div>
 
             <div className="space-y-2">

@@ -354,12 +354,7 @@ function getDigitalAbeBriefing(input: {
 export default function DigitalDashboardPage() {
   const [trendView, setTrendView] = useState<TrendView>("impressions");
 
-  const [digitalLoopMode, setDigitalLoopMode] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState("focus-1");
-  const [loopResult, setLoopResult] = useState("");
-  const [loopNotes, setLoopNotes] = useState("");
-  const [loopMessage, setLoopMessage] = useState("");
-  const [completedLoopCount, setCompletedLoopCount] = useState(0);
 
   const [contentDrops, setContentDrops] = useState<ContentDrop[]>([]);
   const [engagementSpikes, setEngagementSpikes] = useState<EngagementSpike[]>(
@@ -588,45 +583,7 @@ export default function DigitalDashboardPage() {
     };
   }, [demoRole]);
 
-  const activationSummary = useMemo(() => {
-    return {
-      contentDrops: contentDrops.length,
-      engagementSpikes: engagementSpikes.length,
-      sentimentShifts: sentimentShifts.length,
-    };
-  }, [contentDrops.length, engagementSpikes.length, sentimentShifts.length]);
 
-  const digitalCommandSignal = useMemo(() => {
-    if (engagementSpikes.length > 0) {
-      return {
-        title: "Momentum is building — reinforce the winner",
-        detail:
-          "Recent spend moves suggest a strong-performing platform is pulling ahead. Lean into that advantage while engagement is hot.",
-      };
-    }
-
-    if (contentDrops.length > 0) {
-      return {
-        title: "Fresh creative is entering the system",
-        detail:
-          "New content has been produced and should be watched closely for amplification, reuse, or message refinement.",
-      };
-    }
-
-    if (sentimentShifts.length > 0) {
-      return {
-        title: "Narrative pressure is being managed",
-        detail:
-          "Response handling is now actively shaping the conversation. Keep monitoring tone, thread quality, and escalation risk.",
-      };
-    }
-
-    return {
-      title: "Digital system stable",
-      detail:
-        "No major digital bottleneck is surfaced right now. Keep content shipping and continue disciplined allocation.",
-    };
-  }, [engagementSpikes.length, contentDrops.length, sentimentShifts.length]);
 
   const digitalAbeBriefing = useMemo(() => {
     return getDigitalAbeBriefing({
@@ -699,98 +656,6 @@ export default function DigitalDashboardPage() {
     return null;
   }, [selectedTask, engagementSpikes.length, sentimentShifts.length]);
 
-  function getDigitalRecommendation(task: FocusTask | null) {
-    if (!task) return "Select a digital priority to begin execution.";
-
-    if (task.type === "content") {
-      return "Refresh creative immediately to protect performance and improve click-through rate.";
-    }
-
-    if (task.type === "spend") {
-      return "Shift budget toward the strongest performer now while momentum is working in your favor.";
-    }
-
-    return "Draft and control the response carefully so weak sentiment does not spread further.";
-  }
-
-  function moveToNextDigitalTask() {
-    const currentIndex = focusQueue.findIndex((item) => item.id === selectedTaskId);
-    const nextTask = currentIndex >= 0 ? focusQueue[currentIndex + 1] : null;
-
-    if (nextTask) {
-      setTimeout(() => {
-        setSelectedTaskId(nextTask.id);
-      }, 150);
-    }
-  }
-
-  function saveDigitalLoop() {
-    if (!selectedTask) {
-      setLoopMessage("Select a digital priority first.");
-      return;
-    }
-
-    if (!loopResult.trim()) {
-      setLoopMessage("Choose an execution result before saving.");
-      return;
-    }
-
-    if (selectedTask.type === "content" && loopResult === "completed") {
-      const nextDrop: ContentDrop = {
-        id: `content-drop-${Date.now()}`,
-        title: selectedTask.title,
-        platform: "Meta",
-        audience: "Top-funnel persuadables",
-        goal: "Lead generation",
-        narrative: "Education contrast",
-        createdAt: new Date().toLocaleString(),
-      };
-
-      setContentDrops((current) => [nextDrop, ...current]);
-    }
-
-    if (selectedTask.type === "spend" && loopResult === "completed") {
-      const nextSpike: EngagementSpike = {
-        id: `engagement-spike-${Date.now()}`,
-        platform: "TikTok",
-        budgetShift: "15%",
-        audience: "Young persuadables",
-        goal: "Engagement growth",
-        narrative: "Momentum push",
-        createdAt: new Date().toLocaleString(),
-      };
-
-      setEngagementSpikes((current) => [nextSpike, ...current]);
-    }
-
-    if (selectedTask.type === "reply" && loopResult === "completed") {
-      const nextShift: SentimentShift = {
-        id: `sentiment-shift-${Date.now()}`,
-        platform: "X",
-        tone: "Controlled",
-        audience: "Issue-aware voters",
-        goal: "Narrative control",
-        narrative: "Public safety response",
-        createdAt: new Date().toLocaleString(),
-      };
-
-      setSentimentShifts((current) => [nextShift, ...current]);
-    }
-
-    const nextActionMessage =
-      loopResult === "completed"
-        ? "Priority completed. Move immediately to the next digital action."
-        : loopResult === "adjusted"
-        ? "Adjustment logged. Monitor this lane closely and continue execution."
-        : "Needs follow-up. Keep this item active while you continue applying pressure.";
-
-    setCompletedLoopCount((value) => value + 1);
-    setLoopMessage(`Saved successfully. ${nextActionMessage}`);
-    setLoopResult("");
-    setLoopNotes("");
-
-    moveToNextDigitalTask();
-  }
 
   const visibleStats = useMemo(() => {
     const allStats = [
@@ -899,17 +764,6 @@ export default function DigitalDashboardPage() {
     return "Stay focused on the immediate digital work that needs to move right now without carrying the full department surface.";
   }, [demoRole]);
 
-  const loopButtonLabel = useMemo(() => {
-    if (digitalLoopMode) {
-      return demoRole === "general_user" ? "Exit Work Mode" : "Digital Loop On";
-    }
-
-    if (demoRole === "general_user") {
-      return "Start Work Mode";
-    }
-
-    return "Enable Digital Loop";
-  }, [digitalLoopMode, demoRole]);
 
   const focusButtonLabel = useMemo(() => {
     if (demoRole === "general_user") {
@@ -984,18 +838,6 @@ export default function DigitalDashboardPage() {
               <Zap className="h-4 w-4" />
               {focusButtonLabel}
             </Link>
-
-            <button
-              type="button"
-              onClick={() => setDigitalLoopMode((prev) => !prev)}
-              className={
-                digitalLoopMode
-                  ? "rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
-                  : "rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-              }
-            >
-              {loopButtonLabel}
-            </button>
           </div>
         </div>
       </section>
@@ -1159,203 +1001,6 @@ export default function DigitalDashboardPage() {
           </div>
         ) : null}
       </section>
-
-      {digitalLoopMode ? (
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
-          <div
-            className={`mb-6 grid gap-4 ${
-              demoRole === "general_user" ? "md:grid-cols-2" : "md:grid-cols-3"
-            }`}
-          >
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-sm font-medium text-slate-500">
-                Digital Loop Progress
-              </p>
-              <p className="mt-2 text-3xl font-semibold text-slate-900">
-                {visibleFocusQueue.findIndex((item) => item.id === selectedTaskId) + 1 > 0
-                  ? visibleFocusQueue.findIndex((item) => item.id === selectedTaskId) + 1
-                  : 1}
-                <span className="text-base font-medium text-slate-500">
-                  {" "}
-                  / {visibleFocusQueue.length}
-                </span>
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-sm font-medium text-slate-500">
-                Loop Actions Saved
-              </p>
-              <p className="mt-2 text-3xl font-semibold text-slate-900">
-                {completedLoopCount}
-              </p>
-            </div>
-
-            {demoRole !== "general_user" ? (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <p className="text-sm font-medium text-slate-500">
-                  Highest Priority
-                </p>
-                <p className="mt-2 text-lg font-semibold text-slate-900">
-                  {visibleFocusQueue[0]?.title || "No task available"}
-                </p>
-              </div>
-            ) : null}
-          </div>
-                    <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-            <div>
-              <div className="mb-4 rounded-2xl border border-indigo-200 bg-indigo-50 p-4">
-                <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700">
-                  Highest Priority Digital Task
-                </p>
-                <p className="mt-2 text-sm font-semibold text-slate-900">
-                  {visibleFocusQueue[0]?.title || "No priority available"}
-                </p>
-                <p className="mt-1 text-xs text-slate-600">
-                  {visibleFocusQueue[0]?.summary ||
-                    "System recommends immediate digital action."}
-                </p>
-              </div>
-
-              <div className="mb-4">
-                <p className="text-sm font-medium text-slate-500">
-                  Digital Loop Queue
-                </p>
-                <h2 className="text-xl font-semibold text-slate-900">
-                  {demoRole === "general_user"
-                    ? "Active Digital Work"
-                    : "Content + Spend Execution"}
-                </h2>
-              </div>
-
-              <div className="space-y-4">
-                {visibleFocusQueue.map((item) => (
-                  <div
-                    key={item.id}
-                    onClick={() => setSelectedTaskId(item.id)}
-                    className={`cursor-pointer rounded-2xl border p-4 transition-all ${
-                      item.id === selectedTaskId
-                        ? "border-blue-500 bg-blue-50 shadow-md"
-                        : "border-slate-200 bg-white hover:bg-slate-50"
-                    }`}
-                  >
-                    <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-                      <div>
-                        <p className="font-semibold text-slate-900">{item.title}</p>
-                        <p className="mt-2 text-sm text-slate-500">
-                          {item.summary}
-                        </p>
-                        {item.id === selectedTaskId && selectedDigitalPatternHint ? (
-                          <p className="mt-2 text-xs font-medium text-amber-700">
-                            {selectedDigitalPatternHint}
-                          </p>
-                        ) : null}
-                      </div>
-
-                      <div className="flex flex-wrap gap-2">
-                        <span
-                          className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${priorityTone(
-                            item.priority
-                          )}`}
-                        >
-                          {item.priority}
-                        </span>
-
-                        <span className="inline-flex rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700">
-                          {item.type}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
-              {selectedTask ? (
-                <div className="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
-                    Aether Recommendation
-                  </p>
-                  <p className="mt-2 text-sm font-medium text-slate-900">
-                    {getDigitalRecommendation(selectedTask)}
-                  </p>
-                  <p className="mt-1 text-xs text-slate-600">
-                    Save the execution decision and move immediately to the next
-                    digital priority.
-                  </p>
-                  {selectedDigitalPatternHint ? (
-                    <p className="mt-2 text-xs font-medium text-amber-700">
-                      {selectedDigitalPatternHint}
-                    </p>
-                  ) : null}
-                </div>
-              ) : null}
-
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold text-slate-900">
-                  {demoRole === "general_user"
-                    ? "Digital Work"
-                    : "Digital Execution"}
-                </h3>
-                <p className="mt-1 text-sm text-slate-500">
-                  {demoRole === "general_user"
-                    ? "Record the result and keep the next digital action moving."
-                    : "Record the result, reinforce the next move, and keep momentum going."}
-                </p>
-              </div>
-
-              {selectedTask ? (
-                <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-4">
-                  <p className="text-sm text-slate-500">Selected Priority</p>
-                  <p className="mt-2 text-lg font-semibold text-slate-900">
-                    {selectedTask.title}
-                  </p>
-                  <p className="mt-1 text-sm text-slate-500">
-                    {selectedTask.summary}
-                  </p>
-                </div>
-              ) : null}
-
-              {loopMessage ? (
-                <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-700">
-                  {loopMessage}
-                </div>
-              ) : null}
-
-              <div className="space-y-4">
-                <select
-                  value={loopResult}
-                  onChange={(e) => setLoopResult(e.target.value)}
-                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400"
-                >
-                  <option value="">Select an execution result</option>
-                  <option value="completed">Completed</option>
-                  <option value="adjusted">Adjusted</option>
-                  <option value="needs_follow_up">Needs Follow-Up</option>
-                </select>
-
-                <textarea
-                  value={loopNotes}
-                  onChange={(e) => setLoopNotes(e.target.value)}
-                  placeholder="Digital notes..."
-                  rows={5}
-                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400"
-                />
-
-                <button
-                  type="button"
-                  onClick={saveDigitalLoop}
-                  disabled={!selectedTask}
-                  className="w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {demoRole === "general_user" ? "Save & Continue" : "Save & Next"}
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
-      ) : null}
 
       <section
         className={`grid gap-4 ${

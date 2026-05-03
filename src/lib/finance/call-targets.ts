@@ -57,6 +57,22 @@ export type FinanceDbContact = {
   city?: string | null;
   state?: string | null;
   owner_name?: string | null;
+  fec_match_status?: "matched" | "probable" | "unresolved" | "none" | null;
+  fec_confidence_score?: number | null;
+  fec_total_given?: number | null;
+  fec_last_donation_date?: string | null;
+  fec_recent_activity?: boolean | null;
+  fec_donor_tier?: "none" | "base" | "mid" | "major" | "maxed" | null;
+  jackpot_candidate?: boolean | null;
+  jackpot_anomaly_type?:
+    | "dormant_high_value_donor"
+    | "recent_external_giving"
+    | "high_value_unworked"
+    | "pledge_gap"
+    | "compliance_blocked"
+    | "none"
+    | null;
+  jackpot_reason?: string | null;
 };
 
 function generateMockUuid(seed: string) {
@@ -312,38 +328,155 @@ function fullName(contact: FinanceDbContact) {
   return name || contact.email || "Unnamed Contact";
 }
 
-function buildLiveSuggestedAsk(contact: FinanceDbContact, amount: number) {
-  return `Thank them for their support and ask for ${formatCurrency(amount)} to move this finance push forward.`;
+function donorTierLabel(contact: FinanceDbContact) {
+  switch (contact.fec_donor_tier) {
+    case "maxed":
+      return "maxed donor";
+    case "major":
+      return "major donor";
+    case "mid":
+      return "mid-level donor";
+    case "base":
+      return "base donor";
+    case "none":
+    default:
+      return "donor prospect";
+  }
 }
 
-function buildLiveScript(contact: FinanceDbContact, amount: number) {
-  return `${fullName(contact)}, thanks again for your support. I’m reaching out because we’re in an active push and wanted to ask whether you’d consider ${formatCurrency(amount)} today to help us close strong.`;
+function jackpotLabel(contact: FinanceDbContact) {
+  switch (contact.jackpot_anomaly_type) {
+    case "pledge_gap":
+      return "pledge gap";
+    case "compliance_blocked":
+      return "compliance-blocked donor";
+    case "recent_external_giving":
+      return "recent external giving";
+    case "high_value_unworked":
+      return "high-value unworked donor";
+    case "dormant_high_value_donor":
+      return "dormant high-value donor";
+    case "none":
+    default:
+      return "donor opportunity";
+  }
+}
+
+function buildLiveAmount(contact: FinanceDbContact) {
+  const fecTotal = Number(contact.fec_total_given || 0);
+
+  if (contact.jackpot_candidate && fecTotal >= 6600) return 6600;
+  if (contact.jackpot_candidate && fecTotal >= 2500) return 5000;
+
+  if (contact.fec_donor_tier === "maxed") return 6600;
+  if (contact.fec_donor_tier === "major") return 2500;
+  if (contact.fec_donor_tier === "mid") return 1000;
+  if (contact.fec_donor_tier === "base") return 500;
+
+  if (fecTotal >= 6600) return 6600;
+  if (fecTotal >= 2500) return 2500;
+  if (fecTotal >= 500) return 1000;
+
+  if ((contact.owner_name || "").trim()) return 1000;
+  return 500;
+}
+
+function buildLivePriority(contact: FinanceDbContact) {
+  if (contact.jackpot_candidate) return "high" as const;
+  if (contact.fec_donor_tier === "maxed" || contact.fec_donor_tier === "major") {
+    return "high" as const;
+  }
+  if (contact.fec_recent_activity || contact.fec_donor_tier === "mid") {
+    return "medium" as const;
+  }
+  if ((contact.owner_name || "").trim()) return "medium" as const;
+  return "low" as const;
+}
+
+function buildLiveStatus(contact: FinanceDbContact) {
+  if (contact.jackpot_anomaly_type === "pledge_gap") return "pledged" as const;
+  if (contact.fec_recent_activity || contact.jackpot_candidate) return "follow_up" as const;
+  return "reconnect" as const;
 }
 
 function buildLiveReason(contact: FinanceDbContact, amount: number) {
+  if (contact.jackpot_candidate) {
+    return contact.jackpot_reason || `Jackpot signal surfaced a ${jackpotLabel(contact)} with a suggested ask of ${formatCurrency(amount)}.`;
+  }
+
+  if (contact.fec_donor_tier === "maxed" || contact.fec_donor_tier === "major") {
+    return `${donorTierLabel(contact)} signal is visible with a suggested ask of ${formatCurrency(amount)}.`;
+  }
+
+  if (contact.fec_recent_activity) {
+    return `Recent FEC activity is visible; follow up while donor intent is still warm.`;
+  }
+
+  if (contact.fec_match_status === "matched" || contact.fec_match_status === "probable") {
+    return `FEC donor match is ${contact.fec_match_status}; keep this contact in the finance queue.`;
+  }
+
   if ((contact.owner_name || "").trim()) {
     return `Assigned contact with callable information and a suggested ask of ${formatCurrency(amount)}.`;
   }
 
-  return `Callable contact with usable finance profile and a suggested ask of ${formatCurrency(amount)}.`;
+  return `Callable contact with a starter finance ask of ${formatCurrency(amount)}.`;
 }
 
-function buildLivePriority(contact: FinanceDbContact) {
-  if ((contact.owner_name || "").trim()) return "high" as const;
-  if (contact.city && contact.state) return "medium" as const;
-  return "low" as const;
+function buildLiveSuggestedAsk(contact: FinanceDbContact, amount: number) {
+  if (contact.jackpot_candidate) {
+    return `Open with the ${jackpotLabel(contact)} context and test a ${formatCurrency(amount)} ask.`;
+  }
+
+  if (contact.fec_donor_tier === "maxed") {
+    return `Protect the relationship, confirm current intent, and discuss the cleanest max-out path.`;
+  }
+
+  if (contact.fec_donor_tier === "major") {
+    return `Thank them for past support and ask for ${formatCurrency(amount)} while donor capacity is visible.`;
+  }
+
+  if (contact.fec_recent_activity) {
+    return `Reference recent giving momentum and ask for ${formatCurrency(amount)} now.`;
+  }
+
+  return `Thank them for their support and ask for ${formatCurrency(amount)} to move this finance push forward.`;
 }
 
-function buildLiveAmount(contact: FinanceDbContact) {
-  if ((contact.owner_name || "").trim()) return 1500;
-  if (contact.city && contact.state) return 1000;
-  return 500;
+function buildLiveScript(contact: FinanceDbContact, amount: number) {
+  const name = fullName(contact);
+
+  if (contact.jackpot_candidate) {
+    return `${name}, thanks again for being in our campaign orbit. I’m reaching out because your donor profile is showing a timely finance opportunity, and I wanted to ask whether you’d consider ${formatCurrency(amount)} to help us move this push forward.`;
+  }
+
+  if (contact.fec_donor_tier === "maxed" || contact.fec_donor_tier === "major") {
+    return `${name}, thank you again for your support. I’m reaching out because your past giving makes you one of the relationships we want to handle carefully, and I wanted to ask whether ${formatCurrency(amount)} is possible for this push.`;
+  }
+
+  if (contact.fec_recent_activity) {
+    return `${name}, thanks again for staying engaged. I’m reaching out while support is active to ask whether you’d consider ${formatCurrency(amount)} today to help us close strong.`;
+  }
+
+  return `${name}, thanks again for your support. I’m reaching out because we’re in an active push and wanted to ask whether you’d consider ${formatCurrency(amount)} today to help us close strong.`;
+}
+
+function buildLiveLastContact(contact: FinanceDbContact) {
+  if (contact.fec_last_donation_date) {
+    return `Last FEC gift: ${contact.fec_last_donation_date}`;
+  }
+
+  if (contact.fec_match_status === "matched" || contact.fec_match_status === "probable") {
+    return `FEC match: ${contact.fec_match_status}`;
+  }
+
+  return "Live contact record";
 }
 
 export async function getLiveFinanceCallTargets(): Promise<FinanceCallTarget[]> {
   const { data, error } = await supabase
     .from("contacts")
-    .select("id, first_name, last_name, email, phone, city, state, owner_name")
+    .select("id, first_name, last_name, email, phone, city, state, owner_name, fec_match_status, fec_confidence_score, fec_total_given, fec_last_donation_date, fec_recent_activity, fec_donor_tier, jackpot_candidate, jackpot_anomaly_type, jackpot_reason")
     .not("phone", "is", null)
     .order("last_name", { ascending: true })
     .limit(50);
@@ -376,8 +509,8 @@ export async function getLiveFinanceCallTargets(): Promise<FinanceCallTarget[]> 
       reason: buildLiveReason(contact, amount),
       suggestedAsk: buildLiveSuggestedAsk(contact, amount),
       script: buildLiveScript(contact, amount),
-      status: "reconnect" as const,
-      lastContact: "Live contact record",
+      status: buildLiveStatus(contact),
+      lastContact: buildLiveLastContact(contact),
     };
   });
 

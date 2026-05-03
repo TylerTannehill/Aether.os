@@ -31,6 +31,9 @@ type FocusLaneItem = {
   summary: string;
   priority: "high" | "medium" | "low";
   type: "pledge" | "compliance" | "entry";
+  contactName?: string;
+  amount?: number;
+  callTargetStatus?: FinanceCallTarget["status"];
 };
 
 type ActivePledgeExecution = {
@@ -239,6 +242,10 @@ export default function FinanceFocusModePage() {
   const [callNote, setCallNote] = useState("");
   const [callTargets, setCallTargets] = useState<FinanceCallTarget[]>([]);
   const [loadingTargets, setLoadingTargets] = useState(true);
+  const [roleLoading, setRoleLoading] = useState(true);
+  const [hasFinanceAccess, setHasFinanceAccess] = useState(false);
+  const [hasFinanceDirector, setHasFinanceDirector] = useState(false);
+  const [hasFinanceUser, setHasFinanceUser] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -273,17 +280,118 @@ export default function FinanceFocusModePage() {
     };
   }, []);
 
-  const nowLine = useMemo(() => {
-    return {
-      headline:
-        "Stay in finance flow.",
-      body:
-        "Call time comes first. Everything else supports clean records and compliance.",
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadFinanceRoleContext() {
+      try {
+        setRoleLoading(true);
+
+        const response = await fetch("/api/admin/org-members");
+        const data = await response.json();
+
+        if (!mounted) return;
+
+        if (!response.ok) {
+          console.error("Failed to load finance role context:", data?.error);
+          setHasFinanceAccess(false);
+          setHasFinanceDirector(false);
+          setHasFinanceUser(false);
+          return;
+        }
+
+        const currentMemberId = data?.currentMember?.id;
+        const roles = Array.isArray(data?.roles) ? data.roles : [];
+
+        const myRoles = roles.filter(
+          (role: any) => role.organization_member_id === currentMemberId
+        );
+
+        const normalizedFinanceRoles = myRoles.filter(
+          (role: any) => String(role.department || "").toLowerCase() === "finance"
+        );
+
+        const financeDirector = normalizedFinanceRoles.some(
+          (role: any) =>
+            ["admin", "campaign_manager", "director", "finance_director"].includes(
+              String(role.role_level || "").toLowerCase()
+            )
+        );
+
+        const financeUser = normalizedFinanceRoles.some((role: any) =>
+          ["user", "general_user", "finance_user"].includes(
+            String(role.role_level || "").toLowerCase()
+          )
+        );
+
+        const legacyRole = String(data?.currentMember?.role || "").toLowerCase();
+        const legacyDepartment = String(
+          data?.currentMember?.department || ""
+        ).toLowerCase();
+
+        const legacyAdminAccess = legacyRole === "admin";
+        const legacyFinanceAccess = legacyDepartment === "finance";
+
+        setHasFinanceDirector(financeDirector || legacyAdminAccess);
+        setHasFinanceUser(financeUser || legacyFinanceAccess);
+        setHasFinanceAccess(
+          normalizedFinanceRoles.length > 0 || legacyAdminAccess || legacyFinanceAccess
+        );
+      } catch (error) {
+        console.error("Failed to load finance role context:", error);
+
+        if (!mounted) return;
+        setHasFinanceAccess(false);
+        setHasFinanceDirector(false);
+        setHasFinanceUser(false);
+      } finally {
+        if (mounted) {
+          setRoleLoading(false);
+        }
+      }
+    }
+
+    loadFinanceRoleContext();
+
+    return () => {
+      mounted = false;
     };
   }, []);
 
-  const focusItems = useMemo<FocusLaneItem[]>(
-    () => [
+  const nowLine = useMemo(() => {
+    if (hasFinanceDirector) {
+      return {
+        headline: "Direct the finance lane.",
+        body:
+          "Spot donor pressure, route the highest-value work, and keep calls moving without drowning operators in strategy.",
+      };
+    }
+
+    return {
+      headline: "Stay in finance execution flow.",
+      body:
+        "Call time comes first. Work the queue, log outcomes, and keep donor follow-up clean.",
+    };
+  }, [hasFinanceDirector]);
+
+  const focusItems = useMemo<FocusLaneItem[]>(() => {
+    const donorDrivenItems: FocusLaneItem[] = callTargets.slice(0, 4).map((target) => ({
+      id: target.id,
+      title:
+        target.status === "pledged"
+          ? `Collect ${target.contactName} pledge`
+          : target.status === "follow_up"
+            ? `Follow up with ${target.contactName}`
+            : `Call ${target.contactName}`,
+      summary: target.reason,
+      priority: target.priority,
+      type: "pledge",
+      contactName: target.contactName,
+      amount: target.amount,
+      callTargetStatus: target.status,
+    }));
+
+    const fallbackPledgeItems: FocusLaneItem[] = [
       {
         id: "focus-1",
         title: "Collect Michael Ross pledge",
@@ -291,7 +399,24 @@ export default function FinanceFocusModePage() {
           "A pledged contribution is still waiting to be collected and should be converted before it stalls in the workflow.",
         priority: "high",
         type: "pledge",
+        contactName: "Michael Ross",
+        amount: 3200,
+        callTargetStatus: "pledged",
       },
+      {
+        id: "focus-4",
+        title: "Schedule second pledge follow-up block",
+        summary:
+          "Open pledge follow-ups should be organized into the next active collection block.",
+        priority: "medium",
+        type: "pledge",
+        contactName: "Open pledge block",
+        amount: 5400,
+        callTargetStatus: "follow_up",
+      },
+    ];
+
+    const operationalItems: FocusLaneItem[] = [
       {
         id: "focus-2",
         title: "Fix James Carter compliance data",
@@ -309,14 +434,6 @@ export default function FinanceFocusModePage() {
         type: "entry",
       },
       {
-        id: "focus-4",
-        title: "Schedule second pledge follow-up block",
-        summary:
-          "Open pledge follow-ups should be organized into the next active collection block.",
-        priority: "medium",
-        type: "pledge",
-      },
-      {
         id: "focus-5",
         title: "Complete missing employer and occupation records",
         summary:
@@ -332,9 +449,13 @@ export default function FinanceFocusModePage() {
         priority: "low",
         type: "entry",
       },
-    ],
-    []
-  );
+    ];
+
+    return [
+      ...(donorDrivenItems.length > 0 ? donorDrivenItems : fallbackPledgeItems),
+      ...operationalItems,
+    ];
+  }, [callTargets]);
 
   const grouped = useMemo(() => {
     return {
@@ -508,9 +629,9 @@ export default function FinanceFocusModePage() {
       id: item.id,
       title: item.title,
       summary: item.summary,
-      contactName: "Finance Contact",
-      amount: 1000,
-      status: "pledged" as const,
+      contactName: item.contactName || "Finance Contact",
+      amount: item.amount || 1000,
+      status: item.callTargetStatus === "follow_up" ? "follow_up" : "pledged",
     };
 
     setActivePledge(selected);
@@ -622,6 +743,61 @@ export default function FinanceFocusModePage() {
   const callSessionComplete =
     callSessionStarted && callSessionStats.completed >= callTargets.length;
 
+  const financeRoleLabel = hasFinanceDirector
+    ? "Finance Director"
+    : hasFinanceUser
+      ? "Finance User"
+      : "No Finance Role";
+
+  if (roleLoading) {
+    return (
+      <div className="space-y-6">
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <p className="text-sm text-slate-600">Loading finance context...</p>
+        </section>
+      </div>
+    );
+  }
+
+  if (!hasFinanceAccess) {
+    return (
+      <div className="space-y-6">
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="text-sm font-medium text-slate-500">Finance Focus Mode</p>
+              <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+                No Finance Role Assigned
+              </h1>
+              <p className="mt-2 max-w-2xl text-sm text-slate-600">
+                You are not currently assigned to Finance. Ask your campaign admin
+                to add a Finance Director or Finance User role before working this
+                lane.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+              >
+                Back to Dashboard
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+
+              <Link
+                href="/dashboard/profile"
+                className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+              >
+                View Profile
+              </Link>
+            </div>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <section className="rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-6 text-white shadow-sm lg:p-8">
@@ -630,6 +806,10 @@ export default function FinanceFocusModePage() {
             <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200">
               <Zap className="h-3.5 w-3.5" />
               Finance Focus Mode
+            </div>
+
+            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-emerald-900">
+              {financeRoleLabel}
             </div>
 
             <div className="space-y-3">
@@ -673,7 +853,34 @@ export default function FinanceFocusModePage() {
         </div>
       </section>
 
+      {!hasFinanceDirector ? (
+        <section className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800">
+                Execution Lane
+              </p>
+              <h2 className="mt-2 text-xl font-semibold text-emerald-950">
+                Your finance work starts with donor calls.
+              </h2>
+              <p className="mt-1 max-w-3xl text-sm text-emerald-800">
+                Strategy signals stay with finance leadership. Your job is to work the call queue, log clean outcomes, and keep pledge follow-up moving.
+              </p>
+            </div>
 
+            <a
+              href="#finance-call-time"
+              className="inline-flex w-fit items-center gap-2 rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-emerald-700"
+            >
+              Start with calls
+              <PhoneCall className="h-4 w-4" />
+            </a>
+          </div>
+        </section>
+      ) : null}
+
+
+      {hasFinanceDirector ? (
       <section className="rounded-3xl border-2 border-amber-300 bg-gradient-to-br from-amber-50 via-yellow-50 to-white p-6 shadow-md">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div>
@@ -724,6 +931,7 @@ export default function FinanceFocusModePage() {
           </div>
         </div>
       </section>
+      ) : null}
 
       <section id="finance-call-time" className="rounded-3xl border-2 border-emerald-300 bg-emerald-50 p-6 shadow-md">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -1251,9 +1459,9 @@ export default function FinanceFocusModePage() {
                       onClick={() => openPledgePanel(item)}
                       className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white transition hover:bg-slate-800"
                     >
-                      {item.id === "focus-1"
-                        ? "Collect Pledge"
-                        : "Schedule Follow-Up"}
+                      {item.callTargetStatus === "follow_up"
+                        ? "Schedule Follow-Up"
+                        : "Collect Pledge"}
                     </button>
                     <button
                       onClick={() => openPledgePanel(item)}
@@ -1727,10 +1935,9 @@ export default function FinanceFocusModePage() {
               Finance Operating Pattern
             </h2>
             <p className="mt-2 text-sm text-amber-800">
-              This page should stay ruthless: finance call time and pledge
-              collection first, clear compliance second, and process finance
-              entry third. Everything else in Finance should support those
-              actions, not distract from them.
+              {hasFinanceDirector
+                ? "Director mode keeps donor strategy, jackpot pressure, pledge conversion, compliance cleanup, and entry work visible in one finance command lane."
+                : "User mode strips out finance strategy and keeps the work focused: run donor calls, log outcomes, collect pledges, and keep records clean."}
             </p>
           </div>
         </div>

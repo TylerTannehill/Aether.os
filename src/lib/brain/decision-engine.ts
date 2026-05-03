@@ -47,6 +47,10 @@ function roundScore(value: number): number {
   return Math.round(value * 1000) / 1000;
 }
 
+function hasTag(context: BrainContext, tag: string) {
+  return context.tags.includes(tag);
+}
+
 function mapPriorityHintToImpact(priorityHint: BrainPriorityHint): number {
   switch (priorityHint) {
     case "critical":
@@ -128,6 +132,11 @@ function scoreImpact(context: BrainContext, reasons: string[]): number {
     reasons.push(`Connected metric increased impact (${context.relatedMetric}).`);
   }
 
+  if (hasTag(context, "abe:primary")) {
+    score += 0.1;
+    reasons.push("ABE primary lane alignment increased impact.");
+  }
+
   return clamp(score);
 }
 
@@ -174,6 +183,11 @@ function scoreUrgency(context: BrainContext, reasons: string[]): number {
     }
   }
 
+  if (hasTag(context, "abe:pressure")) {
+    score += 0.1;
+    reasons.push("ABE pressure lane alignment increased urgency.");
+  }
+
   return clamp(score);
 }
 function scoreConfidence(context: BrainContext, reasons: string[]): number {
@@ -210,6 +224,11 @@ function scoreConfidence(context: BrainContext, reasons: string[]): number {
   if (context.relatedMetric) {
     score += 0.05;
     reasons.push("Metric linkage increased confidence.");
+  }
+
+  if (hasTag(context, "abe:opportunity")) {
+    score += 0.05;
+    reasons.push("ABE opportunity lane alignment increased confidence.");
   }
 
   return clamp(score);

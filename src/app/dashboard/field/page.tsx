@@ -5,7 +5,6 @@ import { useEffect, useMemo, useState } from "react";
 import {
   CheckCircle2,
   ClipboardList,
-  ListChecks,
   MapPinned,
   Route,
   Sparkles,
@@ -273,12 +272,7 @@ function getFieldAbeBriefing(input: {
 
 export default function FieldDashboardPage() {
   const [trendView, setTrendView] = useState<FieldTrendView>("doors");
-  const [fieldLoopMode, setFieldLoopMode] = useState(false);
   const [selectedFocusTaskId, setSelectedFocusTaskId] = useState("focus-1");
-  const [fieldResult, setFieldResult] = useState("");
-  const [fieldNotes, setFieldNotes] = useState("");
-  const [fieldMessage, setFieldMessage] = useState("");
-  const [completedLoopCount, setCompletedLoopCount] = useState(0);
   const [generatedLists, setGeneratedLists] = useState<GeneratedFieldList[]>([]);
   const [demoRole, setDemoRole] = useState<DemoRole>("admin");
   const [demoDepartment, setDemoDepartment] =
@@ -673,67 +667,6 @@ export default function FieldDashboardPage() {
     return null;
   }, [selectedFocusTask, averageCompletion, topLine.ids, generatedLists.length]);
 
-  function getFieldRecommendation(task: FieldFocusTask | null) {
-    if (!task) return "Select a field priority to begin execution.";
-
-    if (task.type === "turf") {
-      return "Push unfinished turf to completion first to protect pacing and coverage.";
-    }
-
-    if (task.type === "canvass") {
-      return "Reallocate the strongest canvassers into the highest-opportunity turf now.";
-    }
-
-    return "Convert live field conversations into immediate follow-up actions before they cool off.";
-  }
-
-  function moveToNextFieldTask() {
-    const currentIndex = focusQueue.findIndex((item) => item.id === selectedFocusTaskId);
-    const nextTask = currentIndex >= 0 ? focusQueue[currentIndex + 1] : null;
-
-    if (nextTask) {
-      setTimeout(() => {
-        setSelectedFocusTaskId(nextTask.id);
-      }, 150);
-    }
-  }
-
-  function saveFieldLoop() {
-    if (!selectedFocusTask) {
-      setFieldMessage("Select a field priority first.");
-      return;
-    }
-
-    if (!fieldResult.trim()) {
-      setFieldMessage("Choose an execution result before saving.");
-      return;
-    }
-
-    if (selectedFocusTask.type === "follow_up") {
-      const nextList: GeneratedFieldList = {
-        id: `generated-${Date.now()}`,
-        name: `${selectedFocusTask.linkedListName || "Field Follow-Up"} ${
-          generatedLists.length + 1
-        }`,
-        source: selectedFocusTask.title,
-        created: new Date().toLocaleString(),
-      };
-
-      setGeneratedLists((current) => [nextList, ...current]);
-    }
-
-    setCompletedLoopCount((value) => value + 1);
-
-    setFieldMessage(
-      `Saved: ${selectedFocusTask.title} marked as "${fieldResult}".`
-    );
-
-    setFieldResult("");
-    setFieldNotes("");
-
-    moveToNextFieldTask();
-  }
-
   const visibleTurfRows = useMemo(() => {
     if (demoRole === "admin") {
       return turfRows;
@@ -824,18 +757,6 @@ export default function FieldDashboardPage() {
     return "Stay focused on the immediate field work that needs to move right now without carrying the full department surface.";
   }, [demoRole]);
 
-  const commandSignalCtaLabel = useMemo(() => {
-    if (demoRole === "general_user") {
-      return "Start Field Work";
-    }
-
-    if (demoRole === "director") {
-      return "Run Field Lane";
-    }
-
-    return "Open Field Focus Mode";
-  }, [demoRole]);
-
   const trendHeadline = useMemo(() => {
     if (demoRole === "admin") {
       return "Weekly Trend";
@@ -847,18 +768,6 @@ export default function FieldDashboardPage() {
 
     return "Active Trend";
   }, [demoRole]);
-
-  const fieldLoopButtonLabel = useMemo(() => {
-    if (fieldLoopMode) {
-      return demoRole === "general_user" ? "Exit Work Mode" : "Exit Loop Mode";
-    }
-
-    if (demoRole === "general_user") {
-      return "Start Work Mode";
-    }
-
-    return "Enter Loop Mode";
-  }, [fieldLoopMode, demoRole]);
 
   return (
     <div className="space-y-8">
@@ -887,17 +796,6 @@ export default function FieldDashboardPage() {
               <Zap className="h-4 w-4" />
               Open Focus Mode
             </Link>
-
-            <button
-              onClick={() => setFieldLoopMode((value) => !value)}
-              className={`rounded-2xl px-4 py-3 text-sm font-medium transition ${
-                fieldLoopMode
-                  ? "bg-emerald-600 text-white hover:bg-emerald-700"
-                  : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-              }`}
-            >
-              {fieldLoopButtonLabel}
-            </button>
           </div>
         </div>
       </section>
@@ -1483,180 +1381,6 @@ export default function FieldDashboardPage() {
         ) : null}
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
-        <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <p className="text-sm font-medium text-slate-500">
-              {demoRole === "general_user" ? "Field Work Loop" : "Field Loop"}
-            </p>
-            <h2 className="text-xl font-semibold text-slate-900">
-              {demoRole === "general_user"
-                ? "Work Through The Next Field Moves"
-                : "Identify → Work → Convert → Move"}
-            </h2>
-            <p className="mt-1 text-sm text-slate-500">
-              {demoRole === "admin"
-                ? "Work through lagging turf, deployment, and follow-up generation without losing momentum."
-                : demoRole === "director"
-                ? "Keep the field lane moving through completion, deployment, and follow-up generation."
-                : "Stay inside the immediate field actions that need to move right now."}
-            </p>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setFieldLoopMode((value) => !value)}
-            className={
-              fieldLoopMode
-                ? "rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
-                : "rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-            }
-          >
-            {fieldLoopButtonLabel}
-          </button>
-        </div>
-
-        {fieldLoopMode ? (
-          <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-            <div className="space-y-3">
-              {visibleFocusQueue.map((task) => {
-                const isSelected = selectedFocusTaskId === task.id;
-
-                return (
-                  <div
-                    key={task.id}
-                    onClick={() => setSelectedFocusTaskId(task.id)}
-                    className={`cursor-pointer rounded-2xl border p-4 transition-all ${
-                      isSelected
-                        ? "border-emerald-500 bg-emerald-50 shadow-sm"
-                        : "border-slate-200 bg-white hover:bg-slate-50"
-                    }`}
-                  >
-                    <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-                      <div>
-                        <p className="font-semibold text-slate-900">
-                          {task.title}
-                        </p>
-                        <p className="mt-1 text-sm text-slate-500">
-                          {task.summary}
-                        </p>
-                        {task.linkedListName && demoRole !== "general_user" ? (
-                          <p className="mt-2 text-xs text-slate-500">
-                            Linked list: {task.linkedListName}
-                          </p>
-                        ) : null}
-                        {isSelected && selectedFocusPatternHint ? (
-                          <p className="mt-2 text-xs font-medium text-amber-700">
-                            {selectedFocusPatternHint}
-                          </p>
-                        ) : null}
-                      </div>
-
-                      <div className="flex flex-wrap gap-2">
-                        <span
-                          className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${priorityTone(
-                            task.priority
-                          )}`}
-                        >
-                          {task.priority}
-                        </span>
-
-                        <span
-                          className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${typeTone(
-                            task.type
-                          )}`}
-                        >
-                          {task.type}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
-              {selectedFocusTask ? (
-                <div className="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
-                    Aether Recommendation
-                  </p>
-                  <p className="mt-2 text-sm font-medium text-slate-900">
-                    {getFieldRecommendation(selectedFocusTask)}
-                  </p>
-                  <p className="mt-1 text-xs text-slate-600">
-                    Save cleanly, move the best field signal forward, then continue.
-                  </p>
-                  {selectedFocusPatternHint ? (
-                    <p className="mt-2 text-xs font-medium text-amber-700">
-                      {selectedFocusPatternHint}
-                    </p>
-                  ) : null}
-                </div>
-              ) : null}
-
-              {fieldMessage ? (
-                <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-700">
-                  {fieldMessage}
-                </div>
-              ) : null}
-
-              <div className="space-y-4">
-                <div>
-                  <p className="text-xs font-medium text-slate-500">
-                    Execution Result
-                  </p>
-                  <select
-                    value={fieldResult}
-                    onChange={(e) => setFieldResult(e.target.value)}
-                    className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
-                  >
-                    <option value="">Select result</option>
-                    <option value="completed">Completed</option>
-                    <option value="in_progress">In Progress</option>
-                    <option value="needs_follow_up">Needs Follow-Up</option>
-                    <option value="reassigned">Reassigned</option>
-                  </select>
-                </div>
-
-                <div>
-                  <p className="text-xs font-medium text-slate-500">Notes</p>
-                  <textarea
-                    value={fieldNotes}
-                    onChange={(e) => setFieldNotes(e.target.value)}
-                    placeholder="Optional notes..."
-                    rows={5}
-                    className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
-                  />
-                </div>
-
-                <div className="flex flex-wrap gap-3">
-                  <button
-                    onClick={saveFieldLoop}
-                    className="inline-flex items-center gap-2 rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-emerald-700"
-                  >
-                    <CheckCircle2 className="h-4 w-4" />
-                    {demoRole === "general_user" ? "Save & Continue" : "Save & Move"}
-                  </button>
-
-                  <button
-                    onClick={moveToNextFieldTask}
-                    className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
-                  >
-                    Next Priority
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="rounded-2xl border border-dashed border-slate-300 p-6 text-center text-sm text-slate-500">
-            {demoRole === "general_user"
-              ? "Enable Field Work to move through the next field actions in sequence."
-              : "Enable Field Loop to work through turf completion, canvasser allocation, and follow-up generation in sequence."}
-          </div>
-        )}
-      </section>
     </div>
   );
 }

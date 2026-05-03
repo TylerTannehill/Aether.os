@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowRight,
   Boxes,
@@ -136,6 +136,73 @@ export default function PrintFocusModePage() {
   const [inventoryActions, setInventoryActions] = useState<PrintInventoryAction[]>([]);
   const [deliveryUnlocks, setDeliveryUnlocks] = useState<PrintDeliveryUnlock[]>([]);
 
+  const [roleLoading, setRoleLoading] = useState(true);
+  const [hasPrintAccess, setHasPrintAccess] = useState(false);
+  const [hasPrintDirector, setHasPrintDirector] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadRoleContext() {
+      try {
+        const response = await fetch("/api/admin/org-members");
+        const data = await response.json();
+
+        if (!mounted) return;
+
+        if (!response.ok) {
+          setHasPrintAccess(false);
+          setHasPrintDirector(false);
+          return;
+        }
+
+        const currentMemberId = data?.currentMember?.id;
+        const roles = Array.isArray(data?.roles) ? data.roles : [];
+
+        const myRoles = roles.filter(
+          (role: any) => role.organization_member_id === currentMemberId
+        );
+
+        const hasAdmin = myRoles.some(
+          (role: any) =>
+            String(role.department || "").toLowerCase() === "admin" ||
+            String(role.role_level || "").toLowerCase() === "admin" ||
+            String(role.role_level || "").toLowerCase() === "campaign_manager"
+        );
+
+        const hasPrint = myRoles.some(
+          (role: any) => String(role.department || "").toLowerCase() === "print"
+        );
+
+        const isPrintDirector = myRoles.some(
+          (role: any) =>
+            String(role.department || "").toLowerCase() === "print" &&
+            String(role.role_level || "").toLowerCase() === "director"
+        );
+
+        setHasPrintAccess(hasAdmin || hasPrint);
+        setHasPrintDirector(hasAdmin || isPrintDirector);
+      } catch (error) {
+        console.error("Failed to load print role context:", error);
+
+        if (!mounted) return;
+
+        setHasPrintAccess(false);
+        setHasPrintDirector(false);
+      } finally {
+        if (mounted) {
+          setRoleLoading(false);
+        }
+      }
+    }
+
+    loadRoleContext();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   const nowLine = useMemo(() => {
     return {
       headline:
@@ -145,8 +212,82 @@ export default function PrintFocusModePage() {
     };
   }, []);
 
-  const focusItems = useMemo<FocusLaneItem[]>(
+  const systemPrintSignals = useMemo(
     () => [
+      {
+        id: "signal-south-persuasion",
+        turf: "South Persuasion Universe",
+        useCase: "Persuasion mail drop",
+        needsApproval: true,
+        needsInventory: true,
+        needsDelivery: false,
+      },
+      {
+        id: "signal-aurora-field",
+        turf: "Aurora Field Deployment",
+        useCase: "Yard sign saturation push",
+        needsApproval: false,
+        needsInventory: true,
+        needsDelivery: true,
+      },
+      {
+        id: "signal-absentee-chase",
+        turf: "Absentee Chase Universe",
+        useCase: "Vote-by-mail persuasion",
+        needsApproval: true,
+        needsInventory: false,
+        needsDelivery: false,
+      },
+    ],
+    []
+  );
+
+  const focusItems = useMemo<FocusLaneItem[]>(() => {
+    const generated: FocusLaneItem[] = [];
+
+    systemPrintSignals.forEach((signal, index) => {
+      if (signal.needsApproval) {
+        generated.push({
+          id: `focus-approval-${index + 1}`,
+          title: `Approve asset for ${signal.turf}`,
+          summary: `Print approval is blocking ${signal.useCase}. Clear the approval or revision path before downstream execution slows down.`,
+          priority: "high",
+          type: "approval",
+          linkedTurf: signal.turf,
+          linkedUseCase: signal.useCase,
+        });
+      }
+
+      if (signal.needsInventory) {
+        generated.push({
+          id: `focus-inventory-${index + 1}`,
+          title: `Protect materials for ${signal.turf}`,
+          summary: `Inventory pressure is rising around ${signal.useCase}. Reorder or reserve materials before field demand outpaces supply.`,
+          priority: "high",
+          type: "inventory",
+          linkedTurf: signal.turf,
+          linkedUseCase: signal.useCase,
+        });
+      }
+
+      if (signal.needsDelivery) {
+        generated.push({
+          id: `focus-delivery-${index + 1}`,
+          title: `Confirm delivery for ${signal.turf}`,
+          summary: `Delivery timing is now an execution dependency for ${signal.useCase}. Verify ETA and handoff readiness.`,
+          priority: "medium",
+          type: "delivery",
+          linkedTurf: signal.turf,
+          linkedUseCase: signal.useCase,
+        });
+      }
+    });
+
+    if (generated.length > 0) {
+      return generated;
+    }
+
+    return [
       {
         id: "focus-1",
         title: "Get candidate approval on education mailer",
@@ -207,9 +348,8 @@ export default function PrintFocusModePage() {
         linkedTurf: "Multi-region print support",
         linkedUseCase: "Vendor timing control",
       },
-    ],
-    []
-  );
+    ];
+  }, [systemPrintSignals]);
 
   const grouped = useMemo(() => {
     return {
@@ -423,6 +563,45 @@ export default function PrintFocusModePage() {
     setDeliveryConfirmed(null);
   }
 
+  if (roleLoading) {
+    return (
+      <div className="space-y-8">
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <p className="text-slate-600">Loading print focus context...</p>
+        </section>
+      </div>
+    );
+  }
+
+  if (!hasPrintAccess) {
+    return (
+      <div className="space-y-8">
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-sm">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50">
+            <Package className="h-5 w-5 text-slate-500" />
+          </div>
+          <h1 className="mt-4 text-xl font-semibold text-slate-900">
+            No Print Role Assigned
+          </h1>
+          <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-600">
+            You are not currently assigned to Print. Ask your campaign admin to
+            add a Print Director or Print User role if you need access to print
+            execution work.
+          </p>
+          <div className="mt-5 flex justify-center">
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
+            >
+              Back to Dashboard
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <section className="rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-6 text-white shadow-sm lg:p-8">
@@ -431,6 +610,10 @@ export default function PrintFocusModePage() {
             <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200">
               <Zap className="h-3.5 w-3.5" />
               Print Focus Mode
+            </div>
+
+            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-300/30 bg-emerald-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-100">
+              {hasPrintDirector ? "Print Director Access" : "Print User Access"}
             </div>
 
             <div className="space-y-3">
@@ -704,6 +887,7 @@ export default function PrintFocusModePage() {
           </div>
         </div>
 
+        {hasPrintDirector ? (
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="mb-5 flex items-center justify-between">
             <div>
@@ -838,6 +1022,7 @@ export default function PrintFocusModePage() {
             })}
           </div>
         </div>
+        ) : null}
 
         <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm">
           <div className="mb-5 flex items-center justify-between">
@@ -999,6 +1184,7 @@ export default function PrintFocusModePage() {
           </p>
         </div>
 
+        {hasPrintDirector ? (
         <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4 shadow-sm">
           <div className="flex items-center justify-between">
             <p className="text-xs font-medium text-sky-800">
@@ -1013,6 +1199,7 @@ export default function PrintFocusModePage() {
             Protection moves
           </p>
         </div>
+        ) : null}
 
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm">
           <div className="flex items-center justify-between">

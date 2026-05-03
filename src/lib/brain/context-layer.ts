@@ -17,6 +17,21 @@ export type BrainDepartment =
   | "general"
   | "unknown";
 
+export type BrainAbeLane =
+  | "outreach"
+  | "finance"
+  | "field"
+  | "digital"
+  | "print";
+
+export type BrainAbeAlignment = {
+  primaryLane?: BrainAbeLane | null;
+  pressureLane?: BrainAbeLane | null;
+  opportunityLane?: BrainAbeLane | null;
+  health?: string | null;
+  campaignStatus?: string | null;
+};
+
 export type BrainOwnerLevel =
   | "admin"
   | "director"
@@ -90,6 +105,8 @@ export type BrainContext = {
   failureType: BrainFailureType;
   issueType: BrainIssueType;
   priorityHint: BrainPriorityHint;
+
+  abeAlignment: BrainAbeAlignment | null;
 
   relatedMetric: string | null;
   status: string | null;
@@ -251,6 +268,30 @@ function extractRelatedMetric(item: RawBrainItem): string | null {
   );
 }
 
+function normalizeAbeLane(value?: string | null): BrainAbeLane | null {
+  const normalized = safeLower(value);
+
+  if (
+    normalized === "outreach" ||
+    normalized === "finance" ||
+    normalized === "field" ||
+    normalized === "digital" ||
+    normalized === "print"
+  ) {
+    return normalized as BrainAbeLane;
+  }
+
+  return null;
+}
+
+function doesDepartmentMatchAbeLane(
+  department: BrainDepartment,
+  lane?: BrainAbeLane | null
+) {
+  if (!lane) return false;
+  return department === lane;
+}
+
 function buildTags(args: {
   source: BrainActionSource;
   department: BrainDepartment;
@@ -258,6 +299,7 @@ function buildTags(args: {
   failureType: BrainFailureType;
   issueType: BrainIssueType;
   priorityHint: BrainPriorityHint;
+  abeAlignment?: BrainAbeAlignment | null;
   hasOwner: boolean;
   isAutoExecutable: boolean;
   isManualOnly: boolean;
@@ -277,6 +319,26 @@ function buildTags(args: {
   if (args.isManualOnly) tags.push("execution:manual-only");
   if (args.isStale) tags.push("data:stale");
 
+  const primaryLane = normalizeAbeLane(args.abeAlignment?.primaryLane);
+  const pressureLane = normalizeAbeLane(args.abeAlignment?.pressureLane);
+  const opportunityLane = normalizeAbeLane(args.abeAlignment?.opportunityLane);
+
+  if (doesDepartmentMatchAbeLane(args.department, primaryLane)) {
+    tags.push("abe:primary");
+  }
+
+  if (doesDepartmentMatchAbeLane(args.department, pressureLane)) {
+    tags.push("abe:pressure");
+  }
+
+  if (doesDepartmentMatchAbeLane(args.department, opportunityLane)) {
+    tags.push("abe:opportunity");
+  }
+
+  if (safeText(args.abeAlignment?.health)) {
+    tags.push(`abe:health:${safeLower(args.abeAlignment?.health).replace(/\s+/g, "-")}`);
+  }
+
   return tags;
 }
 
@@ -295,7 +357,10 @@ function isItemStale(item: RawBrainItem): boolean {
   return ageMs > seventyTwoHours;
 }
 
-export function enrichBrainItem(item: RawBrainItem): BrainContext {
+export function enrichBrainItem(
+  item: RawBrainItem,
+  abeAlignment?: BrainAbeAlignment | null
+): BrainContext {
   const itemId = safeText(item.id) || buildFallbackId(item);
   const label = safeText(item.title) || "Untitled action";
   const description = safeText(item.description);
@@ -321,6 +386,7 @@ export function enrichBrainItem(item: RawBrainItem): BrainContext {
     failureType,
     issueType,
     priorityHint,
+    abeAlignment,
     hasOwner,
     isAutoExecutable,
     isManualOnly,
@@ -337,6 +403,7 @@ export function enrichBrainItem(item: RawBrainItem): BrainContext {
     failureType,
     issueType,
     priorityHint,
+    abeAlignment: abeAlignment ?? null,
     relatedMetric,
     status: safeText(item.status),
     hasOwner,
@@ -352,6 +419,9 @@ export function enrichBrainItem(item: RawBrainItem): BrainContext {
   };
 }
 
-export function enrichBrainItems(items: RawBrainItem[]): BrainContext[] {
-  return items.map(enrichBrainItem);
+export function enrichBrainItems(
+  items: RawBrainItem[],
+  abeAlignment?: BrainAbeAlignment | null
+): BrainContext[] {
+  return items.map((item) => enrichBrainItem(item, abeAlignment));
 }

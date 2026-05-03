@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowRight,
   ClipboardList,
@@ -11,6 +11,8 @@ import {
   Users,
   Zap,
 } from "lucide-react";
+import { getLists } from "@/lib/data/lists";
+import { CampaignList } from "@/lib/data/types";
 
 type FocusLaneItem = {
   id: string;
@@ -39,6 +41,110 @@ type FollowUpGeneratedList = {
   source: string;
   created: string;
 };
+
+function resolveFieldListType(list: CampaignList): FocusLaneItem["type"] | null {
+  const name = (list.name || "").toLowerCase();
+
+  if (
+    name.includes("turf") ||
+    name.includes("door") ||
+    name.includes("walk") ||
+    name.includes("canvass") ||
+    name.includes("field")
+  ) {
+    if (
+      name.includes("follow") ||
+      name.includes("callback") ||
+      name.includes("engaged") ||
+      name.includes("conversation")
+    ) {
+      return "follow_up";
+    }
+
+    if (
+      name.includes("packet") ||
+      name.includes("canvass") ||
+      name.includes("operator") ||
+      name.includes("volunteer")
+    ) {
+      return "canvass";
+    }
+
+    return "turf";
+  }
+
+  if (
+    name.includes("follow") ||
+    name.includes("callback") ||
+    name.includes("conversation")
+  ) {
+    return "follow_up";
+  }
+
+  return null;
+}
+
+function buildFieldFocusItemFromList(
+  list: CampaignList,
+  index: number
+): FocusLaneItem | null {
+  const type = resolveFieldListType(list);
+
+  if (!type) return null;
+
+  const hasOwner = Boolean(list.default_owner_name?.trim());
+  const priority: FocusLaneItem["priority"] = !hasOwner
+    ? "high"
+    : index <= 1
+      ? "high"
+      : "medium";
+
+  if (type === "turf") {
+    return {
+      id: `field-list-${list.id}`,
+      title: `Finish ${list.name}`,
+      summary: hasOwner
+        ? `${list.name} is a field routing list assigned to ${list.default_owner_name}. Keep coverage moving and prevent turf completion from dragging.`
+        : `${list.name} is a field routing list without a default owner. Assign coverage and move it before it becomes execution drift.`,
+      priority,
+      type,
+      linkedListId: list.id,
+      linkedListName: list.name,
+    };
+  }
+
+  if (type === "canvass") {
+    return {
+      id: `field-list-${list.id}`,
+      title: `Route operators into ${list.name}`,
+      summary: hasOwner
+        ? `${list.name} has routing context. Use it to align the strongest field operators with the highest-value packet.`
+        : `${list.name} needs operator routing before execution can move cleanly.`,
+      priority,
+      type,
+      linkedListId: list.id,
+      linkedListName: list.name,
+    };
+  }
+
+  return {
+    id: `field-list-${list.id}`,
+    title: `Convert conversations from ${list.name}`,
+    summary: hasOwner
+      ? `${list.name} should move into follow-up so strong field conversations do not sit idle.`
+      : `${list.name} has follow-up value but needs routing before Outreach can absorb it cleanly.`,
+    priority,
+    type,
+    linkedListId: list.id,
+    linkedListName: list.name,
+  };
+}
+
+function priorityRank(priority: FocusLaneItem["priority"]) {
+  if (priority === "high") return 3;
+  if (priority === "medium") return 2;
+  return 1;
+}
 
 function priorityTone(priority: FocusLaneItem["priority"]) {
   switch (priority) {
@@ -74,6 +180,102 @@ export default function FieldFocusModePage() {
   const [followUpConfirmed, setFollowUpConfirmed] = useState<string | null>(null);
   const [completedLaneActions, setCompletedLaneActions] = useState(0);
   const [generatedLists, setGeneratedLists] = useState<FollowUpGeneratedList[]>([]);
+  const [fieldLists, setFieldLists] = useState<CampaignList[]>([]);
+  const [loadingFieldLists, setLoadingFieldLists] = useState(true);
+  const [roleLoading, setRoleLoading] = useState(true);
+  const [hasFieldAccess, setHasFieldAccess] = useState(false);
+  const [hasFieldDirector, setHasFieldDirector] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadFieldLists() {
+      try {
+        const lists = await getLists();
+
+        if (!mounted) return;
+
+        setFieldLists(lists);
+      } catch (error) {
+        console.error("Failed to load field routing lists:", error);
+
+        if (!mounted) return;
+
+        setFieldLists([]);
+      } finally {
+        if (mounted) {
+          setLoadingFieldLists(false);
+        }
+      }
+    }
+
+    loadFieldLists();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadRoleContext() {
+      try {
+        const response = await fetch("/api/admin/org-members");
+        const data = await response.json();
+
+        if (!mounted) return;
+
+        if (!response.ok) {
+          console.error("Failed to load field role context:", data?.error);
+          setHasFieldAccess(false);
+          setHasFieldDirector(false);
+          return;
+        }
+
+        const currentMember = data?.currentMember;
+        const roles = Array.isArray(data?.roles) ? data.roles : [];
+
+        const currentMemberRoles = roles.filter(
+          (role: any) => role.organization_member_id === currentMember?.id
+        );
+
+        const hasAdminRole =
+          currentMember?.role === "admin" ||
+          currentMemberRoles.some(
+            (role: any) =>
+              role.department === "admin" || role.role_level === "admin"
+          );
+
+        const fieldRoles = currentMemberRoles.filter(
+          (role: any) => role.department === "field"
+        );
+
+        const hasFieldRole = fieldRoles.length > 0;
+        const fieldDirector = fieldRoles.some(
+          (role: any) => role.role_level === "director"
+        );
+
+        setHasFieldAccess(hasAdminRole || hasFieldRole);
+        setHasFieldDirector(hasAdminRole || fieldDirector);
+      } catch (error) {
+        console.error("Failed to load field role context:", error);
+        if (!mounted) return;
+        setHasFieldAccess(false);
+        setHasFieldDirector(false);
+      } finally {
+        if (mounted) {
+          setRoleLoading(false);
+        }
+      }
+    }
+
+    loadRoleContext();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const nowLine = useMemo(() => {
     return {
@@ -84,7 +286,7 @@ export default function FieldFocusModePage() {
     };
   }, []);
 
-  const focusItems = useMemo<FocusLaneItem[]>(
+  const fallbackFocusItems = useMemo<FocusLaneItem[]>(
     () => [
       {
         id: "focus-1",
@@ -149,6 +351,20 @@ export default function FieldFocusModePage() {
     ],
     []
   );
+
+  const generatedFieldFocusItems = useMemo<FocusLaneItem[]>(() => {
+    return fieldLists
+      .map((list, index) => buildFieldFocusItemFromList(list, index))
+      .filter((item): item is FocusLaneItem => Boolean(item))
+      .sort((a, b) => priorityRank(b.priority) - priorityRank(a.priority))
+      .slice(0, 6);
+  }, [fieldLists]);
+
+  const focusItems = useMemo<FocusLaneItem[]>(() => {
+    return generatedFieldFocusItems.length > 0
+      ? generatedFieldFocusItems
+      : fallbackFocusItems;
+  }, [generatedFieldFocusItems, fallbackFocusItems]);
 
   const grouped = useMemo(() => {
     return {
@@ -300,6 +516,44 @@ export default function FieldFocusModePage() {
     setFollowUpConfirmed(null);
   }
 
+  if (roleLoading) {
+    return (
+      <div className="space-y-6 p-6">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <p className="text-sm text-slate-600">Loading field context...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!hasFieldAccess) {
+    return (
+      <div className="space-y-6 p-6">
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-sm">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50">
+            <MapPinned className="h-5 w-5 text-slate-500" />
+          </div>
+          <h1 className="mt-4 text-xl font-semibold text-slate-900">
+            No Field Role Assigned
+          </h1>
+          <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-600">
+            You are not currently assigned to Field. Ask an admin to add a Field
+            Director or Field User role before working this focus lane.
+          </p>
+          <div className="mt-5 flex justify-center">
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+            >
+              Back to Dashboard
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       {activeTurf && (
@@ -389,6 +643,10 @@ export default function FieldFocusModePage() {
             <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200">
               <Zap className="h-3.5 w-3.5" />
               Field Focus Mode
+            </div>
+
+            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-medium text-slate-200">
+              {hasFieldDirector ? "Field Director Access" : "Field User Access"}
             </div>
 
             <div className="space-y-3">
@@ -556,6 +814,7 @@ export default function FieldFocusModePage() {
             })}
           </div>
         </div>
+        {hasFieldDirector ? (
                 <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="mb-5 flex items-center justify-between">
             <div>
@@ -687,6 +946,7 @@ export default function FieldFocusModePage() {
             })}
           </div>
         </div>
+        ) : null}
 
         <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm">
           <div className="mb-5 flex items-center justify-between">
@@ -837,20 +1097,22 @@ export default function FieldFocusModePage() {
           </p>
         </div>
 
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-emerald-800">
-              Canvasser Moves
+        {hasFieldDirector ? (
+          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-medium text-emerald-800">
+                Canvasser Moves
+              </p>
+              <Users className="h-5 w-5 text-emerald-700" />
+            </div>
+            <p className="mt-3 text-xl font-semibold text-emerald-900">
+              {grouped.canvass.length}
             </p>
-            <Users className="h-5 w-5 text-emerald-700" />
+            <p className="mt-2 text-sm text-emerald-800">
+              Allocation and execution changes
+            </p>
           </div>
-          <p className="mt-3 text-xl font-semibold text-emerald-900">
-            {grouped.canvass.length}
-          </p>
-          <p className="mt-2 text-sm text-emerald-800">
-            Allocation and execution changes
-          </p>
-        </div>
+        ) : null}
 
         <div className="rounded-2xl border border-purple-200 bg-purple-50 p-4 shadow-sm">
           <div className="flex items-center justify-between">
@@ -891,10 +1153,13 @@ export default function FieldFocusModePage() {
               Field Operating Pattern
             </h2>
             <p className="mt-2 text-sm text-amber-800">
-              This page should stay ruthless: finish turf first, move strongest
-              canvassers second, and convert the best conversations into
-              follow-up third. Everything else in Field should support those
-              actions, not distract from them.
+              {hasFieldDirector
+                ? "This page should stay ruthless: finish turf first, move strongest canvassers second, and convert the best conversations into follow-up third. Everything else in Field should support those actions, not distract from them."
+                : "This page should stay ruthless: finish turf first and convert the best conversations into follow-up. Assignment and operator routing stay with Field Director access."} {loadingFieldLists
+                ? "Loading live routing lists."
+                : generatedFieldFocusItems.length > 0
+                  ? "Live list routing is currently driving this focus queue."
+                  : "Fallback field priorities are active until routing lists are available."}
             </p>
           </div>
         </div>
