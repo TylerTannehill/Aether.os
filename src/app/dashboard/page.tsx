@@ -71,7 +71,6 @@ import {
 import { AbeBriefing } from "@/lib/abe/abe-briefing";
 import { updateAbeMemory } from "@/lib/abe/update-abe-memory";
 import { buildAbePatternInsights } from "@/lib/abe/abe-patterns";
-import { createClient } from "@/lib/supabase/client";
 import { getEffectiveContext } from "@/lib/abe/get-effective-context";
 import { buildAbeActionSet } from "@/lib/abe/abe-actions";
 import {
@@ -698,6 +697,7 @@ export default function DashboardPage() {
     recentOpportunityLanes: [],
     recentCrossDomainSignals: [],
   });
+  const [abeMemoryLoaded, setAbeMemoryLoaded] = useState(false);
   const [previousFollowThrough, setPreviousFollowThrough] =
     useState<FollowThroughSignals | null>(null);
 
@@ -730,12 +730,56 @@ export default function DashboardPage() {
     loadData();
   }, []);
 
+  useEffect(() => {
+    loadAbeMemory();
+  }, []);
+
+  async function loadAbeMemory() {
+    try {
+      const response = await fetch("/api/abe/memory", {
+        credentials: "include",
+      });
+
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload?.error || "Failed to load Abe memory");
+      }
+
+      if (payload?.memory) {
+        setAbeMemory(payload.memory);
+      }
+    } catch (error) {
+      console.error("Failed to load Abe memory", error);
+    } finally {
+      setAbeMemoryLoaded(true);
+    }
+  }
+
+  async function persistAbeMemory(memory: AbeGlobalMemory) {
+    try {
+      const response = await fetch("/api/abe/memory", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ memory }),
+      });
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        throw new Error(payload?.error || "Failed to persist Abe memory");
+      }
+    } catch (error) {
+      console.error("Failed to persist Abe memory", error);
+    }
+  }
+
   async function loadData() {
     try {
       setLoading(true);
       setMessage("");
-
-      const supabase = createClient();
 
       const [
         data,
@@ -743,58 +787,47 @@ export default function DashboardPage() {
         liveFieldSnapshot,
         livePrintSnapshot,
         liveFinanceSnapshot,
-        userResult,
+        contextResponse,
       ] = await Promise.all([
         getDashboardData(),
         getDigitalSnapshot(),
         getFieldSnapshot(),
         getPrintSnapshot(),
         getFinanceSnapshot(),
-        supabase.auth.getUser(),
+        fetch("/api/auth/current-context"),
       ]);
 
-      const user = userResult.data.user;
+      const contextResult = await contextResponse.json();
+
+      if (!contextResponse.ok) {
+        throw new Error(
+          contextResult?.error || "Failed to load active campaign context"
+        );
+      }
+
+      const user = contextResult?.user;
+      const organization = contextResult?.organization;
+      const membership = contextResult?.membership;
 
       let nextUserContext: LiveDashboardUserContext | null = null;
 
-      if (user) {
-        const { data: membership } = await supabase
-          .from("organization_members")
-          .select(
-            `
-              role,
-              department,
-              title,
-              organizations (
-                name
-              )
-            `
-          )
-          .eq("user_id", user.id)
-          .maybeSingle();
-
-        const organizationRecord = Array.isArray(membership?.organizations)
-          ? membership?.organizations?.[0]
-          : membership?.organizations;
-
-        const normalizedRole = normalizeMembershipRole(membership?.role);
+      if (user && membership) {
+        const normalizedRole = normalizeMembershipRole(membership.role);
+        const normalizedDepartment = normalizeMembershipDepartment(
+          membership.department
+        );
 
         nextUserContext = {
           email: String(user.email || ""),
-          organizationName:
-            organizationRecord?.name || "No organization assigned",
+          organizationName: organization?.name || "No organization assigned",
           role: normalizedRole,
-          department: normalizeMembershipDepartment(membership?.department),
-          title: membership?.title || null,
+          department: normalizedDepartment,
+          title: membership.title || null,
         };
 
         if (normalizedRole && normalizedRole !== demoRole) {
           setDemoRole(normalizedRole);
         }
-
-        const normalizedDepartment = normalizeMembershipDepartment(
-          membership?.department
-        );
 
         if (normalizedDepartment && normalizedDepartment !== demoDepartment) {
           setDemoDepartment(normalizedDepartment);
@@ -1043,6 +1076,18 @@ export default function DashboardPage() {
   }, [fieldSnapshot]);
 
   const digitalSentimentRatio = useMemo(() => {
+    const hasDigitalData =
+      digitalSnapshot.impressions > 0 ||
+      digitalSnapshot.engagement > 0 ||
+      digitalSnapshot.spend > 0;
+
+    if (!hasDigitalData) {
+      return {
+        positive: 0,
+        negative: 0,
+      };
+    }
+
     const negativeWeight = String(digitalSnapshot.issue || "")
       .toLowerCase()
       .includes("negative")
@@ -1160,10 +1205,10 @@ export default function DashboardPage() {
     const fallingCtrPlatforms = issueText.includes("issue") ? 1 : 0;
     const strongPerformingPlatforms = digitalSnapshot.bestPlatform ? 1 : 0;
     const negativeSentimentThreads = issueText.includes("sentiment") ? 1 : 0;
-    const contentBacklogCount = Math.max(
-      1,
-      Math.round(digitalSnapshot.engagement / 5000)
-    );
+    const contentBacklogCount =
+      digitalSnapshot.engagement > 0
+        ? Math.max(1, Math.round(digitalSnapshot.engagement / 5000))
+        : 0;
 
     return getDigitalSignals({
       fallingCtrPlatforms,
@@ -1545,7 +1590,13 @@ export default function DashboardPage() {
   ]);
 
   useEffect(() => {
-    setAbeMemory((current) => updateAbeMemory(current, abeBriefing));
+    if (!abeMemoryLoaded) return;
+
+    setAbeMemory((current) => {
+      const nextMemory = updateAbeMemory(current, abeBriefing);
+      persistAbeMemory(nextMemory);
+      return nextMemory;
+    });
   }, [
     abeBriefing.health,
     abeBriefing.campaignStatus,
@@ -1554,6 +1605,7 @@ export default function DashboardPage() {
     abeBriefing.weakest,
     abeBriefing.opportunityLane,
     abeBriefing.crossDomainSignal,
+    abeMemoryLoaded,
   ]);
 
   useEffect(() => {

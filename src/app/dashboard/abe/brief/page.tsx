@@ -463,10 +463,23 @@ export default function AbeBriefPage() {
   }, [fieldSnapshot]);
 
   const digitalSentimentRatio = useMemo(() => {
-    const negativeWeight = String(digitalSnapshot.issue || "").toLowerCase().includes("negative")
+    const hasDigitalData =
+      digitalSnapshot.impressions > 0 ||
+      digitalSnapshot.engagement > 0 ||
+      digitalSnapshot.spend > 0;
+
+    if (!hasDigitalData) {
+      return { positive: 0, negative: 0 };
+    }
+
+    const negativeWeight = String(digitalSnapshot.issue || "")
+      .toLowerCase()
+      .includes("negative")
       ? 38
       : 24;
+
     const positiveWeight = Math.max(100 - negativeWeight, 0);
+
     return { positive: positiveWeight, negative: negativeWeight };
   }, [digitalSnapshot]);
 
@@ -486,12 +499,24 @@ export default function AbeBriefPage() {
   }, [filteredData]);
 
   const financeBundle = useMemo(() => {
-    const missingComplianceRecords = Math.max(0, Math.round(financeSnapshot.pledges / 1000));
-    const overduePledges = Math.max(0, Math.round(financeSnapshot.pledges / 2500));
+    const missingComplianceRecords =
+      financeSnapshot.pledges > 0
+        ? Math.max(1, Math.round(financeSnapshot.pledges / 1000))
+        : 0;
+
+    const overduePledges =
+      financeSnapshot.pledges > 0
+        ? Math.max(1, Math.round(financeSnapshot.pledges / 2500))
+        : 0;
     const highValueDonorsPending = (filteredData.contacts ?? []).filter(
       (contact: any) => Number(contact.donation_total ?? 0) >= 500 || Number(contact.pledge_amount ?? 0) >= 500
     ).length;
-    const cashOnHandPressure = financeSnapshot.moneyOut > financeSnapshot.moneyIn ? 8 : 4;
+    const cashOnHandPressure =
+      financeSnapshot.moneyIn > 0 || financeSnapshot.moneyOut > 0
+        ? financeSnapshot.moneyOut > financeSnapshot.moneyIn
+          ? 8
+          : 0
+        : 0;
     return getFinanceSignals({
       missingComplianceRecords,
       overduePledges,
@@ -513,10 +538,26 @@ export default function AbeBriefPage() {
 
   const digitalBundle = useMemo(() => {
     const issueText = String(digitalSnapshot.issue || "").toLowerCase();
-    const fallingCtrPlatforms = issueText.includes("issue") ? 1 : 0;
-    const strongPerformingPlatforms = digitalSnapshot.bestPlatform ? 1 : 0;
-    const negativeSentimentThreads = issueText.includes("sentiment") ? 1 : 0;
-    const contentBacklogCount = Math.max(1, Math.round(digitalSnapshot.engagement / 5000));
+    const hasDigitalData =
+      digitalSnapshot.impressions > 0 ||
+      digitalSnapshot.engagement > 0 ||
+      digitalSnapshot.spend > 0;
+
+    const fallingCtrPlatforms =
+      hasDigitalData && issueText.includes("issue") ? 1 : 0;
+
+    const strongPerformingPlatforms =
+      hasDigitalData && digitalSnapshot.bestPlatform !== "No platform data"
+        ? 1
+        : 0;
+
+    const negativeSentimentThreads =
+      hasDigitalData && issueText.includes("sentiment") ? 1 : 0;
+
+    const contentBacklogCount =
+      digitalSnapshot.engagement > 0
+        ? Math.max(1, Math.round(digitalSnapshot.engagement / 5000))
+        : 0;
     return getDigitalSignals({
       fallingCtrPlatforms,
       strongPerformingPlatforms,
@@ -526,7 +567,7 @@ export default function AbeBriefPage() {
   }, [digitalSnapshot]);
 
   const printBundle = useMemo(() => {
-    const approvalBlocks = printSnapshot.approvalReady > 0 ? 1 : 2;
+    const approvalBlocks = printSnapshot.approvalReady > 0 ? 1 : 0;
     const nearReorderItems = printSnapshot.onHand > 0 ? Math.max(1, Math.round(printSnapshot.onHand / 4000)) : 0;
     const deliveryRisks = printSnapshot.orders > 0 ? Math.max(1, Math.round(printSnapshot.orders / 2)) : 0;
     const readyAssets = printSnapshot.approvalReady;
@@ -711,10 +752,20 @@ export default function AbeBriefPage() {
             </div>
             <div className="space-y-2">
               <h1 className="text-3xl font-semibold tracking-tight text-slate-900 lg:text-4xl">
-                The campaign is moving. Coordination is the gap.
+                {filteredData.contacts.length === 0 &&
+                filteredData.tasks.length === 0 &&
+                filteredData.logs.length === 0 &&
+                financeSnapshot.moneyIn === 0 &&
+                financeSnapshot.moneyOut === 0 &&
+                financeSnapshot.pledges === 0 &&
+                fieldSnapshot.doors === 0 &&
+                digitalSnapshot.impressions === 0 &&
+                printSnapshot.orders === 0
+                  ? "Abe is waiting for live campaign signal."
+                  : "The campaign is moving. Coordination is the gap."}
               </h1>
               <p className="max-w-3xl text-sm text-slate-600 lg:text-base">
-                This is Abe’s morning brief — a live strategic read built from the same intelligence layer as the dashboard. This is the fast read. Explore Abe expands it into deeper campaign intelligence.
+                This is Abe’s morning brief — a live strategic read built from the same intelligence layer as the dashboard. When there is no live data, Abe stays quiet instead of inventing pressure.
               </p>
             </div>
           </div>

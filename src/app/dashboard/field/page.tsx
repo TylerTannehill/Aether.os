@@ -22,6 +22,10 @@ import { filterPatternsForDepartment } from "@/lib/abe/abe-filters";
 import { AbeBriefing } from "@/lib/abe/abe-briefing";
 import { updateAbeMemory } from "@/lib/abe/update-abe-memory";
 import { buildAbeOrgLayer, getOrgContextForDepartment } from "@/lib/abe/abe-org-layer";
+import {
+  getFieldMetricRows,
+  type FieldMetricRow,
+} from "@/lib/data/field";
 
 type FieldTrendView = "doors" | "conversations" | "ids" | "completion";
 
@@ -66,6 +70,138 @@ type GeneratedFieldList = {
 
 type DemoRole = "admin" | "director" | "general_user";
 type DemoDepartment = "outreach" | "finance" | "field" | "digital" | "print";
+
+
+function toNumber(value: unknown) {
+  const num = Number(value ?? 0);
+  return Number.isFinite(num) ? num : 0;
+}
+
+function buildTurfRowsFromMetrics(rows: FieldMetricRow[]): TurfRow[] {
+  return rows.map((row) => ({
+    id: String(row.id),
+    name: row.turf_name || "Unnamed Turf",
+    region: row.region || "Unassigned Region",
+    doors: toNumber(row.doors),
+    conversations: toNumber(row.conversations),
+    ids: toNumber(row.ids),
+    completion: toNumber(row.completion),
+    owner: row.canvasser_name || "Unassigned",
+  }));
+}
+
+function buildCanvasserRowsFromMetrics(rows: FieldMetricRow[]): CanvasserRow[] {
+  const grouped = new Map<
+    string,
+    {
+      id: string;
+      name: string;
+      doors: number;
+      conversations: number;
+      ids: number;
+      shifts: number;
+    }
+  >();
+
+  for (const row of rows) {
+    const name = row.canvasser_name || "Unassigned";
+    const existing =
+      grouped.get(name) ??
+      {
+        id: `canvasser-${name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
+        name,
+        doors: 0,
+        conversations: 0,
+        ids: 0,
+        shifts: 0,
+      };
+
+    existing.doors += toNumber(row.doors);
+    existing.conversations += toNumber(row.conversations);
+    existing.ids += toNumber(row.ids);
+    existing.shifts += 1;
+
+    grouped.set(name, existing);
+  }
+
+  return Array.from(grouped.values()).sort((a, b) => b.doors - a.doors);
+}
+
+function buildFieldFocusQueueFromTurf(turfRows: TurfRow[]): FieldFocusTask[] {
+  const tasks: FieldFocusTask[] = [];
+
+  const lowestCompletion = [...turfRows]
+    .filter((turf) => turf.completion < 100)
+    .sort((a, b) => a.completion - b.completion)[0];
+
+  const highestIdTurf = [...turfRows].sort((a, b) => b.ids - a.ids)[0];
+
+  const bestConversationTurf = [...turfRows].sort(
+    (a, b) => b.conversations - a.conversations
+  )[0];
+
+  if (lowestCompletion) {
+    tasks.push({
+      id: `focus-turf-${lowestCompletion.id}`,
+      title: `Finish ${lowestCompletion.name}`,
+      type: "turf",
+      priority: lowestCompletion.completion < 60 ? "high" : "medium",
+      summary: `${lowestCompletion.name} is ${lowestCompletion.completion}% complete and should move before it creates field drag.`,
+      linkedListId: lowestCompletion.linkedListId,
+      linkedListName: lowestCompletion.linkedListName,
+    });
+  }
+
+  if (highestIdTurf && highestIdTurf.ids > 0) {
+    tasks.push({
+      id: `focus-id-${highestIdTurf.id}`,
+      title: `Review high-ID movement in ${highestIdTurf.name}`,
+      type: "canvass",
+      priority: "high",
+      summary: `${highestIdTurf.name} is carrying the strongest ID signal in the uploaded field metrics.`,
+      linkedListId: highestIdTurf.linkedListId,
+      linkedListName: highestIdTurf.linkedListName,
+    });
+  }
+
+  if (bestConversationTurf && bestConversationTurf.conversations > 0) {
+    tasks.push({
+      id: `focus-followup-${bestConversationTurf.id}`,
+      title: `Convert conversations from ${bestConversationTurf.name}`,
+      type: "follow_up",
+      priority: "medium",
+      summary: `${bestConversationTurf.name} has the strongest conversation volume and may be ready for follow-up routing.`,
+      linkedListId: bestConversationTurf.linkedListId,
+      linkedListName: bestConversationTurf.linkedListName,
+    });
+  }
+
+  return tasks.slice(0, 3);
+}
+
+function buildFieldChartData(rows: FieldMetricRow[]) {
+  return rows
+    .slice(0, 4)
+    .reverse()
+    .map((row, index) => ({
+      label: row.created_at
+        ? new Date(row.created_at).toLocaleDateString(undefined, {
+            month: "short",
+            day: "numeric",
+          })
+        : `Entry ${index + 1}`,
+      doors: toNumber(row.doors),
+      conversations: toNumber(row.conversations),
+      ids: toNumber(row.ids),
+      completion: toNumber(row.completion),
+    }));
+}
+
+function getBestOutputName(canvasserRows: CanvasserRow[]) {
+  const winner = [...canvasserRows].sort((a, b) => b.ids - a.ids)[0];
+  return winner?.name || "No canvasser data";
+}
+
 
 function priorityTone(priority: FieldFocusTask["priority"]) {
   switch (priority) {
@@ -272,7 +408,9 @@ function getFieldAbeBriefing(input: {
 
 export default function FieldDashboardPage() {
   const [trendView, setTrendView] = useState<FieldTrendView>("doors");
-  const [selectedFocusTaskId, setSelectedFocusTaskId] = useState("focus-1");
+  const [fieldMetricRows, setFieldMetricRows] = useState<FieldMetricRow[]>([]);
+  const [fieldLoading, setFieldLoading] = useState(true);
+  const [selectedFocusTaskId, setSelectedFocusTaskId] = useState("");
   const [generatedLists, setGeneratedLists] = useState<GeneratedFieldList[]>([]);
   const [demoRole, setDemoRole] = useState<DemoRole>("admin");
   const [demoDepartment, setDemoDepartment] =
@@ -284,135 +422,55 @@ export default function FieldDashboardPage() {
     recentCrossDomainSignals: [],
   });
 
-  const turfRows = useMemo<TurfRow[]>(
-    () => [
-      {
-        id: "turf-1",
-        name: "North Aurora East",
-        region: "Aurora",
-        doors: 820,
-        conversations: 214,
-        ids: 92,
-        completion: 71,
-        owner: "Maya",
-        linkedListId: "field-north-aurora-east",
-        linkedListName: "North Aurora East",
-      },
-      {
-        id: "turf-2",
-        name: "Ward 4 River Block",
-        region: "Naperville",
-        doors: 610,
-        conversations: 163,
-        ids: 68,
-        completion: 58,
-        owner: "Jordan",
-        linkedListId: "field-ward-4-river-block",
-        linkedListName: "Ward 4 River Block",
-      },
-      {
-        id: "turf-3",
-        name: "Central Walk Packet",
-        region: "Evanston",
-        doors: 940,
-        conversations: 255,
-        ids: 121,
-        completion: 84,
-        owner: "Tyler",
-        linkedListId: "field-central-walk-packet",
-        linkedListName: "Central Walk Packet",
-      },
-      {
-        id: "turf-4",
-        name: "South Persuasion Universe",
-        region: "Chicago",
-        doors: 500,
-        conversations: 119,
-        ids: 44,
-        completion: 39,
-        owner: "Avery",
-        linkedListId: "field-south-persuasion-universe",
-        linkedListName: "South Persuasion Universe",
-      },
-    ],
-    []
-  );
+  useEffect(() => {
+    let mounted = true;
 
-  const canvasserRows = useMemo<CanvasserRow[]>(
-    () => [
-      {
-        id: "canvasser-1",
-        name: "Maya",
-        doors: 410,
-        conversations: 118,
-        ids: 46,
-        shifts: 5,
-      },
-      {
-        id: "canvasser-2",
-        name: "Jordan",
-        doors: 355,
-        conversations: 91,
-        ids: 39,
-        shifts: 4,
-      },
-      {
-        id: "canvasser-3",
-        name: "Tyler",
-        doors: 520,
-        conversations: 146,
-        ids: 63,
-        shifts: 6,
-      },
-      {
-        id: "canvasser-4",
-        name: "Avery",
-        doors: 280,
-        conversations: 67,
-        ids: 24,
-        shifts: 3,
-      },
-    ],
-    []
-  );
-    const focusQueue = useMemo<FieldFocusTask[]>(
-    () => [
-      {
-        id: "focus-1",
-        title: "Finish South Persuasion Universe turf",
-        type: "turf",
-        priority: "high",
-        summary:
-          "This turf is lagging on completion and needs immediate attention to stay on pacing goals.",
-        linkedListId: "field-south-persuasion-universe",
-        linkedListName: "South Persuasion Universe",
-      },
-      {
-        id: "focus-2",
-        title: "Shift strongest canvassers into high-ID turf",
-        type: "canvass",
-        priority: "high",
-        summary:
-          "Move top performers into the highest-opportunity universe to increase IDs before the next reporting cycle.",
-        linkedListId: "field-high-id-packet",
-        linkedListName: "Highest-ID Packet",
-      },
-      {
-        id: "focus-3",
-        title: "Build follow-up list from engaged conversations",
-        type: "follow_up",
-        priority: "medium",
-        summary:
-          "Recent conversations are generating good engagement. Convert those into organized follow-up actions.",
-        linkedListId: "field-engaged-follow-up",
-        linkedListName: "Field Engaged Follow-Up",
-      },
-    ],
-    []
-  );
+    async function loadFieldRows() {
+      try {
+        setFieldLoading(true);
+        const rows = await getFieldMetricRows();
+
+        if (!mounted) return;
+
+        setFieldMetricRows(rows);
+      } catch (error) {
+        console.error("Failed to load field page metrics:", error);
+
+        if (!mounted) return;
+
+        setFieldMetricRows([]);
+      } finally {
+        if (mounted) {
+          setFieldLoading(false);
+        }
+      }
+    }
+
+    loadFieldRows();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const turfRows = useMemo<TurfRow[]>(() => {
+    return buildTurfRowsFromMetrics(fieldMetricRows);
+  }, [fieldMetricRows]);
+
+  const canvasserRows = useMemo<CanvasserRow[]>(() => {
+    return buildCanvasserRowsFromMetrics(fieldMetricRows);
+  }, [fieldMetricRows]);
+
+    const focusQueue = useMemo<FieldFocusTask[]>(() => {
+    return buildFieldFocusQueueFromTurf(turfRows);
+  }, [turfRows]);
 
   const selectedFocusTask = useMemo(() => {
-    return focusQueue.find((item) => item.id === selectedFocusTaskId) || null;
+    return (
+      focusQueue.find((item) => item.id === selectedFocusTaskId) ||
+      focusQueue[0] ||
+      null
+    );
   }, [focusQueue, selectedFocusTaskId]);
 
   const topLine = useMemo(() => {
@@ -444,78 +502,44 @@ export default function FieldDashboardPage() {
     };
   }, [turfRows]);
 
-  const chartData = useMemo(
-    () => [
-      {
-        label: "Week 1",
-        doors: 980,
-        conversations: 240,
-        ids: 96,
-        completion: 48,
-      },
-      {
-        label: "Week 2",
-        doors: 1280,
-        conversations: 322,
-        ids: 121,
-        completion: 57,
-      },
-      {
-        label: "Week 3",
-        doors: 1660,
-        conversations: 418,
-        ids: 174,
-        completion: 69,
-      },
-      {
-        label: "Week 4",
-        doors: 2010,
-        conversations: 521,
-        ids: 233,
-        completion: 78,
-      },
-    ],
-    []
-  );
+  const chartData = useMemo(() => {
+    return buildFieldChartData(fieldMetricRows);
+  }, [fieldMetricRows]);
 
   const chartMax = Math.max(...chartData.map((point) => point[trendView]), 1);
 
   const aiSummary = useMemo(() => {
-    if (demoRole === "admin") {
+    if (!turfRows.length) {
       return {
-        headline:
-          "Field production is healthy, but turf completion needs tightening.",
-        body:
-          "Strong canvassing volume is being slowed by completion drag.",
+        headline: "No field metrics uploaded yet.",
+        body: "Field will stay quiet until turf or canvass metrics are available for this campaign.",
         recommendation:
-          "Concentrate stronger canvassers in lagging turf, push unfinished packets to completion, and convert the highest-quality conversations into follow-up actions.",
-        action:
-          "Focus next on unfinished turf, strongest-canvasser allocation, and conversation-driven follow-up.",
+          "Upload field metrics to activate turf, canvasser, completion, and follow-up reads.",
+        action: "Upload field data to activate field intelligence.",
       };
     }
 
-    if (demoRole === "director") {
-      return {
-        headline:
-          "Your field lane is productive, but lagging turf needs tighter control.",
-        body:
-          "Field production is moving, but lagging turf needs tighter deployment.",
-        recommendation:
-          "Tighten canvasser allocation, complete lagging packets, and convert stronger conversations into follow-up.",
-        action:
-          "Focus next on coverage pressure, deployment, and follow-up generation.",
-      };
-    }
+    const lowestCompletion = [...turfRows]
+      .filter((turf) => turf.completion < 100)
+      .sort((a, b) => a.completion - b.completion)[0];
+
+    const bestIdTurf = [...turfRows].sort((a, b) => b.ids - a.ids)[0];
 
     return {
-      headline: "Your field lane needs clean completion and quick follow-up.",
-      body:
-        "Keep the next field actions tight and completion clean.",
-      recommendation:
-        "Stay on the active turf, log good conversations clearly, and move the best interactions into follow-up.",
-      action: "Focus next on completion, IDs, and immediate follow-up.",
+      headline: lowestCompletion
+        ? `${lowestCompletion.name} is the clearest completion pressure.`
+        : "Field activity is available for review.",
+      body: lowestCompletion
+        ? `${lowestCompletion.name} is ${lowestCompletion.completion}% complete in the uploaded field metrics.`
+        : "Uploaded field metrics are available for review.",
+      recommendation: bestIdTurf
+        ? `Review ${bestIdTurf.name} for ID movement and follow-up conversion.`
+        : "Review the uploaded turf metrics and decide the next field move.",
+      action:
+        focusQueue[0]?.summary ||
+        "Review field metrics and move the next field priority.",
     };
-  }, [demoRole]);
+  }, [turfRows, focusQueue]);
 
   const fieldCommandSignal = useMemo(() => {
     if (generatedLists.length > 0) {
@@ -1008,23 +1032,29 @@ export default function FieldDashboardPage() {
             </div>
           </div>
 
-          <div className="h-48 flex items-end gap-2">
-            {chartData.map((point) => {
-              const height = Math.max((point[trendView] / chartMax) * 100, 6);
+          {chartData.length > 0 ? (
+            <div className="h-48 flex items-end gap-2">
+              {chartData.map((point) => {
+                const height = Math.max((point[trendView] / chartMax) * 100, 6);
 
-              return (
-                <div key={point.label} className="flex-1">
-                  <div
-                    className="rounded-t-lg bg-slate-900 transition-all"
-                    style={{ height: `${height}%` }}
-                  />
-                  <p className="mt-2 text-center text-xs text-slate-500">
-                    {point.label}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
+                return (
+                  <div key={point.label} className="flex-1">
+                    <div
+                      className="rounded-t-lg bg-slate-900 transition-all"
+                      style={{ height: `${height}%` }}
+                    />
+                    <p className="mt-2 text-center text-xs text-slate-500">
+                      {point.label}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-600">
+              No field trend data available yet.
+            </div>
+          )}
         </section>
       ) : null}
             <section className="rounded-3xl border border-amber-200 bg-amber-50 p-6 shadow-sm">
@@ -1097,6 +1127,14 @@ export default function FieldDashboardPage() {
             : "xl:grid-cols-4"
         }`}
       >
+        {visibleTurfRows.length === 0 ? (
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 text-sm text-slate-600 shadow-sm xl:col-span-4">
+            {fieldLoading
+              ? "Loading field metrics..."
+              : "No field turf metrics available for this campaign yet."}
+          </div>
+        ) : null}
+
         {visibleTurfRows.map((turf) => (
           <div
             key={turf.id}
@@ -1169,6 +1207,12 @@ export default function FieldDashboardPage() {
             </div>
 
             <div className="space-y-4">
+              {visibleCanvasserRows.length === 0 ? (
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                  No canvasser output is connected yet.
+                </div>
+              ) : null}
+
               {visibleCanvasserRows.map((canvasser) => (
                 <div
                   key={canvasser.id}
@@ -1232,6 +1276,12 @@ export default function FieldDashboardPage() {
             </div>
 
             <div className="space-y-4">
+              {visibleTurfRows.length === 0 ? (
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                  No active field priorities are available yet.
+                </div>
+              ) : null}
+
               {visibleTurfRows.map((turf) => (
                 <div
                   key={turf.id}
@@ -1260,6 +1310,12 @@ export default function FieldDashboardPage() {
           </div>
 
           <div className="space-y-4">
+            {visibleFocusQueue.length === 0 ? (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                No field focus queue items are available from live metrics yet.
+              </div>
+            ) : null}
+
             {visibleFocusQueue.map((item) => (
               <div
                 key={item.id}
@@ -1359,7 +1415,7 @@ export default function FieldDashboardPage() {
                 ? `${Math.round((topLine.ids / topLine.conversations) * 100)}%`
                 : "0%"}
             </div>
-            <div>Best output: Tyler</div>
+            <div>Best output: {getBestOutputName(canvasserRows)}</div>
           </div>
         </div>
 
@@ -1374,7 +1430,7 @@ export default function FieldDashboardPage() {
 
             <div className="mt-4 space-y-2 text-sm text-slate-700">
               <div>Generated follow-up lists: {generatedLists.length}</div>
-              <div>Conversation clusters to review: 3</div>
+              <div>Conversation clusters to review: 0</div>
               <div>Immediate action items: {visibleFocusQueue.length}</div>
             </div>
           </div>

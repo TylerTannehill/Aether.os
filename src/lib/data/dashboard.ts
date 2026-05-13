@@ -9,30 +9,110 @@ import {
   OwnerQueue,
   OwnerSegment,
   TodaySnapshot,
+  AnalyticsEvent,
+  DashboardAnalyticsSnapshot,
 } from "./types";
 import { deriveStatusLabel, isOverdue, isToday } from "./utils";
 
+function normalizeAnalyticsDepartment(value?: string | null) {
+  const normalized = String(value || "").trim().toLowerCase();
+
+  if (
+    normalized === "outreach" ||
+    normalized === "finance" ||
+    normalized === "field" ||
+    normalized === "digital" ||
+    normalized === "print"
+  ) {
+    return normalized;
+  }
+
+  return "unknown";
+}
+
+function buildDashboardAnalyticsSnapshot(
+  events: AnalyticsEvent[]
+): DashboardAnalyticsSnapshot {
+  const snapshot: DashboardAnalyticsSnapshot = {
+    events,
+    digital: [],
+    finance: [],
+    field: [],
+    print: [],
+    outreach: [],
+  };
+
+  events.forEach((event) => {
+    const department = normalizeAnalyticsDepartment(event.department);
+
+    if (department === "digital") snapshot.digital.push(event);
+    if (department === "finance") snapshot.finance.push(event);
+    if (department === "field") snapshot.field.push(event);
+    if (department === "print") snapshot.print.push(event);
+    if (department === "outreach") snapshot.outreach.push(event);
+  });
+
+  return snapshot;
+}
+
+async function getActiveOrganizationId(): Promise<string> {
+  const response = await fetch("/api/auth/current-context", {
+    method: "GET",
+    cache: "no-store",
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(data?.error || "Failed to load active campaign context");
+  }
+
+  const organizationId = data?.membership?.organization_id || data?.organization?.id;
+
+  if (!organizationId) {
+    throw new Error("No active campaign selected");
+  }
+
+  return String(organizationId);
+}
+
 export async function getDashboardData(): Promise<DashboardData> {
-  const [contactsRes, listsRes, logsRes, tasksRes] = await Promise.all([
+  const organizationId = await getActiveOrganizationId();
+
+  const [contactsRes, listsRes, logsRes, tasksRes, analyticsRes] = await Promise.all([
     supabase
       .from("contacts")
-      .select("id, first_name, last_name, email, phone, city, state, party, owner_name"),
+      .select(
+        "id, first_name, last_name, email, phone, city, state, party, owner_name, organization_id, donation_total, pledge_amount, fec_total_given, fec_match_status, fec_confidence_score, fec_recent_activity, fec_donor_tier, jackpot_candidate, jackpot_anomaly_type, jackpot_reason, needs_follow_up, is_stale"
+      )
+      .eq("organization_id", organizationId),
 
     supabase
       .from("lists")
-      .select("id, name, created_at, default_owner_name"),
+      .select("id, name, created_at, default_owner_name, organization_id")
+      .eq("organization_id", organizationId),
 
     supabase
       .from("outreach_logs")
       .select(
-        "id, contact_id, list_id, channel, result, notes, created_at, contacts(id, first_name, last_name, email, phone, city, state, party, owner_name), lists(id, name, created_at, default_owner_name)"
+        "id, contact_id, list_id, channel, result, notes, created_at, organization_id, contacts(id, first_name, last_name, email, phone, city, state, party, owner_name, organization_id), lists(id, name, created_at, default_owner_name, organization_id)"
       )
+      .eq("organization_id", organizationId)
       .order("created_at", { ascending: false }),
 
     supabase
       .from("tasks")
-      .select("id, title, description, status, priority, task_type, due_date, completed_at, contact_id, list_id, owner_name, notes, created_at, updated_at")
+      .select(
+        "id, title, description, status, priority, task_type, due_date, completed_at, contact_id, list_id, owner_name, notes, created_at, updated_at, organization_id"
+      )
+      .eq("organization_id", organizationId)
       .order("created_at", { ascending: false }),
+
+    supabase
+      .from("analytics_events")
+      .select("*")
+      .eq("organization_id", organizationId)
+      .order("metric_date", { ascending: false }),
   ]);
 
   if (contactsRes.error) throw contactsRes.error;
@@ -40,11 +120,21 @@ export async function getDashboardData(): Promise<DashboardData> {
   if (logsRes.error) throw logsRes.error;
   if (tasksRes.error) throw tasksRes.error;
 
+  let analyticsEvents: AnalyticsEvent[] = [];
+
+  if (analyticsRes.error) {
+    console.error("Failed to load analytics events for dashboard", analyticsRes.error);
+  } else {
+    analyticsEvents = (analyticsRes.data ?? []) as AnalyticsEvent[];
+  }
+
   return {
     contacts: contactsRes.data ?? [],
     lists: listsRes.data ?? [],
-    logs: ((logsRes.data ?? []) as unknown as OutreachLog[]),
+    logs: (logsRes.data ?? []) as unknown as OutreachLog[],
     tasks: tasksRes.data ?? [],
+    analyticsEvents,
+    analyticsSnapshot: buildDashboardAnalyticsSnapshot(analyticsEvents),
   };
 }
 
@@ -100,6 +190,8 @@ export function filterDashboardDataByOwner(
     lists,
     logs,
     tasks,
+    analyticsEvents: data.analyticsEvents ?? [],
+    analyticsSnapshot: data.analyticsSnapshot,
   };
 }
 

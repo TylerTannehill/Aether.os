@@ -215,77 +215,9 @@ export default function DigitalFocusModePage() {
     };
   }, []);
 
-  const focusItems = useMemo<FocusLaneItem[]>(
-    () => [
-      {
-        id: "focus-1",
-        title: "Create two new Meta ad variants",
-        summary:
-          "Meta performance is flattening. Refresh the hook, visual framing, and first line before efficiency drops further.",
-        priority: "high",
-        type: "content",
-        linkedAudience: "Top-funnel persuadables",
-        linkedGoal: "Lead generation",
-        linkedNarrative: "Education contrast",
-      },
-      {
-        id: "focus-2",
-        title: "Increase TikTok spend by 15%",
-        summary:
-          "TikTok is the strongest performer on engagement and positive sentiment. Shift budget while momentum is high.",
-        priority: "high",
-        type: "spend",
-        linkedAudience: "Young persuadables",
-        linkedGoal: "Engagement growth",
-        linkedNarrative: "Momentum push",
-      },
-      {
-        id: "focus-3",
-        title: "Write response copy for negative X thread",
-        summary:
-          "X sentiment is weaker than the rest of the stack. Prepare tighter messaging and selective replies.",
-        priority: "medium",
-        type: "reply",
-        linkedAudience: "Issue-aware voters",
-        linkedGoal: "Narrative control",
-        linkedNarrative: "Public safety response",
-      },
-      {
-        id: "focus-4",
-        title: "Finish education contrast graphic",
-        summary:
-          "Move the Instagram creative from review to scheduled so the next release block stays on time.",
-        priority: "medium",
-        type: "content",
-        linkedAudience: "Instagram persuadables",
-        linkedGoal: "Content release",
-        linkedNarrative: "Education contrast",
-      },
-      {
-        id: "focus-5",
-        title: "Review underperforming ad set spend caps",
-        summary:
-          "Reduce waste on lower-efficiency spend pockets and tighten allocation discipline.",
-        priority: "medium",
-        type: "spend",
-        linkedAudience: "Broad paid audience",
-        linkedGoal: "Efficiency protection",
-        linkedNarrative: "Budget discipline",
-      },
-      {
-        id: "focus-6",
-        title: "Queue replies for top 6 comments",
-        summary:
-          "Address the most visible audience comments first to shape conversation quality.",
-        priority: "low",
-        type: "reply",
-        linkedAudience: "High-visibility commenters",
-        linkedGoal: "Comment shaping",
-        linkedNarrative: "Tone control",
-      },
-    ],
-    []
-  );
+  const focusItems = useMemo<FocusLaneItem[]>(() => {
+    return [];
+  }, []);
 
   const grouped = useMemo(() => {
     return {
@@ -686,6 +618,12 @@ export default function DigitalFocusModePage() {
           </div>
 
           <div className="space-y-4">
+            {grouped.content.length === 0 ? (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                No live digital content actions are available yet.
+              </div>
+            ) : null}
+
             {grouped.content.map((item) => {
               const isActive = activeContent?.id === item.id;
               const isConfirmed = contentConfirmed === item.id;
@@ -849,6 +787,12 @@ export default function DigitalFocusModePage() {
             </div>
 
             <div className="space-y-4">
+              {grouped.spend.length === 0 ? (
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                  No live spend optimization actions are available yet.
+                </div>
+              ) : null}
+
               {grouped.spend.map((item) => {
                 const isActive = activeSpend?.id === item.id;
                 const isConfirmed = spendConfirmed === item.id;
@@ -1008,6 +952,12 @@ export default function DigitalFocusModePage() {
             </div>
 
             <div className="space-y-4">
+              {grouped.reply.length === 0 ? (
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                  No live sentiment or reply actions are available yet.
+                </div>
+              ) : null}
+
               {grouped.reply.map((item) => {
                 const isActive = activeReply?.id === item.id;
                 const isConfirmed = replyConfirmed === item.id;

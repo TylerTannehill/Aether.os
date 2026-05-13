@@ -22,6 +22,10 @@ import { filterPatternsForDepartment } from "@/lib/abe/abe-filters";
 import { AbeBriefing } from "@/lib/abe/abe-briefing";
 import { updateAbeMemory } from "@/lib/abe/update-abe-memory";
 import { buildAbeOrgLayer, getOrgContextForDepartment } from "@/lib/abe/abe-org-layer";
+import {
+  getPrintMetricRows,
+  type PrintMetricRow,
+} from "@/lib/data/print";
 
 type PrintTrendView = "inventory" | "orders" | "deliveries" | "approvals";
 
@@ -102,6 +106,212 @@ type PrintDeliveryUnlock = {
 
 type DemoRole = "admin" | "director" | "general_user";
 type DemoDepartment = "outreach" | "finance" | "field" | "digital" | "print";
+
+
+function toNumber(value: unknown) {
+  const num = Number(value ?? 0);
+  return Number.isFinite(num) ? num : 0;
+}
+
+function normalizePrintType(value?: string | null): PrintAssetRow["type"] {
+  const normalized = String(value || "").trim().toLowerCase();
+
+  if (normalized === "mailer") return "mailer";
+  if (normalized === "door_hanger" || normalized === "door hanger") {
+    return "door_hanger";
+  }
+  if (normalized === "yard_sign" || normalized === "yard sign") {
+    return "yard_sign";
+  }
+  if (normalized === "lit_piece" || normalized === "lit piece") {
+    return "lit_piece";
+  }
+  if (normalized === "digital_asset" || normalized === "digital asset") {
+    return "digital_asset";
+  }
+
+  return "lit_piece";
+}
+
+function normalizeAssetStatus(value?: string | null): PrintAssetRow["status"] {
+  const normalized = String(value || "").trim().toLowerCase();
+
+  if (normalized === "design") return "design";
+  if (
+    normalized === "candidate_review" ||
+    normalized === "candidate review" ||
+    normalized === "review"
+  ) {
+    return "candidate_review";
+  }
+  if (normalized === "approved") return "approved";
+  if (normalized === "ordered") return "ordered";
+  if (normalized === "delivered") return "delivered";
+
+  return "design";
+}
+
+function normalizeOrderStatus(value?: string | null): PrintOrderRow["status"] {
+  const normalized = String(value || "").trim().toLowerCase();
+
+  if (normalized === "queued") return "queued";
+  if (normalized === "in_production" || normalized === "in production") {
+    return "in_production";
+  }
+  if (normalized === "shipped") return "shipped";
+  if (normalized === "delivered") return "delivered";
+
+  return "queued";
+}
+
+function buildAssetRowsFromMetrics(rows: PrintMetricRow[]): PrintAssetRow[] {
+  return rows
+    .filter((row) => {
+      const status = normalizeAssetStatus(row.status);
+      return (
+        status === "design" ||
+        status === "candidate_review" ||
+        status === "approved" ||
+        status === "ordered" ||
+        status === "delivered"
+      );
+    })
+    .map((row) => {
+      const status = normalizeAssetStatus(row.status);
+
+      return {
+        id: String(row.id),
+        name: row.item_name || "Unnamed Print Asset",
+        type: normalizePrintType(row.item_type),
+        status,
+        owner: row.vendor || "Unassigned",
+        candidateApprovedDate:
+          status === "approved" || status === "ordered" || status === "delivered"
+            ? row.created_at || null
+            : null,
+        expectedDelivery: row.expected_delivery || null,
+      };
+    });
+}
+
+function buildInventoryRowsFromMetrics(rows: PrintMetricRow[]): InventoryRow[] {
+  return rows
+    .filter((row) => toNumber(row.on_hand) > 0 || toNumber(row.reserved) > 0)
+    .map((row) => ({
+      id: String(row.id),
+      item: row.item_name || "Unnamed Print Item",
+      onHand: toNumber(row.on_hand),
+      reserved: toNumber(row.reserved),
+      reorderAt: toNumber(row.reorder_at),
+      region: row.vendor || "Unassigned",
+      dailyUsage: undefined,
+    }));
+}
+
+function buildOrderRowsFromMetrics(rows: PrintMetricRow[]): PrintOrderRow[] {
+  return rows
+    .filter((row) => {
+      const status = normalizeOrderStatus(row.status);
+      return Boolean(row.vendor) || status !== "queued" || Boolean(row.expected_delivery);
+    })
+    .map((row) => ({
+      id: String(row.id),
+      vendor: row.vendor || "Unassigned Vendor",
+      item: row.item_name || "Unnamed Print Order",
+      quantity: Math.max(toNumber(row.reserved), toNumber(row.on_hand), 0),
+      status: normalizeOrderStatus(row.status),
+      eta: row.expected_delivery || null,
+    }));
+}
+
+function buildPrintFocusQueue(input: {
+  assetRows: PrintAssetRow[];
+  inventoryRows: InventoryRow[];
+  orderRows: PrintOrderRow[];
+}): PrintFocusTask[] {
+  const tasks: PrintFocusTask[] = [];
+
+  const approvalBlock = input.assetRows.find(
+    (asset) => asset.status === "candidate_review" || asset.status === "design"
+  );
+
+  const exposedInventory = input.inventoryRows
+    .map((row) => ({
+      ...row,
+      available: row.onHand - row.reserved,
+    }))
+    .sort((a, b) => a.available - b.available)[0];
+
+  const activeOrder = input.orderRows.find(
+    (order) => order.status === "queued" || order.status === "in_production" || order.status === "shipped"
+  );
+
+  if (approvalBlock) {
+    tasks.push({
+      id: `focus-approval-${approvalBlock.id}`,
+      title: `Review approval for ${approvalBlock.name}`,
+      type: "approval",
+      priority: approvalBlock.status === "candidate_review" ? "high" : "medium",
+      summary: `${approvalBlock.name} is still in ${approvalBlock.status.replace("_", " ")} and may be blocking production timing.`,
+      linkedTurf: approvalBlock.linkedTurf,
+      linkedUseCase: approvalBlock.linkedUseCase,
+    });
+  }
+
+  if (exposedInventory && exposedInventory.available <= exposedInventory.reorderAt) {
+    tasks.push({
+      id: `focus-inventory-${exposedInventory.id}`,
+      title: `Protect ${exposedInventory.item} inventory`,
+      type: "inventory",
+      priority: "high",
+      summary: `${exposedInventory.item} is at or below reorder pressure based on current on-hand and reserved counts.`,
+      linkedTurf: exposedInventory.linkedTurf,
+      linkedUseCase: exposedInventory.linkedUseCase,
+    });
+  }
+
+  if (activeOrder) {
+    tasks.push({
+      id: `focus-delivery-${activeOrder.id}`,
+      title: `Confirm delivery for ${activeOrder.item}`,
+      type: "delivery",
+      priority: activeOrder.status === "shipped" ? "medium" : "high",
+      summary: `${activeOrder.item} is currently ${activeOrder.status.replace("_", " ")} and should be tracked through delivery.`,
+      linkedTurf: activeOrder.linkedTurf,
+      linkedUseCase: activeOrder.linkedUseCase,
+    });
+  }
+
+  return tasks.slice(0, 3);
+}
+
+function buildPrintChartData(rows: PrintMetricRow[]) {
+  return rows
+    .slice(0, 4)
+    .reverse()
+    .map((row, index) => ({
+      label: row.created_at
+        ? new Date(row.created_at).toLocaleDateString(undefined, {
+            month: "short",
+            day: "numeric",
+          })
+        : `Entry ${index + 1}`,
+      inventory: toNumber(row.on_hand),
+      orders: normalizeOrderStatus(row.status) === "queued" ||
+        normalizeOrderStatus(row.status) === "in_production" ||
+        normalizeOrderStatus(row.status) === "shipped"
+          ? 1
+          : 0,
+      deliveries: normalizeOrderStatus(row.status) === "delivered" ? 1 : 0,
+      approvals:
+        normalizeAssetStatus(row.status) === "approved" ||
+        normalizeAssetStatus(row.status) === "ordered" ||
+        normalizeAssetStatus(row.status) === "delivered"
+          ? 1
+          : 0,
+    }));
+}
+
 
 function priorityTone(priority: PrintFocusTask["priority"]) {
   switch (priority) {
@@ -355,9 +565,11 @@ function getPrintAbeBriefing(input: {
 
 export default function PrintDashboardPage() {
   const [trendView, setTrendView] = useState<PrintTrendView>("inventory");
+  const [printMetricRows, setPrintMetricRows] = useState<PrintMetricRow[]>([]);
+  const [printLoading, setPrintLoading] = useState(true);
 
   const [printLoopMode, setPrintLoopMode] = useState(false);
-  const [selectedTaskId, setSelectedTaskId] = useState("focus-1");
+  const [selectedTaskId, setSelectedTaskId] = useState("");
   const [loopResult, setLoopResult] = useState("");
   const [loopNotes, setLoopNotes] = useState("");
   const [loopMessage, setLoopMessage] = useState("");
@@ -377,193 +589,63 @@ export default function PrintDashboardPage() {
     recentCrossDomainSignals: [],
   });
 
-  const assetRows = useMemo<PrintAssetRow[]>(
-    () => [
-      {
-        id: "asset-1",
-        name: "Education contrast mailer",
-        type: "mailer",
-        status: "candidate_review",
-        owner: "Maya",
-        candidateApprovedDate: null,
-        expectedDelivery: "2026-04-11",
-        linkedTurf: "Aurora persuasion turf",
-        linkedUseCase: "Education contrast mail drop",
-      },
-      {
-        id: "asset-2",
-        name: "Neighborhood door hanger v2",
-        type: "door_hanger",
-        status: "approved",
-        owner: "Jordan",
-        candidateApprovedDate: "2026-04-06",
-        expectedDelivery: "2026-04-10",
-        linkedTurf: "Central walk packet",
-        linkedUseCase: "Door program support",
-      },
-      {
-        id: "asset-3",
-        name: "Large yard sign artwork",
-        type: "yard_sign",
-        status: "ordered",
-        owner: "Tyler",
-        candidateApprovedDate: "2026-04-05",
-        expectedDelivery: "2026-04-12",
-        linkedTurf: "Aurora field deployment",
-        linkedUseCase: "Yard sign saturation push",
-      },
-      {
-        id: "asset-4",
-        name: "Absentee chase lit piece",
-        type: "lit_piece",
-        status: "design",
-        owner: "Avery",
-        candidateApprovedDate: null,
-        expectedDelivery: null,
-        linkedTurf: "Absentee chase universe",
-        linkedUseCase: "Vote-by-mail persuasion",
-      },
-    ],
-    []
-  );
-    const inventoryRows = useMemo<InventoryRow[]>(
-    () => [
-      {
-        id: "inv-1",
-        item: "Yard Signs",
-        onHand: 420,
-        reserved: 180,
-        reorderAt: 150,
-        region: "Aurora",
-        dailyUsage: 55,
-        linkedTurf: "Aurora field deployment",
-        linkedUseCase: "Yard sign saturation push",
-      },
-      {
-        id: "inv-2",
-        item: "Door Hangers",
-        onHand: 6800,
-        reserved: 2400,
-        reorderAt: 2000,
-        region: "Naperville",
-        dailyUsage: 320,
-        linkedTurf: "Ward 4 River Block",
-        linkedUseCase: "Door program support",
-      },
-      {
-        id: "inv-3",
-        item: "Mailer Stock",
-        onHand: 3100,
-        reserved: 2200,
-        reorderAt: 1200,
-        region: "Chicago",
-        dailyUsage: 180,
-        linkedTurf: "Chicago persuasion reserve",
-        linkedUseCase: "Mailer reserve protection",
-      },
-      {
-        id: "inv-4",
-        item: "Palm Cards",
-        onHand: 5400,
-        reserved: 900,
-        reorderAt: 1500,
-        region: "Evanston",
-        dailyUsage: 140,
-        linkedTurf: "Central walk packet",
-        linkedUseCase: "Volunteer packet support",
-      },
-    ],
-    []
-  );
+  useEffect(() => {
+    let mounted = true;
 
-  const orderRows = useMemo<PrintOrderRow[]>(
-    () => [
-      {
-        id: "order-1",
-        vendor: "Midwest Print House",
-        item: "Education contrast mailer",
-        quantity: 15000,
-        status: "in_production",
-        eta: "2026-04-11",
-        linkedTurf: "Aurora persuasion turf",
-        linkedUseCase: "Education contrast mail drop",
-        unblocks: "Aurora persuasion mail flight",
-      },
-      {
-        id: "order-2",
-        vendor: "Great Lakes Signs",
-        item: "Large yard signs",
-        quantity: 250,
-        status: "shipped",
-        eta: "2026-04-09",
-        linkedTurf: "Aurora field deployment",
-        linkedUseCase: "Yard sign saturation push",
-        unblocks: "Aurora sign handoff",
-      },
-      {
-        id: "order-3",
-        vendor: "City Direct Mail",
-        item: "Absentee chase lit piece",
-        quantity: 8000,
-        status: "queued",
-        eta: "2026-04-13",
-        linkedTurf: "Absentee chase universe",
-        linkedUseCase: "Vote-by-mail persuasion",
-        unblocks: "Absentee chase rollout",
-      },
-      {
-        id: "order-4",
-        vendor: "Neighborhood Print Co.",
-        item: "Door hangers v2",
-        quantity: 12000,
-        status: "delivered",
-        eta: "2026-04-06",
-        linkedTurf: "Ward 4 River Block",
-        linkedUseCase: "Door program support",
-        unblocks: "Weekend canvass deployment",
-      },
-    ],
-    []
-  );
+    async function loadPrintRows() {
+      try {
+        setPrintLoading(true);
+        const rows = await getPrintMetricRows();
 
-  const focusQueue = useMemo<PrintFocusTask[]>(
-    () => [
-      {
-        id: "focus-1",
-        title: "Get candidate approval on education mailer",
-        type: "approval",
-        priority: "high",
-        summary:
-          "This piece is blocking production timing and should be approved or revised immediately.",
-        linkedTurf: "Aurora persuasion turf",
-        linkedUseCase: "Education contrast mail drop",
-      },
-      {
-        id: "focus-2",
-        title: "Reorder yard signs before Aurora drawdown",
-        type: "inventory",
-        priority: "high",
-        summary:
-          "Current yard sign burn rate suggests inventory pressure is approaching the reorder threshold.",
-        linkedTurf: "Aurora field deployment",
-        linkedUseCase: "Yard sign saturation push",
-      },
-      {
-        id: "focus-3",
-        title: "Confirm shipped sign delivery timing",
-        type: "delivery",
-        priority: "medium",
-        summary:
-          "Track vendor delivery window and confirm handoff timing to field operations.",
-        linkedTurf: "Aurora field deployment",
-        linkedUseCase: "Sign handoff to field",
-      },
-    ],
-    []
-  );
+        if (!mounted) return;
+
+        setPrintMetricRows(rows);
+      } catch (error) {
+        console.error("Failed to load print page metrics:", error);
+
+        if (!mounted) return;
+
+        setPrintMetricRows([]);
+      } finally {
+        if (mounted) {
+          setPrintLoading(false);
+        }
+      }
+    }
+
+    loadPrintRows();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const assetRows = useMemo<PrintAssetRow[]>(() => {
+    return buildAssetRowsFromMetrics(printMetricRows);
+  }, [printMetricRows]);
+
+    const inventoryRows = useMemo<InventoryRow[]>(() => {
+    return buildInventoryRowsFromMetrics(printMetricRows);
+  }, [printMetricRows]);
+
+  const orderRows = useMemo<PrintOrderRow[]>(() => {
+    return buildOrderRowsFromMetrics(printMetricRows);
+  }, [printMetricRows]);
+
+  const focusQueue = useMemo<PrintFocusTask[]>(() => {
+    return buildPrintFocusQueue({
+      assetRows,
+      inventoryRows,
+      orderRows,
+    });
+  }, [assetRows, inventoryRows, orderRows]);
 
   const selectedTask = useMemo(() => {
-    return focusQueue.find((item) => item.id === selectedTaskId) || null;
+    return (
+      focusQueue.find((item) => item.id === selectedTaskId) ||
+      focusQueue[0] ||
+      null
+    );
   }, [focusQueue, selectedTaskId]);
 
   const topLine = useMemo(() => {
@@ -580,73 +662,47 @@ export default function PrintDashboardPage() {
     };
   }, [inventoryRows, orderRows, assetRows]);
 
-  const chartData = useMemo(
-    () => [
-      {
-        label: "Week 1",
-        inventory: 14200,
-        orders: 4,
-        deliveries: 1,
-        approvals: 2,
-      },
-      {
-        label: "Week 2",
-        inventory: 12800,
-        orders: 5,
-        deliveries: 2,
-        approvals: 3,
-      },
-      {
-        label: "Week 3",
-        inventory: 11600,
-        orders: 6,
-        deliveries: 2,
-        approvals: 4,
-      },
-      {
-        label: "Week 4",
-        inventory: 10400,
-        orders: 7,
-        deliveries: 3,
-        approvals: 5,
-      },
-    ],
-    []
-  );
+  const chartData = useMemo(() => {
+    return buildPrintChartData(printMetricRows);
+  }, [printMetricRows]);
 
   const chartMax = Math.max(...chartData.map((point) => point[trendView]), 1);
 
   const aiSummary = useMemo(() => {
-    if (demoRole === "admin") {
+    if (!printMetricRows.length) {
       return {
-        headline:
-          "Print operations are moving, but approvals and inventory timing need tighter control.",
-        body:
-          "Approvals and inventory pressure are creating drag in the print lane.",
+        headline: "No print metrics uploaded yet.",
+        body: "Print will stay quiet until asset, inventory, or order data is available for this campaign.",
         recommendation:
-          "Push candidate approvals faster, protect sign inventory before depletion, and track delivery timing more aggressively on active orders.",
+          "Upload print metrics to activate inventory, approval, delivery, and readiness reads.",
       };
     }
 
-    if (demoRole === "director") {
-      return {
-        headline:
-          "Your print lane is moving, but approvals and inventory timing need tighter control.",
-        body:
-          "Print execution is moving, but approvals and inventory need tighter control.",
-        recommendation:
-          "Push approvals faster, protect critical inventory, and confirm delivery timing before it causes downstream drag.",
-      };
-    }
+    const approvalBlock = assetRows.find(
+      (asset) => asset.status === "candidate_review" || asset.status === "design"
+    );
+
+    const exposedInventory = inventoryRows
+      .map((row) => ({
+        ...row,
+        available: row.onHand - row.reserved,
+      }))
+      .sort((a, b) => a.available - b.available)[0];
 
     return {
-      headline: "Your print lane needs clean approvals and protected inventory.",
-      body:
-        "Keep the next print actions tight and protect timing.",
+      headline: approvalBlock
+        ? `${approvalBlock.name} is the clearest print approval pressure.`
+        : "Print activity is available for review.",
+      body: approvalBlock
+        ? `${approvalBlock.name} is still in ${approvalBlock.status.replace("_", " ")}.`
+        : exposedInventory
+        ? `${exposedInventory.item} is the most exposed inventory position.`
+        : "Uploaded print metrics are available for review.",
       recommendation:
-        "Push approvals, protect inventory, and confirm delivery timing on critical items.",
+        focusQueue[0]?.summary ||
+        "Review the uploaded print metrics and decide the next material move.",
     };
-  }, [demoRole]);
+  }, [printMetricRows.length, assetRows, inventoryRows, focusQueue]);
 
   const materialReadiness = useMemo(() => {
     return {
@@ -697,7 +753,15 @@ export default function PrintDashboardPage() {
       };
     }
 
-    if (mostExposedInventory?.daysRemaining !== null) {
+    if (!mostExposedInventory) {
+      return {
+        title: "No inventory pressure detected",
+        detail:
+          "No live inventory metrics are available for print operations yet.",
+      };
+    }
+
+    if (mostExposedInventory.daysRemaining !== null) {
       return {
         title: "Inventory protection needs attention",
         detail: `${mostExposedInventory.item} in ${mostExposedInventory.region} is the most exposed stock position right now.`,
@@ -1390,6 +1454,12 @@ export default function PrintDashboardPage() {
               </div>
 
               <div className="space-y-4">
+                {visibleFocusQueue.length === 0 ? (
+                  <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600">
+                    No print loop tasks are available from live metrics yet.
+                  </div>
+                ) : null}
+
                 {visibleFocusQueue.map((item) => (
                   <div
                     key={item.id}
@@ -1660,6 +1730,14 @@ export default function PrintDashboardPage() {
           </div>
 
           <div className="space-y-4">
+            {visibleAssetRows.length === 0 ? (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                {printLoading
+                  ? "Loading print assets..."
+                  : "No print asset pipeline items are connected yet."}
+              </div>
+            ) : null}
+
             {visibleAssetRows.map((asset) => (
               <div
                 key={asset.id}
@@ -1703,6 +1781,14 @@ export default function PrintDashboardPage() {
           </div>
 
           <div className="space-y-4">
+            {visibleOrderRows.length === 0 ? (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                {printLoading
+                  ? "Loading print orders..."
+                  : "No print production or delivery orders are connected yet."}
+              </div>
+            ) : null}
+
             {visibleOrderRows.map((order) => (
               <div
                 key={order.id}
@@ -1747,6 +1833,14 @@ export default function PrintDashboardPage() {
         </div>
 
         <div className="space-y-4">
+          {visibleInventoryRows.length === 0 ? (
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+              {printLoading
+                ? "Loading print inventory..."
+                : "No print inventory records are connected yet."}
+            </div>
+          ) : null}
+
           {visibleInventoryRows.map((row) => (
             <div
               key={row.id}

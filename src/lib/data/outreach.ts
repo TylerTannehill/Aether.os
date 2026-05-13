@@ -33,10 +33,79 @@ type IntelligenceInput =
   | Record<string, ContactIntelligence>
   | OutreachLog[];
 
+async function getActiveOrganizationId(): Promise<string> {
+  const response = await fetch("/api/auth/current-context", {
+    method: "GET",
+    credentials: "include",
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data?.error || "No active campaign selected");
+  }
+
+  const organizationId = data?.organization?.id || data?.membership?.organization_id;
+
+  if (!organizationId) {
+    throw new Error("No active campaign found");
+  }
+
+  return String(organizationId);
+}
+
+async function getValidatedContactContext(contactId: string) {
+  const organizationId = await getActiveOrganizationId();
+
+  const { data: contactData, error: contactError } = await supabase
+    .from("contacts")
+    .select("id, owner_name, organization_id")
+    .eq("id", contactId)
+    .eq("organization_id", organizationId)
+    .maybeSingle();
+
+  if (contactError) {
+    throw contactError;
+  }
+
+  if (!contactData) {
+    throw new Error("Contact does not belong to the active campaign");
+  }
+
+  return { organizationId, contactData };
+}
+
+async function validateListForActiveOrganization(
+  listId: string | null,
+  organizationId: string
+) {
+  if (!listId) return null;
+
+  const { data: listData, error: listError } = await supabase
+    .from("lists")
+    .select("id, organization_id, default_owner_name")
+    .eq("id", listId)
+    .eq("organization_id", organizationId)
+    .maybeSingle();
+
+  if (listError) {
+    throw listError;
+  }
+
+  if (!listData) {
+    throw new Error("List does not belong to the active campaign");
+  }
+
+  return listData;
+}
+
 export async function getOutreachLists(): Promise<CampaignList[]> {
+  const organizationId = await getActiveOrganizationId();
+
   const { data, error } = await supabase
     .from("lists")
     .select("id, name, created_at, default_owner_name")
+    .eq("organization_id", organizationId)
     .order("created_at", { ascending: false });
 
   if (error) throw error;
@@ -45,12 +114,16 @@ export async function getOutreachLists(): Promise<CampaignList[]> {
 }
 
 export async function getListContacts(listId: string): Promise<Contact[]> {
+  const organizationId = await getActiveOrganizationId();
+  await validateListForActiveOrganization(listId, organizationId);
+
   const { data, error } = await supabase
     .from("list_contacts")
     .select(
-      "contact_id, contacts(id, first_name, last_name, email, phone, city, state, party, owner_name)"
+      "contact_id, contacts!inner(id, first_name, last_name, email, phone, city, state, party, owner_name, organization_id)"
     )
-    .eq("list_id", listId);
+    .eq("list_id", listId)
+    .eq("contacts.organization_id", organizationId);
 
   if (error) throw error;
 
@@ -61,11 +134,15 @@ export async function getListContacts(listId: string): Promise<Contact[]> {
 }
 
 export async function getOutreachLogs(listId: string): Promise<OutreachLog[]> {
+  const organizationId = await getActiveOrganizationId();
+  await validateListForActiveOrganization(listId, organizationId);
+
   const { data, error } = await supabase
     .from("outreach_logs")
     .select(
       "id, contact_id, list_id, channel, result, notes, created_at, contacts(id, first_name, last_name, email, phone, city, state, party, owner_name)"
     )
+    .eq("organization_id", organizationId)
     .eq("list_id", listId)
     .order("created_at", { ascending: false })
     .limit(100);
@@ -245,18 +322,25 @@ export async function createAutoTaskForOutcome(args: {
 }): Promise<AutoTaskOutcome> {
   const normalized = args.result.toLowerCase();
 
-  const { data: contactData, error: contactError } = await supabase
-    .from("contacts")
-    .select("owner_name")
-    .eq("id", args.contactId)
-    .single();
+  let organizationId = "";
+  let contactOwner: string | null = null;
+  let listOwner = args.ownerName?.trim() || null;
 
-  if (contactError && contactError.code !== "PGRST116") {
-    return { created: false, skipped: false, error: contactError.message };
+  try {
+    const validated = await getValidatedContactContext(args.contactId);
+    organizationId = validated.organizationId;
+    contactOwner = validated.contactData?.owner_name?.trim() || null;
+
+    const listData = await validateListForActiveOrganization(args.listId, organizationId);
+    listOwner = listOwner || listData?.default_owner_name?.trim() || null;
+  } catch (err: any) {
+    return {
+      created: false,
+      skipped: false,
+      error: err?.message || "Failed to validate active campaign context",
+    };
   }
 
-  const contactOwner = contactData?.owner_name?.trim() || null;
-  const listOwner = args.ownerName?.trim() || null;
   const resolvedOwner = contactOwner || listOwner || FALLBACK_OWNER;
 
   let taskType: TaskType | null = null;
@@ -286,6 +370,7 @@ export async function createAutoTaskForOutcome(args: {
   const existingTasksQuery = supabase
     .from("tasks")
     .select("id")
+    .eq("organization_id", organizationId)
     .eq("contact_id", args.contactId)
     .eq("task_type", taskType)
     .in("status", ["open", "in_progress"])
@@ -312,6 +397,7 @@ export async function createAutoTaskForOutcome(args: {
 
   const { error: insertError } = await supabase.from("tasks").insert([
     {
+      organization_id: organizationId,
       title,
       description,
       status: "open",
@@ -339,8 +425,12 @@ export async function saveOutreachLog(args: {
   result: string;
   notes?: string | null;
 }) {
+  const { organizationId } = await getValidatedContactContext(args.contactId);
+  await validateListForActiveOrganization(args.listId, organizationId);
+
   const { error } = await supabase.from("outreach_logs").insert([
     {
+      organization_id: organizationId,
       contact_id: args.contactId,
       list_id: args.listId,
       channel: args.channel,

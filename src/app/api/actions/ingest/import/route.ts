@@ -1,5 +1,32 @@
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { createClient } from "../../../../../lib/supabase/server";
+
+const ALLOWED_CONTACT_COLUMNS = [
+  "first_name",
+  "last_name",
+  "phone",
+  "email",
+  "address",
+  "occupation",
+  "employer",
+  "city",
+  "state",
+  "party",
+  "contact_code",
+  "organization_id",
+  "owner_name",
+  "full_name",
+  "fec_match_status",
+  "fec_confidence_score",
+  "fec_total_given",
+  "fec_last_donation_date",
+  "fec_recent_activity",
+  "fec_donor_tier",
+  "jackpot_candidate",
+  "jackpot_anomaly_type",
+  "jackpot_reason",
+];
 
 function isBlank(value: unknown) {
   return value === null || value === undefined || String(value).trim() === "";
@@ -123,7 +150,13 @@ function calculateDonorTier(totalGiven: number) {
 }
 
 function normalizeImportedContact(contact: Record<string, any>) {
-  const normalized: Record<string, any> = { ...contact };
+  const normalized: Record<string, any> = {};
+
+  Object.entries(contact).forEach(([key, value]) => {
+    if (ALLOWED_CONTACT_COLUMNS.includes(key)) {
+      normalized[key] = value;
+    }
+  });
 
   Object.entries(normalized).forEach(([key, value]) => {
     if (typeof value === "string") {
@@ -214,6 +247,7 @@ function mergeContact(existing: Record<string, any>, incoming: Record<string, an
 
   Object.entries(incoming).forEach(([key, value]) => {
     if (key === "id") return;
+    if (key === "organization_id") return;
 
     const existingValue = existing[key];
 
@@ -293,13 +327,15 @@ function buildMatchScore(contact: Record<string, any>, fecRecord: Record<string,
     matchedOn.push("zip");
   }
 
+  const contactAddress = contact.address || contact.street;
+
   if (
-    contact.street &&
+    contactAddress &&
     fecRecord.street &&
-    normalizeText(contact.street) === normalizeText(fecRecord.street)
+    normalizeText(contactAddress) === normalizeText(fecRecord.street)
   ) {
     score += 15;
-    matchedOn.push("street");
+    matchedOn.push("address");
   }
 
   return {
@@ -315,13 +351,53 @@ function getMatchStatus(score: number) {
   return "none";
 }
 
+async function resolveActiveOrganizationId(
+  supabase: Awaited<ReturnType<typeof createClient>>
+) {
+  const cookieStore = await cookies();
+  const activeOrganizationId = cookieStore.get("active_organization_id")?.value;
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    throw new Error("Not authenticated.");
+  }
+
+  if (!activeOrganizationId) {
+    throw new Error("No active campaign selected.");
+  }
+
+  const { data: membership, error: membershipError } = await supabase
+    .from("organization_members")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("organization_id", activeOrganizationId)
+    .maybeSingle();
+
+  if (membershipError) throw membershipError;
+
+  if (!membership) {
+    throw new Error("You do not have access to this campaign.");
+  }
+
+  return activeOrganizationId;
+}
+
 async function upsertContactsSafely(
   supabase: Awaited<ReturnType<typeof createClient>>,
-  contacts: Record<string, any>[]
+  contacts: Record<string, any>[],
+  organizationId: string
 ) {
-  const normalizedContacts = contacts
-    .map(normalizeImportedContact)
-    .filter((contact) => {
+  const normalizedContacts: Record<string, any>[] = contacts
+    .map((rawContact: Record<string, any>) => normalizeImportedContact(rawContact))
+    .map((contact: Record<string, any>) => ({
+      ...contact,
+      organization_id: organizationId,
+    }))
+    .filter((contact: Record<string, any>) => {
       return (
         !isBlank(contact.first_name) ||
         !isBlank(contact.last_name) ||
@@ -336,7 +412,8 @@ async function upsertContactsSafely(
 
   const { data: existingContacts, error: existingError } = await supabase
     .from("contacts")
-    .select("*");
+    .select("*")
+    .eq("organization_id", organizationId);
 
   if (existingError) throw existingError;
 
@@ -348,12 +425,16 @@ async function upsertContactsSafely(
     const existing = key ? index.get(key) : null;
 
     if (existing?.id) {
-      const merged = mergeContact(existing, contact);
+      const merged = {
+        ...mergeContact(existing, contact),
+        organization_id: organizationId,
+      };
 
       const { data: updated, error: updateError } = await supabase
         .from("contacts")
         .update(merged)
         .eq("id", existing.id)
+        .eq("organization_id", organizationId)
         .select()
         .single();
 
@@ -400,7 +481,8 @@ async function upsertContactsSafely(
 
 async function getOrCreateSuggestedLists(
   supabase: Awaited<ReturnType<typeof createClient>>,
-  suggestedLists: string[]
+  suggestedLists: string[],
+  organizationId: string
 ) {
   const uniqueNames = Array.from(
     new Set(suggestedLists.map((name) => String(name || "").trim()).filter(Boolean))
@@ -411,6 +493,7 @@ async function getOrCreateSuggestedLists(
   const { data: existingLists, error: existingError } = await supabase
     .from("lists")
     .select("id, name")
+    .eq("organization_id", organizationId)
     .in("name", uniqueNames);
 
   if (existingError) throw existingError;
@@ -425,7 +508,12 @@ async function getOrCreateSuggestedLists(
   if (missingNames.length > 0) {
     const { data: insertedLists, error: insertError } = await supabase
       .from("lists")
-      .insert(missingNames.map((name) => ({ name })))
+      .insert(
+        missingNames.map((name) => ({
+          name,
+          organization_id: organizationId,
+        }))
+      )
       .select("id, name");
 
     if (insertError) throw insertError;
@@ -452,6 +540,7 @@ export async function POST(req: Request) {
     const source: string = body.source ?? "outreach";
 
     const supabase = await createClient();
+    const organizationId = await resolveActiveOrganizationId(supabase);
 
     if (source === "fec") {
       if (!Array.isArray(fecRecords) || fecRecords.length === 0) {
@@ -465,6 +554,7 @@ export async function POST(req: Request) {
 
       const sanitizedRecords = fecRecords
         .map((record: Record<string, any>) => ({
+          organization_id: organizationId,
           source_file_id: cleanString(record.source_file_id),
           source_record_id: cleanString(record.source_record_id),
           import_batch_id: record.import_batch_id || batchId,
@@ -497,7 +587,8 @@ export async function POST(req: Request) {
 
       const { data: existingContacts, error: contactsError } = await supabase
         .from("contacts")
-        .select("*");
+        .select("*")
+        .eq("organization_id", organizationId);
 
       if (contactsError) {
         return NextResponse.json(
@@ -532,6 +623,7 @@ export async function POST(req: Request) {
         const matchStatus = getMatchStatus(bestScore);
 
         matchInserts.push({
+          organization_id: organizationId,
           contact_id: bestContact.id,
           fec_record_id: fecRecord.id,
           match_status: matchStatus,
@@ -595,7 +687,8 @@ export async function POST(req: Request) {
               ? "High giving capacity is visible and should be reviewed for outreach priority."
               : null,
           })
-          .eq("id", contactId);
+          .eq("id", contactId)
+          .eq("organization_id", organizationId);
 
         if (updateError) {
           return NextResponse.json(
@@ -623,8 +716,17 @@ export async function POST(req: Request) {
       );
     }
 
-    const savedContacts = await upsertContactsSafely(supabase, contacts);
-    const lists = await getOrCreateSuggestedLists(supabase, suggestedLists);
+    const savedContacts = await upsertContactsSafely(
+      supabase,
+      contacts,
+      organizationId
+    );
+
+    const lists = await getOrCreateSuggestedLists(
+      supabase,
+      suggestedLists,
+      organizationId
+    );
 
     const summaryCounts: Record<string, number> = {};
 
@@ -647,6 +749,8 @@ export async function POST(req: Request) {
       };
 
       for (const contact of savedContacts) {
+        if (contact.organization_id !== organizationId) continue;
+
         const total = donationTotal(contact);
 
         const generalListName =

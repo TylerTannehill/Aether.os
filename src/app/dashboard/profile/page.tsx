@@ -19,7 +19,6 @@ import {
   TrendingUp,
   Zap,
 } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
 
 type PreferenceOption = "overview" | "focus" | "outreach" | "admin";
 
@@ -207,38 +206,24 @@ export default function DashboardProfilePage() {
         setProfileLoading(true);
         setProfileError("");
 
-        const supabase = createClient();
+        const contextResponse = await fetch("/api/auth/current-context", {
+          method: "GET",
+        });
 
-        const {
-          data: { user },
-          error: userError,
-        } = await supabase.auth.getUser();
+        const contextData = await contextResponse.json();
 
-        if (userError) {
-          throw userError;
+        if (!contextResponse.ok) {
+          throw new Error(
+            contextData?.error || "Failed to load active campaign context."
+          );
         }
+
+        const user = contextData?.user;
+        const membership = contextData?.membership;
+        const organization = contextData?.organization;
 
         if (!user) {
           throw new Error("No authenticated user found.");
-        }
-
-        const { data: membership, error: membershipError } = await supabase
-          .from("organization_members")
-          .select(
-            `
-              role,
-              department,
-              title,
-              organizations (
-                name
-              )
-            `
-          )
-          .eq("user_id", user.id)
-          .maybeSingle();
-
-        if (membershipError) {
-          throw membershipError;
         }
 
         let currentUserRoles: OrgRole[] = [];
@@ -260,12 +245,9 @@ export default function DashboardProfilePage() {
         }
 
         const displayName = getDisplayNameFromUser(user);
-        const orgRecord = Array.isArray(membership?.organizations)
-          ? membership?.organizations?.[0]
-          : membership?.organizations;
 
         const organizationName =
-          orgRecord?.name ||
+          organization?.name ||
           "No organization assigned yet";
 
         const roleLabel = formatRoleLabel(membership?.role);

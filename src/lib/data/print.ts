@@ -21,6 +21,30 @@ export type PrintSnapshot = {
   issue: string;
 };
 
+
+async function getActiveOrganizationId() {
+  const response = await fetch("/api/auth/current-context", {
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    throw new Error("Unable to resolve active campaign context.");
+  }
+
+  const payload = await response.json();
+
+  const organizationId =
+    payload?.organization?.id ||
+    payload?.membership?.organization_id ||
+    null;
+
+  if (!organizationId) {
+    throw new Error("No active campaign selected.");
+  }
+
+  return organizationId;
+}
+
 function toNumber(value: unknown) {
   const num = Number(value ?? 0);
   return Number.isFinite(num) ? num : 0;
@@ -68,11 +92,21 @@ function determinePrintIssue(rows: PrintMetricRow[]) {
 }
 
 export async function getPrintMetricRows(): Promise<PrintMetricRow[]> {
+  let organizationId: string;
+
+  try {
+    organizationId = await getActiveOrganizationId();
+  } catch (error) {
+    console.error("Failed to resolve active campaign for print metrics", error);
+    return [];
+  }
+
   const { data, error } = await supabase
     .from("print_metrics")
     .select(
       "id, item_name, item_type, status, on_hand, reserved, reorder_at, vendor, expected_delivery, created_at"
     )
+    .eq("organization_id", organizationId)
     .order("created_at", { ascending: false });
 
   if (error) {

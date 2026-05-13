@@ -22,8 +22,12 @@ import { filterPatternsForDepartment } from "@/lib/abe/abe-filters";
 import { AbeBriefing } from "@/lib/abe/abe-briefing";
 import { updateAbeMemory } from "@/lib/abe/update-abe-memory";
 import { buildAbeOrgLayer, getOrgContextForDepartment } from "@/lib/abe/abe-org-layer";
+import {
+  getDigitalPlatformRows,
+  type DigitalPlatformRow,
+} from "@/lib/data/digital";
 
-type PlatformKey = "meta" | "instagram" | "x" | "tiktok";
+type PlatformKey = "meta" | "instagram" | "x" | "tiktok" | "unknown";
 type TrendView = "impressions" | "engagement" | "spend" | "sentiment";
 
 type PlatformMetric = {
@@ -92,6 +96,208 @@ const currency = new Intl.NumberFormat("en-US", {
   currency: "USD",
   maximumFractionDigits: 0,
 });
+
+
+function toNumber(value: unknown) {
+  const num = Number(value ?? 0);
+  return Number.isFinite(num) ? num : 0;
+}
+
+function normalizePlatform(value?: string | null) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function platformKeyFromValue(value?: string | null): PlatformKey {
+  const normalized = normalizePlatform(value);
+
+  if (normalized === "meta" || normalized === "facebook") return "meta";
+  if (normalized === "instagram" || normalized === "ig") return "instagram";
+  if (normalized === "x" || normalized === "twitter") return "x";
+  if (normalized === "tiktok" || normalized === "tik tok") return "tiktok";
+
+  return "unknown";
+}
+
+function platformLabelFromKey(key: PlatformKey, fallback?: string | null) {
+  if (key === "meta") return "Meta";
+  if (key === "instagram") return "Instagram";
+  if (key === "x") return "X";
+  if (key === "tiktok") return "TikTok";
+
+  return fallback?.trim() || "Unknown";
+}
+
+function buildPlatformMetrics(rows: DigitalPlatformRow[]): PlatformMetric[] {
+  const grouped = new Map<
+    PlatformKey,
+    {
+      key: PlatformKey;
+      label: string;
+      impressions: number;
+      engagement: number;
+      spend: number;
+      positiveTotal: number;
+      negativeTotal: number;
+      ctrTotal: number;
+      sentimentRows: number;
+      ctrRows: number;
+    }
+  >();
+
+  for (const row of rows) {
+    const key = platformKeyFromValue(row.platform);
+    const existing =
+      grouped.get(key) ??
+      {
+        key,
+        label: platformLabelFromKey(key, row.platform),
+        impressions: 0,
+        engagement: 0,
+        spend: 0,
+        positiveTotal: 0,
+        negativeTotal: 0,
+        ctrTotal: 0,
+        sentimentRows: 0,
+        ctrRows: 0,
+      };
+
+    existing.impressions += toNumber(row.impressions);
+    existing.engagement += toNumber(row.engagement);
+    existing.spend += toNumber(row.spend);
+
+    if (row.positive_sentiment !== null || row.negative_sentiment !== null) {
+      existing.positiveTotal += toNumber(row.positive_sentiment);
+      existing.negativeTotal += toNumber(row.negative_sentiment);
+      existing.sentimentRows += 1;
+    }
+
+    if (row.ctr !== null) {
+      existing.ctrTotal += toNumber(row.ctr);
+      existing.ctrRows += 1;
+    }
+
+    grouped.set(key, existing);
+  }
+
+  return Array.from(grouped.values())
+    .map((item) => ({
+      key: item.key,
+      label: item.label,
+      impressions: item.impressions,
+      engagement: item.engagement,
+      spend: item.spend,
+      positive:
+        item.sentimentRows > 0
+          ? Math.round(item.positiveTotal / item.sentimentRows)
+          : 0,
+      negative:
+        item.sentimentRows > 0
+          ? Math.round(item.negativeTotal / item.sentimentRows)
+          : 0,
+      ctr:
+        item.ctrRows > 0
+          ? Number((item.ctrTotal / item.ctrRows).toFixed(1))
+          : 0,
+    }))
+    .sort(
+      (a, b) =>
+        b.engagement + b.impressions / 100 - (a.engagement + a.impressions / 100)
+    );
+}
+
+function buildChartData(rows: DigitalPlatformRow[]) {
+  return rows
+    .slice(0, 4)
+    .reverse()
+    .map((row, index) => ({
+      label: row.created_at
+        ? new Date(row.created_at).toLocaleDateString(undefined, {
+            month: "short",
+            day: "numeric",
+          })
+        : `Entry ${index + 1}`,
+      impressions: toNumber(row.impressions),
+      engagement: toNumber(row.engagement),
+      spend: toNumber(row.spend),
+      sentiment: Math.max(
+        0,
+        toNumber(row.positive_sentiment) - toNumber(row.negative_sentiment)
+      ),
+    }));
+}
+
+function buildFocusQueueFromMetrics(platformMetrics: PlatformMetric[]): FocusTask[] {
+  const tasks: FocusTask[] = [];
+
+  const strongestEngagement = [...platformMetrics].sort(
+    (a, b) => b.engagement - a.engagement
+  )[0];
+
+  const weakestSentiment = [...platformMetrics].sort(
+    (a, b) => b.negative - a.negative
+  )[0];
+
+  const inefficientSpend = [...platformMetrics]
+    .filter((platform) => platform.spend > 0)
+    .sort((a, b) => {
+      const aEfficiency = a.engagement / Math.max(a.spend, 1);
+      const bEfficiency = b.engagement / Math.max(b.spend, 1);
+      return aEfficiency - bEfficiency;
+    })[0];
+
+  if (strongestEngagement && strongestEngagement.engagement > 0) {
+    tasks.push({
+      id: `focus-amplify-${strongestEngagement.key}`,
+      title: `Review ${strongestEngagement.label} momentum`,
+      type: "spend",
+      priority: "high",
+      summary: `${strongestEngagement.label} is carrying the strongest engagement signal in the current uploaded data.`,
+    });
+  }
+
+  if (weakestSentiment && weakestSentiment.negative > 0) {
+    tasks.push({
+      id: `focus-sentiment-${weakestSentiment.key}`,
+      title: `Review ${weakestSentiment.label} sentiment pressure`,
+      type: "reply",
+      priority: weakestSentiment.negative >= 35 ? "high" : "medium",
+      summary: `${weakestSentiment.label} has the highest negative sentiment in the current uploaded data.`,
+    });
+  }
+
+  if (inefficientSpend && inefficientSpend.spend > 0) {
+    tasks.push({
+      id: `focus-efficiency-${inefficientSpend.key}`,
+      title: `Audit ${inefficientSpend.label} spend efficiency`,
+      type: "spend",
+      priority: "medium",
+      summary: `${inefficientSpend.label} has spend attached and should be checked against engagement efficiency.`,
+    });
+  }
+
+  return tasks.slice(0, 3);
+}
+
+function getBestSpendCandidate(platformMetrics: PlatformMetric[]) {
+  const winner = [...platformMetrics].sort((a, b) => {
+    const aScore = a.engagement / Math.max(a.spend, 1);
+    const bScore = b.engagement / Math.max(b.spend, 1);
+    return bScore - aScore;
+  })[0];
+
+  return winner?.label || "No platform data";
+}
+
+function getCreativeRefreshCandidate(platformMetrics: PlatformMetric[]) {
+  const candidate = [...platformMetrics].sort((a, b) => a.ctr - b.ctr)[0];
+  return candidate?.label || "No platform data";
+}
+
+function getWeakestSentimentCandidate(platformMetrics: PlatformMetric[]) {
+  const candidate = [...platformMetrics].sort((a, b) => b.negative - a.negative)[0];
+  return candidate?.label || "No platform data";
+}
+
 
 function platformTone(platform: PlatformKey) {
   switch (platform) {
@@ -314,21 +520,18 @@ function getDigitalAbeBriefing(input: {
 
   const actions: string[] = [];
 
-  if (bestPlatform?.key === "tiktok") {
-    actions.push("Shift more weight toward TikTok while engagement is strongest.");
+  if (bestPlatform && bestPlatform.engagement > 0) {
+    actions.push(`Review ${bestPlatform.label} while engagement is strongest.`);
   }
 
-  if (weakestSentimentPlatform?.key === "x") {
-    actions.push("Tighten response handling on X before sentiment spreads.");
+  if (weakestSentimentPlatform && weakestSentimentPlatform.negative > 0) {
+    actions.push(`Tighten response handling on ${weakestSentimentPlatform.label} before sentiment spreads.`);
   }
 
-  if (
-    input.selectedTask?.type === "content" ||
-    input.contentDrops.length === 0
-  ) {
-    actions.push("Refresh creative before Meta efficiency softens further.");
+  if (input.selectedTask) {
+    actions.push(input.selectedTask.summary);
   } else {
-    actions.push("Keep the next digital action tight and move to the next signal.");
+    actions.push("Upload digital metrics to activate the next digital action.");
   }
 
   while (actions.length < (input.role === "admin" ? 3 : 2)) {
@@ -353,8 +556,10 @@ function getDigitalAbeBriefing(input: {
 
 export default function DigitalDashboardPage() {
   const [trendView, setTrendView] = useState<TrendView>("impressions");
+  const [digitalRows, setDigitalRows] = useState<DigitalPlatformRow[]>([]);
+  const [digitalLoading, setDigitalLoading] = useState(true);
 
-  const [selectedTaskId, setSelectedTaskId] = useState("focus-1");
+  const [selectedTaskId, setSelectedTaskId] = useState("");
 
   const [contentDrops, setContentDrops] = useState<ContentDrop[]>([]);
   const [engagementSpikes, setEngagementSpikes] = useState<EngagementSpike[]>(
@@ -372,121 +577,55 @@ export default function DigitalDashboardPage() {
     recentCrossDomainSignals: [],
   });
 
-  const platformMetrics = useMemo<PlatformMetric[]>(
-    () => [
-      {
-        key: "meta",
-        label: "Meta",
-        impressions: 182000,
-        engagement: 9400,
-        spend: 4200,
-        positive: 71,
-        negative: 29,
-        ctr: 3.6,
-      },
-      {
-        key: "instagram",
-        label: "Instagram",
-        impressions: 96400,
-        engagement: 6100,
-        spend: 1700,
-        positive: 76,
-        negative: 24,
-        ctr: 4.1,
-      },
-      {
-        key: "x",
-        label: "X",
-        impressions: 68400,
-        engagement: 2900,
-        spend: 600,
-        positive: 54,
-        negative: 46,
-        ctr: 1.9,
-      },
-      {
-        key: "tiktok",
-        label: "TikTok",
-        impressions: 143000,
-        engagement: 12100,
-        spend: 2500,
-        positive: 81,
-        negative: 19,
-        ctr: 4.8,
-      },
-    ],
-    []
-  );
+  useEffect(() => {
+    let mounted = true;
 
-  const contentPipeline = useMemo<ContentItem[]>(
-    () => [
-      {
-        id: "content-1",
-        title: "Education contrast graphic",
-        platform: "instagram",
-        status: "review",
-        publish_at: "2026-04-08 11:00 AM",
-        owner: "Maya",
-      },
-      {
-        id: "content-2",
-        title: "30-sec candidate clip on public safety",
-        platform: "tiktok",
-        status: "drafting",
-        publish_at: null,
-        owner: "Jordan",
-      },
-      {
-        id: "content-3",
-        title: "Fundraising push creative refresh",
-        platform: "meta",
-        status: "scheduled",
-        publish_at: "2026-04-09 2:00 PM",
-        owner: "Tyler",
-      },
-      {
-        id: "content-4",
-        title: "Rapid response quote post",
-        platform: "x",
-        status: "live",
-        publish_at: "2026-04-07 9:10 AM",
-        owner: "Avery",
-      },
-    ],
-    []
-  );
-    const focusQueue = useMemo<FocusTask[]>(
-    () => [
-      {
-        id: "focus-1",
-        title: "Create 2 new top-funnel ad creatives",
-        type: "content",
-        priority: "high",
-        summary:
-          "Meta CTR is flattening. Refresh hooks and visual framing before spend efficiency drops further.",
-      },
-      {
-        id: "focus-2",
-        title: "Increase TikTok spend by 15%",
-        type: "spend",
-        priority: "high",
-        summary:
-          "TikTok is leading on engagement and positive response. Shift budget into the strongest performer.",
-      },
-      {
-        id: "focus-3",
-        title: "Draft replies for negative X thread",
-        type: "reply",
-        priority: "medium",
-        summary:
-          "X sentiment is weaker than other channels. Prepare tighter messaging and selective response handling.",
-      },
-    ],
-    []
-  );
+    async function loadDigitalRows() {
+      try {
+        setDigitalLoading(true);
+        const rows = await getDigitalPlatformRows();
+
+        if (!mounted) return;
+
+        setDigitalRows(rows);
+      } catch (error) {
+        console.error("Failed to load digital page metrics:", error);
+
+        if (!mounted) return;
+
+        setDigitalRows([]);
+      } finally {
+        if (mounted) {
+          setDigitalLoading(false);
+        }
+      }
+    }
+
+    loadDigitalRows();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const platformMetrics = useMemo<PlatformMetric[]>(() => {
+    return buildPlatformMetrics(digitalRows);
+  }, [digitalRows]);
+
+  const contentPipeline = useMemo<ContentItem[]>(() => {
+    return [];
+  }, []);
+
+    const focusQueue = useMemo<FocusTask[]>(() => {
+    return buildFocusQueueFromMetrics(platformMetrics);
+  }, [platformMetrics]);
 
   const selectedTask = useMemo(() => {
-    return focusQueue.find((item) => item.id === selectedTaskId) || null;
+    return (
+      focusQueue.find((item) => item.id === selectedTaskId) ||
+      focusQueue[0] ||
+      null
+    );
   }, [focusQueue, selectedTaskId]);
 
   const topLine = useMemo(() => {
@@ -502,6 +641,13 @@ export default function DigitalDashboardPage() {
   }, [platformMetrics]);
 
   const sentimentSnapshot = useMemo(() => {
+    if (!platformMetrics.length) {
+      return {
+        positive: 0,
+        negative: 0,
+      };
+    }
+
     const positive =
       platformMetrics.reduce((sum, platform) => sum + platform.positive, 0) /
       platformMetrics.length;
@@ -515,73 +661,43 @@ export default function DigitalDashboardPage() {
     };
   }, [platformMetrics]);
 
-  const chartData = useMemo(
-    () => [
-      {
-        label: "Week 1",
-        impressions: 92000,
-        engagement: 5100,
-        spend: 1800,
-        sentiment: 61,
-      },
-      {
-        label: "Week 2",
-        impressions: 118000,
-        engagement: 6800,
-        spend: 2300,
-        sentiment: 66,
-      },
-      {
-        label: "Week 3",
-        impressions: 143000,
-        engagement: 8900,
-        spend: 3100,
-        sentiment: 69,
-      },
-      {
-        label: "Week 4",
-        impressions: 176000,
-        engagement: 10800,
-        spend: 3900,
-        sentiment: 71,
-      },
-    ],
-    []
+  const chartData = useMemo(() => {
+    return buildChartData(digitalRows);
+  }, [digitalRows]);
+
+  const chartMax = Math.max(
+    ...chartData.map((point) => point[trendView]),
+    1
   );
 
-  const chartMax = Math.max(...chartData.map((point) => point[trendView]), 1);
-
   const aiSummary = useMemo(() => {
-    if (demoRole === "admin") {
+    if (!platformMetrics.length) {
       return {
-        headline:
-          "Digital momentum is positive, but allocation needs refinement.",
-        body:
-          "Digital momentum is strong, but sentiment and allocation need shaping.",
-        recommendation:
-          "Create new creative for Meta, move additional spend toward TikTok, and tighten response strategy on X.",
+        headline: "No digital metrics uploaded yet.",
+        body: "Digital will stay quiet until platform metrics are available for this campaign.",
+        recommendation: "Upload digital metrics to activate platform, spend, sentiment, and content reads.",
       };
     }
 
-    if (demoRole === "director") {
-      return {
-        headline:
-          "Your digital lane is moving, but allocation and response strategy need tightening.",
-        body:
-          "Momentum is moving, but response pressure and allocation need tighter control.",
-        recommendation:
-          "Refresh Meta creative, keep budget moving toward TikTok, and control the weaker response lane on X.",
-      };
-    }
+    const strongest = [...platformMetrics].sort(
+      (a, b) => b.engagement - a.engagement
+    )[0];
+
+    const weakestSentiment = [...platformMetrics].sort(
+      (a, b) => b.negative - a.negative
+    )[0];
 
     return {
-      headline: "Your digital lane needs clear content and spend decisions.",
+      headline: `${strongest?.label || "Digital"} is carrying the strongest engagement signal.`,
       body:
-        "Keep the next digital actions tight and protect momentum.",
+        weakestSentiment && weakestSentiment.negative > 0
+          ? `${weakestSentiment.label} has the highest sentiment pressure in the uploaded metrics.`
+          : "Uploaded digital metrics are available for review.",
       recommendation:
-        "Ship stronger content, protect spend efficiency, and handle weak sentiment carefully.",
+        focusQueue[0]?.summary ||
+        "Review the uploaded platform metrics and decide the next digital move.",
     };
-  }, [demoRole]);
+  }, [platformMetrics, focusQueue]);
 
 
 
@@ -1160,24 +1276,33 @@ export default function DigitalDashboardPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-4 gap-4">
-            {chartData.map((point) => {
-              const value = point[trendView];
-              const height = (value / chartMax) * 120;
+          {chartData.length > 0 ? (
+            <div className="grid grid-cols-4 gap-4">
+              {chartData.map((point, index) => {
+                const value = point[trendView];
+                const height = (value / chartMax) * 120;
 
-              return (
-                <div key={point.label} className="flex flex-col items-center gap-2">
-                  <div className="flex h-32 items-end">
-                    <div
-                      style={{ height }}
-                      className="w-10 rounded-2xl bg-slate-900"
-                    />
+                return (
+                  <div
+                    key={`${point.label}-${index}`}
+                    className="flex flex-col items-center gap-2"
+                  >
+                    <div className="flex h-32 items-end">
+                      <div
+                        style={{ height }}
+                        className="w-10 rounded-2xl bg-slate-900"
+                      />
+                    </div>
+                    <p className="text-xs text-slate-500">{point.label}</p>
                   </div>
-                  <p className="text-xs text-slate-500">{point.label}</p>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-600">
+              No digital trend data available yet.
+            </div>
+          )}
         </section>
       ) : null}
 
@@ -1190,6 +1315,14 @@ export default function DigitalDashboardPage() {
             : "xl:grid-cols-4"
         }`}
       >
+        {visiblePlatformMetrics.length === 0 ? (
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 text-sm text-slate-600 shadow-sm xl:col-span-4">
+            {digitalLoading
+              ? "Loading digital metrics..."
+              : "No digital platform metrics available for this campaign yet."}
+          </div>
+        ) : null}
+
         {visiblePlatformMetrics.map((platform) => (
           <div
             key={platform.key}
@@ -1266,6 +1399,12 @@ export default function DigitalDashboardPage() {
           </div>
 
           <div className="space-y-4">
+            {visibleContentPipeline.length === 0 ? (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                No live content pipeline items are connected yet.
+              </div>
+            ) : null}
+
             {visibleContentPipeline.map((item) => (
               <div
                 key={item.id}
@@ -1326,6 +1465,12 @@ export default function DigitalDashboardPage() {
           </div>
 
           <div className="space-y-4">
+            {visibleFocusQueue.length === 0 ? (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                No digital focus queue items are available from live metrics yet.
+              </div>
+            ) : null}
+
             {visibleFocusQueue.map((item) => (
               <div
                 key={item.id}
@@ -1412,9 +1557,9 @@ export default function DigitalDashboardPage() {
           </div>
 
           <div className="mt-4 space-y-2 text-sm text-slate-700">
-            <div>Best spend candidate: TikTok</div>
-            <div>Needs creative refresh: Meta</div>
-            <div>Weakest sentiment: X</div>
+            <div>Best spend candidate: {getBestSpendCandidate(platformMetrics)}</div>
+            <div>Needs creative refresh: {getCreativeRefreshCandidate(platformMetrics)}</div>
+            <div>Weakest sentiment: {getWeakestSentimentCandidate(platformMetrics)}</div>
           </div>
         </div>
 
@@ -1428,9 +1573,9 @@ export default function DigitalDashboardPage() {
             </div>
 
             <div className="mt-4 space-y-2 text-sm text-slate-700">
-              <div>Comments needing review: 18</div>
-              <div>Suggested replies queued: 6</div>
-              <div>Rapid response item: 1</div>
+              <div>Comments needing review: 0</div>
+              <div>Suggested replies queued: 0</div>
+              <div>Rapid response item: 0</div>
             </div>
           </div>
         ) : null}

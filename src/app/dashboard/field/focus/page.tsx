@@ -286,71 +286,9 @@ export default function FieldFocusModePage() {
     };
   }, []);
 
-  const fallbackFocusItems = useMemo<FocusLaneItem[]>(
-    () => [
-      {
-        id: "focus-1",
-        title: "Finish South Persuasion Universe turf",
-        summary:
-          "This turf is lagging on completion and is dragging the field picture down. Push it over the line first.",
-        priority: "high",
-        type: "turf",
-        linkedListId: "field-south-persuasion",
-        linkedListName: "South Persuasion Universe",
-      },
-      {
-        id: "focus-2",
-        title: "Move Tyler into highest-ID packet",
-        summary:
-          "Top output should be concentrated in the highest-opportunity universe until the next reporting cycle closes.",
-        priority: "high",
-        type: "canvass",
-        linkedListId: "field-high-id-packet",
-        linkedListName: "Highest-ID Packet",
-      },
-      {
-        id: "focus-3",
-        title: "Build follow-up list from engaged conversations",
-        summary:
-          "Recent conversations produced useful engagement signals. Convert them into organized follow-up tasks now.",
-        priority: "medium",
-        type: "follow_up",
-        linkedListId: "field-engaged-follow-up",
-        linkedListName: "Field Engaged Follow-Up",
-      },
-      {
-        id: "focus-4",
-        title: "Reassign underperforming turf owner support",
-        summary:
-          "Add coverage support to the weakest-completion turf before it becomes a reporting problem.",
-        priority: "medium",
-        type: "turf",
-        linkedListId: "field-support-turf",
-        linkedListName: "South Persuasion Support Turf",
-      },
-      {
-        id: "focus-5",
-        title: "Pair strongest canvasser with newer volunteer",
-        summary:
-          "Use high-performing field staff to stabilize weaker route execution while keeping volume moving.",
-        priority: "medium",
-        type: "canvass",
-        linkedListId: "field-central-walk",
-        linkedListName: "Central Walk Packet",
-      },
-      {
-        id: "focus-6",
-        title: "Queue 10 conversation-based callbacks",
-        summary:
-          "The highest-quality recent conversations should become immediate follow-up action, not sit idle.",
-        priority: "low",
-        type: "follow_up",
-        linkedListId: "field-callback-queue",
-        linkedListName: "Field Callback Queue",
-      },
-    ],
-    []
-  );
+  const fallbackFocusItems = useMemo<FocusLaneItem[]>(() => {
+    return [];
+  }, []);
 
   const generatedFieldFocusItems = useMemo<FocusLaneItem[]>(() => {
     return fieldLists
@@ -361,10 +299,8 @@ export default function FieldFocusModePage() {
   }, [fieldLists]);
 
   const focusItems = useMemo<FocusLaneItem[]>(() => {
-    return generatedFieldFocusItems.length > 0
-      ? generatedFieldFocusItems
-      : fallbackFocusItems;
-  }, [generatedFieldFocusItems, fallbackFocusItems]);
+    return generatedFieldFocusItems;
+  }, [generatedFieldFocusItems]);
 
   const grouped = useMemo(() => {
     return {
@@ -744,6 +680,14 @@ export default function FieldFocusModePage() {
           </div>
 
           <div className="space-y-4">
+            {grouped.turf.length === 0 ? (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                {loadingFieldLists
+                  ? "Loading field turf actions..."
+                  : "No turf focus actions are available from live field lists yet."}
+              </div>
+            ) : null}
+
             {grouped.turf.map((item) => {
               const isActive = activeTurf?.id === item.id;
 
@@ -827,6 +771,14 @@ export default function FieldFocusModePage() {
           </div>
 
           <div className="space-y-4">
+            {grouped.canvass.length === 0 ? (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                {loadingFieldLists
+                  ? "Loading canvass actions..."
+                  : "No canvass focus actions are available from live field lists yet."}
+              </div>
+            ) : null}
+
             {grouped.canvass.map((item) => {
               const isActive = activeCanvass === item.id;
               const isConfirmed = assignmentConfirmed === item.id;
@@ -960,6 +912,14 @@ export default function FieldFocusModePage() {
           </div>
 
           <div className="space-y-4">
+            {grouped.follow_up.length === 0 ? (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                {loadingFieldLists
+                  ? "Loading field follow-up actions..."
+                  : "No field follow-up actions are available from live field lists yet."}
+              </div>
+            ) : null}
+
             {grouped.follow_up.map((item) => {
               const isActive = activeFollowUp === item.id;
               const isConfirmed = followUpConfirmed === item.id;
@@ -1159,7 +1119,7 @@ export default function FieldFocusModePage() {
                 ? "Loading live routing lists."
                 : generatedFieldFocusItems.length > 0
                   ? "Live list routing is currently driving this focus queue."
-                  : "Fallback field priorities are active until routing lists are available."}
+                  : "No live field routing lists are available yet."}
             </p>
           </div>
         </div>

@@ -212,144 +212,13 @@ export default function PrintFocusModePage() {
     };
   }, []);
 
-  const systemPrintSignals = useMemo(
-    () => [
-      {
-        id: "signal-south-persuasion",
-        turf: "South Persuasion Universe",
-        useCase: "Persuasion mail drop",
-        needsApproval: true,
-        needsInventory: true,
-        needsDelivery: false,
-      },
-      {
-        id: "signal-aurora-field",
-        turf: "Aurora Field Deployment",
-        useCase: "Yard sign saturation push",
-        needsApproval: false,
-        needsInventory: true,
-        needsDelivery: true,
-      },
-      {
-        id: "signal-absentee-chase",
-        turf: "Absentee Chase Universe",
-        useCase: "Vote-by-mail persuasion",
-        needsApproval: true,
-        needsInventory: false,
-        needsDelivery: false,
-      },
-    ],
-    []
-  );
+  const systemPrintSignals = useMemo(() => {
+    return [];
+  }, []);
 
   const focusItems = useMemo<FocusLaneItem[]>(() => {
-    const generated: FocusLaneItem[] = [];
-
-    systemPrintSignals.forEach((signal, index) => {
-      if (signal.needsApproval) {
-        generated.push({
-          id: `focus-approval-${index + 1}`,
-          title: `Approve asset for ${signal.turf}`,
-          summary: `Print approval is blocking ${signal.useCase}. Clear the approval or revision path before downstream execution slows down.`,
-          priority: "high",
-          type: "approval",
-          linkedTurf: signal.turf,
-          linkedUseCase: signal.useCase,
-        });
-      }
-
-      if (signal.needsInventory) {
-        generated.push({
-          id: `focus-inventory-${index + 1}`,
-          title: `Protect materials for ${signal.turf}`,
-          summary: `Inventory pressure is rising around ${signal.useCase}. Reorder or reserve materials before field demand outpaces supply.`,
-          priority: "high",
-          type: "inventory",
-          linkedTurf: signal.turf,
-          linkedUseCase: signal.useCase,
-        });
-      }
-
-      if (signal.needsDelivery) {
-        generated.push({
-          id: `focus-delivery-${index + 1}`,
-          title: `Confirm delivery for ${signal.turf}`,
-          summary: `Delivery timing is now an execution dependency for ${signal.useCase}. Verify ETA and handoff readiness.`,
-          priority: "medium",
-          type: "delivery",
-          linkedTurf: signal.turf,
-          linkedUseCase: signal.useCase,
-        });
-      }
-    });
-
-    if (generated.length > 0) {
-      return generated;
-    }
-
-    return [
-      {
-        id: "focus-1",
-        title: "Get candidate approval on education mailer",
-        summary:
-          "This asset is blocking the production timeline and should be approved or revised immediately.",
-        priority: "high",
-        type: "approval",
-        linkedTurf: "Aurora persuasion turf",
-        linkedUseCase: "Education contrast mail drop",
-      },
-      {
-        id: "focus-2",
-        title: "Reorder yard signs before Aurora inventory drawdown",
-        summary:
-          "Sign inventory is approaching the pressure zone and needs a reorder before field demand outpaces supply.",
-        priority: "high",
-        type: "inventory",
-        linkedTurf: "Aurora field deployment",
-        linkedUseCase: "Yard sign saturation push",
-      },
-      {
-        id: "focus-3",
-        title: "Confirm shipped sign delivery handoff timing",
-        summary:
-          "Shipped materials need confirmed arrival timing so downstream field planning stays aligned.",
-        priority: "medium",
-        type: "delivery",
-        linkedTurf: "Aurora field deployment",
-        linkedUseCase: "Sign handoff to field",
-      },
-      {
-        id: "focus-4",
-        title: "Push absentee chase lit piece out of design",
-        summary:
-          "Design-stage delay is slowing the print queue and should be resolved before it impacts schedule.",
-        priority: "medium",
-        type: "approval",
-        linkedTurf: "Absentee chase universe",
-        linkedUseCase: "Vote-by-mail persuasion",
-      },
-      {
-        id: "focus-5",
-        title: "Review regional stock reserve levels",
-        summary:
-          "Validate that reserved inventory matches real deployment need and protect against preventable shortages.",
-        priority: "medium",
-        type: "inventory",
-        linkedTurf: "Chicago mail reserve",
-        linkedUseCase: "Mailer reserve protection",
-      },
-      {
-        id: "focus-6",
-        title: "Track vendor ETA changes on active orders",
-        summary:
-          "Delivery timing needs tighter tracking so print operations do not surprise field or outreach execution.",
-        priority: "low",
-        type: "delivery",
-        linkedTurf: "Multi-region print support",
-        linkedUseCase: "Vendor timing control",
-      },
-    ];
-  }, [systemPrintSignals]);
+    return [];
+  }, []);
 
   const grouped = useMemo(() => {
     return {
@@ -754,6 +623,12 @@ export default function PrintFocusModePage() {
           </div>
 
           <div className="space-y-4">
+            {grouped.approval.length === 0 ? (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                No live print approval actions are available yet.
+              </div>
+            ) : null}
+
             {grouped.approval.map((item) => {
               const isActive = activeApproval?.id === item.id;
               const isConfirmed = approvalConfirmed === item.id;
@@ -900,6 +775,12 @@ export default function PrintFocusModePage() {
           </div>
 
           <div className="space-y-4">
+            {grouped.inventory.length === 0 ? (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                No live print inventory actions are available yet.
+              </div>
+            ) : null}
+
             {grouped.inventory.map((item) => {
               const isActive = activeInventory?.id === item.id;
               const isConfirmed = inventoryConfirmed === item.id;
@@ -1036,6 +917,12 @@ export default function PrintFocusModePage() {
           </div>
 
           <div className="space-y-4">
+            {grouped.delivery.length === 0 ? (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                No live print delivery actions are available yet.
+              </div>
+            ) : null}
+
             {grouped.delivery.map((item) => {
               const isActive = activeDelivery?.id === item.id;
               const isConfirmed = deliveryConfirmed === item.id;

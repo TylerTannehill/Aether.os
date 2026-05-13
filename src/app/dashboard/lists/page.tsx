@@ -149,12 +149,13 @@ function DashboardListsPageContent() {
             >
               Refresh
             </button>
-            <button
-              onClick={handleCreateList}
-              className="rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white hover:bg-slate-800"
+            <Link
+              href="/dashboard/contacts"
+              aria-label="Create List from Contacts"
+              className="inline-flex min-w-[120px] items-center justify-center rounded-2xl bg-slate-900 px-4 py-3 text-center text-sm font-semibold !text-white shadow-sm transition hover:bg-slate-800"
             >
-              Create List
-            </button>
+              <span className="block !text-white">Create List</span>
+            </Link>
           </div>
         </div>
       </section>
@@ -297,9 +298,10 @@ function DashboardListsPageContent() {
 
             <Link
               href="/dashboard/outreach/focus"
-              className="rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
+              aria-label="Open Outreach Focus"
+              className="inline-flex min-w-[120px] items-center justify-center rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-semibold !text-white shadow-sm transition hover:bg-slate-800"
             >
-              Outreach Focus
+              <span className="block !text-white">Outreach Focus</span>
             </Link>
           </div>
         </div>
@@ -426,7 +428,7 @@ function DashboardListsPageContent() {
               List Controls
             </h2>
             <p className="mt-1 text-sm text-slate-500">
-              Create a new list or narrow the current routing view.
+              Create lists from Contacts segmentation, or narrow the current routing view.
             </p>
           </div>
 
@@ -445,12 +447,13 @@ function DashboardListsPageContent() {
               className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400"
             />
 
-            <button
-              onClick={handleCreateList}
-              className="rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
+            <Link
+              href="/dashboard/contacts"
+              aria-label="Create List from Contacts"
+              className="inline-flex min-w-[120px] items-center justify-center rounded-2xl bg-slate-900 px-4 py-3 text-center text-sm font-semibold !text-white shadow-sm transition hover:bg-slate-800"
             >
-              Create List
-            </button>
+              <span className="block !text-white">Create List</span>
+            </Link>
           </div>
         </section>
       </section>

@@ -75,6 +75,30 @@ export type FinanceDbContact = {
   jackpot_reason?: string | null;
 };
 
+
+async function getActiveOrganizationId() {
+  const response = await fetch("/api/auth/current-context", {
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    throw new Error("Unable to resolve active campaign context.");
+  }
+
+  const payload = await response.json();
+
+  const organizationId =
+    payload?.organization?.id ||
+    payload?.membership?.organization_id ||
+    null;
+
+  if (!organizationId) {
+    throw new Error("No active campaign selected.");
+  }
+
+  return organizationId;
+}
+
 function generateMockUuid(seed: string) {
   return `00000000-0000-4000-8000-${seed.padEnd(12, "0").slice(0, 12)}`;
 }
@@ -474,16 +498,26 @@ function buildLiveLastContact(contact: FinanceDbContact) {
 }
 
 export async function getLiveFinanceCallTargets(): Promise<FinanceCallTarget[]> {
+  let organizationId: string;
+
+  try {
+    organizationId = await getActiveOrganizationId();
+  } catch (error) {
+    console.error("Failed to resolve active campaign for finance call targets:", error);
+    return [];
+  }
+
   const { data, error } = await supabase
     .from("contacts")
     .select("id, first_name, last_name, email, phone, city, state, owner_name, fec_match_status, fec_confidence_score, fec_total_given, fec_last_donation_date, fec_recent_activity, fec_donor_tier, jackpot_candidate, jackpot_anomaly_type, jackpot_reason")
+    .eq("organization_id", organizationId)
     .not("phone", "is", null)
     .order("last_name", { ascending: true })
     .limit(50);
 
   if (error) {
     console.error("Failed to load live finance contacts:", error);
-    return deriveSeedCallTargets();
+    return [];
   }
 
   const contacts = (data as FinanceDbContact[] | null)?.filter(
@@ -491,7 +525,7 @@ export async function getLiveFinanceCallTargets(): Promise<FinanceCallTarget[]> 
   ) ?? [];
 
   if (contacts.length === 0) {
-    return deriveSeedCallTargets();
+    return [];
   }
 
   const targets = contacts.map((contact) => {
@@ -522,8 +556,6 @@ export async function getLiveFinanceCallTargets(): Promise<FinanceCallTarget[]> 
   });
 }
 
-export function getFinanceCallTargets(
-  contacts: FinanceContactSeed[] = financeContactSeeds
-): FinanceCallTarget[] {
-  return deriveSeedCallTargets(contacts);
+export async function getFinanceCallTargets(): Promise<FinanceCallTarget[]> {
+  return getLiveFinanceCallTargets();
 }

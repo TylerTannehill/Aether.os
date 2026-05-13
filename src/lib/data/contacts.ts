@@ -2,10 +2,36 @@ import { supabase } from "@/lib/supabase";
 import { Contact, ContactCounts } from "./types";
 import { fullName } from "./utils";
 
+async function getActiveOrganizationId() {
+  const response = await fetch("/api/auth/current-context", {
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    throw new Error("Unable to resolve active campaign context.");
+  }
+
+  const payload = await response.json();
+
+  const organizationId =
+    payload?.organization?.id ||
+    payload?.membership?.organization_id ||
+    null;
+
+  if (!organizationId) {
+    throw new Error("No active campaign selected.");
+  }
+
+  return organizationId;
+}
+
 export async function getContacts(): Promise<Contact[]> {
+  const organizationId = await getActiveOrganizationId();
+
   const { data, error } = await supabase
     .from("contacts")
     .select("*")
+    .eq("organization_id", organizationId)
     .order("last_name", { ascending: true });
 
   if (error) throw error;
@@ -13,13 +39,19 @@ export async function getContacts(): Promise<Contact[]> {
   return (data as Contact[]) ?? [];
 }
 
-export async function updateContactOwner(contactId: string, ownerName?: string | null) {
+export async function updateContactOwner(
+  contactId: string,
+  ownerName?: string | null
+) {
+  const organizationId = await getActiveOrganizationId();
+
   const { error } = await supabase
     .from("contacts")
     .update({
       owner_name: ownerName?.trim() || null,
     })
-    .eq("id", contactId);
+    .eq("id", contactId)
+    .eq("organization_id", organizationId);
 
   if (error) throw error;
 }
@@ -32,12 +64,15 @@ export async function bulkUpdateContactOwner(
     throw new Error("Please select at least one contact.");
   }
 
+  const organizationId = await getActiveOrganizationId();
+
   const { error } = await supabase
     .from("contacts")
     .update({
       owner_name: ownerName?.trim() || null,
     })
-    .in("id", contactIds);
+    .in("id", contactIds)
+    .eq("organization_id", organizationId);
 
   if (error) throw error;
 }

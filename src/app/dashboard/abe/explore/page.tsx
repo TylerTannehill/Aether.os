@@ -233,8 +233,23 @@ export default function ExploreAbePage() {
   }, [fieldSnapshot]);
 
   const digitalSentimentRatio = useMemo(() => {
-    const negativeWeight = String(digitalSnapshot.issue || "").toLowerCase().includes("negative") ? 38 : 24;
+    const hasDigitalData =
+      digitalSnapshot.impressions > 0 ||
+      digitalSnapshot.engagement > 0 ||
+      digitalSnapshot.spend > 0;
+
+    if (!hasDigitalData) {
+      return { positive: 0, negative: 0 };
+    }
+
+    const negativeWeight = String(digitalSnapshot.issue || "")
+      .toLowerCase()
+      .includes("negative")
+      ? 38
+      : 24;
+
     const positiveWeight = Math.max(100 - negativeWeight, 0);
+
     return { positive: positiveWeight, negative: negativeWeight };
   }, [digitalSnapshot]);
 
@@ -254,12 +269,24 @@ export default function ExploreAbePage() {
   }, [filteredData]);
 
   const financeBundle = useMemo(() => {
-    const missingComplianceRecords = Math.max(0, Math.round(financeSnapshot.pledges / 1000));
-    const overduePledges = Math.max(0, Math.round(financeSnapshot.pledges / 2500));
+    const missingComplianceRecords =
+      financeSnapshot.pledges > 0
+        ? Math.max(1, Math.round(financeSnapshot.pledges / 1000))
+        : 0;
+
+    const overduePledges =
+      financeSnapshot.pledges > 0
+        ? Math.max(1, Math.round(financeSnapshot.pledges / 2500))
+        : 0;
     const highValueDonorsPending = (filteredData.contacts ?? []).filter(
       (contact: any) => Number(contact.donation_total ?? 0) >= 500 || Number(contact.pledge_amount ?? 0) >= 500
     ).length;
-    const cashOnHandPressure = financeSnapshot.moneyOut > financeSnapshot.moneyIn ? 8 : 4;
+    const cashOnHandPressure =
+      financeSnapshot.moneyIn > 0 || financeSnapshot.moneyOut > 0
+        ? financeSnapshot.moneyOut > financeSnapshot.moneyIn
+          ? 8
+          : 0
+        : 0;
     return getFinanceSignals({ missingComplianceRecords, overduePledges, highValueDonorsPending, cashOnHandPressure });
   }, [financeSnapshot, filteredData.contacts]);
 
@@ -273,15 +300,31 @@ export default function ExploreAbePage() {
 
   const digitalBundle = useMemo(() => {
     const issueText = String(digitalSnapshot.issue || "").toLowerCase();
-    const fallingCtrPlatforms = issueText.includes("issue") ? 1 : 0;
-    const strongPerformingPlatforms = digitalSnapshot.bestPlatform ? 1 : 0;
-    const negativeSentimentThreads = issueText.includes("sentiment") ? 1 : 0;
-    const contentBacklogCount = Math.max(1, Math.round(digitalSnapshot.engagement / 5000));
+    const hasDigitalData =
+      digitalSnapshot.impressions > 0 ||
+      digitalSnapshot.engagement > 0 ||
+      digitalSnapshot.spend > 0;
+
+    const fallingCtrPlatforms =
+      hasDigitalData && issueText.includes("issue") ? 1 : 0;
+
+    const strongPerformingPlatforms =
+      hasDigitalData && digitalSnapshot.bestPlatform !== "No platform data"
+        ? 1
+        : 0;
+
+    const negativeSentimentThreads =
+      hasDigitalData && issueText.includes("sentiment") ? 1 : 0;
+
+    const contentBacklogCount =
+      digitalSnapshot.engagement > 0
+        ? Math.max(1, Math.round(digitalSnapshot.engagement / 5000))
+        : 0;
     return getDigitalSignals({ fallingCtrPlatforms, strongPerformingPlatforms, negativeSentimentThreads, contentBacklogCount });
   }, [digitalSnapshot]);
 
   const printBundle = useMemo(() => {
-    const approvalBlocks = printSnapshot.approvalReady > 0 ? 1 : 2;
+    const approvalBlocks = printSnapshot.approvalReady > 0 ? 1 : 0;
     const nearReorderItems = printSnapshot.onHand > 0 ? Math.max(1, Math.round(printSnapshot.onHand / 4000)) : 0;
     const deliveryRisks = printSnapshot.orders > 0 ? Math.max(1, Math.round(printSnapshot.orders / 2)) : 0;
     const readyAssets = printSnapshot.approvalReady;
@@ -351,16 +394,81 @@ export default function ExploreAbePage() {
     setAbeMemory((current) => updateAbeMemory(current, abeBriefing));
   }, [abeBriefing.health, abeBriefing.campaignStatus, abeBriefing.primaryLane, abeBriefing.strongest, abeBriefing.weakest, abeBriefing.opportunityLane, abeBriefing.crossDomainSignal]);
 
+  const hasLiveSignal = useMemo(() => {
+    return (
+      filteredData.contacts.length > 0 ||
+      filteredData.tasks.length > 0 ||
+      filteredData.logs.length > 0 ||
+      financeSnapshot.moneyIn > 0 ||
+      financeSnapshot.moneyOut > 0 ||
+      financeSnapshot.pledges > 0 ||
+      fieldSnapshot.doors > 0 ||
+      fieldSnapshot.conversations > 0 ||
+      fieldSnapshot.ids > 0 ||
+      digitalSnapshot.impressions > 0 ||
+      digitalSnapshot.engagement > 0 ||
+      digitalSnapshot.spend > 0 ||
+      printSnapshot.onHand > 0 ||
+      printSnapshot.orders > 0 ||
+      printSnapshot.approvalReady > 0
+    );
+  }, [
+    filteredData.contacts.length,
+    filteredData.tasks.length,
+    filteredData.logs.length,
+    financeSnapshot.moneyIn,
+    financeSnapshot.moneyOut,
+    financeSnapshot.pledges,
+    fieldSnapshot.doors,
+    fieldSnapshot.conversations,
+    fieldSnapshot.ids,
+    digitalSnapshot.impressions,
+    digitalSnapshot.engagement,
+    digitalSnapshot.spend,
+    printSnapshot.onHand,
+    printSnapshot.orders,
+    printSnapshot.approvalReady,
+  ]);
+
   const patternWatch = useMemo(() => {
+    if (!hasLiveSignal) {
+      return [];
+    }
+
     return buildAbePatternInsights({
       role: "admin",
       demoDepartment: abeBriefing.primaryLane,
       briefing: abeBriefing,
       memory: abeMemory,
     });
-  }, [abeBriefing, abeMemory]);
+  }, [abeBriefing, abeMemory, hasLiveSignal]);
 
   const laneReads = useMemo(() => {
+    if (!hasLiveSignal) {
+      return [
+        {
+          lane: "Outreach",
+          read: "No live outreach contacts, logs, or follow-up tasks are available yet.",
+        },
+        {
+          lane: "Finance",
+          read: "No live finance dollars, pledges, or donor pressure are available yet.",
+        },
+        {
+          lane: "Field",
+          read: "No live field doors, conversations, or ID signals are available yet.",
+        },
+        {
+          lane: "Digital",
+          read: "No live digital impressions, engagement, spend, or sentiment signals are available yet.",
+        },
+        {
+          lane: "Print",
+          read: "No live print inventory, orders, approvals, or delivery signals are available yet.",
+        },
+      ];
+    }
+
     return [
       {
         lane: "Outreach",
@@ -387,11 +495,15 @@ export default function ExploreAbePage() {
         read: `${printSnapshot.approvalReady} ready assets and ${printSnapshot.orders} active order signals make print primarily a timing lane today. Print is less about volume right now and more about whether delivery and approval timing reinforce downstream execution.`,
       },
     ];
-  }, [filteredData.tasks, financeSnapshot, fieldSnapshot, fieldAverageCompletion, digitalSnapshot, digitalSentimentRatio, printSnapshot]);
+  }, [hasLiveSignal, filteredData.tasks, financeSnapshot, fieldSnapshot, fieldAverageCompletion, digitalSnapshot, digitalSentimentRatio, printSnapshot]);
 
   const deeperRead = useMemo(() => {
+    if (!hasLiveSignal) {
+      return "Explore Abe is waiting for live campaign signal. Once contacts, tasks, logs, donations, field activity, digital metrics, or print records exist, this read will expand into real cross-lane interpretation.";
+    }
+
     return `${intelligenceSummary.body} Abe’s deeper interpretation is that the campaign is not struggling with a lack of movement — it is managing the harder problem of coordination. The strongest lanes are capable of pulling the weaker ones forward, but only if timing, follow-through, and handoffs stay tight. This is where campaigns usually either compound momentum or leak it.`;
-  }, [intelligenceSummary.body]);
+  }, [hasLiveSignal, intelligenceSummary.body]);
 
   if (loading) {
     return (
@@ -417,7 +529,7 @@ export default function ExploreAbePage() {
                 Deeper campaign intelligence
               </h1>
               <p className="max-w-3xl text-sm text-slate-600 lg:text-base">
-                This expands on Abe’s Brief — same read, deeper interpretation of how the campaign is actually behaving across lanes.
+                This expands on Abe’s Brief — same read, deeper interpretation of how the campaign is behaving across lanes. When the campaign is empty, Abe stays quiet instead of inventing motion.
               </p>
             </div>
           </div>
@@ -456,13 +568,15 @@ export default function ExploreAbePage() {
           {intelligenceSummary.headline}
         </h2>
         <p className="mt-3 text-lg font-semibold text-slate-900">
-          This is the same read as Abe’s Brief — just widened so you can see the system behind it.
+          {hasLiveSignal
+            ? "This is the same read as Abe’s Brief — just widened so you can see the system behind it."
+            : "No live campaign signal is available yet."}
         </p>
         <p className="mt-3 max-w-4xl text-base leading-7 text-slate-800">
           {deeperRead}
         </p>
         <p className="mt-3 max-w-4xl text-sm italic text-slate-600">
-          Why Abe thinks this: {abeBriefing.whyNow}
+          Why Abe thinks this: {hasLiveSignal ? abeBriefing.whyNow : "No live data is strong enough to justify a deeper strategic read yet."}
         </p>
       </section>
 
@@ -509,7 +623,9 @@ export default function ExploreAbePage() {
           Cross-Domain Signal
         </p>
         <p className="mt-3 text-base font-medium text-indigo-950">
-          {abeBriefing.crossDomainSignal || "No single cross-domain dependency is overpowering the read right now, but coordination quality is still the story underneath the surface."}
+          {hasLiveSignal
+            ? abeBriefing.crossDomainSignal || "No single cross-domain dependency is overpowering the read right now."
+            : "No cross-domain signal is available yet."}
         </p>
       </section>
     </div>

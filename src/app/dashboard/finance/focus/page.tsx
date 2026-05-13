@@ -21,7 +21,6 @@ import {
 import { createAutoTaskForOutcome, saveOutreachLog } from "@/lib/data/outreach";
 import {
   getFinanceCallTargets,
-  getLiveFinanceCallTargets,
   type FinanceCallTarget,
 } from "@/lib/finance/call-targets";
 
@@ -252,20 +251,16 @@ export default function FinanceFocusModePage() {
 
     async function loadTargets() {
       try {
-        const liveTargets = await getLiveFinanceCallTargets();
+        const liveTargets = await getFinanceCallTargets();
 
         if (!mounted) return;
 
-        if (liveTargets.length > 0) {
-          setCallTargets(liveTargets);
-        } else {
-          setCallTargets(getFinanceCallTargets());
-        }
+        setCallTargets(Array.isArray(liveTargets) ? liveTargets : []);
       } catch (error) {
         console.error("Failed to load live finance targets:", error);
 
         if (!mounted) return;
-        setCallTargets(getFinanceCallTargets());
+        setCallTargets([]);
       } finally {
         if (mounted) {
           setLoadingTargets(false);
@@ -375,7 +370,7 @@ export default function FinanceFocusModePage() {
   }, [hasFinanceDirector]);
 
   const focusItems = useMemo<FocusLaneItem[]>(() => {
-    const donorDrivenItems: FocusLaneItem[] = callTargets.slice(0, 4).map((target) => ({
+    return callTargets.slice(0, 4).map((target) => ({
       id: target.id,
       title:
         target.status === "pledged"
@@ -390,71 +385,6 @@ export default function FinanceFocusModePage() {
       amount: target.amount,
       callTargetStatus: target.status,
     }));
-
-    const fallbackPledgeItems: FocusLaneItem[] = [
-      {
-        id: "focus-1",
-        title: "Collect Michael Ross pledge",
-        summary:
-          "A pledged contribution is still waiting to be collected and should be converted before it stalls in the workflow.",
-        priority: "high",
-        type: "pledge",
-        contactName: "Michael Ross",
-        amount: 3200,
-        callTargetStatus: "pledged",
-      },
-      {
-        id: "focus-4",
-        title: "Schedule second pledge follow-up block",
-        summary:
-          "Open pledge follow-ups should be organized into the next active collection block.",
-        priority: "medium",
-        type: "pledge",
-        contactName: "Open pledge block",
-        amount: 5400,
-        callTargetStatus: "follow_up",
-      },
-    ];
-
-    const operationalItems: FocusLaneItem[] = [
-      {
-        id: "focus-2",
-        title: "Fix James Carter compliance data",
-        summary:
-          "A recorded contribution is missing required fields and should be completed before export readiness is affected.",
-        priority: "high",
-        type: "compliance",
-      },
-      {
-        id: "focus-3",
-        title: "Enter weekend fundraiser checks",
-        summary:
-          "Recent fundraiser checks still need to be entered so reporting and cash flow stay accurate.",
-        priority: "medium",
-        type: "entry",
-      },
-      {
-        id: "focus-5",
-        title: "Complete missing employer and occupation records",
-        summary:
-          "Compliance cleanup should happen before those contributions become a reporting risk.",
-        priority: "medium",
-        type: "compliance",
-      },
-      {
-        id: "focus-6",
-        title: "Log manual cash receipts from event table",
-        summary:
-          "Offline receipts should be entered quickly so totals and compliance workflows stay current.",
-        priority: "low",
-        type: "entry",
-      },
-    ];
-
-    return [
-      ...(donorDrivenItems.length > 0 ? donorDrivenItems : fallbackPledgeItems),
-      ...operationalItems,
-    ];
   }, [callTargets]);
 
   const grouped = useMemo(() => {
@@ -880,7 +810,7 @@ export default function FinanceFocusModePage() {
       ) : null}
 
 
-      {hasFinanceDirector ? (
+      {hasFinanceDirector && callTargets.length > 0 ? (
       <section className="rounded-3xl border-2 border-amber-300 bg-gradient-to-br from-amber-50 via-yellow-50 to-white p-6 shadow-md">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div>
@@ -898,22 +828,28 @@ export default function FinanceFocusModePage() {
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="rounded-2xl border border-amber-200 bg-white p-4">
               <p className="text-xs text-slate-500">Latent Value</p>
-              <p className="mt-2 text-xl font-semibold text-amber-800">$18,400</p>
+              <p className="mt-2 text-xl font-semibold text-amber-800">
+                {currency.format(callTargets.reduce((sum, target) => sum + target.amount, 0))}
+              </p>
             </div>
             <div className="rounded-2xl border border-amber-200 bg-white p-4">
               <p className="text-xs text-slate-500">Priority Donors</p>
-              <p className="mt-2 text-xl font-semibold text-slate-900">2</p>
+              <p className="mt-2 text-xl font-semibold text-slate-900">
+                {callTargets.filter((target) => target.priority === "high").length}
+              </p>
             </div>
             <div className="rounded-2xl border border-amber-200 bg-white p-4">
               <p className="text-xs text-slate-500">Conversion Risk</p>
-              <p className="mt-2 text-xl font-semibold text-rose-700">1</p>
+              <p className="mt-2 text-xl font-semibold text-rose-700">
+                {callTargets.filter((target) => target.status === "pledged" || target.status === "follow_up").length}
+              </p>
             </div>
           </div>
         </div>
         <div className="mt-5 rounded-2xl border border-amber-200 bg-white p-5">
           <p className="text-xs uppercase tracking-wide text-amber-700">Abe Read</p>
           <p className="mt-2 text-sm text-slate-700">
-            Jackpot Priority Bridge sees latent donor value sitting idle. Recommended first action: call Michael Ross pledge now.
+            Jackpot Priority Bridge is using live finance call targets. Recommended first action: work the highest-priority target in the call session.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
             <Link
@@ -968,11 +904,15 @@ export default function FinanceFocusModePage() {
             {!callSessionStarted ? (
               <button
                 onClick={startCallSession}
-                disabled={loadingTargets}
+                disabled={loadingTargets || callTargets.length === 0}
                 className="inline-flex items-center gap-2 rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <PhoneCall className="h-4 w-4" />
-                {loadingTargets ? "Loading Targets..." : "Start Call Session"}
+                {loadingTargets
+                  ? "Loading Targets..."
+                  : callTargets.length === 0
+                    ? "No Targets Available"
+                    : "Start Call Session"}
               </button>
             ) : (
               <button
@@ -1298,6 +1238,14 @@ export default function FinanceFocusModePage() {
           </div>
 
           <div className="space-y-4">
+            {grouped.pledge.length === 0 ? (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                {loadingTargets
+                  ? "Loading finance pledge actions..."
+                  : "No live finance pledge or donor call actions are available yet."}
+              </div>
+            ) : null}
+
             {grouped.pledge.map((item) => {
               const isActive = activePledge?.id === item.id;
               const isConfirmed = pledgeConfirmed === item.id;
@@ -1461,7 +1409,9 @@ export default function FinanceFocusModePage() {
                     >
                       {item.callTargetStatus === "follow_up"
                         ? "Schedule Follow-Up"
-                        : "Collect Pledge"}
+                        : item.callTargetStatus === "reconnect"
+                          ? "Open Call"
+                          : "Collect Pledge"}
                     </button>
                     <button
                       onClick={() => openPledgePanel(item)}
@@ -1490,6 +1440,12 @@ export default function FinanceFocusModePage() {
           </div>
 
           <div className="space-y-4">
+            {grouped.compliance.length === 0 ? (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                No live finance compliance actions are available yet.
+              </div>
+            ) : null}
+
             {grouped.compliance.map((item) => {
               const isActive = activeCompliance?.id === item.id;
               const isConfirmed = complianceConfirmed === item.id;
@@ -1689,6 +1645,12 @@ export default function FinanceFocusModePage() {
             <Users className="h-5 w-5 text-sky-600" />
           </div>
                     <div className="space-y-4">
+            {grouped.entry.length === 0 ? (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                No live finance entry actions are available yet.
+              </div>
+            ) : null}
+
             {grouped.entry.map((item) => {
               const isActive = activeEntry?.id === item.id;
               const isConfirmed = entryConfirmed === item.id;

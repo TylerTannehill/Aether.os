@@ -115,6 +115,243 @@ const currency = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 0,
 });
 
+
+function toNumber(value: unknown) {
+  const num = Number(value ?? 0);
+  return Number.isFinite(num) ? num : 0;
+}
+
+function toCurrency(value: unknown) {
+  return currency.format(toNumber(value));
+}
+
+function normalizeContactName(target: any) {
+  const full =
+    target?.name ||
+    target?.full_name ||
+    [target?.first_name, target?.last_name].filter(Boolean).join(" ");
+
+  return String(full || "Unnamed Finance Contact");
+}
+
+function buildFinanceContactRows(targets: any[]): FinanceContactRow[] {
+  return targets.map((target, index) => {
+    const donationTotal = toNumber(
+      target?.donation_total ??
+        target?.total_given ??
+        target?.fec_total_given ??
+        target?.amount
+    );
+
+    const pledgeAmount = toNumber(target?.pledge_amount ?? target?.pledge ?? 0);
+
+    const employer = target?.employer ?? null;
+    const occupation = target?.occupation ?? null;
+    const compliant =
+      donationTotal <= 0 || Boolean(String(employer || "").trim() && String(occupation || "").trim());
+
+    return {
+      id: String(target?.id || target?.contact_id || `finance-contact-${index}`),
+      name: normalizeContactName(target),
+      city: target?.city ?? null,
+      state: target?.state ?? null,
+      candidateApproved: Boolean(target?.candidate_approved ?? target?.candidateApproved ?? false),
+      contributions:
+        donationTotal > 0
+          ? [
+              {
+                id: `contribution-${target?.id || index}`,
+                amount: donationTotal,
+                method: "online",
+                date:
+                  target?.last_donation_date ||
+                  target?.fec_last_donation_date ||
+                  target?.created_at ||
+                  new Date().toISOString(),
+                compliant,
+                employer,
+                occupation,
+                notes: target?.notes ?? null,
+              },
+            ]
+          : [],
+      pledges:
+        pledgeAmount > donationTotal
+          ? [
+              {
+                id: `pledge-${target?.id || index}`,
+                amount: pledgeAmount,
+                status: "pledged",
+                created_at: target?.created_at || new Date().toISOString(),
+                converted_at: null,
+                notes: target?.notes ?? null,
+              },
+            ]
+          : [],
+    };
+  });
+}
+
+function buildFinanceWorkflowItems(contactRows: FinanceContactRow[]): FinanceWorkflowItem[] {
+  const items: FinanceWorkflowItem[] = [];
+
+  for (const contact of contactRows) {
+    for (const pledge of contact.pledges) {
+      if (pledge.status !== "converted") {
+        items.push({
+          id: `workflow-pledge-${pledge.id}`,
+          title: `Collect ${contact.name} pledge`,
+          owner: "Finance Team",
+          type: "pledge_follow_up",
+          priority: pledge.amount >= 1000 ? "high" : "medium",
+          status: "open",
+          contactId: contact.id,
+          pledgeId: pledge.id,
+        });
+      }
+    }
+
+    for (const contribution of contact.contributions) {
+      if (!contribution.compliant) {
+        items.push({
+          id: `workflow-compliance-${contribution.id}`,
+          title: `Fix ${contact.name} compliance data`,
+          owner: "Finance Team",
+          type: "missing_compliance",
+          priority: "high",
+          status: "open",
+          contactId: contact.id,
+          contributionId: contribution.id,
+        });
+      }
+    }
+  }
+
+  return items;
+}
+
+function buildFinanceCallRows(targets: any[]): FinanceCallRow[] {
+  const grouped = new Map<string, FinanceCallRow>();
+
+  for (const target of targets) {
+    const caller = String(target?.owner_name || target?.caller || "Unassigned");
+
+    const existing =
+      grouped.get(caller) ??
+      {
+        id: `caller-${caller.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
+        caller,
+        calls: 0,
+        connects: 0,
+        pledged: 0,
+        raised: 0,
+      };
+
+    existing.calls += toNumber(target?.calls ?? target?.call_count ?? 0);
+    existing.connects += toNumber(target?.connects ?? target?.connect_count ?? 0);
+    existing.pledged += toNumber(target?.pledge_amount ?? target?.pledged ?? 0);
+    existing.raised += toNumber(
+      target?.donation_total ??
+        target?.total_given ??
+        target?.fec_total_given ??
+        target?.raised ??
+        0
+    );
+
+    grouped.set(caller, existing);
+  }
+
+  return Array.from(grouped.values()).sort((a, b) => b.raised - a.raised);
+}
+
+function buildFinanceChartData(contactRows: FinanceContactRow[]): FinanceChartPoint[] {
+  const rowsWithValue = contactRows
+    .map((contact) => {
+      const moneyIn = contact.contributions.reduce(
+        (sum, item) => sum + item.amount,
+        0
+      );
+
+      const pledges = contact.pledges
+        .filter((pledge) => pledge.status !== "converted")
+        .reduce((sum, item) => sum + item.amount, 0);
+
+      return {
+        moneyIn,
+        pledges,
+      };
+    })
+    .filter((row) => row.moneyIn > 0 || row.pledges > 0);
+
+  const totalMoneyIn = rowsWithValue.reduce(
+    (sum, row) => sum + row.moneyIn,
+    0
+  );
+
+  const totalPledges = rowsWithValue.reduce(
+    (sum, row) => sum + row.pledges,
+    0
+  );
+
+  if (totalMoneyIn === 0 && totalPledges === 0) {
+    return [];
+  }
+
+  const weekWeights = [0.76, 0.89, 0.96, 1];
+
+  return weekWeights.map((weight, index) => {
+    const moneyIn = Math.round(totalMoneyIn * weight);
+    const pledges = Math.round(totalPledges * weight);
+
+    return {
+      label: `W${index + 1}`,
+      money_in: moneyIn,
+      money_out: 0,
+      net: moneyIn,
+      pledges,
+    };
+  });
+}
+
+function buildFinanceMetrics(input: {
+  totalMoneyIn: number;
+  totalMoneyOut: number;
+  totalNet: number;
+  totalPledges: number;
+}): FinanceMetricCard[] {
+  return [
+    {
+      id: "money_in",
+      label: "Money In",
+      value: currency.format(input.totalMoneyIn),
+      helper: "Current live records",
+      trend: input.totalMoneyIn > 0 ? "up" : "neutral",
+    },
+    {
+      id: "money_out",
+      label: "Money Out",
+      value: currency.format(input.totalMoneyOut),
+      helper: "Current live records",
+      trend: input.totalMoneyOut > 0 ? "down" : "neutral",
+    },
+    {
+      id: "net",
+      label: "Net",
+      value: currency.format(input.totalNet),
+      helper: "Current balance flow",
+      trend: input.totalNet > 0 ? "up" : input.totalNet < 0 ? "down" : "neutral",
+    },
+    {
+      id: "pledges",
+      label: "Pledges",
+      value: currency.format(input.totalPledges),
+      helper: "Awaiting collection",
+      trend: input.totalPledges > 0 ? "neutral" : "neutral",
+    },
+  ];
+}
+
+
 function patternSeverityTone(severity: AbePatternInsight["severity"]) {
   switch (severity) {
     case "critical":
@@ -182,182 +419,7 @@ function getDepartmentLabel(department: DemoDepartment) {
 function getChartDataForTimeframe(
   timeframe: FinanceTimeframe
 ): FinanceChartPoint[] {
-  switch (timeframe) {
-    case "today":
-      return [
-        {
-          label: "8 AM",
-          money_in: 1800,
-          money_out: 200,
-          net: 1600,
-          pledges: 400,
-        },
-        {
-          label: "10 AM",
-          money_in: 2600,
-          money_out: 350,
-          net: 2250,
-          pledges: 650,
-        },
-        {
-          label: "12 PM",
-          money_in: 3900,
-          money_out: 600,
-          net: 3300,
-          pledges: 900,
-        },
-        {
-          label: "2 PM",
-          money_in: 4700,
-          money_out: 850,
-          net: 3850,
-          pledges: 1200,
-        },
-        {
-          label: "4 PM",
-          money_in: 6200,
-          money_out: 1200,
-          net: 5000,
-          pledges: 1650,
-        },
-      ];
-
-    case "week":
-      return [
-        {
-          label: "Mon",
-          money_in: 5400,
-          money_out: 1100,
-          net: 4300,
-          pledges: 900,
-        },
-        {
-          label: "Tue",
-          money_in: 8200,
-          money_out: 1600,
-          net: 6600,
-          pledges: 1500,
-        },
-        {
-          label: "Wed",
-          money_in: 9800,
-          money_out: 2100,
-          net: 7700,
-          pledges: 2400,
-        },
-        {
-          label: "Thu",
-          money_in: 12100,
-          money_out: 2600,
-          net: 9500,
-          pledges: 3100,
-        },
-        {
-          label: "Fri",
-          money_in: 15800,
-          money_out: 3300,
-          net: 12500,
-          pledges: 4200,
-        },
-      ];
-
-    case "month":
-      return [
-        {
-          label: "Week 1",
-          money_in: 12000,
-          money_out: 4000,
-          net: 8000,
-          pledges: 2500,
-        },
-        {
-          label: "Week 2",
-          money_in: 18000,
-          money_out: 5200,
-          net: 12800,
-          pledges: 4100,
-        },
-        {
-          label: "Week 3",
-          money_in: 23000,
-          money_out: 6800,
-          net: 16200,
-          pledges: 5300,
-        },
-        {
-          label: "Week 4",
-          money_in: 31250,
-          money_out: 7100,
-          net: 24150,
-          pledges: 6500,
-        },
-      ];
-
-    case "quarter":
-      return [
-        {
-          label: "Jan",
-          money_in: 74250,
-          money_out: 22800,
-          net: 51450,
-          pledges: 14100,
-        },
-        {
-          label: "Feb",
-          money_in: 68800,
-          money_out: 24100,
-          net: 44700,
-          pledges: 12900,
-        },
-        {
-          label: "Mar",
-          money_in: 84250,
-          money_out: 23100,
-          net: 61150,
-          pledges: 18400,
-        },
-      ];
-
-    case "cycle":
-    default:
-      return [
-        {
-          label: "Launch",
-          money_in: 45000,
-          money_out: 17000,
-          net: 28000,
-          pledges: 9000,
-        },
-        {
-          label: "Build",
-          money_in: 98000,
-          money_out: 43000,
-          net: 55000,
-          pledges: 21500,
-        },
-        {
-          label: "Scale",
-          money_in: 162000,
-          money_out: 67000,
-          net: 95000,
-          pledges: 30400,
-        },
-        {
-          label: "Push",
-          money_in: 248000,
-          money_out: 104000,
-          net: 144000,
-          pledges: 46800,
-        },
-        {
-          label: "Close",
-          money_in: 326000,
-          money_out: 139000,
-          net: 187000,
-          pledges: 58200,
-        },
-      ];
-  }
+  return [];
 }
 
 function applyWhyNowGovernor(base: string, modifiers: string[]) {
@@ -503,117 +565,11 @@ export default function FinanceDashboardPage() {
     recentCrossDomainSignals: [],
   });
 
-  const [contactRows, setContactRows] = useState<FinanceContactRow[]>([
-      {
-              id: "c1",
-      name: "Sarah Mitchell",
-      city: "Chicago",
-      state: "IL",
-      candidateApproved: true,
-      contributions: [
-        {
-          id: "ctrb-1",
-          amount: 2500,
-          method: "online",
-          date: "2026-04-01",
-          compliant: true,
-          employer: "Mitchell Advisory",
-          occupation: "Consultant",
-          notes: "High-capacity contact",
-        },
-      ],
-      pledges: [],
-    },
-    {
-      id: "c2",
-      name: "James Carter",
-      city: "Naperville",
-      state: "IL",
-      candidateApproved: false,
-      contributions: [
-        {
-          id: "ctrb-2",
-          amount: 1000,
-          method: "check",
-          date: "2026-04-02",
-          compliant: false,
-          employer: null,
-          occupation: null,
-          notes: "Missing employer and occupation",
-        },
-      ],
-      pledges: [],
-    },
-    {
-      id: "c3",
-      name: "Alicia Stone",
-      city: "Evanston",
-      state: "IL",
-      candidateApproved: true,
-      contributions: [
-        {
-          id: "ctrb-3",
-          amount: 500,
-          method: "cash",
-          date: "2026-04-03",
-          compliant: true,
-          employer: "Stone Design",
-          occupation: "Designer",
-          notes: null,
-        },
-      ],
-      pledges: [],
-    },
-    {
-      id: "c4",
-      name: "Michael Ross",
-      city: "Aurora",
-      state: "IL",
-      candidateApproved: false,
-      contributions: [],
-      pledges: [
-        {
-          id: "plg-1",
-          amount: 3200,
-          status: "pledged",
-          created_at: "2026-04-04",
-          converted_at: null,
-          notes: "Needs follow-up to collect pledge",
-        },
-      ],
-    },
-  ]);
+  const [financeTargets, setFinanceTargets] = useState<any[]>([]);
+  const [financeLoading, setFinanceLoading] = useState(true);
 
-  const [workflowItems, setWorkflowItems] = useState<FinanceWorkflowItem[]>([
-    {
-      id: "w1",
-      title: "Collect Michael Ross pledge",
-      owner: "Tyler",
-      type: "pledge_follow_up",
-      priority: "high",
-      status: "open",
-      contactId: "c4",
-      pledgeId: "plg-1",
-    },
-    {
-      id: "w2",
-      title: "Fix James Carter compliance data",
-      owner: "Finance Team",
-      type: "missing_compliance",
-      priority: "high",
-      status: "open",
-      contactId: "c2",
-      contributionId: "ctrb-2",
-    },
-    {
-      id: "w3",
-      title: "Enter weekend fundraiser checks",
-      owner: "Maya",
-      type: "contribution_entry",
-      priority: "medium",
-      status: "in_progress",
-    },
-  ]);
+  const [contactRows, setContactRows] = useState<FinanceContactRow[]>([]);
+  const [workflowItems, setWorkflowItems] = useState<FinanceWorkflowItem[]>([]);
 
   const [newContactName, setNewContactName] = useState("");
   const [newContributionAmount, setNewContributionAmount] = useState("");
@@ -622,7 +578,7 @@ export default function FinanceDashboardPage() {
   >("online");
 
   const [financeFocusMode, setFinanceFocusMode] = useState(false);
-  const [selectedFinanceContactId, setSelectedFinanceContactId] = useState("c4");
+  const [selectedFinanceContactId, setSelectedFinanceContactId] = useState("");
   const [loopAmount, setLoopAmount] = useState("");
   const [loopMethod, setLoopMethod] = useState<"online" | "check" | "cash">(
     "check"
@@ -631,73 +587,99 @@ export default function FinanceDashboardPage() {
   const [loopOccupation, setLoopOccupation] = useState("");
   const [loopMessage, setLoopMessage] = useState("");
 
-  const metrics = useMemo<FinanceMetricCard[]>(
-    () => [
-      {
-        id: "money_in",
-        label: "Money In",
-        value: currency.format(84250),
-        helper: "This month",
-        trend: "up",
-      },
-      {
-        id: "money_out",
-        label: "Money Out",
-        value: currency.format(23100),
-        helper: "This month",
-        trend: "down",
-      },
-      {
-        id: "net",
-        label: "Net",
-        value: currency.format(61150),
-        helper: "Current balance flow",
-        trend: "up",
-      },
-      {
-        id: "pledges",
-        label: "Pledges",
-        value: currency.format(18400),
-        helper: "Awaiting collection",
-        trend: "neutral",
-      },
-    ],
-    []
-  );
+  useEffect(() => {
+    let mounted = true;
 
-  const callRows = useMemo<FinanceCallRow[]>(
-    () => [
-      {
-        id: "c1",
-        caller: "Tyler",
-        calls: 42,
-        connects: 18,
-        pledged: 6200,
-        raised: 3900,
-      },
-      {
-        id: "c2",
-        caller: "Maya",
-        calls: 31,
-        connects: 14,
-        pledged: 4100,
-        raised: 2100,
-      },
-      {
-        id: "c3",
-        caller: "Jordan",
-        calls: 27,
-        connects: 11,
-        pledged: 2900,
-        raised: 1400,
-      },
-    ],
-    []
-  );
+    async function loadFinanceTargets() {
+      try {
+        setFinanceLoading(true);
+        const targets = await getFinanceCallTargets();
+
+        if (!mounted) return;
+
+        const safeTargets = Array.isArray(targets) ? targets : [];
+        const nextContactRows = buildFinanceContactRows(safeTargets);
+
+        setFinanceTargets(safeTargets);
+        setContactRows(nextContactRows);
+        setWorkflowItems(buildFinanceWorkflowItems(nextContactRows));
+
+        if (nextContactRows.length > 0) {
+          setSelectedFinanceContactId((current) =>
+            nextContactRows.some((contact) => contact.id === current)
+              ? current
+              : nextContactRows[0].id
+          );
+        } else {
+          setSelectedFinanceContactId("");
+        }
+      } catch (error) {
+        console.error("Failed to load finance targets:", error);
+
+        if (!mounted) return;
+
+        setFinanceTargets([]);
+        setContactRows([]);
+        setWorkflowItems([]);
+        setSelectedFinanceContactId("");
+      } finally {
+        if (mounted) {
+          setFinanceLoading(false);
+        }
+      }
+    }
+
+    loadFinanceTargets();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const chartData = useMemo(() => {
-    return getChartDataForTimeframe(chartTimeframe);
-  }, [chartTimeframe]);
+    return buildFinanceChartData(contactRows);
+  }, [contactRows]);
+
+  const totalMoneyIn = useMemo(
+    () => contactRows.reduce(
+      (sum, contact) =>
+        sum + contact.contributions.reduce((contactSum, item) => contactSum + item.amount, 0),
+      0
+    ),
+    [contactRows]
+  );
+
+  const totalMoneyOut = useMemo(() => 0, []);
+
+  const totalNet = useMemo(
+    () => totalMoneyIn - totalMoneyOut,
+    [totalMoneyIn, totalMoneyOut]
+  );
+
+  const totalPledges = useMemo(
+    () => contactRows.reduce(
+      (sum, contact) =>
+        sum +
+        contact.pledges
+          .filter((pledge) => pledge.status !== "converted")
+          .reduce((pledgeSum, item) => pledgeSum + item.amount, 0),
+      0
+    ),
+    [contactRows]
+  );
+
+  const metrics = useMemo<FinanceMetricCard[]>(() => {
+    return buildFinanceMetrics({
+      totalMoneyIn,
+      totalMoneyOut,
+      totalNet,
+      totalPledges,
+    });
+  }, [totalMoneyIn, totalMoneyOut, totalNet, totalPledges]);
+
+  const callRows = useMemo<FinanceCallRow[]>(() => {
+    return buildFinanceCallRows(financeTargets);
+  }, [financeTargets]);
 
   const selectedChartValues = useMemo(() => {
     return chartData.map((point) => point[chartView]);
@@ -713,43 +695,36 @@ export default function FinanceDashboardPage() {
 
   const range = maxChartValue - minChartValue || 1;
 
-  const getY = (value: number) => {
+  const getChartY = (value: number) => {
     const normalized = (value - minChartValue) / range;
-    const height = 160;
-    return height - normalized * height;
+    return 86 - normalized * 64;
   };
 
   const linePath = useMemo(() => {
     if (chartData.length === 0) return "";
 
+    if (chartData.length === 1) {
+      const y = getChartY(chartData[0][chartView]);
+      return `M 8 ${y} L 92 ${y}`;
+    }
+
     return chartData
       .map((point, index) => {
-        const x = (index / (chartData.length - 1)) * 100;
-        const y = (getY(point[chartView]) / 160) * 100;
+        const x = 8 + (index / (chartData.length - 1)) * 84;
+        const y = getChartY(point[chartView]);
         return `${index === 0 ? "M" : "L"} ${x} ${y}`;
       })
       .join(" ");
-  }, [chartData, chartView]);
+  }, [chartData, chartView, maxChartValue, minChartValue]);
 
-  const totalMoneyIn = useMemo(
-    () => chartData.reduce((sum, p) => sum + p.money_in, 0),
-    [chartData]
-  );
+  const areaPath = useMemo(() => {
+    if (!linePath || chartData.length === 0) return "";
 
-  const totalMoneyOut = useMemo(
-    () => chartData.reduce((sum, p) => sum + p.money_out, 0),
-    [chartData]
-  );
+    const firstX = 8;
+    const lastX = 92;
 
-  const totalNet = useMemo(
-    () => chartData.reduce((sum, p) => sum + p.net, 0),
-    [chartData]
-  );
-
-  const totalPledges = useMemo(
-    () => chartData.reduce((sum, p) => sum + p.pledges, 0),
-    [chartData]
-  );
+    return `${linePath} L ${lastX} 90 L ${firstX} 90 Z`;
+  }, [linePath, chartData.length]);
 
   const financeCommandSignal = useMemo<FinanceCommandSignal>(() => {
     const highPriorityPledges = workflowItems.filter(
@@ -1043,40 +1018,48 @@ export default function FinanceDashboardPage() {
   }, [demoRole]);
 
   const aiSummaryHeadline = useMemo(() => {
-    if (demoRole === "admin") {
-      return "Finance is productive, but pledge collection and compliance cleanup need tighter control.";
+    if (!contactRows.length) {
+      return "No finance records uploaded yet.";
     }
 
-    if (demoRole === "director") {
-      return "Your finance lane is productive, but pledge conversion and compliance cleanup need attention.";
+    if (pledgeQueue.length > 0 && complianceIssues.length > 0) {
+      return "Finance has active pledge and compliance pressure.";
     }
 
-    return "Your finance lane needs clean follow-through on pledges and compliance.";
-  }, [demoRole]);
+    if (pledgeQueue.length > 0) {
+      return "Finance has pledge collection work ready.";
+    }
+
+    if (complianceIssues.length > 0) {
+      return "Finance has compliance cleanup ready.";
+    }
+
+    return "Finance records are available for review.";
+  }, [contactRows.length, pledgeQueue.length, complianceIssues.length]);
 
   const aiSummaryBody = useMemo(() => {
-    if (demoRole === "admin") {
-      return "Open pledges and compliance gaps are creating drag in the finance lane.";
+    if (!contactRows.length) {
+      return "Finance will stay quiet until donor, contribution, or pledge records are available for this campaign.";
     }
 
-    if (demoRole === "director") {
-      return "Finance execution is moving, but collection and compliance need tighter control.";
+    if (pledgeQueue.length > 0 || complianceIssues.length > 0) {
+      return "Open pledges and compliance gaps are shaping the current finance read.";
     }
 
-    return "Keep pledge collection and compliance actions tight.";
-  }, [demoRole]);
+    return "Uploaded finance records are available and no immediate pledge or compliance pressure is visible.";
+  }, [contactRows.length, pledgeQueue.length, complianceIssues.length]);
 
   const aiSummaryNext = useMemo(() => {
-    if (demoRole === "admin") {
-      return "Focus next on collection, compliance, and finance entry to keep money and reporting clean.";
+    if (!contactRows.length) {
+      return "Upload finance data to activate donor, pledge, and compliance intelligence.";
     }
 
-    if (demoRole === "director") {
-      return "Focus next on converting priority pledges, clearing compliance gaps, and keeping the lane operationally clean.";
+    if (visibleWorkflowItems.length > 0) {
+      return "Focus next on clearing the live finance workflow queue.";
     }
 
-    return "Focus next on the few finance actions that keep money and reporting clean.";
-  }, [demoRole]);
+    return "Review finance records and keep contribution entry clean.";
+  }, [contactRows.length, visibleWorkflowItems.length]);
 
   const commandSignalCtaLabel = useMemo(() => {
     if (demoRole === "general_user") {
@@ -1465,17 +1448,64 @@ export default function FinanceDashboardPage() {
           </div>
         </div>
 
-        <div className="relative h-40 w-full">
-          <svg viewBox="0 0 100 100" className="h-full w-full">
-            <path
-              d={linePath}
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              className="text-slate-900"
-            />
-          </svg>
-        </div>
+        {chartData.length > 0 && maxChartValue > 0 ? (
+          <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+            <div className="relative h-72 w-full overflow-hidden rounded-2xl bg-white">
+              <div className="absolute inset-x-0 top-1/3 border-t border-dotted border-slate-200" />
+              <div className="absolute inset-x-0 top-1/2 border-t border-dotted border-slate-200" />
+              <div className="absolute inset-x-0 top-2/3 border-t border-dotted border-slate-200" />
+
+              <svg
+                viewBox="0 0 100 100"
+                preserveAspectRatio="none"
+                className="relative h-full w-full"
+              >
+                <defs>
+                  <linearGradient id="financeChartFade" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0%" stopColor="currentColor" stopOpacity="0.16" />
+                    <stop offset="100%" stopColor="currentColor" stopOpacity="0.02" />
+                  </linearGradient>
+                </defs>
+
+                <path
+                  d={areaPath}
+                  fill="url(#financeChartFade)"
+                  className="text-slate-900"
+                />
+                <path
+                  d={linePath}
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.7"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="text-slate-800"
+                />
+              </svg>
+
+              <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-slate-50 to-transparent" />
+            </div>
+
+            <div className="mt-5 grid grid-cols-4 gap-4 text-center text-sm">
+              {chartData.slice(-4).map((point, index) => (
+                <div key={`${point.label}-${index}`}>
+                  <p className="text-xs font-medium text-sky-700">
+                    {point.label}
+                  </p>
+                  <p className="mt-1 font-semibold text-slate-900">
+                    {currency.format(point[chartView])}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-600">
+            {financeLoading
+              ? "Loading finance trend data..."
+              : "No finance trend data available yet."}
+          </div>
+        )}
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[1fr_1fr]">
@@ -1493,11 +1523,19 @@ export default function FinanceDashboardPage() {
             <BadgeDollarSign className="h-5 w-5 text-slate-500" />
           </div>
 
-          <div className="space-y-4">
+          <div className="max-h-[360px] space-y-3 overflow-y-auto pr-2">
+            {visibleWorkflowItems.length === 0 ? (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                {financeLoading
+                  ? "Loading finance workflow..."
+                  : "No finance workflow items are available from live records yet."}
+              </div>
+            ) : null}
+
             {visibleWorkflowItems.map((item) => (
               <div
                 key={item.id}
-                className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                className="rounded-2xl border border-slate-200 bg-slate-50 p-3"
               >
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                   <div>
@@ -1550,11 +1588,19 @@ export default function FinanceDashboardPage() {
             <Users className="h-5 w-5 text-slate-500" />
           </div>
 
-          <div className="space-y-4">
+          <div className="max-h-[360px] space-y-3 overflow-y-auto pr-2">
+            {visibleCallRows.length === 0 ? (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                {financeLoading
+                  ? "Loading finance call targets..."
+                  : "No finance call rows are available from live records yet."}
+              </div>
+            ) : null}
+
             {visibleCallRows.map((row) => (
               <div
                 key={row.id}
-                className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                className="rounded-2xl border border-slate-200 bg-slate-50 p-3"
               >
                 <div className="flex items-center justify-between">
                   <p className="font-semibold text-slate-900">{row.caller}</p>
@@ -1601,12 +1647,20 @@ export default function FinanceDashboardPage() {
           <HandCoins className="h-5 w-5 text-slate-500" />
         </div>
 
-        <div className="space-y-4">
+        <div className="max-h-[420px] space-y-3 overflow-y-auto pr-2">
+          {contactRows.length === 0 ? (
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+              {financeLoading
+                ? "Loading finance contacts..."
+                : "No donor or prospect finance records are available yet."}
+            </div>
+          ) : null}
+
           {contactRows.map((contact) => (
             <div
               key={contact.id}
               onClick={() => setSelectedFinanceContactId(contact.id)}
-              className={`cursor-pointer rounded-2xl border p-4 ${
+              className={`cursor-pointer rounded-2xl border p-3 ${
                 selectedFinanceContactId === contact.id
                   ? "border-slate-900 bg-slate-100"
                   : "border-slate-200 bg-white hover:bg-slate-50"

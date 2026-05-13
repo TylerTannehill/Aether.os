@@ -688,94 +688,91 @@ export default function FocusModePage() {
   }, [demoRole, demoDepartment]);
 
   const strategicPushes = useMemo<StrategicPush[]>(() => {
-    const pushes: StrategicPush[] = [];
-
-    if (demoRole === "admin") {
-      pushes.push({
-        id: "outreach-momentum",
-        title: "Reinforce Outreach Momentum",
-        type: "momentum",
-        bucket: "followUp",
-        lanes: ["outreach", "finance", "digital"],
-        trigger:
-          "Engagement is building while follow-up pressure is starting to concentrate.",
-        objective:
-          "Convert warm engagement into outcomes without losing responsiveness.",
-        actions: [
-          "Tighten follow-up loop",
-          "Convert pending pledges",
-          "Align digital signal",
-        ],
-      });
-
-      pushes.push({
-        id: "print-field-gap",
-        title: "Resolve Print → Field Delay",
+    const bucketConfigs: {
+      bucket: BucketKey;
+      label: string;
+      type: StrategicPushType;
+      items: any[];
+    }[] = [
+      {
+        bucket: "fixNow",
+        label: "Fix Now",
         type: "pressure",
+        items: scopedFocusBoard.fixNow ?? [],
+      },
+      {
+        bucket: "immediate",
+        label: "Immediate",
+        type: "pressure",
+        items: scopedFocusBoard.immediate ?? [],
+      },
+      {
+        bucket: "followUp",
+        label: "Follow-Up",
+        type: "momentum",
+        items: scopedFocusBoard.followUp ?? [],
+      },
+      {
         bucket: "routing",
-        lanes: ["print", "field"],
-        trigger:
-          "Print readiness is available while field deployment still looks exposed.",
-        objective:
-          "Close the timing gap between ready materials and field movement.",
-        actions: [
-          "Confirm delivery timing",
-          "Adjust turf assignment",
-          "Route deployment cleanly",
-        ],
-      });
+        label: "Routing",
+        type: "stabilization",
+        items: scopedFocusBoard.routing ?? [],
+      },
+      {
+        bucket: "owner",
+        label: "Owner",
+        type: "stabilization",
+        items: scopedFocusBoard.owner ?? [],
+      },
+      {
+        bucket: "pipeline",
+        label: "Pipeline",
+        type: "stabilization",
+        items: scopedFocusBoard.pipeline ?? [],
+      },
+    ];
 
-      pushes.push({
-        id: "finance-stability",
-        title: "Stabilize Finance Conversion",
-        type: "stabilization",
-        bucket: "immediate",
-        lanes: ["finance", "outreach"],
-        trigger:
-          "Pledge pressure and donor follow-through both need cleaner conversion.",
-        objective:
-          "Keep revenue movement clean while reducing finance drag.",
-        actions: [
-          "Work donor follow-up",
-          "Clear pledge backlog",
-          "Protect clean record flow",
-        ],
-      });
-    } else if (demoRole === "director") {
-      pushes.push({
-        id: `${demoDepartment}-lane-push`,
-        title: `Strengthen ${getFocusDepartmentLabel(demoDepartment)} Coordination`,
-        type: "stabilization",
-        bucket: "immediate",
-        lanes: demoDepartment === "outreach" ? ["outreach", "finance"] : [demoDepartment],
-        trigger:
-          demoDepartment === "outreach"
-            ? "Follow-up work and downstream conversion need tighter coordination."
-            : `${getFocusDepartmentLabel(demoDepartment)} work needs cleaner coordination inside the lane.`,
-        objective:
-          demoDepartment === "outreach"
-            ? "Keep engagement moving into the next useful action."
-            : `Tighten how ${getFocusDepartmentLabel(demoDepartment).toLowerCase()} work is getting worked right now.`,
-        actions:
-          demoDepartment === "outreach"
-            ? ["Tighten follow-up", "Clear finance handoff", "Keep contact flow moving"]
-            : ["Review top queue", "Clear exposed blockers", "Keep the lane moving"],
-      });
-    } else {
-      pushes.push({
-        id: `${demoDepartment}-operator-push`,
-        title: `Keep ${getFocusDepartmentLabel(demoDepartment)} Moving`,
-        type: "stabilization",
-        bucket: "immediate",
-        lanes: [demoDepartment],
-        trigger: "The lane needs clean follow-through more than broader visibility.",
-        objective: "Stay inside the next useful work and keep the queue moving.",
-        actions: ["Start with the top action", "Clear the next blocker", "Keep momentum clean"],
-      });
-    }
+    return bucketConfigs
+      .filter((config) => config.items.length > 0)
+      .slice(0, 3)
+      .map((config) => {
+        const topAction = config.items[0];
+        const lanes = Array.from(
+          new Set(
+            config.items
+              .map((item) => getFocusItemDepartment(item))
+              .filter((department): department is DemoDepartment =>
+                department !== "system"
+              )
+          )
+        );
 
-    return pushes.slice(0, 3);
-  }, [demoRole, demoDepartment]);
+        const scopedLanes = lanes.length > 0 ? lanes : [demoDepartment];
+
+        const topReason = getActionReasonLines(topAction)[0];
+        const actionTitles = config.items
+          .slice(0, 3)
+          .map((item) => String(item?.title || "Review live action"));
+
+        return {
+          id: `live-${config.bucket}`,
+          title: `${config.label} Push`,
+          type: config.type,
+          bucket: config.bucket,
+          lanes: scopedLanes,
+          trigger:
+            topReason ||
+            `${config.items.length} live ${config.label.toLowerCase()} action${
+              config.items.length === 1 ? "" : "s"
+            } available.`,
+          objective: `Clear ${config.items.length} live ${config.label.toLowerCase()} action${
+            config.items.length === 1 ? "" : "s"
+          } from the current Focus queue.`,
+          actions: actionTitles,
+        };
+      });
+  }, [scopedFocusBoard, demoDepartment]);
+
 
 
   const activePush = useMemo(() => {
@@ -1017,6 +1014,12 @@ export default function FocusModePage() {
           </div>
 
           <div className="grid gap-4 xl:grid-cols-3">
+            {strategicPushes.length === 0 ? (
+              <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-600 xl:col-span-3">
+                No strategic pushes are available from live Focus actions right now.
+              </div>
+            ) : null}
+
             {strategicPushes.map((push) => {
               const isActivePush = activePush?.id === push.id;
 

@@ -169,11 +169,56 @@ export type DashboardMetrics = {
   recentActivity: OutreachLog[];
   ownerSegments: OwnerSegment[];
 };
+export type AnalyticsDepartment =
+  | "outreach"
+  | "finance"
+  | "field"
+  | "digital"
+  | "print"
+  | "unknown";
+
+export type AnalyticsEvent = {
+  id: string;
+  organization_id?: string | null;
+  department?: AnalyticsDepartment | string | null;
+  source?: string | null;
+  platform?: string | null;
+  campaign_name?: string | null;
+  asset_name?: string | null;
+  metric_date?: string | null;
+  impressions?: number | null;
+  engagements?: number | null;
+  engagement?: number | null;
+  clicks?: number | null;
+  spend?: number | null;
+  sentiment_positive?: number | null;
+  positive_sentiment?: number | null;
+  sentiment_negative?: number | null;
+  negative_sentiment?: number | null;
+  sentiment_neutral?: number | null;
+  ctr?: number | null;
+  notes?: string | null;
+  raw_payload?: Record<string, unknown> | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+};
+
+export type DashboardAnalyticsSnapshot = {
+  events: AnalyticsEvent[];
+  digital: AnalyticsEvent[];
+  finance: AnalyticsEvent[];
+  field: AnalyticsEvent[];
+  print: AnalyticsEvent[];
+  outreach: AnalyticsEvent[];
+};
+
 export type DashboardData = {
   contacts: Contact[];
   lists: CampaignList[];
   logs: OutreachLog[];
   tasks: Task[];
+  analyticsEvents?: AnalyticsEvent[];
+  analyticsSnapshot?: DashboardAnalyticsSnapshot;
 };
 
 export type CreateTaskInput = {

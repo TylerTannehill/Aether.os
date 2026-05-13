@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/lib/supabase";
 import {
   ArrowRight,
   BadgeDollarSign,
@@ -30,78 +32,242 @@ type JackpotOpportunity = {
   contactHref: string;
 };
 
+type JackpotDbContact = {
+  id: string;
+  first_name?: string | null;
+  last_name?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  city?: string | null;
+  state?: string | null;
+  fec_match_status?: "matched" | "probable" | "unresolved" | "none" | null;
+  fec_confidence_score?: number | null;
+  fec_total_given?: number | null;
+  fec_last_donation_date?: string | null;
+  fec_recent_activity?: boolean | null;
+  fec_donor_tier?: "none" | "base" | "mid" | "major" | "maxed" | null;
+  jackpot_candidate?: boolean | null;
+  jackpot_anomaly_type?:
+    | "dormant_high_value_donor"
+    | "recent_external_giving"
+    | "high_value_unworked"
+    | "pledge_gap"
+    | "compliance_blocked"
+    | "none"
+    | null;
+  jackpot_reason?: string | null;
+  pledge_amount?: number | null;
+  donation_total?: number | null;
+  updated_at?: string | null;
+  created_at?: string | null;
+};
+
+
+
 const currency = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
   maximumFractionDigits: 0,
 });
 
-const jackpotOpportunities: JackpotOpportunity[] = [
-  {
-    id: "jackpot-1",
-    contactName: "Michael Ross",
-    opportunityScore: 94,
-    latentValue: 3200,
-    category: "pledge_conversion",
-    headline: "Pledge conversion risk is creating immediate opportunity.",
-    whySurfaced: [
-      "$3,200 pledge is still open.",
-      "Recent donor intent is already visible.",
-      "Conversion window is active enough to work now.",
-    ],
-    recommendedAction: "Call now and convert the pledge before it cools.",
-    suggestedAsk: "Confirm $3,200 pledge",
-    contactHref: "/dashboard/contacts",
-  },
-  {
-    id: "jackpot-2",
-    contactName: "Elaine Porter",
-    opportunityScore: 88,
-    latentValue: 6600,
-    category: "underworked_major",
-    headline: "Major donor capacity is visible but underworked.",
-    whySurfaced: [
-      "Giving capacity sits above major donor threshold.",
-      "No recent finance call activity is attached.",
-      "A timely touch could reopen donor momentum.",
-    ],
-    recommendedAction: "Route into the next finance call session.",
-    suggestedAsk: "Test $6,600 max-out path",
-    contactHref: "/dashboard/contacts",
-  },
-  {
-    id: "jackpot-3",
-    contactName: "Jordan Hayes",
-    opportunityScore: 81,
-    latentValue: 4200,
-    category: "hidden_capacity",
-    headline: "Hidden capacity signal should be worked before normal volume.",
-    whySurfaced: [
-      "External donor signal suggests higher capacity than current ask.",
-      "Contact has not been prioritized in finance flow yet.",
-      "Opportunity is stronger than routine call queue volume.",
-    ],
-    recommendedAction: "Open contact context and prepare a higher ask.",
-    suggestedAsk: "Prepare $4,200 ask",
-    contactHref: "/dashboard/contacts",
-  },
-  {
-    id: "jackpot-4",
-    contactName: "Priya Shah",
-    opportunityScore: 76,
-    latentValue: 2400,
-    category: "reengagement",
-    headline: "Dormant donor relationship may be ready for reactivation.",
-    whySurfaced: [
-      "Past giving indicates meaningful donor intent.",
-      "No recent follow-up is visible.",
-      "Reactivation could create a clean donor conversation.",
-    ],
-    recommendedAction: "Send to call session after top pledge and major donor work.",
-    suggestedAsk: "Reopen with $2,400 ask",
-    contactHref: "/dashboard/contacts",
-  },
-];
+async function getActiveOrganizationId() {
+  const response = await fetch("/api/auth/current-context", {
+    credentials: "include",
+  });
+
+  const payload = await response.json();
+
+  if (!response.ok) {
+    throw new Error(payload?.error || "Unable to resolve active campaign context.");
+  }
+
+  const organizationId =
+    payload?.organization?.id ||
+    payload?.membership?.organization_id ||
+    null;
+
+  if (!organizationId) {
+    throw new Error("No active campaign selected.");
+  }
+
+  return organizationId;
+}
+
+function contactName(contact: JackpotDbContact) {
+  const name = `${contact.first_name ?? ""} ${contact.last_name ?? ""}`.trim();
+  return name || contact.email || "Unnamed Contact";
+}
+
+function getLatentValue(contact: JackpotDbContact) {
+  const values = [
+    Number(contact.pledge_amount ?? 0),
+    Number(contact.fec_total_given ?? 0),
+    Number(contact.donation_total ?? 0),
+  ].filter((value) => Number.isFinite(value));
+
+  const bestValue = Math.max(0, ...values);
+
+  if (contact.fec_donor_tier === "maxed") return Math.max(bestValue, 6600);
+  if (contact.fec_donor_tier === "major") return Math.max(bestValue, 2500);
+  if (contact.fec_donor_tier === "mid") return Math.max(bestValue, 1000);
+  if (contact.fec_donor_tier === "base") return Math.max(bestValue, 500);
+
+  return bestValue;
+}
+
+function getJackpotCategory(
+  contact: JackpotDbContact
+): JackpotOpportunity["category"] {
+  if (contact.jackpot_anomaly_type === "pledge_gap" || Number(contact.pledge_amount ?? 0) > 0) {
+    return "pledge_conversion";
+  }
+
+  if (
+    contact.jackpot_anomaly_type === "high_value_unworked" ||
+    contact.fec_donor_tier === "major" ||
+    contact.fec_donor_tier === "maxed"
+  ) {
+    return "underworked_major";
+  }
+
+  if (
+    contact.jackpot_anomaly_type === "recent_external_giving" ||
+    contact.fec_recent_activity
+  ) {
+    return "hidden_capacity";
+  }
+
+  return "reengagement";
+}
+
+function getOpportunityScore(contact: JackpotDbContact) {
+  let score = 45;
+
+  if (contact.jackpot_candidate) score += 25;
+  if (contact.fec_match_status === "matched") score += 10;
+  if (contact.fec_match_status === "probable") score += 6;
+  if (contact.fec_recent_activity) score += 10;
+  if (Number(contact.pledge_amount ?? 0) > 0) score += 12;
+
+  const latentValue = getLatentValue(contact);
+
+  if (latentValue >= 6600) score += 12;
+  else if (latentValue >= 2500) score += 9;
+  else if (latentValue >= 1000) score += 6;
+  else if (latentValue >= 500) score += 3;
+
+  const confidence = Number(contact.fec_confidence_score ?? 0);
+  if (confidence > 0) {
+    score += Math.min(10, Math.round(confidence / 10));
+  }
+
+  return Math.min(99, Math.max(1, score));
+}
+
+function getHeadline(contact: JackpotDbContact) {
+  const category = getJackpotCategory(contact);
+
+  if (category === "pledge_conversion") {
+    return "Pledge conversion risk is creating immediate opportunity.";
+  }
+
+  if (category === "underworked_major") {
+    return "Major donor capacity is visible but underworked.";
+  }
+
+  if (category === "hidden_capacity") {
+    return "Hidden capacity signal should be worked before normal volume.";
+  }
+
+  return "Dormant donor relationship may be ready for reactivation.";
+}
+
+function getSuggestedAsk(contact: JackpotDbContact) {
+  const latentValue = getLatentValue(contact);
+
+  if (Number(contact.pledge_amount ?? 0) > 0) {
+    return `Confirm ${currency.format(Number(contact.pledge_amount ?? 0))} pledge`;
+  }
+
+  if (contact.fec_donor_tier === "maxed") {
+    return "Protect max-out relationship";
+  }
+
+  if (latentValue >= 6600) return "Test $6,600 max-out path";
+  if (latentValue >= 2500) return `Prepare ${currency.format(latentValue)} ask`;
+  if (latentValue >= 500) return `Reopen with ${currency.format(Math.max(latentValue, 1000))} ask`;
+
+  return "Prepare starter finance ask";
+}
+
+function buildWhySurfaced(contact: JackpotDbContact) {
+  const reasons: string[] = [];
+
+  if (contact.jackpot_reason) {
+    reasons.push(contact.jackpot_reason);
+  }
+
+  if (Number(contact.pledge_amount ?? 0) > 0) {
+    reasons.push(`${currency.format(Number(contact.pledge_amount ?? 0))} pledge is still open.`);
+  }
+
+  if (contact.fec_donor_tier && contact.fec_donor_tier !== "none") {
+    reasons.push(`${contact.fec_donor_tier.replace("_", " ")} donor tier is visible.`);
+  }
+
+  if (contact.fec_recent_activity) {
+    reasons.push("Recent FEC activity suggests the donor is warm.");
+  }
+
+  if (contact.fec_match_status === "matched" || contact.fec_match_status === "probable") {
+    reasons.push(`FEC match status is ${contact.fec_match_status}.`);
+  }
+
+  if (Number(contact.fec_total_given ?? 0) > 0) {
+    reasons.push(`${currency.format(Number(contact.fec_total_given ?? 0))} in FEC giving is visible.`);
+  }
+
+  if (!reasons.length) {
+    reasons.push("Contact has finance signal fields available for review.");
+  }
+
+  return reasons.slice(0, 3);
+}
+
+function buildRecommendedAction(contact: JackpotDbContact) {
+  const category = getJackpotCategory(contact);
+
+  if (category === "pledge_conversion") {
+    return "Call now and convert the pledge before it cools.";
+  }
+
+  if (category === "underworked_major") {
+    return "Route into the next finance call session.";
+  }
+
+  if (category === "hidden_capacity") {
+    return "Open contact context and prepare a higher ask.";
+  }
+
+  return "Send to call session after top pledge and major donor work.";
+}
+
+function buildOpportunity(contact: JackpotDbContact): JackpotOpportunity {
+  const latentValue = getLatentValue(contact);
+
+  return {
+    id: contact.id,
+    contactName: contactName(contact),
+    opportunityScore: getOpportunityScore(contact),
+    latentValue,
+    category: getJackpotCategory(contact),
+    headline: getHeadline(contact),
+    whySurfaced: buildWhySurfaced(contact),
+    recommendedAction: buildRecommendedAction(contact),
+    suggestedAsk: getSuggestedAsk(contact),
+    contactHref: `/dashboard/contacts/${contact.id}`,
+  };
+}
 
 function categoryLabel(category: JackpotOpportunity["category"]) {
   switch (category) {
@@ -138,15 +304,94 @@ function scoreTone(score: number) {
 }
 
 export default function FinanceJackpotQueuePage() {
-  const totalLatentValue = jackpotOpportunities.reduce(
-    (sum, opportunity) => sum + opportunity.latentValue,
-    0
-  );
+  const [jackpotOpportunities, setJackpotOpportunities] = useState<
+    JackpotOpportunity[]
+  >([]);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
 
-  const topOpportunity = jackpotOpportunities[0];
-  const highPriorityCount = jackpotOpportunities.filter(
-    (opportunity) => opportunity.opportunityScore >= 85
-  ).length;
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadJackpotOpportunities() {
+      try {
+        setLoading(true);
+        setMessage("");
+
+        const organizationId = await getActiveOrganizationId();
+
+        const { data, error } = await supabase
+          .from("contacts")
+          .select(
+            "id, first_name, last_name, email, phone, city, state, fec_match_status, fec_confidence_score, fec_total_given, fec_last_donation_date, fec_recent_activity, fec_donor_tier, jackpot_candidate, jackpot_anomaly_type, jackpot_reason, pledge_amount, donation_total, updated_at, created_at"
+          )
+          .eq("organization_id", organizationId)
+          .or(
+            "jackpot_candidate.eq.true,jackpot_anomaly_type.neq.none,fec_recent_activity.eq.true,fec_total_given.gt.0,pledge_amount.gt.0,donation_total.gt.0"
+          )
+          .limit(100);
+
+        if (error) {
+          throw error;
+        }
+
+        if (!mounted) return;
+
+        const opportunities = ((data as JackpotDbContact[] | null) ?? [])
+          .map(buildOpportunity)
+          .filter((opportunity) => opportunity.latentValue > 0 || opportunity.opportunityScore >= 60)
+          .sort((a, b) => {
+            const scoreDifference = b.opportunityScore - a.opportunityScore;
+            if (scoreDifference !== 0) return scoreDifference;
+            return b.latentValue - a.latentValue;
+          });
+
+        setJackpotOpportunities(opportunities);
+      } catch (error: any) {
+        console.error("Failed to load jackpot opportunities:", error);
+
+        if (!mounted) return;
+
+        setJackpotOpportunities([]);
+        setMessage(error?.message || "Failed to load jackpot opportunities.");
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadJackpotOpportunities();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const totalLatentValue = useMemo(() => {
+    return jackpotOpportunities.reduce(
+      (sum, opportunity) => sum + opportunity.latentValue,
+      0
+    );
+  }, [jackpotOpportunities]);
+
+  const topOpportunity = jackpotOpportunities[0] ?? null;
+
+  const highPriorityCount = useMemo(() => {
+    return jackpotOpportunities.filter(
+      (opportunity) => opportunity.opportunityScore >= 85
+    ).length;
+  }, [jackpotOpportunities]);
+
+  if (loading) {
+    return (
+      <div className="space-y-8">
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <p className="text-sm text-slate-600">Loading jackpot queue...</p>
+        </section>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -190,6 +435,12 @@ export default function FinanceJackpotQueuePage() {
         </div>
       </section>
 
+      {message ? (
+        <section className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+          {message}
+        </section>
+      ) : null}
+
       <section className="grid gap-4 md:grid-cols-3">
         <div className="rounded-3xl border border-amber-300 bg-amber-50 p-5 shadow-sm">
           <div className="flex items-center justify-between">
@@ -225,10 +476,10 @@ export default function FinanceJackpotQueuePage() {
             <PhoneCall className="h-5 w-5 text-emerald-700" />
           </div>
           <p className="mt-3 text-lg font-semibold text-emerald-950">
-            {topOpportunity.contactName}
+            {topOpportunity?.contactName || "No opportunity surfaced"}
           </p>
           <p className="mt-2 text-sm text-emerald-900/80">
-            {topOpportunity.suggestedAsk}
+            {topOpportunity?.suggestedAsk || "Ingest donor or FEC signals to activate Jackpot."}
           </p>
         </div>
       </section>
@@ -241,18 +492,47 @@ export default function FinanceJackpotQueuePage() {
               Abe Jackpot Read
             </p>
             <h2 className="mt-2 text-2xl font-semibold text-slate-900">
-              Jackpot sees money sitting between signal and action.
+              {jackpotOpportunities.length > 0
+                ? "Jackpot sees money sitting between signal and action."
+                : "Jackpot is waiting for live donor signal."}
             </h2>
             <p className="mt-2 max-w-4xl text-sm text-slate-700">
-              Work the top pledge conversion first, then route underworked major
-              donors into the finance call session. Compliance remains protected
-              in its own lane; this queue is for opportunity-generating pressure.
+              {jackpotOpportunities.length > 0
+                ? "Work the top pledge conversion first, then route underworked major donors into the finance call session. Compliance remains protected in its own lane; this queue is for opportunity-generating pressure."
+                : "No live jackpot opportunities are available yet. Import contacts, FEC matches, pledge records, or donor activity to activate this queue."}
             </p>
           </div>
         </div>
       </section>
 
       <section className="grid gap-5">
+        {jackpotOpportunities.length === 0 ? (
+          <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
+            <p className="text-lg font-semibold text-slate-900">
+              No live jackpot opportunities yet.
+            </p>
+            <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-600">
+              Jackpot will populate when contacts carry FEC totals, donor tiers,
+              jackpot anomaly flags, pledges, or other finance signal fields.
+            </p>
+            <div className="mt-5 flex justify-center gap-3">
+              <Link
+                href="/dashboard/contacts/import"
+                className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
+              >
+                Import Contacts
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
+                href="/dashboard/finance"
+                className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+              >
+                Back to Finance
+              </Link>
+            </div>
+          </div>
+        ) : null}
+
         {jackpotOpportunities.map((opportunity, index) => (
           <div
             key={opportunity.id}
@@ -356,12 +636,14 @@ export default function FinanceJackpotQueuePage() {
               Jackpot Pattern Watch
             </p>
             <h2 className="mt-2 text-2xl font-semibold">
-              The strongest pattern is conversion before discovery.
+              {jackpotOpportunities.length > 0
+                ? "The strongest pattern is conversion before discovery."
+                : "No jackpot pattern is active yet."}
             </h2>
             <p className="mt-2 max-w-3xl text-sm text-slate-300">
-              Work active pledge conversion first, then underworked major donor
-              capacity, then hidden capacity and re-engagement. The queue should
-              protect focus by keeping money-moving signals above routine volume.
+              {jackpotOpportunities.length > 0
+                ? "Work active pledge conversion first, then underworked major donor capacity, then hidden capacity and re-engagement. The queue should protect focus by keeping money-moving signals above routine volume."
+                : "Once donor intelligence is ingested, this section will summarize the strongest live money-moving pattern."}
             </p>
           </div>
 
