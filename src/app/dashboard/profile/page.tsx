@@ -9,6 +9,7 @@ import {
   Bell,
   Bot,
   Briefcase,
+  ChevronDown,
   Clock3,
   Flame,
   ListChecks,
@@ -123,7 +124,7 @@ function buildLaneMeta(department: string): AbeProfileLane {
       label: "Finance",
       detail: "Donor follow-through",
       href: "/dashboard/finance/focus",
-      tone: "border-emerald-200 bg-emerald-50 text-emerald-900",
+      tone: "border-slate-200 bg-white text-slate-900",
     };
   }
 
@@ -133,7 +134,7 @@ function buildLaneMeta(department: string): AbeProfileLane {
       label: "Field",
       detail: "Coverage and follow-up",
       href: "/dashboard/field/focus",
-      tone: "border-sky-200 bg-sky-50 text-sky-900",
+      tone: "border-slate-200 bg-white text-slate-900",
     };
   }
 
@@ -143,7 +144,7 @@ function buildLaneMeta(department: string): AbeProfileLane {
       label: "Digital",
       detail: "Content and conversation shaping",
       href: "/dashboard/digital/focus",
-      tone: "border-purple-200 bg-purple-50 text-purple-900",
+      tone: "border-slate-200 bg-white text-slate-900",
     };
   }
 
@@ -153,7 +154,7 @@ function buildLaneMeta(department: string): AbeProfileLane {
       label: "Print",
       detail: "Approvals and delivery",
       href: "/dashboard/print/focus",
-      tone: "border-amber-200 bg-amber-50 text-amber-900",
+      tone: "border-slate-200 bg-white text-slate-900",
     };
   }
 
@@ -162,7 +163,7 @@ function buildLaneMeta(department: string): AbeProfileLane {
     label: "Outreach",
     detail: "Contact and list movement",
     href: "/dashboard/outreach/focus",
-    tone: "border-slate-200 bg-slate-50 text-slate-900",
+    tone: "border-slate-200 bg-white text-slate-900",
   };
 }
 
@@ -407,7 +408,7 @@ export default function DashboardProfilePage() {
         lane: "Finance",
         summary: "Primary donor call and pledge conversion lane tied to Finance Focus.",
         href: "/dashboard/finance/focus",
-        tone: "border-emerald-200 bg-emerald-50 text-emerald-900",
+        tone: "border-slate-200 bg-white text-slate-900",
       },
       {
         key: "field",
@@ -416,7 +417,7 @@ export default function DashboardProfilePage() {
         lane: "Field",
         summary: "Coverage and follow-up work currently shaping Field Focus.",
         href: "/dashboard/field/focus",
-        tone: "border-sky-200 bg-sky-50 text-sky-900",
+        tone: "border-slate-200 bg-white text-slate-900",
       },
       {
         key: "digital",
@@ -425,7 +426,7 @@ export default function DashboardProfilePage() {
         lane: "Digital",
         summary: "Content creation and conversation-shaping work available in Digital Focus.",
         href: "/dashboard/digital/focus",
-        tone: "border-purple-200 bg-purple-50 text-purple-900",
+        tone: "border-slate-200 bg-white text-slate-900",
       },
       {
         key: "print",
@@ -434,7 +435,7 @@ export default function DashboardProfilePage() {
         lane: "Print",
         summary: "Print approvals and delivery checks supporting downstream execution.",
         href: "/dashboard/print/focus",
-        tone: "border-amber-200 bg-amber-50 text-amber-900",
+        tone: "border-slate-200 bg-white text-slate-900",
       },
     ];
 
@@ -454,7 +455,7 @@ export default function DashboardProfilePage() {
         lane: "Outreach",
         summary: "Shared contact and list execution layer available across roles.",
         href: "/dashboard/outreach/focus",
-        tone: "border-emerald-200 bg-emerald-50 text-emerald-900",
+        tone: "border-slate-200 bg-white text-slate-900",
       },
       {
         key: "lists",
@@ -463,7 +464,7 @@ export default function DashboardProfilePage() {
         lane: "Routing",
         summary: "Lists and segments currently feeding contact, field, and finance execution.",
         href: "/dashboard/lists",
-        tone: "border-sky-200 bg-sky-50 text-sky-900",
+        tone: "border-slate-200 bg-white text-slate-900",
       },
       {
         key: "cleanup",
@@ -472,7 +473,7 @@ export default function DashboardProfilePage() {
         lane: "Cleanup",
         summary: "Data quality segment that keeps execution lanes clean.",
         href: "/dashboard/lists?name=Missing%20Phone%20Numbers",
-        tone: "border-amber-200 bg-amber-50 text-amber-900",
+        tone: "border-slate-200 bg-white text-slate-900",
       },
     ];
   }, [activeDepartments]);
@@ -502,15 +503,15 @@ export default function DashboardProfilePage() {
     return [
       {
         label: "First 50 Actions",
-        tone: "border-amber-200 bg-amber-50 text-amber-900",
+        tone: "border-slate-200 bg-white text-slate-900",
       },
       {
         label: "Consistent Operator",
-        tone: "border-emerald-200 bg-emerald-50 text-emerald-900",
+        tone: "border-slate-200 bg-white text-slate-900",
       },
       {
         label: "Outreach Driver",
-        tone: "border-sky-200 bg-sky-50 text-sky-900",
+        tone: "border-slate-200 bg-white text-slate-900",
       },
     ];
   }, []);
@@ -600,19 +601,17 @@ export default function DashboardProfilePage() {
         label: "Open Focus Mode",
         href: "/dashboard/focus",
         tone:
-          "border-amber-200 bg-amber-50 text-amber-900 hover:bg-amber-100",
+          "border-slate-200 bg-white text-slate-700 hover:bg-slate-50",
       },
       {
         label: "Go to Outreach",
         href: "/dashboard/outreach",
-        tone:
-          "border-emerald-200 bg-emerald-50 text-emerald-900 hover:bg-emerald-100",
+        tone: "border-slate-200 bg-white text-slate-700 hover:bg-slate-50",
       },
       {
         label: "Open Admin Control",
         href: "/dashboard/admin",
-        tone:
-          "border-indigo-200 bg-indigo-50 text-indigo-900 hover:bg-indigo-100",
+        tone: "border-slate-200 bg-white text-slate-700 hover:bg-slate-50",
       },
       {
         label: "Back to Dashboard",
@@ -630,27 +629,27 @@ export default function DashboardProfilePage() {
         </section>
       ) : null}
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
+      <section className="rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-6 shadow-sm lg:p-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
           <div className="flex items-start gap-5">
-            <div className="flex h-20 w-20 items-center justify-center rounded-3xl border border-slate-200 bg-slate-100 text-2xl font-semibold text-slate-700">
+            <div className="flex h-20 w-20 items-center justify-center rounded-3xl border border-slate-700 bg-slate-800 text-2xl font-semibold text-white">
               {identity.initials}
             </div>
 
             <div className="space-y-4">
-              <div className="flex items-center gap-2 text-sm text-slate-500">
+              <div className="flex items-center gap-2 text-sm text-slate-300">
                 <UserCircle2 className="h-4 w-4" />
                 Operator profile
               </div>
 
               <div className="space-y-1">
-                <h1 className="text-3xl font-semibold tracking-tight text-slate-900 lg:text-4xl">
+                <h1 className="text-3xl font-semibold tracking-tight text-white lg:text-4xl">
                   {identity.name}
                 </h1>
-                <p className="text-sm text-slate-600 lg:text-base">
+                <p className="text-sm text-slate-300 lg:text-base">
                   {identity.role} • {identity.department}
                 </p>
-                <p className="text-sm text-slate-500">{identity.tagline}</p>
+                <p className="text-sm text-slate-400">{identity.tagline}</p>
                 {identity.email ? (
                   <p className="text-xs text-slate-400">{identity.email}</p>
                 ) : null}
@@ -673,7 +672,7 @@ export default function DashboardProfilePage() {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+              <div className="rounded-2xl border border-slate-700 bg-slate-900/50 px-4 py-3">
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
                   Assigned roles
                 </p>
@@ -715,20 +714,20 @@ export default function DashboardProfilePage() {
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+            <div className="rounded-2xl border border-slate-700 bg-slate-900/40 px-4 py-3">
               <p className="text-xs uppercase tracking-wide text-slate-500">
                 Current mode
               </p>
-              <p className="mt-1 text-sm font-semibold text-slate-900">
+              <p className="mt-1 text-sm font-semibold text-white">
                 {operatorStats.currentMode}
               </p>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+            <div className="rounded-2xl border border-slate-700 bg-slate-900/40 px-4 py-3">
               <p className="text-xs uppercase tracking-wide text-slate-500">
                 Last active
               </p>
-              <p className="mt-1 text-sm font-semibold text-slate-900">
+              <p className="mt-1 text-sm font-semibold text-white">
                 {operatorStats.lastActive}
               </p>
             </div>
@@ -748,8 +747,8 @@ export default function DashboardProfilePage() {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4">
-            <p className="text-xs uppercase tracking-wide text-sky-800">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4">
+            <p className="text-xs uppercase tracking-wide text-slate-500">
               Outreach touches
             </p>
             <p className="mt-2 text-3xl font-semibold text-slate-900">
@@ -760,8 +759,8 @@ export default function DashboardProfilePage() {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
-            <p className="text-xs uppercase tracking-wide text-amber-800">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4">
+            <p className="text-xs uppercase tracking-wide text-slate-500">
               Tasks closed
             </p>
             <p className="mt-2 text-3xl font-semibold text-slate-900">
@@ -773,7 +772,7 @@ export default function DashboardProfilePage() {
           </div>
         </div>
 
-        <div className="mt-6 rounded-3xl border border-amber-200 bg-gradient-to-br from-amber-50 via-white to-sky-50 p-5 shadow-sm">
+        <div className="mt-6 rounded-3xl border border-amber-200 bg-amber-50 p-5 shadow-sm">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-amber-800">
@@ -799,10 +798,10 @@ export default function DashboardProfilePage() {
           </div>
 
 
-          <div className="mt-6 rounded-3xl border border-indigo-200 bg-indigo-50 p-5 shadow-sm">
+          <div className="mt-6 rounded-3xl border border-violet-200 bg-violet-50/40 p-5 shadow-sm">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
               <div>
-                <div className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-indigo-800">
+                <div className="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-violet-800">
                   <Sparkles className="h-3.5 w-3.5" />
                   ABE-Aligned Read
                 </div>
@@ -816,7 +815,7 @@ export default function DashboardProfilePage() {
 
               <Link
                 href={abeProfileRead.primary.href}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-indigo-300 bg-white px-4 py-3 text-sm font-medium text-indigo-900 transition hover:bg-indigo-100"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
               >
                 Open Primary Lane
                 <ArrowRight className="h-4 w-4" />
@@ -861,15 +860,15 @@ export default function DashboardProfilePage() {
               </Link>
             </div>
 
-            <div className="mt-4 rounded-2xl border border-indigo-200 bg-white px-4 py-3 text-sm text-indigo-950">
+            <div className="mt-4 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700">
               <span className="font-semibold">Why now:</span> {abeProfileRead.whyNow}
             </div>
           </div>
 
-        <div className="mt-6 rounded-3xl border border-sky-200 bg-sky-50 p-5 shadow-sm">
+        <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50/60 p-5 shadow-sm">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-sky-800">
+              <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-slate-600">
                 <ListChecks className="h-3.5 w-3.5" />
                 Active Work Context
               </div>
@@ -883,7 +882,7 @@ export default function DashboardProfilePage() {
 
             <Link
               href="/dashboard/lists"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-sky-300 bg-white px-4 py-3 text-sm font-medium text-sky-900 transition hover:bg-sky-100"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
             >
               Review Lists
               <ArrowRight className="h-4 w-4" />
@@ -913,16 +912,44 @@ export default function DashboardProfilePage() {
         </div>        </div>
       </section>
 
-      <section className="grid gap-4 xl:grid-cols-2">
-        <section className="rounded-3xl border border-violet-200 bg-violet-50 p-6 shadow-sm">
-          <div className="flex items-center gap-2 text-sm text-violet-800">
-            <Shield className="h-4 w-4" />
-            Org + role
+      <section className="space-y-4">
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex items-center gap-2 text-sm text-slate-500">
+            <Briefcase className="h-4 w-4" />
+            Quick links
           </div>
+
+          <div className="mt-5 grid gap-3 md:grid-cols-2">
+            {quickLinks.map((item) => (
+              <Link
+                key={item.label}
+                href={item.href}
+                className={`inline-flex items-center justify-between rounded-2xl border px-4 py-3 text-sm font-medium transition ${item.tone}`}
+              >
+                {item.label}
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        <details className="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 text-sm text-slate-500">
+                <Shield className="h-4 w-4" />
+                Organization Context
+              </div>
+              <p className="mt-2 text-sm text-slate-500">
+                Role, access, reporting, and visibility details.
+              </p>
+            </div>
+            <ChevronDown className="h-5 w-5 text-slate-500 transition group-open:rotate-180" />
+          </summary>
 
           <div className="mt-5 grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
             <div className="space-y-4">
-              <div className="rounded-2xl border border-violet-200 bg-white p-4">
+              <div className="rounded-2xl border border-slate-200 bg-white p-4">
                 <p className="text-xs uppercase tracking-wide text-slate-500">
                   Organization
                 </p>
@@ -931,7 +958,7 @@ export default function DashboardProfilePage() {
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-violet-200 bg-white p-4">
+              <div className="rounded-2xl border border-slate-200 bg-white p-4">
                 <p className="text-xs uppercase tracking-wide text-slate-500">
                   Role
                 </p>
@@ -940,7 +967,7 @@ export default function DashboardProfilePage() {
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-violet-200 bg-white p-4">
+              <div className="rounded-2xl border border-slate-200 bg-white p-4">
                 <p className="text-xs uppercase tracking-wide text-slate-500">
                   Department
                 </p>
@@ -949,7 +976,7 @@ export default function DashboardProfilePage() {
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-violet-200 bg-white p-4">
+              <div className="rounded-2xl border border-slate-200 bg-white p-4">
                 <p className="text-xs uppercase tracking-wide text-slate-500">
                   Title
                 </p>
@@ -958,7 +985,7 @@ export default function DashboardProfilePage() {
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-violet-200 bg-white p-4">
+              <div className="rounded-2xl border border-slate-200 bg-white p-4">
                 <p className="text-xs uppercase tracking-wide text-slate-500">
                   Reports to
                 </p>
@@ -971,7 +998,7 @@ export default function DashboardProfilePage() {
               </div>
 
               {orgContext.manages.length > 0 ? (
-                <div className="rounded-2xl border border-violet-200 bg-white p-4">
+                <div className="rounded-2xl border border-slate-200 bg-white p-4">
                   <p className="text-xs uppercase tracking-wide text-slate-500">
                     Manages
                   </p>
@@ -979,7 +1006,7 @@ export default function DashboardProfilePage() {
                     {orgContext.manages.map((person) => (
                       <div
                         key={person}
-                        className="rounded-full border border-violet-200 bg-violet-100 px-3 py-1 text-xs font-medium text-violet-800"
+                        className="rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700"
                       >
                         {person}
                       </div>
@@ -990,7 +1017,7 @@ export default function DashboardProfilePage() {
             </div>
 
             <div className="space-y-4">
-              <div className="rounded-2xl border border-violet-200 bg-white p-4">
+              <div className="rounded-2xl border border-slate-200 bg-white p-4">
                 <p className="text-xs uppercase tracking-wide text-slate-500">
                   Access summary
                 </p>
@@ -1006,7 +1033,7 @@ export default function DashboardProfilePage() {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-violet-200 bg-white p-4">
+              <div className="rounded-2xl border border-slate-200 bg-white p-4">
                 <p className="text-xs uppercase tracking-wide text-slate-500">
                   Visibility model
                 </p>
@@ -1015,7 +1042,7 @@ export default function DashboardProfilePage() {
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-violet-200 bg-white p-4">
+              <div className="rounded-2xl border border-slate-200 bg-white p-4">
                 <p className="text-xs uppercase tracking-wide text-slate-500">
                   Future communication layer
                 </p>
@@ -1025,13 +1052,21 @@ export default function DashboardProfilePage() {
               </div>
             </div>
           </div>
-        </section>
+        </details>
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center gap-2 text-sm text-slate-500">
-            <Bell className="h-4 w-4" />
-            Preferences
-          </div>
+        <details className="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 text-sm text-slate-500">
+                <Bell className="h-4 w-4" />
+                Operator Preferences
+              </div>
+              <p className="mt-2 text-sm text-slate-500">
+                Notifications, default landing behavior, and briefing settings.
+              </p>
+            </div>
+            <ChevronDown className="h-5 w-5 text-slate-500 transition group-open:rotate-180" />
+          </summary>
 
           <div className="mt-5 space-y-4">
             <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 p-4">
@@ -1113,17 +1148,23 @@ export default function DashboardProfilePage() {
               </p>
             </div>
           </div>
-        </section>
-      </section>
+        </details>
 
-      <section className="grid gap-4 xl:grid-cols-3">
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm xl:col-span-1">
-          <div className="flex items-center gap-2 text-sm text-slate-500">
-            <Activity className="h-4 w-4" />
-            Today’s momentum
-          </div>
+        <details className="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 text-sm text-slate-500">
+                <Activity className="h-4 w-4" />
+                Execution Metrics
+              </div>
+              <p className="mt-2 text-sm text-slate-500">
+                Open work, blocked items, recent execution history, and cadence.
+              </p>
+            </div>
+            <ChevronDown className="h-5 w-5 text-slate-500 transition group-open:rotate-180" />
+          </summary>
 
-          <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
               <p className="text-xs uppercase tracking-wide text-slate-500">
                 Open items
@@ -1133,7 +1174,7 @@ export default function DashboardProfilePage() {
               </p>
             </div>
 
-            <div className="rounded-2xl border border-rose-200 bg-slate-50 p-4">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
               <p className="text-xs uppercase tracking-wide text-slate-500">
                 Blocked items
               </p>
@@ -1141,16 +1182,7 @@ export default function DashboardProfilePage() {
                 {operatorStats.blockedItems}
               </p>
             </div>
-          </div>
-        </section>
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm xl:col-span-1">
-          <div className="flex items-center gap-2 text-sm text-slate-500">
-            <Activity className="h-4 w-4" />
-            Execution history
-          </div>
-
-          <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
             {executionHistory.map((item) => (
               <div
                 key={item.label}
@@ -1166,30 +1198,9 @@ export default function DashboardProfilePage() {
               </div>
             ))}
           </div>
-        </section>
+        </details>
 
-        <section className="rounded-3xl border border-sky-200 bg-sky-50 p-6 shadow-sm xl:col-span-1">
-          <div className="flex items-center gap-2 text-sm text-sky-800">
-            <Briefcase className="h-4 w-4" />
-            Quick links
-          </div>
-
-          <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-            {quickLinks.map((item) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                className={`inline-flex items-center justify-between rounded-2xl border px-4 py-3 text-sm font-medium transition ${item.tone}`}
-              >
-                {item.label}
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            ))}
-          </div>
-        </section>
-      </section>
-
-      <section className="rounded-3xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm">
+      <section className="hidden" aria-hidden="true">
         <div className="flex items-center gap-2 text-sm text-emerald-800">
           <Clock3 className="h-4 w-4" />
           Recent activity
@@ -1205,6 +1216,7 @@ export default function DashboardProfilePage() {
             </div>
           ))}
         </div>
+      </section>
       </section>
     </div>
   );

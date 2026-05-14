@@ -2,6 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
+import {
+  Activity,
+  MessageSquare,
+  Radio,
+  Send,
+  Sparkles,
+} from "lucide-react";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -157,7 +164,7 @@ export default function ChatPage() {
   if (loading) {
     return (
       <div className="rounded-3xl border border-slate-200 bg-white p-6 text-sm text-slate-500">
-        Loading campaign chat...
+        Loading campaign coordination...
       </div>
     );
   }
@@ -171,42 +178,111 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="flex h-[70vh] flex-col rounded-3xl border border-slate-200 bg-white">
-      <div className="border-b border-slate-200 p-4">
-        <h1 className="text-lg font-semibold">Internal Chat</h1>
-        <p className="text-xs text-slate-500">Live • Campaign scoped • ABE aware</p>
-      </div>
-
-      <div className="flex-1 space-y-3 overflow-y-auto p-4">
-        {messages.map((m) => (
-          <div
-            key={m.id}
-            className={`rounded-xl p-3 ${
-              m.system ? "border border-yellow-200 bg-yellow-50" : "bg-slate-50"
-            }`}
-          >
-            <div className="text-xs text-slate-500">
-              {m.sender_name} • {m.sender_role}
+    <div className="flex h-[78vh] flex-col overflow-hidden rounded-3xl border border-slate-200 bg-slate-50 shadow-sm">
+      <div className="border-b border-slate-800 bg-slate-950 px-6 py-5 text-white">
+        <div className="flex items-center justify-between gap-4">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-slate-400">
+              <Radio className="h-3.5 w-3.5" />
+              Internal coordination lane
             </div>
-            <div className="text-sm text-slate-900">{m.message}</div>
+
+            <div>
+              <h1 className="text-2xl font-semibold tracking-tight">
+                Campaign Coordination
+              </h1>
+
+              <p className="mt-1 text-sm text-slate-300">
+                Lightweight operational messaging across your active campaign.
+              </p>
+            </div>
           </div>
-        ))}
-        <div ref={bottomRef} />
+
+          <div className="hidden items-center gap-3 rounded-2xl border border-slate-800 bg-slate-900 px-4 py-3 lg:flex">
+            <Activity className="h-4 w-4 text-emerald-400" />
+
+            <div className="text-xs">
+              <div className="font-medium text-white">
+                Coordination Active
+              </div>
+              <div className="text-slate-400">
+                Live org messaging enabled
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="flex gap-2 border-t border-slate-200 p-3">
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          className="flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm"
-          placeholder="Send a message..."
-        />
-        <button
-          onClick={sendMessage}
-          className="rounded-xl bg-black px-4 text-sm text-white"
-        >
-          Send
-        </button>
+      <div className="border-b border-slate-200 bg-white px-6 py-4">
+        <div className="flex flex-wrap items-center gap-3 text-sm">
+          <div className="rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-slate-700">
+            {user.role}
+          </div>
+
+          <div className="rounded-full border border-fuchsia-200 bg-fuchsia-50 px-3 py-1 text-fuchsia-700">
+            ABE aware
+          </div>
+
+          <div className="rounded-full border border-slate-200 bg-white px-3 py-1 text-slate-600">
+            Live coordination
+          </div>
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto bg-slate-100/60 px-5 py-5">
+        <div className="mx-auto flex max-w-5xl flex-col gap-4">
+          {messages.map((m) => (
+            <div
+              key={m.id}
+              className={`rounded-2xl border p-4 shadow-sm transition ${
+                m.system
+                  ? "border-fuchsia-200 bg-fuchsia-50"
+                  : "border-slate-200 bg-white"
+              }`}
+            >
+              <div className="mb-2 flex items-center gap-2">
+                {m.system ? (
+                  <Sparkles className="h-4 w-4 text-fuchsia-600" />
+                ) : (
+                  <MessageSquare className="h-4 w-4 text-slate-400" />
+                )}
+
+                <div className="text-xs font-medium uppercase tracking-[0.16em] text-slate-500">
+                  {m.sender_name} • {m.sender_role}
+                </div>
+              </div>
+
+              <div
+                className={`text-sm leading-6 ${
+                  m.system ? "text-fuchsia-950" : "text-slate-800"
+                }`}
+              >
+                {m.message}
+              </div>
+            </div>
+          ))}
+
+          <div ref={bottomRef} />
+        </div>
+      </div>
+
+      <div className="border-t border-slate-200 bg-white px-5 py-4">
+        <div className="mx-auto flex max-w-5xl gap-3">
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            className="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:bg-white"
+            placeholder="Coordinate with your campaign team..."
+          />
+
+          <button
+            onClick={sendMessage}
+            className="inline-flex items-center gap-2 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
+          >
+            <Send className="h-4 w-4" />
+            Send
+          </button>
+        </div>
       </div>
     </div>
   );

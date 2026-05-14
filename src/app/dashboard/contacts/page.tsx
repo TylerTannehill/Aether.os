@@ -93,7 +93,7 @@ function donorTierTone(tier?: Contact["fec_donor_tier"] | null) {
     case "base":
       return "border border-slate-200 bg-slate-100 text-slate-700";
     default:
-      return "border border-slate-200 bg-slate-100 text-slate-500";
+      return "border border-slate-200 bg-slate-100 text-slate-300";
   }
 }
 
@@ -478,17 +478,17 @@ export default function DashboardContactsPage() {
 
   return (
     <div className="space-y-8 pb-10">
-      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm lg:p-8">
+      <section className="rounded-3xl border border-slate-900 bg-gradient-to-r from-slate-950 via-slate-950 to-slate-900 p-5 shadow-sm lg:p-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-3">
             <p className="text-sm font-medium uppercase tracking-[0.18em] text-slate-500">
               Contact Management
             </p>
             <div className="space-y-2">
-              <h1 className="text-3xl font-semibold tracking-tight text-slate-900 lg:text-4xl">
+              <h1 className="text-3xl font-semibold tracking-tight text-white lg:text-4xl">
                 Contact Management
               </h1>
-              <p className="max-w-3xl text-sm text-slate-600 lg:text-base">
+              <p className="max-w-3xl text-sm text-slate-300 lg:text-base">
                 Search, segment, assign, and organize the contact layer that powers
                 Outreach, Lists, and downstream execution.
               </p>
@@ -512,13 +512,15 @@ export default function DashboardContactsPage() {
               View Lists
             </Link>
 
-            <button
-              onClick={loadContactsPageData}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
-            >
-              <RefreshCw className="h-4 w-4" />
-              Refresh
-            </button>
+            <div className="hidden" aria-hidden="true">
+              <button
+                onClick={loadContactsPageData}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
+              >
+                <RefreshCw className="h-4 w-4" />
+                Refresh
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -561,12 +563,12 @@ export default function DashboardContactsPage() {
           </p>
         </div>
 
-        <div className="rounded-3xl border border-blue-200 bg-blue-50 p-5 shadow-sm">
-          <p className="text-sm font-medium text-blue-800">Major Donors</p>
-          <p className="mt-3 text-3xl font-semibold text-blue-950">
+        <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm">
+          <p className="text-sm font-medium text-emerald-800">Major Donors</p>
+          <p className="mt-3 text-3xl font-semibold text-emerald-950">
             {donorStats.majorDonors}
           </p>
-          <p className="mt-2 text-sm text-blue-900/70">
+          <p className="mt-2 text-sm text-emerald-900/70">
             Contacts at major or maxed donor tiers
           </p>
         </div>
@@ -659,7 +661,7 @@ export default function DashboardContactsPage() {
               <Link
                 href="/dashboard/lists"
                 onClick={stageCurrentSegment}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-100"
               >
                 <Save className="h-4 w-4" />
                 Save List

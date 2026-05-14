@@ -1555,20 +1555,20 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
   return (
     <div className="space-y-8">
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
+      <section className="rounded-3xl border border-slate-800 bg-slate-950 p-6 text-white shadow-sm lg:p-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm text-slate-500">
+            <div className="flex items-center gap-2 text-sm text-slate-300">
               <ShieldAlert className="h-4 w-4" />
               Admin control layer
             </div>
 
             <div className="space-y-2">
-              <h1 className="text-3xl font-semibold tracking-tight text-slate-900 lg:text-4xl">
-                Admin Control Center
+              <h1 className="text-3xl font-semibold tracking-tight text-white lg:text-4xl">
+                Aether System Console
               </h1>
-              <p className="max-w-3xl text-sm text-slate-600 lg:text-base">
-                Manage your organization, shape system behavior, and confirm the system is healthy without digging through the machine.
+              <p className="max-w-3xl text-sm text-slate-300 lg:text-base">
+                Govern organization roles, system posture, execution health, and deep diagnostics from one protected operating layer.
               </p>
             </div>
           </div>
@@ -1576,7 +1576,7 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
           <div className="flex flex-wrap gap-3">
             <button
               onClick={loadData}
-              className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+              className="rounded-2xl border border-white/15 bg-white px-4 py-3 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-slate-100"
             >
               Refresh
             </button>
@@ -1584,7 +1584,7 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
             <button
               onClick={loadAuditLog}
               disabled={auditLoading}
-              className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-2xl border border-white/15 bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {auditLoading ? "Refreshing Log..." : "Refresh Execution Log"}
             </button>
@@ -1593,13 +1593,13 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
       </section>
 
       {message ? (
-        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-700 shadow-sm">
           {message}
         </div>
       ) : null}
 
       {policyActionMessage ? (
-        <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
+        <div className="rounded-2xl border border-fuchsia-200 bg-fuchsia-50 p-4 text-sm text-fuchsia-900 shadow-sm">
           {policyActionMessage}
         </div>
       ) : null}
@@ -1608,7 +1608,7 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="text-sm font-medium text-slate-500">Organization Control</p>
+              <p className="text-sm font-medium text-slate-500">Human Governance</p>
               <h2 className="text-2xl font-semibold text-slate-900">
                 Manage operating roles
               </h2>
@@ -1771,19 +1771,19 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
           </div>
         </section>
 
-        <section className="rounded-3xl border border-indigo-200 bg-indigo-50 p-6 shadow-sm">
+        <section className="rounded-3xl border border-fuchsia-200 bg-fuchsia-50 p-6 shadow-sm">
           <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="text-sm font-medium text-indigo-800">System Behavior</p>
-              <h2 className="text-2xl font-semibold text-indigo-900">
+              <p className="text-sm font-medium text-fuchsia-800">Aether Strategy Layer</p>
+              <h2 className="text-2xl font-semibold text-fuchsia-900">
                 Control autonomy and strategy
               </h2>
-              <p className="mt-2 text-sm text-indigo-800">
+              <p className="mt-2 text-sm text-fuchsia-800">
                 Set how assertive Aether should be, then decide which strategy the system should favor.
               </p>
             </div>
 
-            <div className="rounded-2xl border border-indigo-200 bg-white px-4 py-3 text-sm text-indigo-900">
+            <div className="rounded-2xl border border-indigo-200 bg-white px-4 py-3 text-sm text-fuchsia-900">
               Mode: {autonomyConfig.mode.toUpperCase()}
             </div>
           </div>
@@ -1795,8 +1795,8 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
                 onClick={() => handleSetAutonomyMode(mode as AutonomyConfig["mode"])}
                 className={`rounded-2xl px-4 py-3 text-sm font-medium ${
                   autonomyConfig.mode === mode
-                    ? "bg-indigo-900 text-white"
-                    : "border border-indigo-200 bg-white text-indigo-900"
+                    ? "bg-fuchsia-900 text-white"
+                    : "border border-indigo-200 bg-white text-fuchsia-900"
                 }`}
               >
                 {mode}
@@ -1805,7 +1805,7 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
           </div>
 
           <div className="mt-6">
-            <p className="mb-2 text-sm font-medium text-indigo-800">Strategy</p>
+            <p className="mb-2 text-sm font-medium text-fuchsia-800">Strategy</p>
             <div className="flex flex-wrap gap-2">
               {["balanced", "cleanup", "fundraising_push", "outreach_push", "stability"].map((strategy) => (
                 <button
@@ -1813,8 +1813,8 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
                   onClick={() => handleSetStrategy(strategy as AutonomyConfig["strategy"])}
                   className={`rounded-full px-3 py-1 text-xs font-medium ${
                     autonomyConfig.strategy === strategy
-                      ? "bg-indigo-900 text-white"
-                      : "border border-indigo-200 bg-white text-indigo-800"
+                      ? "bg-fuchsia-900 text-white"
+                      : "border border-indigo-200 bg-white text-fuchsia-800"
                   }`}
                 >
                   {strategy.replaceAll("_", " ")}
@@ -1825,17 +1825,17 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <button
                 onClick={handleAutoShiftToSuggestedStrategy}
-                className="rounded-xl border border-indigo-200 bg-white px-3 py-2 text-xs text-indigo-900"
+                className="rounded-xl border border-indigo-200 bg-white px-3 py-2 text-xs text-fuchsia-900"
               >
                 Apply Suggested Strategy
               </button>
 
-              <div className="text-sm text-indigo-900">
+              <div className="text-sm text-fuchsia-900">
                 Suggested: <span className="font-semibold">{strategyDecision.strategy.replaceAll("_", " ")}</span>
               </div>
             </div>
 
-            <p className="mt-2 text-xs text-indigo-700">{strategyDecision.reason}</p>
+            <p className="mt-2 text-xs text-fuchsia-700">{strategyDecision.reason}</p>
           </div>
         </section>
       </section>
@@ -1844,37 +1844,37 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
         <div className="mb-5">
           <p className="text-sm font-medium text-slate-500">System Health</p>
           <h2 className="text-2xl font-semibold text-slate-900">
-            Confirm the system is stable
+            Confirm the operating layer is stable
           </h2>
           <p className="mt-2 text-sm text-slate-600">
-            High-level health first. Deep risk and governance detail only appears if you open Advanced System.
+            High-level health first. Deep risk and governance detail stays buried until you open Advanced System.
           </p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <p className="text-xs uppercase tracking-wide text-slate-500">Execution Score</p>
+          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+            <p className="text-xs uppercase tracking-wide text-emerald-700">Execution Score</p>
             <p className="mt-2 text-3xl font-semibold text-slate-900">
               {executionFeedback.executionHealthScore}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <p className="text-xs uppercase tracking-wide text-slate-500">Failure Rate</p>
+          <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4">
+            <p className="text-xs uppercase tracking-wide text-rose-700">Failure Rate</p>
             <p className="mt-2 text-3xl font-semibold text-slate-900">
               {executionSummary.failureRate}%
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <p className="text-xs uppercase tracking-wide text-slate-500">Blocked Rate</p>
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+            <p className="text-xs uppercase tracking-wide text-amber-700">Blocked Rate</p>
             <p className="mt-2 text-3xl font-semibold text-slate-900">
               {executionSummary.blockedRate}%
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <p className="text-xs uppercase tracking-wide text-slate-500">Finance Net</p>
+          <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4">
+            <p className="text-xs uppercase tracking-wide text-sky-700">Finance Net</p>
             <p className="mt-2 text-3xl font-semibold text-slate-900">
               ${financeSnapshot.net.toLocaleString()}
             </p>
@@ -1886,33 +1886,33 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
         </div>
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="rounded-3xl border border-slate-800 bg-slate-950 p-6 text-white shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-sm font-medium text-slate-500">Advanced System</p>
-            <h2 className="text-2xl font-semibold text-slate-900">
+            <p className="text-sm font-medium text-slate-300">Advanced System</p>
+            <h2 className="text-2xl font-semibold text-white">
               Policy, governed execution, and deep diagnostics
             </h2>
-            <p className="mt-2 text-sm text-slate-600">
-              Keep this collapsed until you need to inspect system internals.
+            <p className="mt-2 text-sm text-slate-300">
+              Keep this machine room collapsed until you need to inspect system internals.
             </p>
           </div>
 
           <button
             onClick={() => setAdvancedOpen((prev) => !prev)}
-            className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+            className="rounded-2xl border border-white/15 bg-white px-4 py-3 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-slate-100"
           >
             {advancedOpen ? "Hide Advanced System" : "Show Advanced System"}
           </button>
         </div>
 
         {advancedOpen ? (
-          <div className="mt-6 space-y-5">
+          <div className="mt-6 space-y-5 rounded-3xl border border-white/10 bg-slate-100 p-5 text-slate-950">
             <section className="rounded-3xl border border-rose-200 bg-rose-50 p-6">
               <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                 <div>
                   <p className="text-sm font-medium text-rose-800">Risk</p>
-                  <h3 className="text-xl font-semibold text-rose-900">Unified Risk Panel</h3>
+                  <h3 className="text-xl font-semibold text-rose-900">Risk + Governance Panel</h3>
                 </div>
                 <div className="rounded-2xl border border-rose-200 bg-white px-4 py-3 text-sm text-rose-900">
                   Failure rate <span className="font-semibold">{executionSummary.failureRate}%</span>
@@ -1981,12 +1981,12 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
 
             <section className="space-y-5">
               <div className="grid gap-5 xl:grid-cols-2">
-              <section className="rounded-3xl border border-blue-200 bg-blue-50 p-6">
+              <section className="rounded-3xl border border-sky-200 bg-sky-50 p-6">
                   <div className="mb-4">
-                    <h3 className="text-xl font-semibold text-blue-900">
+                    <h3 className="text-xl font-semibold text-sky-900">
                       Policy Recommendations
                     </h3>
-                    <p className="text-sm text-blue-700">
+                    <p className="text-sm text-sky-700">
                       Suggested improvements based on repeated system friction.
                     </p>
                   </div>
@@ -1996,16 +1996,16 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
                   ) : (
                     <div className="space-y-3">
                       {policyRecommendations.map((rec) => (
-                        <div key={rec.id} className="rounded-xl border border-blue-200 bg-white p-4">
+                        <div key={rec.id} className="rounded-xl border border-sky-200 bg-white p-4">
                           <div className="flex items-center justify-between gap-4">
                             <div className="text-sm font-medium text-slate-900">{rec.message}</div>
                             <div className="flex items-center gap-3">
-                              <div className="text-xs text-blue-700">
+                              <div className="text-xs text-sky-700">
                                 {(rec.confidence * 100).toFixed(0)}%
                               </div>
                               <button
                                 onClick={() => handleApplyRecommendation(rec.id)}
-                                className="rounded-lg bg-blue-900 px-3 py-1 text-xs text-white"
+                                className="rounded-lg bg-sky-900 px-3 py-1 text-xs text-white"
                               >
                                 Apply
                               </button>
@@ -2058,10 +2058,10 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
                 <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                   <div>
                     <p className="text-sm font-medium text-slate-500">
-                      Governed Action Queue
+                      Governed Operations
                     </p>
                     <h3 className="text-2xl font-semibold text-slate-900">
-                      Unified Auto Execution Queue
+                      Governed Operations Queue
                     </h3>
                     <p className="mt-2 max-w-3xl text-sm text-slate-600">
                       Review what is safe to run, what needs manual review, and what remains blocked under governance.

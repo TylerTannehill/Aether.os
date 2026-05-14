@@ -26,6 +26,11 @@ import {
   getDigitalPlatformRows,
   type DigitalPlatformRow,
 } from "@/lib/data/digital";
+import {
+  getDashboardStateTone,
+  getDashboardStateTextTone,
+  getDepartmentHealthState,
+} from "@/lib/intelligence/dashboard-tones";
 
 type PlatformKey = "meta" | "instagram" | "x" | "tiktok" | "unknown";
 type TrendView = "impressions" | "engagement" | "spend" | "sentiment";
@@ -296,6 +301,43 @@ function getCreativeRefreshCandidate(platformMetrics: PlatformMetric[]) {
 function getWeakestSentimentCandidate(platformMetrics: PlatformMetric[]) {
   const candidate = [...platformMetrics].sort((a, b) => b.negative - a.negative)[0];
   return candidate?.label || "No platform data";
+}
+
+function getDigitalStatState(input: {
+  id: string;
+  impressions: number;
+  engagement: number;
+  spend: number;
+  sentimentNegative: number;
+}) {
+  if (input.id === "sentiment") {
+    return getDepartmentHealthState({
+      pressure: input.sentimentNegative,
+      opportunity: Math.max(0, 100 - input.sentimentNegative),
+    });
+  }
+
+  if (input.id === "spend") {
+    return getDepartmentHealthState({
+      pressure: input.spend > 0 ? Math.round(input.spend / 1000) : 0,
+      opportunity:
+        input.engagement > 0 ? Math.round(input.engagement / 5000) : 0,
+    });
+  }
+
+  if (input.id === "engagement") {
+    return getDepartmentHealthState({
+      pressure: input.engagement > 0 ? 1 : 2,
+      opportunity:
+        input.engagement > 0 ? Math.round(input.engagement / 5000) : 0,
+    });
+  }
+
+  return getDepartmentHealthState({
+    pressure: input.impressions > 0 ? 1 : 2,
+    opportunity:
+      input.impressions > 0 ? Math.round(input.impressions / 5000) : 0,
+  });
 }
 
 
@@ -779,28 +821,92 @@ export default function DigitalDashboardPage() {
         id: "impressions",
         label: "Impressions",
         value: topLine.impressions.toLocaleString(),
-        tone: "border-sky-200 bg-sky-50 text-sky-900",
+        tone: `${getDashboardStateTone(
+          getDigitalStatState({
+            id: "impressions",
+            impressions: topLine.impressions,
+            engagement: topLine.engagement,
+            spend: topLine.spend,
+            sentimentNegative: sentimentSnapshot.negative,
+          })
+        )} ${getDashboardStateTextTone(
+          getDigitalStatState({
+            id: "impressions",
+            impressions: topLine.impressions,
+            engagement: topLine.engagement,
+            spend: topLine.spend,
+            sentimentNegative: sentimentSnapshot.negative,
+          })
+        )}`,
         helper: "Cross-platform reach",
       },
       {
         id: "engagement",
         label: "Engagement",
         value: topLine.engagement.toLocaleString(),
-        tone: "border-emerald-200 bg-emerald-50 text-emerald-900",
+        tone: `${getDashboardStateTone(
+          getDigitalStatState({
+            id: "engagement",
+            impressions: topLine.impressions,
+            engagement: topLine.engagement,
+            spend: topLine.spend,
+            sentimentNegative: sentimentSnapshot.negative,
+          })
+        )} ${getDashboardStateTextTone(
+          getDigitalStatState({
+            id: "engagement",
+            impressions: topLine.impressions,
+            engagement: topLine.engagement,
+            spend: topLine.spend,
+            sentimentNegative: sentimentSnapshot.negative,
+          })
+        )}`,
         helper: "Total audience interactions",
       },
       {
         id: "spend",
         label: "Spend",
         value: currency.format(topLine.spend),
-        tone: "border-amber-200 bg-amber-50 text-amber-900",
+        tone: `${getDashboardStateTone(
+          getDigitalStatState({
+            id: "spend",
+            impressions: topLine.impressions,
+            engagement: topLine.engagement,
+            spend: topLine.spend,
+            sentimentNegative: sentimentSnapshot.negative,
+          })
+        )} ${getDashboardStateTextTone(
+          getDigitalStatState({
+            id: "spend",
+            impressions: topLine.impressions,
+            engagement: topLine.engagement,
+            spend: topLine.spend,
+            sentimentNegative: sentimentSnapshot.negative,
+          })
+        )}`,
         helper: "Paid media spend",
       },
       {
         id: "sentiment",
         label: "Sentiment",
         value: `${sentimentSnapshot.positive}% / ${sentimentSnapshot.negative}%`,
-        tone: "border-purple-200 bg-purple-50 text-purple-900",
+        tone: `${getDashboardStateTone(
+          getDigitalStatState({
+            id: "sentiment",
+            impressions: topLine.impressions,
+            engagement: topLine.engagement,
+            spend: topLine.spend,
+            sentimentNegative: sentimentSnapshot.negative,
+          })
+        )} ${getDashboardStateTextTone(
+          getDigitalStatState({
+            id: "sentiment",
+            impressions: topLine.impressions,
+            engagement: topLine.engagement,
+            spend: topLine.spend,
+            sentimentNegative: sentimentSnapshot.negative,
+          })
+        )}`,
         helper: "Positive vs negative response",
       },
     ];
@@ -928,19 +1034,19 @@ export default function DigitalDashboardPage() {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
+      <section className="rounded-3xl border border-slate-800 bg-slate-950 p-6 text-white shadow-sm lg:p-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm text-slate-500">
+            <div className="flex items-center gap-2 text-sm text-slate-300">
               <Megaphone className="h-4 w-4" />
               Media + paid performance center
             </div>
 
             <div className="space-y-2">
-              <h1 className="text-3xl font-semibold tracking-tight text-slate-900 lg:text-4xl">
+              <h1 className="text-3xl font-semibold tracking-tight text-white lg:text-4xl">
                 {perspectiveHeadline}
               </h1>
-              <p className="max-w-3xl text-sm text-slate-600 lg:text-base">
+              <p className="max-w-3xl text-sm text-slate-300 lg:text-base">
                 {perspectiveSubheadline}
               </p>
             </div>
@@ -949,10 +1055,10 @@ export default function DigitalDashboardPage() {
           <div className="flex flex-wrap gap-3">
             <Link
               href="/dashboard/digital/focus"
-              className="inline-flex items-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900 transition hover:bg-amber-100"
+              className="inline-flex items-center gap-2 rounded-2xl border border-amber-300 bg-amber-100 px-4 py-3 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-amber-200"
             >
-              <Zap className="h-4 w-4" />
-              {focusButtonLabel}
+              <Zap className="h-4 w-4 text-slate-950" />
+              <span className="text-slate-950">{focusButtonLabel}</span>
             </Link>
           </div>
         </div>
@@ -1014,39 +1120,39 @@ export default function DigitalDashboardPage() {
         </div>
       </section>
 
-      <section className="rounded-3xl border border-amber-200 bg-amber-50 p-6 shadow-sm">
+      <section className="rounded-3xl border border-fuchsia-200 bg-fuchsia-50 p-6 shadow-sm">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm text-amber-800">
+            <div className="flex items-center gap-2 text-sm text-fuchsia-800">
               <Sparkles className="h-4 w-4" />
               Honest Abe
             </div>
 
             <div className="space-y-2">
-              <p className="text-sm font-medium uppercase tracking-[0.18em] text-amber-700/80">
+              <p className="text-sm font-medium uppercase tracking-[0.18em] text-fuchsia-700/80">
                 {getRoleLabel(demoRole)}
               </p>
 
-              <div className="flex flex-wrap gap-4 text-sm text-amber-900">
+              <div className="flex flex-wrap gap-4 text-sm text-fuchsia-900">
                 <div>
-                  <span className="font-medium text-amber-700">Health:</span>{" "}
+                  <span className="font-medium text-fuchsia-700">Health:</span>{" "}
                   {digitalAbeBriefing.health}
                 </div>
                 <div>
-                  <span className="font-medium text-amber-700">Strongest:</span>{" "}
+                  <span className="font-medium text-fuchsia-700">Strongest:</span>{" "}
                   {departmentLabel(digitalAbeBriefing.strongest)}
                 </div>
                 <div>
-                  <span className="font-medium text-amber-700">Weakest:</span>{" "}
+                  <span className="font-medium text-fuchsia-700">Weakest:</span>{" "}
                   {departmentLabel(digitalAbeBriefing.weakest)}
                 </div>
                 <div>
-                  <span className="font-medium text-amber-700">Status:</span>{" "}
+                  <span className="font-medium text-fuchsia-700">Status:</span>{" "}
                   {digitalAbeBriefing.campaignStatus}
                 </div>
               </div>
 
-              <h2 className="text-2xl font-semibold text-amber-900">
+              <h2 className="text-2xl font-semibold text-fuchsia-900">
                 {digitalAbeBriefing.primaryLane === "digital"
                   ? "Digital is the lane that needs active shaping right now."
                   : `${departmentLabel(
@@ -1063,7 +1169,7 @@ export default function DigitalDashboardPage() {
               </p>
 
               {digitalAbeBriefing.crossDomainSignal ? (
-                <p className="max-w-3xl text-sm text-amber-900/80">
+                <p className="max-w-3xl text-sm text-fuchsia-900/80">
                   {digitalAbeBriefing.crossDomainSignal}
                 </p>
               ) : null}
@@ -1076,7 +1182,7 @@ export default function DigitalDashboardPage() {
         </div>
 
         <div className="mt-5 rounded-2xl border border-white/70 bg-white/70 p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-fuchsia-700">
             What Abe Would Do
           </p>
 
@@ -1086,7 +1192,7 @@ export default function DigitalDashboardPage() {
                 key={`${move}-${index}`}
                 className="flex items-start gap-3 text-sm text-slate-700"
               >
-                <div className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-amber-200 bg-amber-100 text-xs font-semibold text-amber-800">
+                <div className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-fuchsia-200 bg-fuchsia-100 text-xs font-semibold text-fuchsia-800">
                   {index + 1}
                 </div>
                 <p>{move}</p>
@@ -1097,7 +1203,7 @@ export default function DigitalDashboardPage() {
 
         {digitalPatternWatch.length > 0 ? (
           <div className="mt-5 rounded-2xl border border-white/70 bg-white/70 p-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-fuchsia-700">
               Pattern Watch
             </p>
 
@@ -1240,6 +1346,67 @@ export default function DigitalDashboardPage() {
           </div>
         </section>
       ) : null}
+
+      <section
+        className={`grid gap-6 ${
+          demoRole === "general_user" ? "lg:grid-cols-2" : "lg:grid-cols-3"
+        }`}
+      >
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div className="text-sm font-medium text-slate-500">
+              Creative Pressure
+            </div>
+            <BarChart3 className="h-4 w-4 text-slate-500" />
+          </div>
+
+          <div className="mt-4 space-y-2 text-sm text-slate-700">
+            <div>
+              Drafting: {contentPipeline.filter((i) => i.status === "drafting").length}
+            </div>
+            <div>
+              Review: {contentPipeline.filter((i) => i.status === "review").length}
+            </div>
+            <div>
+              Scheduled:{" "}
+              {contentPipeline.filter((i) => i.status === "scheduled").length}
+            </div>
+            <div>Live: {contentPipeline.filter((i) => i.status === "live").length}</div>
+          </div>
+        </div>
+
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div className="text-sm font-medium text-slate-500">
+              Paid Media Signal
+            </div>
+            <CircleDollarSign className="h-4 w-4 text-slate-500" />
+          </div>
+
+          <div className="mt-4 space-y-2 text-sm text-slate-700">
+            <div>Best spend candidate: {getBestSpendCandidate(platformMetrics)}</div>
+            <div>Needs creative refresh: {getCreativeRefreshCandidate(platformMetrics)}</div>
+            <div>Weakest sentiment: {getWeakestSentimentCandidate(platformMetrics)}</div>
+          </div>
+        </div>
+
+        {demoRole !== "general_user" ? (
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div className="text-sm font-medium text-slate-500">
+                Response Queue
+              </div>
+              <MessageSquare className="h-4 w-4 text-slate-500" />
+            </div>
+
+            <div className="mt-4 space-y-2 text-sm text-slate-700">
+              <div>Comments needing review: 0</div>
+              <div>Suggested replies queued: 0</div>
+              <div>Rapid response item: 0</div>
+            </div>
+          </div>
+        ) : null}
+      </section>
 
       {demoRole !== "general_user" ? (
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -1390,8 +1557,8 @@ export default function DigitalDashboardPage() {
               </p>
               <h2 className="text-xl font-semibold text-slate-900">
                 {demoRole === "general_user"
-                  ? "Active Content Work"
-                  : "Creation + Release Queue"}
+                  ? "Active Content Schedule"
+                  : "Content Schedule"}
               </h2>
             </div>
 
@@ -1452,7 +1619,7 @@ export default function DigitalDashboardPage() {
           <div className="mb-6 flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-slate-500">
-                Focus Mode Queue
+                Today&apos;s Touchpoints
               </p>
               <h2 className="text-xl font-semibold text-slate-900">
                 {demoRole === "general_user"
@@ -1467,7 +1634,7 @@ export default function DigitalDashboardPage() {
           <div className="space-y-4">
             {visibleFocusQueue.length === 0 ? (
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
-                No digital focus queue items are available from live metrics yet.
+                No digital touchpoints are available from live metrics yet.
               </div>
             ) : null}
 
@@ -1507,79 +1674,19 @@ export default function DigitalDashboardPage() {
 
           <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-4">
             <p className="text-sm font-semibold text-amber-900">
-              Focus Mode Intent
+              Touchpoint Intent
             </p>
             <p className="mt-2 text-sm text-amber-800">
               {demoRole === "admin"
-                ? "Digital focus mode should narrow the operator view to content creation, spend movement, and response handling based on what is actually performing."
+                ? "Today&apos;s touchpoints should narrow attention to content creation, spend movement, and response handling based on what is actually performing."
                 : demoRole === "director"
-                ? "Digital focus mode should help lane leaders manage content pressure, spend shifts, and weaker response lanes."
-                : "Digital focus mode should keep the next content, spend, and response actions clear and easy to work."}
+                ? "Today&apos;s touchpoints should help lane leaders manage content pressure, spend shifts, and weaker response lanes."
+                : "Today&apos;s touchpoints should keep the next content, spend, and response actions clear and easy to work."}
             </p>
           </div>
         </div>
       </section>
 
-      <section
-        className={`grid gap-6 ${
-          demoRole === "general_user" ? "lg:grid-cols-2" : "lg:grid-cols-3"
-        }`}
-      >
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div className="text-sm font-medium text-slate-500">
-              Creative Pressure
-            </div>
-            <BarChart3 className="h-4 w-4 text-slate-500" />
-          </div>
-
-          <div className="mt-4 space-y-2 text-sm text-slate-700">
-            <div>
-              Drafting: {contentPipeline.filter((i) => i.status === "drafting").length}
-            </div>
-            <div>
-              Review: {contentPipeline.filter((i) => i.status === "review").length}
-            </div>
-            <div>
-              Scheduled:{" "}
-              {contentPipeline.filter((i) => i.status === "scheduled").length}
-            </div>
-            <div>Live: {contentPipeline.filter((i) => i.status === "live").length}</div>
-          </div>
-        </div>
-
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div className="text-sm font-medium text-slate-500">
-              Paid Media Signal
-            </div>
-            <CircleDollarSign className="h-4 w-4 text-slate-500" />
-          </div>
-
-          <div className="mt-4 space-y-2 text-sm text-slate-700">
-            <div>Best spend candidate: {getBestSpendCandidate(platformMetrics)}</div>
-            <div>Needs creative refresh: {getCreativeRefreshCandidate(platformMetrics)}</div>
-            <div>Weakest sentiment: {getWeakestSentimentCandidate(platformMetrics)}</div>
-          </div>
-        </div>
-
-        {demoRole !== "general_user" ? (
-          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div className="text-sm font-medium text-slate-500">
-                Response Queue
-              </div>
-              <MessageSquare className="h-4 w-4 text-slate-500" />
-            </div>
-
-            <div className="mt-4 space-y-2 text-sm text-slate-700">
-              <div>Comments needing review: 0</div>
-              <div>Suggested replies queued: 0</div>
-              <div>Rapid response item: 0</div>
-            </div>
-          </div>
-        ) : null}
-      </section>
     </div>
   );
 }

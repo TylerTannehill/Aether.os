@@ -1098,50 +1098,134 @@ export default function DigitalFocusModePage() {
         </div>
       </section>
 
-<section className={`grid gap-3 ${hasDigitalDirector ? "md:grid-cols-3" : "md:grid-cols-2"}`}>
-        <div className="rounded-3xl border border-sky-200 bg-sky-50 p-4 shadow-sm">
+<section
+        className={`grid gap-3 ${
+          hasDigitalDirector ? "md:grid-cols-3" : "md:grid-cols-2"
+        }`}
+      >
+        <div
+          className={`rounded-3xl border p-4 shadow-sm ${
+            grouped.content.length > 0
+              ? "border-rose-200 bg-rose-50"
+              : "border-slate-200 bg-white"
+          }`}
+        >
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-sky-800">Content Priority</p>
-            <PenSquare className="h-5 w-5 text-sky-700" />
+            <p
+              className={`text-sm font-medium ${
+                grouped.content.length > 0 ? "text-rose-800" : "text-slate-700"
+              }`}
+            >
+              Content Priority
+            </p>
+            <PenSquare
+              className={`h-5 w-5 ${
+                grouped.content.length > 0 ? "text-rose-700" : "text-slate-500"
+              }`}
+            />
           </div>
-          <p className="mt-3 text-2xl font-semibold text-sky-900">
+          <p
+            className={`mt-3 text-2xl font-semibold ${
+              grouped.content.length > 0 ? "text-rose-900" : "text-slate-900"
+            }`}
+          >
             {grouped.content.length}
           </p>
-          <p className="mt-2 text-sm text-sky-800">
+          <p
+            className={`mt-2 text-sm ${
+              grouped.content.length > 0 ? "text-rose-800" : "text-slate-600"
+            }`}
+          >
             Content tasks requiring focused execution
           </p>
         </div>
 
         {hasDigitalDirector ? (
-        <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-emerald-800">Amplify what’s working</p>
-            <CircleDollarSign className="h-5 w-5 text-emerald-700" />
+          <div
+            className={`rounded-3xl border p-4 shadow-sm ${
+              grouped.spend.length > 0
+                ? "border-emerald-200 bg-emerald-50"
+                : "border-slate-200 bg-white"
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <p
+                className={`text-sm font-medium ${
+                  grouped.spend.length > 0
+                    ? "text-emerald-800"
+                    : "text-slate-700"
+                }`}
+              >
+                Amplify what’s working
+              </p>
+              <CircleDollarSign
+                className={`h-5 w-5 ${
+                  grouped.spend.length > 0
+                    ? "text-emerald-700"
+                    : "text-slate-500"
+                }`}
+              />
+            </div>
+            <p
+              className={`mt-3 text-2xl font-semibold ${
+                grouped.spend.length > 0
+                  ? "text-emerald-900"
+                  : "text-slate-900"
+              }`}
+            >
+              {grouped.spend.length}
+            </p>
+            <p
+              className={`mt-2 text-sm ${
+                grouped.spend.length > 0
+                  ? "text-emerald-800"
+                  : "text-slate-600"
+              }`}
+            >
+              Budget shifts and allocation decisions
+            </p>
           </div>
-          <p className="mt-3 text-2xl font-semibold text-emerald-900">
-            {grouped.spend.length}
-          </p>
-          <p className="mt-2 text-sm text-emerald-800">
-            Budget shifts and allocation decisions
-          </p>
-        </div>
         ) : null}
 
-        <div className="rounded-3xl border border-purple-200 bg-purple-50 p-4 shadow-sm">
+        <div
+          className={`rounded-3xl border p-4 shadow-sm ${
+            grouped.reply.length > 0
+              ? "border-rose-200 bg-rose-50"
+              : "border-slate-200 bg-white"
+          }`}
+        >
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-purple-800">Shape the conversation</p>
-            <MessageSquare className="h-5 w-5 text-purple-700" />
+            <p
+              className={`text-sm font-medium ${
+                grouped.reply.length > 0 ? "text-rose-800" : "text-slate-700"
+              }`}
+            >
+              Shape the conversation
+            </p>
+            <MessageSquare
+              className={`h-5 w-5 ${
+                grouped.reply.length > 0 ? "text-rose-700" : "text-slate-500"
+              }`}
+            />
           </div>
-          <p className="mt-3 text-2xl font-semibold text-purple-900">
+          <p
+            className={`mt-3 text-2xl font-semibold ${
+              grouped.reply.length > 0 ? "text-rose-900" : "text-slate-900"
+            }`}
+          >
             {grouped.reply.length}
           </p>
-          <p className="mt-2 text-sm text-purple-800">
+          <p
+            className={`mt-2 text-sm ${
+              grouped.reply.length > 0 ? "text-rose-800" : "text-slate-600"
+            }`}
+          >
             Responses and comment handling items
           </p>
         </div>
       </section>
 
-      <section className="rounded-3xl border-2 border-amber-300 bg-amber-50 p-6 shadow-sm">
+      <section className="hidden" aria-hidden="true">
         <div className="flex items-start gap-3">
           <Sparkles className="mt-0.5 h-5 w-5 text-amber-700" />
           <div>

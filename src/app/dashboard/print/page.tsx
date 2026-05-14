@@ -26,6 +26,11 @@ import {
   getPrintMetricRows,
   type PrintMetricRow,
 } from "@/lib/data/print";
+import {
+  getDashboardStateTone,
+  getDashboardStateTextTone,
+  getDepartmentHealthState,
+} from "@/lib/intelligence/dashboard-tones";
 
 type PrintTrendView = "inventory" | "orders" | "deliveries" | "approvals";
 
@@ -310,6 +315,40 @@ function buildPrintChartData(rows: PrintMetricRow[]) {
           ? 1
           : 0,
     }));
+}
+
+function getPrintStatState(input: {
+  id: string;
+  onHand: number;
+  reserved: number;
+  orders: number;
+  approvalsReady: number;
+}) {
+  if (input.id === "reserved") {
+    return getDepartmentHealthState({
+      pressure: input.reserved,
+      opportunity: input.onHand,
+    });
+  }
+
+  if (input.id === "orders") {
+    return getDepartmentHealthState({
+      pressure: input.orders,
+      opportunity: input.approvalsReady,
+    });
+  }
+
+  if (input.id === "approvalsReady") {
+    return getDepartmentHealthState({
+      pressure: input.orders,
+      opportunity: input.approvalsReady,
+    });
+  }
+
+  return getDepartmentHealthState({
+    pressure: input.onHand > 0 ? 1 : 2,
+    opportunity: input.onHand,
+  });
 }
 
 
@@ -1026,21 +1065,89 @@ export default function PrintDashboardPage() {
         id: "onHand",
         label: "Inventory On Hand",
         value: topLine.onHand.toLocaleString(),
+        tone: `${getDashboardStateTone(
+          getPrintStatState({
+            id: "onHand",
+            onHand: topLine.onHand,
+            reserved: topLine.reserved,
+            orders: topLine.orders,
+            approvalsReady: topLine.approvalsReady,
+          })
+        )} ${getDashboardStateTextTone(
+          getPrintStatState({
+            id: "onHand",
+            onHand: topLine.onHand,
+            reserved: topLine.reserved,
+            orders: topLine.orders,
+            approvalsReady: topLine.approvalsReady,
+          })
+        )}`,
       },
       {
         id: "reserved",
         label: "Reserved",
         value: topLine.reserved.toLocaleString(),
+        tone: `${getDashboardStateTone(
+          getPrintStatState({
+            id: "reserved",
+            onHand: topLine.onHand,
+            reserved: topLine.reserved,
+            orders: topLine.orders,
+            approvalsReady: topLine.approvalsReady,
+          })
+        )} ${getDashboardStateTextTone(
+          getPrintStatState({
+            id: "reserved",
+            onHand: topLine.onHand,
+            reserved: topLine.reserved,
+            orders: topLine.orders,
+            approvalsReady: topLine.approvalsReady,
+          })
+        )}`,
       },
       {
         id: "orders",
         label: "Active Orders",
         value: String(topLine.orders),
+        tone: `${getDashboardStateTone(
+          getPrintStatState({
+            id: "orders",
+            onHand: topLine.onHand,
+            reserved: topLine.reserved,
+            orders: topLine.orders,
+            approvalsReady: topLine.approvalsReady,
+          })
+        )} ${getDashboardStateTextTone(
+          getPrintStatState({
+            id: "orders",
+            onHand: topLine.onHand,
+            reserved: topLine.reserved,
+            orders: topLine.orders,
+            approvalsReady: topLine.approvalsReady,
+          })
+        )}`,
       },
       {
         id: "approvalsReady",
         label: "Assets Ready / Moving",
         value: String(topLine.approvalsReady),
+        tone: `${getDashboardStateTone(
+          getPrintStatState({
+            id: "approvalsReady",
+            onHand: topLine.onHand,
+            reserved: topLine.reserved,
+            orders: topLine.orders,
+            approvalsReady: topLine.approvalsReady,
+          })
+        )} ${getDashboardStateTextTone(
+          getPrintStatState({
+            id: "approvalsReady",
+            onHand: topLine.onHand,
+            reserved: topLine.reserved,
+            orders: topLine.orders,
+            approvalsReady: topLine.approvalsReady,
+          })
+        )}`,
       },
     ];
 
@@ -1183,19 +1290,19 @@ export default function PrintDashboardPage() {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
+      <section className="rounded-3xl border border-slate-800 bg-slate-950 p-6 text-white shadow-sm lg:p-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm text-slate-500">
+            <div className="flex items-center gap-2 text-sm text-slate-300">
               <Printer className="h-4 w-4" />
               Print + asset operations center
             </div>
 
             <div className="space-y-2">
-              <h1 className="text-3xl font-semibold tracking-tight text-slate-900 lg:text-4xl">
+              <h1 className="text-3xl font-semibold tracking-tight text-white lg:text-4xl">
                 {perspectiveHeadline}
               </h1>
-              <p className="max-w-3xl text-sm text-slate-600 lg:text-base">
+              <p className="max-w-3xl text-sm text-slate-300 lg:text-base">
                 {perspectiveSubheadline}
               </p>
             </div>
@@ -1204,23 +1311,11 @@ export default function PrintDashboardPage() {
           <div className="flex flex-wrap gap-3">
             <Link
               href="/dashboard/print/focus"
-              className="inline-flex items-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900 transition hover:bg-amber-100"
+              className="inline-flex items-center gap-2 rounded-2xl border border-amber-300 bg-amber-100 px-4 py-3 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-amber-200"
             >
-              <Zap className="h-4 w-4" />
-              {focusButtonLabel}
+              <Zap className="h-4 w-4 text-slate-950" />
+              <span className="text-slate-950">{focusButtonLabel}</span>
             </Link>
-
-            <button
-              type="button"
-              onClick={() => setPrintLoopMode((prev) => !prev)}
-              className={
-                printLoopMode
-                  ? "rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
-                  : "rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-              }
-            >
-              {loopButtonLabel}
-            </button>
           </div>
         </div>
       </section>
@@ -1281,39 +1376,39 @@ export default function PrintDashboardPage() {
         </div>
       </section>
 
-      <section className="rounded-3xl border border-amber-200 bg-amber-50 p-6 shadow-sm">
+      <section className="rounded-3xl border border-fuchsia-200 bg-fuchsia-50 p-6 shadow-sm">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm text-amber-800">
+            <div className="flex items-center gap-2 text-sm text-fuchsia-800">
               <Sparkles className="h-4 w-4" />
               Honest Abe
             </div>
 
             <div className="space-y-2">
-              <p className="text-sm font-medium uppercase tracking-[0.18em] text-amber-700/80">
+              <p className="text-sm font-medium uppercase tracking-[0.18em] text-fuchsia-700/80">
                 {getRoleLabel(demoRole)}
               </p>
 
-              <div className="flex flex-wrap gap-4 text-sm text-amber-900">
+              <div className="flex flex-wrap gap-4 text-sm text-fuchsia-900">
                 <div>
-                  <span className="font-medium text-amber-700">Health:</span>{" "}
+                  <span className="font-medium text-fuchsia-700">Health:</span>{" "}
                   {printAbeBriefing.health}
                 </div>
                 <div>
-                  <span className="font-medium text-amber-700">Strongest:</span>{" "}
+                  <span className="font-medium text-fuchsia-700">Strongest:</span>{" "}
                   {departmentLabel(printAbeBriefing.strongest)}
                 </div>
                 <div>
-                  <span className="font-medium text-amber-700">Weakest:</span>{" "}
+                  <span className="font-medium text-fuchsia-700">Weakest:</span>{" "}
                   {departmentLabel(printAbeBriefing.weakest)}
                 </div>
                 <div>
-                  <span className="font-medium text-amber-700">Status:</span>{" "}
+                  <span className="font-medium text-fuchsia-700">Status:</span>{" "}
                   {printAbeBriefing.campaignStatus}
                 </div>
               </div>
 
-              <h2 className="text-2xl font-semibold text-amber-900">
+              <h2 className="text-2xl font-semibold text-fuchsia-900">
                 {printAbeBriefing.primaryLane === "print"
                   ? "Print is the lane that needs protected timing right now."
                   : `${departmentLabel(
@@ -1330,7 +1425,7 @@ export default function PrintDashboardPage() {
               </p>
 
               {printAbeBriefing.crossDomainSignal ? (
-                <p className="max-w-3xl text-sm text-amber-900/80">
+                <p className="max-w-3xl text-sm text-fuchsia-900/80">
                   {printAbeBriefing.crossDomainSignal}
                 </p>
               ) : null}
@@ -1343,7 +1438,7 @@ export default function PrintDashboardPage() {
         </div>
 
         <div className="mt-5 rounded-2xl border border-white/70 bg-white/70 p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-fuchsia-700">
             What Abe Would Do
           </p>
 
@@ -1353,7 +1448,7 @@ export default function PrintDashboardPage() {
                 key={`${move}-${index}`}
                 className="flex items-start gap-3 text-sm text-slate-700"
               >
-                <div className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-amber-200 bg-amber-100 text-xs font-semibold text-amber-800">
+                <div className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-fuchsia-200 bg-fuchsia-100 text-xs font-semibold text-fuchsia-800">
                   {index + 1}
                 </div>
                 <p>{move}</p>
@@ -1364,7 +1459,7 @@ export default function PrintDashboardPage() {
 
         {printPatternWatch.length > 0 ? (
           <div className="mt-5 rounded-2xl border border-white/70 bg-white/70 p-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-fuchsia-700">
               Pattern Watch
             </p>
 
@@ -1607,12 +1702,12 @@ export default function PrintDashboardPage() {
         {visibleStats.map((stat) => (
           <div
             key={stat.id}
-            className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
+            className={`rounded-3xl border p-6 shadow-sm ${stat.tone}`}
           >
-            <p className="text-sm font-medium text-slate-500">
+            <p className="text-sm font-medium">
               {stat.label}
             </p>
-            <p className="mt-3 text-3xl font-semibold text-slate-900">
+            <p className="mt-3 text-3xl font-semibold">
               {stat.value}
             </p>
           </div>

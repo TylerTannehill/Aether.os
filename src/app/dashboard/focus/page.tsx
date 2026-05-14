@@ -1062,9 +1062,9 @@ export default function FocusModePage() {
                   </div>
 
                   <div className="mt-4 space-y-2">
-                    {push.actions.map((actionLine) => (
+                    {push.actions.map((actionLine, actionIndex) => (
                       <div
-                        key={`${push.id}-${actionLine}`}
+                        key={`${push.id}-${actionIndex}-${actionLine}`}
                         className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600"
                       >
                         {actionLine}

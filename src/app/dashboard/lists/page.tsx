@@ -121,14 +121,21 @@ function DashboardListsPageContent() {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-3xl border border-slate-200 bg-slate-900 p-6 text-white shadow-sm lg:p-8">
-        <h1 className="text-3xl font-semibold tracking-tight lg:text-4xl">
-          Lists = Routing Engine
-        </h1>
-        <p className="mt-2 max-w-3xl text-sm text-slate-300">
-          Lists determine who gets worked, when they get worked, and how
-          execution flows across Outreach, Finance, and Field.
-        </p>
+      <section className="rounded-3xl border border-slate-900 bg-gradient-to-r from-slate-950 via-slate-950 to-slate-900 p-6 text-white shadow-sm lg:p-8">
+        <div className="space-y-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+            List Infrastructure
+          </p>
+
+          <h1 className="text-3xl font-semibold tracking-tight lg:text-4xl">
+            List Management
+          </h1>
+
+          <p className="max-w-3xl text-sm text-slate-300 lg:text-base">
+            Build, organize, and deploy execution lists across Outreach,
+            Finance, and Field.
+          </p>
+        </div>
       </section>
 
       <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
@@ -142,13 +149,15 @@ function DashboardListsPageContent() {
             </h1>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              onClick={loadLists}
-              className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50"
-            >
-              Refresh
-            </button>
+          <div className="flex flex-wrap gap-3">
+            <div className="hidden" aria-hidden="true">
+              <button
+                onClick={loadLists}
+                className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              >
+                Refresh
+              </button>
+            </div>
             <Link
               href="/dashboard/contacts"
               aria-label="Create List from Contacts"

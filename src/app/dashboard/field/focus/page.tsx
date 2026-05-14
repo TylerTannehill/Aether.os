@@ -1043,69 +1043,149 @@ export default function FieldFocusModePage() {
         </div>
       </section>
 
-<section className="grid gap-4 md:grid-cols-4">
-        <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4 shadow-sm">
+<section
+        className={`grid gap-4 ${
+          hasFieldDirector ? "md:grid-cols-4" : "md:grid-cols-3"
+        }`}
+      >
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-sky-800">Turf Priority</p>
-            <MapPinned className="h-5 w-5 text-sky-700" />
+            <p className="text-sm font-medium text-slate-700">
+              Turf Priority
+            </p>
+            <MapPinned className="h-5 w-5 text-slate-500" />
           </div>
-          <p className="mt-3 text-xl font-semibold text-sky-900">
+          <p className="mt-3 text-xl font-semibold text-slate-900">
             {grouped.turf.length}
           </p>
-          <p className="mt-2 text-sm text-sky-800">
+          <p className="mt-2 text-sm text-slate-600">
             Turf tasks requiring immediate execution
           </p>
         </div>
 
         {hasFieldDirector ? (
-          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm">
+          <div
+            className={`rounded-2xl border p-4 shadow-sm ${
+              grouped.canvass.length > 0
+                ? "border-emerald-200 bg-emerald-50"
+                : "border-slate-200 bg-white"
+            }`}
+          >
             <div className="flex items-center justify-between">
-              <p className="text-sm font-medium text-emerald-800">
+              <p
+                className={`text-sm font-medium ${
+                  grouped.canvass.length > 0
+                    ? "text-emerald-800"
+                    : "text-slate-700"
+                }`}
+              >
                 Canvasser Moves
               </p>
-              <Users className="h-5 w-5 text-emerald-700" />
+              <Users
+                className={`h-5 w-5 ${
+                  grouped.canvass.length > 0
+                    ? "text-emerald-700"
+                    : "text-slate-500"
+                }`}
+              />
             </div>
-            <p className="mt-3 text-xl font-semibold text-emerald-900">
+            <p
+              className={`mt-3 text-xl font-semibold ${
+                grouped.canvass.length > 0
+                  ? "text-emerald-900"
+                  : "text-slate-900"
+              }`}
+            >
               {grouped.canvass.length}
             </p>
-            <p className="mt-2 text-sm text-emerald-800">
+            <p
+              className={`mt-2 text-sm ${
+                grouped.canvass.length > 0
+                  ? "text-emerald-800"
+                  : "text-slate-600"
+              }`}
+            >
               Allocation and execution changes
             </p>
           </div>
         ) : null}
 
-        <div className="rounded-2xl border border-purple-200 bg-purple-50 p-4 shadow-sm">
+        <div
+          className={`rounded-2xl border p-4 shadow-sm ${
+            grouped.follow_up.length > 0
+              ? "border-rose-200 bg-rose-50"
+              : "border-slate-200 bg-white"
+          }`}
+        >
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-purple-800">
+            <p
+              className={`text-sm font-medium ${
+                grouped.follow_up.length > 0 ? "text-rose-800" : "text-slate-700"
+              }`}
+            >
               Follow-Up Queue
             </p>
-            <ClipboardList className="h-5 w-5 text-purple-700" />
+            <ClipboardList
+              className={`h-5 w-5 ${
+                grouped.follow_up.length > 0 ? "text-rose-700" : "text-slate-500"
+              }`}
+            />
           </div>
-          <p className="mt-3 text-2xl font-semibold text-purple-900">
+          <p
+            className={`mt-3 text-2xl font-semibold ${
+              grouped.follow_up.length > 0 ? "text-rose-900" : "text-slate-900"
+            }`}
+          >
             {grouped.follow_up.length}
           </p>
-          <p className="mt-2 text-sm text-purple-800">
+          <p
+            className={`mt-2 text-sm ${
+              grouped.follow_up.length > 0 ? "text-rose-800" : "text-slate-600"
+            }`}
+          >
             Conversation-driven follow-up actions
           </p>
         </div>
 
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
+        <div
+          className={`rounded-2xl border p-4 shadow-sm ${
+            completedLaneActions > 0
+              ? "border-emerald-200 bg-emerald-50"
+              : "border-slate-200 bg-white"
+          }`}
+        >
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-amber-800">
+            <p
+              className={`text-sm font-medium ${
+                completedLaneActions > 0 ? "text-emerald-800" : "text-slate-700"
+              }`}
+            >
               Actions Saved
             </p>
-            <ListChecks className="h-5 w-5 text-amber-700" />
+            <ListChecks
+              className={`h-5 w-5 ${
+                completedLaneActions > 0 ? "text-emerald-700" : "text-slate-500"
+              }`}
+            />
           </div>
-          <p className="mt-3 text-2xl font-semibold text-amber-900">
+          <p
+            className={`mt-3 text-2xl font-semibold ${
+              completedLaneActions > 0 ? "text-emerald-900" : "text-slate-900"
+            }`}
+          >
             {completedLaneActions}
           </p>
-          <p className="mt-2 text-sm text-amber-800">
+          <p
+            className={`mt-2 text-sm ${
+              completedLaneActions > 0 ? "text-emerald-800" : "text-slate-600"
+            }`}
+          >
             Confirmed field actions this session
           </p>
         </div>
       </section>
 
-      <section className="rounded-3xl border border-amber-200 bg-amber-50 p-6 shadow-sm">
+      <section className="hidden" aria-hidden="true">
         <div className="flex items-start gap-3">
           <Sparkles className="mt-0.5 h-5 w-5 text-amber-700" />
           <div>

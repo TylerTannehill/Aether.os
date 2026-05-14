@@ -208,7 +208,7 @@ function priorityTone(priority: FieldFocusTask["priority"]) {
     case "high":
       return "bg-rose-100 text-rose-700 border border-rose-200";
     case "medium":
-      return "bg-amber-100 text-amber-800 border border-amber-200";
+      return "bg-amber-100 text-violet-800 border border-amber-200";
     case "low":
     default:
       return "bg-slate-100 text-slate-700 border border-slate-200";
@@ -232,7 +232,7 @@ function patternSeverityTone(severity: AbePatternInsight["severity"]) {
     case "critical":
       return "border-rose-200 bg-rose-50 text-rose-900";
     case "important":
-      return "border-amber-200 bg-amber-50 text-amber-900";
+      return "border-amber-200 bg-amber-50 text-violet-900";
     case "watch":
     default:
       return "border-sky-200 bg-sky-50 text-sky-900";
@@ -795,18 +795,18 @@ export default function FieldDashboardPage() {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
+      <section className="rounded-3xl border border-slate-800 bg-slate-950 p-6 text-white shadow-sm lg:p-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-3">
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-slate-500">
+            <p className="text-sm font-medium uppercase tracking-[0.18em] text-slate-300">
               Field Dashboard
             </p>
 
             <div className="space-y-2">
-              <h1 className="text-3xl font-semibold tracking-tight text-slate-900 lg:text-4xl">
+              <h1 className="text-3xl font-semibold tracking-tight text-white lg:text-4xl">
                 {perspectiveHeadline}
               </h1>
-              <p className="max-w-3xl text-sm text-slate-600 lg:text-base">
+              <p className="max-w-3xl text-sm text-slate-300 lg:text-base">
                 {perspectiveSubheadline}
               </p>
             </div>
@@ -815,10 +815,10 @@ export default function FieldDashboardPage() {
           <div className="flex flex-wrap gap-3">
             <Link
               href="/dashboard/field/focus"
-              className="inline-flex items-center gap-2 rounded-2xl border border-yellow-300 bg-yellow-100 px-4 py-3 text-sm font-medium text-yellow-900 transition hover:bg-yellow-200"
+              className="inline-flex items-center gap-2 rounded-2xl border border-amber-300 bg-amber-100 px-4 py-3 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-amber-200"
             >
-              <Zap className="h-4 w-4" />
-              Open Focus Mode
+              <Zap className="h-4 w-4 text-slate-950" />
+              <span className="text-slate-950">Open Focus Mode</span>
             </Link>
           </div>
         </div>
@@ -880,39 +880,39 @@ export default function FieldDashboardPage() {
         </div>
       </section>
 
-      <section className="rounded-3xl border border-amber-200 bg-amber-50 p-6 shadow-sm">
+      <section className="rounded-3xl border border-violet-200 bg-violet-50 p-6 shadow-sm">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm text-amber-800">
+            <div className="flex items-center gap-2 text-sm text-violet-800">
               <Sparkles className="h-4 w-4" />
               Honest Abe
             </div>
 
             <div className="space-y-2">
-              <p className="text-sm font-medium uppercase tracking-[0.18em] text-amber-700/80">
+              <p className="text-sm font-medium uppercase tracking-[0.18em] text-violet-700/80">
                 {getRoleLabel(demoRole)}
               </p>
 
-              <div className="flex flex-wrap gap-4 text-sm text-amber-900">
+              <div className="flex flex-wrap gap-4 text-sm text-violet-900">
                 <div>
-                  <span className="font-medium text-amber-700">Health:</span>{" "}
+                  <span className="font-medium text-violet-700">Health:</span>{" "}
                   {fieldAbeBriefing.health}
                 </div>
                 <div>
-                  <span className="font-medium text-amber-700">Strongest:</span>{" "}
+                  <span className="font-medium text-violet-700">Strongest:</span>{" "}
                   {departmentLabel(fieldAbeBriefing.strongest)}
                 </div>
                 <div>
-                  <span className="font-medium text-amber-700">Weakest:</span>{" "}
+                  <span className="font-medium text-violet-700">Weakest:</span>{" "}
                   {departmentLabel(fieldAbeBriefing.weakest)}
                 </div>
                 <div>
-                  <span className="font-medium text-amber-700">Status:</span>{" "}
+                  <span className="font-medium text-violet-700">Status:</span>{" "}
                   {fieldAbeBriefing.campaignStatus}
                 </div>
               </div>
 
-              <h2 className="text-2xl font-semibold text-amber-900">
+              <h2 className="text-2xl font-semibold text-violet-900">
                 {fieldAbeBriefing.primaryLane === "field"
                   ? "Field is the operating lane that needs attention right now."
                   : `${departmentLabel(
@@ -929,7 +929,7 @@ export default function FieldDashboardPage() {
               </p>
 
               {fieldAbeBriefing.crossDomainSignal ? (
-                <p className="max-w-3xl text-sm text-amber-900/80">
+                <p className="max-w-3xl text-sm text-violet-900/80">
                   {fieldAbeBriefing.crossDomainSignal}
                 </p>
               ) : null}
@@ -942,7 +942,7 @@ export default function FieldDashboardPage() {
         </div>
 
         <div className="mt-5 rounded-2xl border border-white/70 bg-white/70 p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-700">
             What Abe Would Do
           </p>
 
@@ -952,7 +952,7 @@ export default function FieldDashboardPage() {
                 key={`${move}-${index}`}
                 className="flex items-start gap-3 text-sm text-slate-700"
               >
-                <div className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-amber-200 bg-amber-100 text-xs font-semibold text-amber-800">
+                <div className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-amber-200 bg-amber-100 text-xs font-semibold text-violet-800">
                   {index + 1}
                 </div>
                 <p>{move}</p>
@@ -963,7 +963,7 @@ export default function FieldDashboardPage() {
 
         {fieldPatternWatch.length > 0 ? (
           <div className="mt-5 rounded-2xl border border-white/70 bg-white/70 p-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-700">
               Pattern Watch
             </p>
 
@@ -996,7 +996,23 @@ export default function FieldDashboardPage() {
         {visibleStats.map((stat) => (
           <div
             key={stat.id}
-            className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
+            className={`rounded-3xl border p-6 shadow-sm ${
+              stat.id === "completion"
+                ? averageCompletion >= 70
+                  ? "border-emerald-200 bg-emerald-50"
+                  : averageCompletion >= 50
+                  ? "border-amber-200 bg-amber-50"
+                  : "border-rose-200 bg-rose-50"
+                : stat.id === "conversations"
+                ? topLine.conversations > 0
+                  ? "border-emerald-200 bg-emerald-50"
+                  : "border-slate-200 bg-white"
+                : stat.id === "ids"
+                ? topLine.ids > 0
+                  ? "border-sky-200 bg-sky-50"
+                  : "border-slate-200 bg-white"
+                : "border-slate-200 bg-white"
+            }`}
           >
             <p className="text-sm font-medium text-slate-500">{stat.label}</p>
             <p className="mt-3 text-3xl font-semibold text-slate-900">
@@ -1004,6 +1020,69 @@ export default function FieldDashboardPage() {
             </p>
           </div>
         ))}
+      </section>
+
+      <section
+        className={`grid gap-6 ${
+          demoRole === "general_user" ? "lg:grid-cols-2" : "lg:grid-cols-3"
+        }`}
+      >
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div className="text-sm font-medium text-slate-500">
+              Turf Pressure
+            </div>
+            <Route className="h-4 w-4 text-slate-500" />
+          </div>
+
+          <div className="mt-4 space-y-2 text-sm text-slate-700">
+            <div>Active turf: {visibleTurfRows.length}</div>
+            <div>Under 60% complete: {turfPressure.underSixtyCount}</div>
+            <div>Unfinished turf: {turfPressure.unfinishedCount}</div>
+          </div>
+        </div>
+
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div className="text-sm font-medium text-slate-500">
+              Conversation Yield
+            </div>
+            <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+          </div>
+
+          <div className="mt-4 space-y-2 text-sm text-slate-700">
+            <div>
+              Avg conversation rate:{" "}
+              {topLine.doors > 0
+                ? `${Math.round((topLine.conversations / topLine.doors) * 100)}%`
+                : "0%"}
+            </div>
+            <div>
+              Avg ID rate:{" "}
+              {topLine.conversations > 0
+                ? `${Math.round((topLine.ids / topLine.conversations) * 100)}%`
+                : "0%"}
+            </div>
+            <div>Best output: {getBestOutputName(canvasserRows)}</div>
+          </div>
+        </div>
+
+        {demoRole !== "general_user" ? (
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div className="text-sm font-medium text-slate-500">
+                Follow-Up Signal
+              </div>
+              <Zap className="h-4 w-4 text-amber-500" />
+            </div>
+
+            <div className="mt-4 space-y-2 text-sm text-slate-700">
+              <div>Generated follow-up lists: {generatedLists.length}</div>
+              <div>Conversation clusters to review: 0</div>
+              <div>Immediate action items: {visibleFocusQueue.length}</div>
+            </div>
+          </div>
+        ) : null}
       </section>
 
       {demoRole !== "general_user" ? (
@@ -1057,17 +1136,17 @@ export default function FieldDashboardPage() {
           )}
         </section>
       ) : null}
-            <section className="rounded-3xl border border-amber-200 bg-amber-50 p-6 shadow-sm">
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex items-start gap-3">
-          <Sparkles className="mt-0.5 h-5 w-5 text-amber-700" />
+          <Sparkles className="mt-0.5 h-5 w-5 text-slate-500" />
           <div>
-            <h2 className="text-lg font-semibold text-amber-900">
+            <h2 className="text-lg font-semibold text-slate-900">
               Field Command Signal
             </h2>
-            <p className="mt-2 text-sm text-amber-800">
+            <p className="mt-2 text-sm text-slate-700">
               {fieldCommandSignal.title}
             </p>
-            <p className="mt-1 text-xs text-amber-700">
+            <p className="mt-1 text-xs text-slate-500">
               {fieldCommandSignal.detail}
             </p>
           </div>
@@ -1331,7 +1410,7 @@ export default function FieldDashboardPage() {
                       </p>
                     ) : null}
                     {selectedFocusTaskId === item.id && selectedFocusPatternHint ? (
-                      <p className="mt-2 text-xs font-medium text-amber-700">
+                      <p className="mt-2 text-xs font-medium text-violet-700">
                         {selectedFocusPatternHint}
                       </p>
                     ) : null}
@@ -1359,11 +1438,11 @@ export default function FieldDashboardPage() {
             ))}
           </div>
 
-          <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-4">
-            <p className="text-sm font-semibold text-amber-900">
+          <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <p className="text-sm font-semibold text-slate-900">
               Focus Mode Intent
             </p>
-            <p className="mt-2 text-sm text-amber-800">
+            <p className="mt-2 text-sm text-slate-700">
               {demoRole === "admin"
                 ? "Field focus mode should narrow execution to turf completion, strongest-canvasser allocation, and immediate follow-up generation from high-value conversations."
                 : demoRole === "director"
@@ -1374,68 +1453,7 @@ export default function FieldDashboardPage() {
         </div>
       </section>
 
-      <section
-        className={`grid gap-6 ${
-          demoRole === "general_user" ? "lg:grid-cols-2" : "lg:grid-cols-3"
-        }`}
-      >
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div className="text-sm font-medium text-slate-500">
-              Turf Pressure
-            </div>
-            <Route className="h-4 w-4 text-slate-500" />
-          </div>
 
-          <div className="mt-4 space-y-2 text-sm text-slate-700">
-            <div>Active turf: {visibleTurfRows.length}</div>
-            <div>Under 60% complete: {turfPressure.underSixtyCount}</div>
-            <div>Unfinished turf: {turfPressure.unfinishedCount}</div>
-          </div>
-        </div>
-
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div className="text-sm font-medium text-slate-500">
-              Conversation Yield
-            </div>
-            <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-          </div>
-
-          <div className="mt-4 space-y-2 text-sm text-slate-700">
-            <div>
-              Avg conversation rate:{" "}
-              {topLine.doors > 0
-                ? `${Math.round((topLine.conversations / topLine.doors) * 100)}%`
-                : "0%"}
-            </div>
-            <div>
-              Avg ID rate:{" "}
-              {topLine.conversations > 0
-                ? `${Math.round((topLine.ids / topLine.conversations) * 100)}%`
-                : "0%"}
-            </div>
-            <div>Best output: {getBestOutputName(canvasserRows)}</div>
-          </div>
-        </div>
-
-        {demoRole !== "general_user" ? (
-          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div className="text-sm font-medium text-slate-500">
-                Follow-Up Signal
-              </div>
-              <Zap className="h-4 w-4 text-amber-500" />
-            </div>
-
-            <div className="mt-4 space-y-2 text-sm text-slate-700">
-              <div>Generated follow-up lists: {generatedLists.length}</div>
-              <div>Conversation clusters to review: 0</div>
-              <div>Immediate action items: {visibleFocusQueue.length}</div>
-            </div>
-          </div>
-        ) : null}
-      </section>
 
     </div>
   );

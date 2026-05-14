@@ -124,7 +124,7 @@ function listTagTone(tag: OutreachListTag) {
       return "border border-purple-200 bg-purple-100 text-purple-700";
     case "outreach":
     default:
-      return "border border-amber-200 bg-amber-100 text-amber-800";
+      return "border border-violet-200 bg-violet-100 text-violet-800";
   }
 }
 
@@ -133,7 +133,7 @@ function patternSeverityTone(severity: AbePatternInsight["severity"]) {
     case "critical":
       return "border-rose-200 bg-rose-50 text-rose-900";
     case "important":
-      return "border-amber-200 bg-amber-50 text-amber-900";
+      return "border-amber-200 bg-amber-50 text-violet-900";
     case "watch":
     default:
       return "border-sky-200 bg-sky-50 text-sky-900";
@@ -824,8 +824,8 @@ function OutreachPageContent() {
         return {
           card: "border-amber-200 bg-amber-50",
           eyebrow: "text-amber-800",
-          title: "text-amber-900",
-          body: "text-amber-900/80",
+          title: "text-violet-900",
+          body: "text-violet-900/80",
           instruction: "text-amber-950",
           chip: "border-amber-300 bg-white text-amber-800",
           button: "bg-amber-600 hover:bg-amber-700 text-white",
@@ -1249,30 +1249,48 @@ function OutreachPageContent() {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
+      <section className="rounded-3xl border border-slate-800 bg-slate-950 p-6 text-white shadow-sm lg:p-8">
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div className="space-y-3">
-              <div className="flex items-center gap-2 text-sm text-slate-500">
+              <div className="flex items-center gap-2 text-sm text-slate-300">
                 <Megaphone className="h-4 w-4" />
                 Voter + contact engagement engine
               </div>
 
               <div className="space-y-2">
-                <h1 className="text-3xl font-semibold tracking-tight text-slate-900 lg:text-4xl">
+                <h1 className="text-3xl font-semibold tracking-tight text-white lg:text-4xl">
                   {perspectiveHeadline}
                 </h1>
-                <p className="max-w-3xl text-sm text-slate-600 lg:text-base">
+                <p className="max-w-3xl text-sm text-slate-300 lg:text-base">
                   {perspectiveSubheadline}
                 </p>
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-3 lg:justify-end">
+              <Link
+                href="/dashboard/contacts"
+                className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+              >
+                <ContactRound className="h-4 w-4" />
+                Contacts
+              </Link>
+
+              {demoRole !== "general_user" ? (
+                <Link
+                  href="/dashboard/lists"
+                  className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+                >
+                  <ListChecks className="h-4 w-4" />
+                  Lists
+                </Link>
+              ) : null}
+
               {demoRole === "admin" ? (
                 <Link
                   href="/dashboard/ingest?source=outreach"
-                  className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                  className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
                 >
                   <Users className="h-4 w-4" />
                   Import Contacts
@@ -1281,15 +1299,17 @@ function OutreachPageContent() {
 
               <Link
                 href="/dashboard/outreach/focus"
-                className="inline-flex items-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900 transition hover:bg-amber-100"
+                className="inline-flex items-center gap-2 rounded-2xl border border-amber-300 bg-amber-100 px-4 py-3 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-amber-200"
               >
-                <Zap className="h-4 w-4" />
-                Open Focus Mode
+                <Zap className="h-4 w-4 text-slate-950" />
+                <span className="text-slate-950">Open Focus Mode</span>
               </Link>
             </div>
           </div>
+        </div>
+      </section>
 
-          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 text-slate-950 shadow-sm">
             <div className="grid gap-5 lg:grid-cols-[1fr_1fr]">
               <div className="space-y-3">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
@@ -1347,39 +1367,39 @@ function OutreachPageContent() {
             </div>
           </section>
 
-          <section className="rounded-3xl border border-amber-200 bg-amber-50 p-6 shadow-sm">
+          <section className="rounded-3xl border border-violet-200 bg-violet-50 p-6 shadow-sm">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
               <div className="space-y-3">
-                <div className="flex items-center gap-2 text-sm text-amber-800">
+                <div className="flex items-center gap-2 text-sm text-violet-800">
                   <Sparkles className="h-4 w-4" />
                   Honest Abe
                 </div>
 
                 <div className="space-y-2">
-                  <p className="text-sm font-medium uppercase tracking-[0.18em] text-amber-700/80">
+                  <p className="text-sm font-medium uppercase tracking-[0.18em] text-violet-700/80">
                     {getRoleLabel(demoRole)}
                   </p>
 
-                  <div className="flex flex-wrap gap-4 text-sm text-amber-900">
+                  <div className="flex flex-wrap gap-4 text-sm text-violet-900">
                     <div>
-                      <span className="font-medium text-amber-700">Health:</span>{" "}
+                      <span className="font-medium text-violet-700">Health:</span>{" "}
                       {outreachAbeDisplayBriefing.health}
                     </div>
                     <div>
-                      <span className="font-medium text-amber-700">Strongest:</span>{" "}
+                      <span className="font-medium text-violet-700">Strongest:</span>{" "}
                       {departmentLabel(outreachAbeDisplayBriefing.strongest)}
                     </div>
                     <div>
-                      <span className="font-medium text-amber-700">Weakest:</span>{" "}
+                      <span className="font-medium text-violet-700">Weakest:</span>{" "}
                       {departmentLabel(outreachAbeDisplayBriefing.weakest)}
                     </div>
                     <div>
-                      <span className="font-medium text-amber-700">Status:</span>{" "}
+                      <span className="font-medium text-violet-700">Status:</span>{" "}
                       {outreachAbeDisplayBriefing.campaignStatus}
                     </div>
                   </div>
 
-                  <h2 className="text-2xl font-semibold text-amber-900">
+                  <h2 className="text-2xl font-semibold text-violet-900">
                     {outreachAbeDisplayBriefing.primaryLane === "outreach"
                       ? "Outreach is the lane that needs tight execution right now."
                       : `${departmentLabel(
@@ -1396,7 +1416,7 @@ function OutreachPageContent() {
                   </p>
 
                   {outreachAbeDisplayBriefing.crossDomainSignal ? (
-                    <p className="max-w-3xl text-sm text-amber-900/80">
+                    <p className="max-w-3xl text-sm text-violet-900/80">
                       {outreachAbeDisplayBriefing.crossDomainSignal}
                     </p>
                   ) : null}
@@ -1408,8 +1428,8 @@ function OutreachPageContent() {
               </div>
             </div>
 
-            <div className="mt-5 rounded-2xl border border-white/70 bg-white/70 p-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">
+            <div className="mt-5 rounded-2xl border border-violet-100 bg-white/80 p-5">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-700">
                 What Abe Would Do
               </p>
 
@@ -1429,8 +1449,8 @@ function OutreachPageContent() {
             </div>
 
             {outreachPatternWatch.length > 0 ? (
-              <div className="mt-5 rounded-2xl border border-white/70 bg-white/70 p-5">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">
+              <div className="mt-5 rounded-2xl border border-violet-100 bg-white/80 p-5">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-700">
                   Pattern Watch
                 </p>
                                 <div className="mt-3 space-y-3">
@@ -1556,8 +1576,6 @@ function OutreachPageContent() {
               </div>
             </section>
           )}
-        </div>
-      </section>
 
       <section
         className={`grid gap-4 ${
@@ -1582,7 +1600,7 @@ function OutreachPageContent() {
       </section>
 
       <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="grid gap-4 lg:grid-cols-[1fr_1fr_260px]">
+        <div className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
           <div className="flex items-center gap-3">
             <ListFilter className="h-4 w-4 text-slate-500" />
             <select
@@ -1609,35 +1627,21 @@ function OutreachPageContent() {
             />
           </div>
 
-          <div className="flex items-center justify-end gap-3">
-            {demoRole !== "general_user" ? (
-              <Link
-                href="/dashboard/lists"
-                className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50"
-              >
-                <ListChecks className="h-4 w-4" />
-                Lists
-              </Link>
-            ) : null}
-
-            <Link
-              href="/dashboard/contacts"
-              className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50"
-            >
-              <ContactRound className="h-4 w-4" />
-              Contacts
-            </Link>
-          </div>
         </div>
       </section>
 
-      <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+      <section className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-slate-900">
-              Contact Queue
-            </h2>
-            <span className="text-sm text-slate-500">
+          <div className="mb-4 flex items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium text-slate-500">
+                Engagement Workspace
+              </p>
+              <h2 className="text-lg font-semibold text-slate-900">
+                Contact View
+              </h2>
+            </div>
+            <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-sm text-slate-500">
               {visibleFilteredContacts.length} contacts
             </span>
           </div>
@@ -1688,7 +1692,7 @@ function OutreachPageContent() {
                   ) : null}
 
                   {selectedContactId === contact.id && selectedContactPatternHint ? (
-                    <p className="mt-2 text-xs font-medium text-amber-700">
+                    <p className="mt-2 text-xs font-medium text-violet-700">
                       {selectedContactPatternHint}
                     </p>
                   ) : null}
@@ -1705,6 +1709,61 @@ function OutreachPageContent() {
         </div>
 
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="mb-4 flex items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium text-slate-500">
+                Lists + Segments
+              </p>
+              <h2 className="text-lg font-semibold text-slate-900">
+                Outreach Universes
+              </h2>
+            </div>
+            <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-sm text-slate-500">
+              {visibleTaggedLists.length} lists
+            </span>
+          </div>
+
+          <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
+            {visibleTaggedLists.slice(0, 12).map((list) => (
+              <button
+                key={list.id}
+                type="button"
+                onClick={() => setSelectedListId(list.id)}
+                className={`w-full rounded-2xl border p-4 text-left transition ${
+                  selectedListId === list.id
+                    ? "border-slate-900 bg-slate-100"
+                    : "border-slate-200 bg-white hover:bg-slate-50"
+                }`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="font-medium text-slate-900">{list.name}</p>
+                    <p className="mt-1 text-sm text-slate-500">
+                      Owner: {list.default_owner_name || "Unassigned"}
+                    </p>
+                  </div>
+                  <span
+                    className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${listTagTone(
+                      list.tag
+                    )}`}
+                  >
+                    {list.tag}
+                  </span>
+                </div>
+              </button>
+            ))}
+
+            {visibleTaggedLists.length === 0 ? (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 text-center text-slate-500">
+                No lists available for this view.
+              </div>
+            ) : null}
+          </div>
+        </div>
+      </section>
+
+      <section className="hidden" aria-hidden="true">
+        <div>
           <div className="mb-4 flex items-center gap-2">
             <Headphones className="h-4 w-4 text-slate-500" />
             <h2 className="text-lg font-semibold text-slate-900">
@@ -1727,7 +1786,7 @@ function OutreachPageContent() {
               </p>
 
               {selectedContactPatternHint ? (
-                <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+                <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-violet-900">
                   {selectedContactPatternHint}
                 </div>
               ) : null}
@@ -1799,7 +1858,7 @@ function OutreachPageContent() {
         </div>
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+      <section className="hidden" aria-hidden="true">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
@@ -1857,7 +1916,7 @@ function OutreachPageContent() {
             </p>
 
             {selectedContactPatternHint ? (
-              <p className="mt-2 text-xs font-medium text-amber-700">
+              <p className="mt-2 text-xs font-medium text-violet-700">
                 {selectedContactPatternHint}
               </p>
             ) : null}

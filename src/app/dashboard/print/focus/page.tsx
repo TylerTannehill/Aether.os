@@ -1055,56 +1055,142 @@ export default function PrintFocusModePage() {
         </div>
       </section>
 
-<section className="grid gap-4 md:grid-cols-3">
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
+<section
+        className={`grid gap-4 ${
+          hasPrintDirector ? "md:grid-cols-3" : "md:grid-cols-2"
+        }`}
+      >
+        <div
+          className={`rounded-2xl border p-4 shadow-sm ${
+            grouped.approval.length > 0
+              ? "border-rose-200 bg-rose-50"
+              : "border-slate-200 bg-white"
+          }`}
+        >
           <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-amber-800">
+            <p
+              className={`text-xs font-medium ${
+                grouped.approval.length > 0 ? "text-rose-800" : "text-slate-700"
+              }`}
+            >
               Approval Priority
             </p>
-            <ClipboardCheck className="h-4 w-4 text-amber-700" />
+            <ClipboardCheck
+              className={`h-4 w-4 ${
+                grouped.approval.length > 0 ? "text-rose-700" : "text-slate-500"
+              }`}
+            />
           </div>
-          <p className="mt-2 text-xl font-semibold text-amber-900">
+          <p
+            className={`mt-2 text-xl font-semibold ${
+              grouped.approval.length > 0 ? "text-rose-900" : "text-slate-900"
+            }`}
+          >
             {grouped.approval.length}
           </p>
-          <p className="mt-1 text-xs text-amber-800">
+          <p
+            className={`mt-1 text-xs ${
+              grouped.approval.length > 0 ? "text-rose-800" : "text-slate-600"
+            }`}
+          >
             Immediate approval actions
           </p>
         </div>
 
         {hasPrintDirector ? (
-        <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-sky-800">
-              Inventory Pressure
+          <div
+            className={`rounded-2xl border p-4 shadow-sm ${
+              grouped.inventory.length > 0
+                ? "border-rose-200 bg-rose-50"
+                : "border-slate-200 bg-white"
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <p
+                className={`text-xs font-medium ${
+                  grouped.inventory.length > 0
+                    ? "text-rose-800"
+                    : "text-slate-700"
+                }`}
+              >
+                Inventory Pressure
+              </p>
+              <Boxes
+                className={`h-4 w-4 ${
+                  grouped.inventory.length > 0
+                    ? "text-rose-700"
+                    : "text-slate-500"
+                }`}
+              />
+            </div>
+            <p
+              className={`mt-2 text-xl font-semibold ${
+                grouped.inventory.length > 0
+                  ? "text-rose-900"
+                  : "text-slate-900"
+              }`}
+            >
+              {grouped.inventory.length}
             </p>
-            <Boxes className="h-4 w-4 text-sky-700" />
+            <p
+              className={`mt-1 text-xs ${
+                grouped.inventory.length > 0
+                  ? "text-rose-800"
+                  : "text-slate-600"
+              }`}
+            >
+              Protection moves
+            </p>
           </div>
-          <p className="mt-2 text-xl font-semibold text-sky-900">
-            {grouped.inventory.length}
-          </p>
-          <p className="mt-1 text-xs text-sky-800">
-            Protection moves
-          </p>
-        </div>
         ) : null}
 
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm">
+        <div
+          className={`rounded-2xl border p-4 shadow-sm ${
+            grouped.delivery.length > 0
+              ? "border-emerald-200 bg-emerald-50"
+              : "border-slate-200 bg-white"
+          }`}
+        >
           <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-emerald-800">
+            <p
+              className={`text-xs font-medium ${
+                grouped.delivery.length > 0
+                  ? "text-emerald-800"
+                  : "text-slate-700"
+              }`}
+            >
               Delivery Queue
             </p>
-            <Truck className="h-4 w-4 text-emerald-700" />
+            <Truck
+              className={`h-4 w-4 ${
+                grouped.delivery.length > 0
+                  ? "text-emerald-700"
+                  : "text-slate-500"
+              }`}
+            />
           </div>
-          <p className="mt-2 text-xl font-semibold text-emerald-900">
+          <p
+            className={`mt-2 text-xl font-semibold ${
+              grouped.delivery.length > 0
+                ? "text-emerald-900"
+                : "text-slate-900"
+            }`}
+          >
             {grouped.delivery.length}
           </p>
-          <p className="mt-1 text-xs text-emerald-800">
+          <p
+            className={`mt-1 text-xs ${
+              grouped.delivery.length > 0
+                ? "text-emerald-800"
+                : "text-slate-600"
+            }`}
+          >
             ETA checks
           </p>
         </div>
       </section>
 
-      <section className="rounded-3xl border border-amber-200 bg-amber-50 p-6 shadow-sm">
+      <section className="hidden" aria-hidden="true">
         <div className="flex items-start gap-3">
           <Sparkles className="mt-0.5 h-5 w-5 text-amber-700" />
           <div>

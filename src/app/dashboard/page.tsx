@@ -58,6 +58,13 @@ import {
   buildAetherSummaryText,
 } from "@/lib/intelligence/aggregator";
 import {
+  type DashboardDepartmentId,
+  type DashboardSignalState,
+  getDashboardStateTone,
+  getDashboardStateTextTone,
+  getDepartmentHealthState,
+} from "@/lib/intelligence/dashboard-tones";
+import {
   getTopTriggerActions,
   buildActionItemsFromTriggers,
 } from "@/lib/intelligence/action-triggers";
@@ -1747,7 +1754,7 @@ export default function DashboardPage() {
     if (abeBriefing.primaryLane === "finance") {
       signals.push({
         type: "pressure",
-        label: "Pledge Pressure",
+        label: "Pledge Follow-Up",
         value: `$${financeSnapshot.pledges.toLocaleString()}`,
         sub: "Pending pledged dollars are still sitting uncollected.",
         route: "/dashboard/finance",
@@ -1769,7 +1776,7 @@ export default function DashboardPage() {
     if (abeBriefing.primaryLane === "digital") {
       signals.push({
         type: "pressure",
-        label: "Sentiment Pressure",
+        label: "Digital Sentiment",
         value: `${digitalSentimentRatio.positive}% / ${digitalSentimentRatio.negative}%`,
         sub: "Public-facing pressure is sitting in sentiment balance.",
         route: "/dashboard/digital",
@@ -1791,7 +1798,7 @@ export default function DashboardPage() {
     const opportunityCandidates = [
       {
         type: "opportunity" as const,
-        label: "Digital Momentum",
+        label: "Digital Reach",
         value: digitalSnapshot.impressions.toLocaleString(),
         sub: "Reach volume is helping expand top-of-funnel opportunity.",
         route: "/dashboard/digital",
@@ -1900,38 +1907,97 @@ export default function DashboardPage() {
     );
   }, [abeSignals, effectiveRole, effectiveDepartment]);
 
+  const dashboardTeamStates = useMemo<Record<DashboardDepartmentId, DashboardSignalState>>(() => {
+    const financePressure = Math.max(
+      0,
+      Math.round(financeSnapshot.moneyOut > financeSnapshot.moneyIn ? 3 : 0) +
+        Math.round(financeSnapshot.pledges / 1000)
+    );
+    const financeOpportunity = Math.max(
+      0,
+      Math.round(financeSnapshot.moneyIn / 1000)
+    );
+
+    const fieldPressure = Math.max(0, 100 - fieldAverageCompletion);
+    const fieldOpportunity = Math.max(
+      0,
+      Math.round(fieldSnapshot.conversations / 10)
+    );
+
+    const digitalPressure = digitalSentimentRatio.negative;
+    const digitalOpportunity = Math.max(
+      0,
+      Math.round(digitalSnapshot.impressions / 5000)
+    );
+
+    const printPressure = Math.max(
+      0,
+      printSnapshot.orders * 8 - printSnapshot.approvalReady * 3
+    );
+    const printOpportunity = Math.max(0, printSnapshot.approvalReady * 10);
+
+    return {
+      digital: getDepartmentHealthState({
+        pressure: digitalPressure,
+        opportunity: digitalOpportunity,
+      }),
+      field: getDepartmentHealthState({
+        pressure: fieldPressure,
+        opportunity: fieldOpportunity,
+      }),
+      print: getDepartmentHealthState({
+        pressure: printPressure,
+        opportunity: printOpportunity,
+      }),
+      finance: getDepartmentHealthState({
+        pressure: financePressure,
+        opportunity: financeOpportunity,
+      }),
+    };
+  }, [
+    financeSnapshot.moneyIn,
+    financeSnapshot.moneyOut,
+    financeSnapshot.pledges,
+    fieldAverageCompletion,
+    fieldSnapshot.conversations,
+    digitalSentimentRatio.negative,
+    digitalSnapshot.impressions,
+    printSnapshot.orders,
+    printSnapshot.approvalReady,
+  ]);
+
   const visibleSnapshotCards = useMemo(() => {
     const allCards = [
       {
         id: "digital",
-        label: "Content + Paid Snapshot",
+        label: "Digital Team",
         body: digitalSnapshot.issue,
         href: "/dashboard/digital",
-        tone: "border-sky-200 bg-sky-50",
+        tone: getDashboardStateTone(dashboardTeamStates.digital),
       },
       {
         id: "field",
-        label: "Turf + Canvass Snapshot",
+        label: "Field Team",
         body: fieldSnapshot.issue,
         href: "/dashboard/field",
-        tone: "border-emerald-200 bg-emerald-50",
+        tone: getDashboardStateTone(dashboardTeamStates.field),
       },
       {
         id: "print",
-        label: "Materials + Delivery Snapshot",
+        label: "Print Team",
         body: printSnapshot.issue,
         href: "/dashboard/print",
-        tone: "border-amber-200 bg-amber-50",
+        tone: getDashboardStateTone(dashboardTeamStates.print),
       },
       {
         id: "finance",
-        label: "Revenue + Compliance Snapshot",
+        label: "Finance Team",
         body:
           financeSnapshot.moneyOut > financeSnapshot.moneyIn
             ? "Spending pressure is outpacing revenue."
             : "Revenue flow is healthy.",
         href: "/dashboard/finance",
-        tone: "border-emerald-200 bg-emerald-50",
+        tone: getDashboardStateTone(dashboardTeamStates.finance),
       },
     ];
 
@@ -1949,6 +2015,7 @@ export default function DashboardPage() {
     printSnapshot.issue,
     financeSnapshot.moneyIn,
     financeSnapshot.moneyOut,
+    dashboardTeamStates,
   ]);
 
   const visibleLaneIds = useMemo(() => {
@@ -2094,23 +2161,23 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
+      <section className="rounded-3xl border border-slate-800 bg-slate-950 p-6 text-white shadow-sm lg:p-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm text-slate-500">
+            <div className="flex items-center gap-2 text-sm text-slate-300">
               <Activity className="h-4 w-4" />
-              Executive command center
+              Executive campaign hub
             </div>
 
             <div className="space-y-2">
-              <h1 className="text-3xl font-semibold tracking-tight text-slate-900 lg:text-4xl">
-                Daily Command Center
+              <h1 className="text-3xl font-semibold tracking-tight text-white lg:text-4xl">
+                Campaign Hub
               </h1>
-              <p className="max-w-3xl text-sm text-slate-600 lg:text-base">
+              <p className="max-w-3xl text-sm text-slate-300 lg:text-base">
                 See org health, spot pressure fast, and understand where attention is
                 needed before moving into execution.
               </p>
-              <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-700">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-medium text-slate-200">
                 <Users className="h-3.5 w-3.5" />
                 {userContextLoading
                   ? "Loading org context..."
@@ -2119,44 +2186,46 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-3">
-            <button
-              onClick={loadData}
-              className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-            >
-              Refresh
-            </button>
-
+          <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={() => {
                 applyMyDashboard();
                 router.push("/dashboard/profile");
               }}
-              className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+              className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-900 transition hover:bg-emerald-100"
             >
               My Profile
             </button>
+
+            {canAccessAdmin ? (
+              <Link
+                href="/dashboard/admin"
+                className="inline-flex items-center gap-2 rounded-2xl border border-slate-700 bg-slate-800 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
+              >
+                <Settings className="h-4 w-4" />
+                Admin Control
+              </Link>
+            ) : null}
 
             <button
               type="button"
               onClick={() =>
                 openFocusBucket("immediate", undefined, "overview_focus_entry")
               }
-              className="inline-flex items-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900 transition hover:bg-amber-100"
+              className="inline-flex items-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900 transition hover:bg-amber-100"
             >
               <Zap className="h-4 w-4" />
               Open Focus Mode
             </button>
 
-            {canAccessAdmin ? (
-              <Link
-                href="/dashboard/admin"
-                className="inline-flex items-center gap-2 rounded-2xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm font-medium text-indigo-900 transition hover:bg-indigo-100"
-              >
-                <Settings className="h-4 w-4" />
-                Admin Control
-              </Link>
-            ) : null}
+            <button
+              onClick={loadData}
+              aria-label="Refresh dashboard"
+              title="Refresh dashboard"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-slate-300 transition hover:bg-white/10 hover:text-white"
+            >
+              <Activity className="h-4 w-4" />
+            </button>
           </div>
         </div>
       </section>
@@ -2413,15 +2482,17 @@ export default function DashboardPage() {
               onClick={() =>
                 openFocusBucket("pipeline", "digital", "digital_total_impressions")
               }
-              className="flex min-h-[176px] flex-col rounded-3xl border border-violet-200 bg-violet-50 p-6 text-left shadow-sm transition hover:bg-violet-100"
+              className={`flex min-h-[176px] flex-col rounded-3xl border p-6 text-left shadow-sm transition ${getDashboardStateTone(
+                dashboardTeamStates.digital
+              )}`}
             >
-              <p className="text-sm font-medium text-violet-800">
-                Digital Reach Momentum
+              <p className={`text-sm font-medium ${getDashboardStateTextTone(dashboardTeamStates.digital)}`}>
+                Digital Reach
               </p>
               <p className="mt-4 text-2xl font-semibold text-slate-950">
                 {digitalSnapshot.impressions.toLocaleString()}
               </p>
-              <p className="mt-5 max-w-[18rem] text-sm leading-7 text-violet-800">
+              <p className={`mt-5 max-w-[18rem] text-sm leading-7 ${getDashboardStateTextTone(dashboardTeamStates.digital)}`}>
                 Reach volume shaping digital opportunity
               </p>
             </button>
@@ -2430,15 +2501,17 @@ export default function DashboardPage() {
               onClick={() =>
                 openFocusBucket("fixNow", "digital", "digital_sentiment_pressure")
               }
-              className="flex min-h-[176px] flex-col rounded-3xl border border-rose-200 bg-rose-50 p-6 text-left shadow-sm transition hover:bg-rose-100"
+              className={`flex min-h-[176px] flex-col rounded-3xl border p-6 text-left shadow-sm transition ${getDashboardStateTone(
+                dashboardTeamStates.digital
+              )}`}
             >
-              <p className="text-sm font-medium text-rose-800">
-                Sentiment Pressure
+              <p className={`text-sm font-medium ${getDashboardStateTextTone(dashboardTeamStates.digital)}`}>
+                Digital Sentiment
               </p>
               <p className="mt-4 text-2xl font-semibold text-slate-950">
                 {digitalSentimentRatio.positive}% / {digitalSentimentRatio.negative}%
               </p>
-              <p className="mt-5 max-w-[18rem] text-sm leading-7 text-rose-800">
+              <p className={`mt-5 max-w-[18rem] text-sm leading-7 ${getDashboardStateTextTone(dashboardTeamStates.digital)}`}>
                 Negative signal that may need intervention
               </p>
             </button>
@@ -2451,15 +2524,17 @@ export default function DashboardPage() {
               onClick={() =>
                 openFocusBucket("immediate", "field", "field_doors_knocked")
               }
-              className="flex min-h-[176px] flex-col rounded-3xl border border-emerald-200 bg-emerald-50 p-6 text-left shadow-sm transition hover:bg-emerald-100"
+              className={`flex min-h-[176px] flex-col rounded-3xl border p-6 text-left shadow-sm transition ${getDashboardStateTone(
+                dashboardTeamStates.field
+              )}`}
             >
-              <p className="text-sm font-medium text-emerald-800">
+              <p className={`text-sm font-medium ${getDashboardStateTextTone(dashboardTeamStates.field)}`}>
                 Field Contact Rate
               </p>
               <p className="mt-4 text-2xl font-semibold text-slate-950">
                 {fieldSnapshot.doors.toLocaleString()}
               </p>
-              <p className="mt-5 max-w-[18rem] text-sm leading-7 text-emerald-800">
+              <p className={`mt-5 max-w-[18rem] text-sm leading-7 ${getDashboardStateTextTone(dashboardTeamStates.field)}`}>
                 Active turf volume pushing field progress
               </p>
             </button>
@@ -2468,15 +2543,17 @@ export default function DashboardPage() {
               onClick={() =>
                 openFocusBucket("routing", "field", "field_turf_completion")
               }
-              className="flex min-h-[176px] flex-col rounded-3xl border border-sky-200 bg-sky-50 p-6 text-left shadow-sm transition hover:bg-sky-100"
+              className={`flex min-h-[176px] flex-col rounded-3xl border p-6 text-left shadow-sm transition ${getDashboardStateTone(
+                dashboardTeamStates.field
+              )}`}
             >
-              <p className="text-sm font-medium text-sky-800">
-                Turf Completion Pressure
+              <p className={`text-sm font-medium ${getDashboardStateTextTone(dashboardTeamStates.field)}`}>
+                Turf Completion
               </p>
               <p className="mt-4 text-2xl font-semibold text-slate-950">
                 {fieldAverageCompletion}%
               </p>
-              <p className="mt-5 max-w-[18rem] text-sm leading-7 text-sky-800">
+              <p className={`mt-5 max-w-[18rem] text-sm leading-7 ${getDashboardStateTextTone(dashboardTeamStates.field)}`}>
                 Coverage pace that may require rebalancing
               </p>
             </button>
@@ -2489,15 +2566,17 @@ export default function DashboardPage() {
               onClick={() =>
                 openFocusBucket("routing", "print", "print_inventory_pressure")
               }
-              className="flex min-h-[176px] flex-col rounded-3xl border border-amber-200 bg-amber-50 p-6 text-left shadow-sm transition hover:bg-amber-100"
+              className={`flex min-h-[176px] flex-col rounded-3xl border p-6 text-left shadow-sm transition ${getDashboardStateTone(
+                dashboardTeamStates.print
+              )}`}
             >
-              <p className="text-sm font-medium text-amber-800">
+              <p className={`text-sm font-medium ${getDashboardStateTextTone(dashboardTeamStates.print)}`}>
                 Inventory Pressure
               </p>
               <p className="mt-4 text-2xl font-semibold text-slate-950">
                 {printSnapshot.onHand.toLocaleString()}
               </p>
-              <p className="mt-5 max-w-[18rem] text-sm leading-7 text-amber-800">
+              <p className={`mt-5 max-w-[18rem] text-sm leading-7 ${getDashboardStateTextTone(dashboardTeamStates.print)}`}>
                 Materials currently available on hand
               </p>
             </button>
@@ -2506,15 +2585,17 @@ export default function DashboardPage() {
               onClick={() =>
                 openFocusBucket("fixNow", "print", "print_delivery_risk")
               }
-              className="flex min-h-[176px] flex-col rounded-3xl border border-rose-200 bg-rose-50 p-6 text-left shadow-sm transition hover:bg-rose-100"
+              className={`flex min-h-[176px] flex-col rounded-3xl border p-6 text-left shadow-sm transition ${getDashboardStateTone(
+                dashboardTeamStates.print
+              )}`}
             >
-              <p className="text-sm font-medium text-rose-800">
+              <p className={`text-sm font-medium ${getDashboardStateTextTone(dashboardTeamStates.print)}`}>
                 Delivery Risk
               </p>
               <p className="mt-4 text-2xl font-semibold text-slate-950">
                 {printSnapshot.orders}
               </p>
-              <p className="mt-5 max-w-[18rem] text-sm leading-7 text-rose-800">
+              <p className={`mt-5 max-w-[18rem] text-sm leading-7 ${getDashboardStateTextTone(dashboardTeamStates.print)}`}>
                 Orders that may impact timelines
               </p>
             </button>
@@ -2527,13 +2608,15 @@ export default function DashboardPage() {
               onClick={() =>
                 openFocusBucket("routing", "finance", "finance_net_position")
               }
-              className="flex min-h-[176px] flex-col rounded-3xl border border-sky-200 bg-sky-50 p-6 text-left shadow-sm transition hover:bg-sky-100"
+              className={`flex min-h-[176px] flex-col rounded-3xl border p-6 text-left shadow-sm transition ${getDashboardStateTone(
+                dashboardTeamStates.finance
+              )}`}
             >
-              <p className="text-sm font-medium text-sky-800">Net Position</p>
+              <p className={`text-sm font-medium ${getDashboardStateTextTone(dashboardTeamStates.finance)}`}>Net Position</p>
               <p className="mt-4 text-2xl font-semibold text-slate-950">
                 ${financeSnapshot.net.toLocaleString()}
               </p>
-              <p className="mt-5 max-w-[18rem] text-sm leading-7 text-sky-800">
+              <p className={`mt-5 max-w-[18rem] text-sm leading-7 ${getDashboardStateTextTone(dashboardTeamStates.finance)}`}>
                 Balance between incoming and outgoing cash
               </p>
             </button>
@@ -2542,15 +2625,17 @@ export default function DashboardPage() {
               onClick={() =>
                 openFocusBucket("followUp", "finance", "finance_pledges_pending")
               }
-              className="flex min-h-[176px] flex-col rounded-3xl border border-amber-200 bg-amber-50 p-6 text-left shadow-sm transition hover:bg-amber-100"
+              className={`flex min-h-[176px] flex-col rounded-3xl border p-6 text-left shadow-sm transition ${getDashboardStateTone(
+                dashboardTeamStates.finance
+              )}`}
             >
-              <p className="text-sm font-medium text-amber-800">
-                Pledge Follow-Up Pressure
+              <p className={`text-sm font-medium ${getDashboardStateTextTone(dashboardTeamStates.finance)}`}>
+                Pledge Follow-Up
               </p>
               <p className="mt-4 text-2xl font-semibold text-slate-950">
                 ${financeSnapshot.pledges.toLocaleString()}
               </p>
-              <p className="mt-5 max-w-[18rem] text-sm leading-7 text-amber-800">
+              <p className={`mt-5 max-w-[18rem] text-sm leading-7 ${getDashboardStateTextTone(dashboardTeamStates.finance)}`}>
                 Dollars still waiting to be collected
               </p>
             </button>

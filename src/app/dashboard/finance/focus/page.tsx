@@ -1828,60 +1828,150 @@ export default function FinanceFocusModePage() {
       </section>
 
 <section className="grid gap-4 md:grid-cols-4">
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm">
+        <div
+          className={`rounded-2xl border p-4 shadow-sm ${
+            grouped.pledge.length > 0
+              ? "border-emerald-200 bg-emerald-50"
+              : "border-slate-200 bg-white"
+          }`}
+        >
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-emerald-800">
+            <p
+              className={`text-sm font-medium ${
+                grouped.pledge.length > 0 ? "text-emerald-800" : "text-slate-700"
+              }`}
+            >
               Pledge
             </p>
-            <HandCoins className="h-5 w-5 text-emerald-700" />
+            <HandCoins
+              className={`h-5 w-5 ${
+                grouped.pledge.length > 0 ? "text-emerald-700" : "text-slate-500"
+              }`}
+            />
           </div>
-          <p className="mt-2 text-xl font-semibold text-emerald-900">
+          <p
+            className={`mt-2 text-xl font-semibold ${
+              grouped.pledge.length > 0 ? "text-emerald-900" : "text-slate-900"
+            }`}
+          >
             {grouped.pledge.length}
           </p>
-          <p className="mt-1 text-xs text-emerald-800">
+          <p
+            className={`mt-1 text-xs ${
+              grouped.pledge.length > 0 ? "text-emerald-800" : "text-slate-600"
+            }`}
+          >
             Collection and follow-up actions
           </p>
         </div>
 
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
+        <div
+          className={`rounded-2xl border p-4 shadow-sm ${
+            grouped.compliance.length > 0
+              ? "border-rose-200 bg-rose-50"
+              : "border-slate-200 bg-white"
+          }`}
+        >
           <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-amber-800">
+            <p
+              className={`text-xs font-medium ${
+                grouped.compliance.length > 0 ? "text-rose-800" : "text-slate-700"
+              }`}
+            >
               Compliance
             </p>
-            <CheckCircle2 className="h-5 w-5 text-amber-700" />
+            <CheckCircle2
+              className={`h-5 w-5 ${
+                grouped.compliance.length > 0 ? "text-rose-700" : "text-slate-500"
+              }`}
+            />
           </div>
-          <p className="mt-2 text-xl font-semibold text-amber-900">
+          <p
+            className={`mt-2 text-xl font-semibold ${
+              grouped.compliance.length > 0 ? "text-rose-900" : "text-slate-900"
+            }`}
+          >
             {grouped.compliance.length}
           </p>
-          <p className="mt-1 text-xs text-amber-800">
+          <p
+            className={`mt-1 text-xs ${
+              grouped.compliance.length > 0 ? "text-rose-800" : "text-slate-600"
+            }`}
+          >
             Missing data and export-readiness work
           </p>
         </div>
 
-        <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4 shadow-sm">
+        <div
+          className={`rounded-2xl border p-4 shadow-sm ${
+            grouped.entry.length > 0
+              ? "border-rose-200 bg-rose-50"
+              : "border-slate-200 bg-white"
+          }`}
+        >
           <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-sky-800">
+            <p
+              className={`text-xs font-medium ${
+                grouped.entry.length > 0 ? "text-rose-800" : "text-slate-700"
+              }`}
+            >
               Entry
             </p>
-            <FileSpreadsheet className="h-5 w-5 text-sky-700" />
+            <FileSpreadsheet
+              className={`h-5 w-5 ${
+                grouped.entry.length > 0 ? "text-rose-700" : "text-slate-500"
+              }`}
+            />
           </div>
-          <p className="mt-2 text-xl font-semibold text-sky-900">
+          <p
+            className={`mt-2 text-xl font-semibold ${
+              grouped.entry.length > 0 ? "text-rose-900" : "text-slate-900"
+            }`}
+          >
             {grouped.entry.length}
           </p>
-          <p className="mt-1 text-xs text-sky-800">
+          <p
+            className={`mt-1 text-xs ${
+              grouped.entry.length > 0 ? "text-rose-800" : "text-slate-600"
+            }`}
+          >
             Contribution and receipt entry actions
           </p>
         </div>
 
-        <div className="rounded-2xl border border-emerald-200 bg-white p-4 shadow-sm">
+        <div
+          className={`rounded-2xl border p-4 shadow-sm ${
+            callTargets.length > 0
+              ? "border-emerald-200 bg-emerald-50"
+              : "border-slate-200 bg-white"
+          }`}
+        >
           <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-slate-500">Call Targets</p>
-            <Phone className="h-5 w-5 text-emerald-600" />
+            <p
+              className={`text-xs font-medium ${
+                callTargets.length > 0 ? "text-emerald-800" : "text-slate-700"
+              }`}
+            >
+              Call Targets
+            </p>
+            <Phone
+              className={`h-5 w-5 ${
+                callTargets.length > 0 ? "text-emerald-700" : "text-slate-500"
+              }`}
+            />
           </div>
-          <p className="mt-2 text-xl font-semibold text-slate-900">
+          <p
+            className={`mt-2 text-xl font-semibold ${
+              callTargets.length > 0 ? "text-emerald-900" : "text-slate-900"
+            }`}
+          >
             {callTargets.length}
           </p>
-          <p className="mt-2 text-sm text-slate-600">
+          <p
+            className={`mt-2 text-sm ${
+              callTargets.length > 0 ? "text-emerald-800" : "text-slate-600"
+            }`}
+          >
             {loadingTargets
               ? "Loading live finance targets"
               : "Native finance call session queue"}
@@ -1889,7 +1979,7 @@ export default function FinanceFocusModePage() {
         </div>
       </section>
 
-      <section className="rounded-3xl border border-amber-200 bg-amber-50 p-6 shadow-sm">
+      <section className="hidden" aria-hidden="true">
         <div className="flex items-start gap-3">
           <Sparkles className="mt-0.5 h-5 w-5 text-amber-700" />
           <div>

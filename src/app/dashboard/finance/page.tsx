@@ -352,6 +352,65 @@ function buildFinanceMetrics(input: {
 }
 
 
+function getFinanceMetricTone(metric: FinanceMetricCard) {
+  if (metric.id === "money_in") {
+    return metric.trend === "up"
+      ? "border-emerald-200 bg-emerald-50 text-emerald-950"
+      : "border-slate-200 bg-white text-slate-900";
+  }
+
+  if (metric.id === "money_out") {
+    return metric.trend === "down"
+      ? "border-amber-200 bg-amber-50 text-amber-950"
+      : "border-slate-200 bg-white text-slate-900";
+  }
+
+  if (metric.id === "net") {
+    if (metric.trend === "up") {
+      return "border-emerald-200 bg-emerald-50 text-emerald-950";
+    }
+
+    if (metric.trend === "down") {
+      return "border-rose-200 bg-rose-50 text-rose-950";
+    }
+
+    return "border-slate-200 bg-white text-slate-900";
+  }
+
+  if (metric.id === "pledges") {
+    return metric.trend === "neutral"
+      ? "border-amber-200 bg-amber-50 text-amber-950"
+      : "border-slate-200 bg-white text-slate-900";
+  }
+
+  return "border-slate-200 bg-white text-slate-900";
+}
+
+function getFinanceMetricMutedTone(metric: FinanceMetricCard) {
+  if (metric.id === "money_in" && metric.trend === "up") {
+    return "text-emerald-700";
+  }
+
+  if (metric.id === "money_out" && metric.trend === "down") {
+    return "text-amber-700";
+  }
+
+  if (metric.id === "net" && metric.trend === "up") {
+    return "text-emerald-700";
+  }
+
+  if (metric.id === "net" && metric.trend === "down") {
+    return "text-rose-700";
+  }
+
+  if (metric.id === "pledges") {
+    return "text-amber-700";
+  }
+
+  return "text-slate-500";
+}
+
+
 function patternSeverityTone(severity: AbePatternInsight["severity"]) {
   switch (severity) {
     case "critical":
@@ -1163,44 +1222,44 @@ export default function FinanceDashboardPage() {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
+      <section className="rounded-3xl border border-slate-800 bg-slate-950 p-6 text-white shadow-sm lg:p-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm text-slate-500">
+            <div className="flex items-center gap-2 text-sm text-slate-300">
               <Landmark className="h-4 w-4" />
               Revenue + compliance engine
             </div>
 
             <div className="space-y-2">
-              <h1 className="text-3xl font-semibold tracking-tight text-slate-900 lg:text-4xl">
+              <h1 className="text-3xl font-semibold tracking-tight text-white lg:text-4xl">
                 {perspectiveHeadline}
               </h1>
-              <p className="max-w-3xl text-sm text-slate-600 lg:text-base">
+              <p className="max-w-3xl text-sm text-slate-300 lg:text-base">
                 {perspectiveSubheadline}
               </p>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 lg:justify-end">
             <Link
               href="/dashboard/finance/focus"
-              className="inline-flex items-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900 transition hover:bg-amber-100"
+              className="inline-flex items-center gap-2 rounded-2xl border border-amber-300 bg-amber-100 px-4 py-3 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-amber-200"
             >
-              <Zap className="h-4 w-4" />
-              Open Focus Mode
+              <Zap className="h-4 w-4 text-slate-950" />
+              <span className="text-slate-950">Open Focus Mode</span>
             </Link>
 
             {demoRole !== "general_user" ? (
-              <button className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50">
+              <button className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800">
                 <FileSpreadsheet className="h-4 w-4" />
                 Export Finance
               </button>
             ) : null}
 
             {demoRole !== "general_user" ? (
-              <button className="inline-flex items-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900 hover:bg-amber-100">
-                <AlertTriangle className="h-4 w-4" />
-                Compliance Review Needed
+              <button className="inline-flex items-center gap-2 rounded-2xl border border-amber-300 bg-amber-100 px-4 py-3 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-amber-200">
+                <AlertTriangle className="h-4 w-4 text-slate-950" />
+                <span className="text-slate-950">Compliance Review Needed</span>
               </button>
             ) : null}
           </div>
@@ -1263,39 +1322,39 @@ export default function FinanceDashboardPage() {
         </div>
       </section>
 
-      <section className="rounded-3xl border border-amber-200 bg-amber-50 p-6 shadow-sm">
+      <section className="rounded-3xl border border-violet-200 bg-violet-50 p-6 shadow-sm">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm text-amber-800">
+            <div className="flex items-center gap-2 text-sm text-violet-800">
               <Sparkles className="h-4 w-4" />
               Honest Abe
             </div>
 
             <div className="space-y-2">
-              <p className="text-sm font-medium uppercase tracking-[0.18em] text-amber-700/80">
+              <p className="text-sm font-medium uppercase tracking-[0.18em] text-violet-700/80">
                 {getRoleLabel(demoRole)}
               </p>
 
-              <div className="flex flex-wrap gap-4 text-sm text-amber-900">
+              <div className="flex flex-wrap gap-4 text-sm text-violet-900">
                 <div>
-                  <span className="font-medium text-amber-700">Health:</span>{" "}
+                  <span className="font-medium text-violet-700">Health:</span>{" "}
                   {financeAbeBriefing.health}
                 </div>
                 <div>
-                  <span className="font-medium text-amber-700">Strongest:</span>{" "}
+                  <span className="font-medium text-violet-700">Strongest:</span>{" "}
                   {departmentLabel(financeAbeBriefing.strongest)}
                 </div>
                 <div>
-                  <span className="font-medium text-amber-700">Weakest:</span>{" "}
+                  <span className="font-medium text-violet-700">Weakest:</span>{" "}
                   {departmentLabel(financeAbeBriefing.weakest)}
                 </div>
                 <div>
-                  <span className="font-medium text-amber-700">Status:</span>{" "}
+                  <span className="font-medium text-violet-700">Status:</span>{" "}
                   {financeAbeBriefing.campaignStatus}
                 </div>
               </div>
 
-              <h2 className="text-2xl font-semibold text-amber-900">
+              <h2 className="text-2xl font-semibold text-violet-900">
                 {financeAbeBriefing.primaryLane === "finance"
                   ? "Finance is the lane that needs tight control right now."
                   : `${departmentLabel(
@@ -1312,7 +1371,7 @@ export default function FinanceDashboardPage() {
               </p>
 
               {financeAbeBriefing.crossDomainSignal ? (
-                <p className="max-w-3xl text-sm text-amber-900/80">
+                <p className="max-w-3xl text-sm text-violet-900/80">
                   {financeAbeBriefing.crossDomainSignal}
                 </p>
               ) : null}
@@ -1324,8 +1383,8 @@ export default function FinanceDashboardPage() {
           </div>
         </div>
 
-        <div className="mt-5 rounded-2xl border border-white/70 bg-white/70 p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">
+        <div className="mt-5 rounded-2xl border border-violet-100 bg-white/80 p-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-700">
             What Abe Would Do
           </p>
 
@@ -1345,8 +1404,8 @@ export default function FinanceDashboardPage() {
         </div>
 
         {financePatternWatch.length > 0 ? (
-          <div className="mt-5 rounded-2xl border border-white/70 bg-white/70 p-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">
+          <div className="mt-5 rounded-2xl border border-violet-100 bg-white/80 p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-700">
               Pattern Watch
             </p>
                         <div className="mt-3 space-y-3">
@@ -1378,24 +1437,28 @@ export default function FinanceDashboardPage() {
         {visibleMetrics.map((metric) => (
           <div
             key={metric.id}
-            className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
+            className={`rounded-3xl border p-6 shadow-sm ${getFinanceMetricTone(
+              metric
+            )}`}
           >
             <div className="flex items-center justify-between">
-              <p className="text-sm font-medium text-slate-500">
+              <p className={`text-sm font-medium ${getFinanceMetricMutedTone(metric)}`}>
                 {metric.label}
               </p>
               {metric.trend === "up" ? (
                 <TrendingUp className="h-4 w-4 text-emerald-500" />
               ) : metric.trend === "down" ? (
-                <TrendingDown className="h-4 w-4 text-rose-500" />
+                <TrendingDown className="h-4 w-4 text-amber-500" />
               ) : null}
             </div>
 
-            <p className="mt-3 text-3xl font-semibold text-slate-900">
+            <p className="mt-3 text-3xl font-semibold">
               {metric.value}
             </p>
 
-            <p className="mt-2 text-sm text-slate-500">{metric.helper}</p>
+            <p className={`mt-2 text-sm ${getFinanceMetricMutedTone(metric)}`}>
+              {metric.helper}
+            </p>
           </div>
         ))}
       </section>
@@ -1633,7 +1696,7 @@ export default function FinanceDashboardPage() {
         </div>
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="hidden" aria-hidden="true">
         <div className="mb-6 flex items-center justify-between">
           <div>
             <p className="text-sm font-medium text-slate-500">

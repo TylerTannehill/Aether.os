@@ -29,32 +29,27 @@ type NavItem = {
 };
 
 type OrgMemberRole = {
-  id: string;
-  organization_member_id: string;
-  organization_id: string;
   department: string;
   role_level: string;
   is_primary?: boolean;
 };
 
-type OrgMembersResponse = {
-  organizationId?: string;
-  currentMember?: {
+type CurrentContextResponse = {
+  organization?: {
     id: string;
+    name?: string | null;
+    slug?: string | null;
+  } | null;
+  membership?: {
+    id: string;
+    user_id?: string | null;
     organization_id: string;
     role?: string | null;
     department?: string | null;
     title?: string | null;
-  };
-  members?: Array<{
-    id: string;
-    user_id: string;
-    role?: string | null;
-    department?: string | null;
-    title?: string | null;
-    organization_id: string;
-  }>;
+  } | null;
   roles?: OrgMemberRole[];
+  recovered_context?: boolean;
   error?: string;
 };
 
@@ -145,24 +140,20 @@ export function DashboardSidebar() {
         setRoleLoading(true);
         setRoleError("");
 
-        const response = await fetch("/api/admin/org-members", {
+        const response = await fetch("/api/auth/current-context", {
           method: "GET",
         });
 
-        const data = (await response.json()) as OrgMembersResponse;
+        const data = (await response.json()) as CurrentContextResponse;
 
         if (!response.ok) {
-          throw new Error(data.error || "Failed to load role context.");
+          throw new Error(data.error || "Failed to load workspace context.");
         }
 
         if (!mounted) return;
 
-        const currentMemberId = data.currentMember?.id;
-        const currentMember = data.currentMember;
-
-        const myRoles = (data.roles || []).filter(
-          (role) => role.organization_member_id === currentMemberId
-        );
+        const currentMember = data.membership;
+        const myRoles = data.roles || [];
 
         const nextDepartments = new Set<string>();
 
@@ -200,7 +191,7 @@ export function DashboardSidebar() {
       } catch (error: any) {
         if (!mounted) return;
 
-        setRoleError(error?.message || "Failed to load role context.");
+        setRoleError(error?.message || "Failed to load workspace context.");
         setAllowedDepartments(new Set());
         setHasAdminAccess(false);
       } finally {
