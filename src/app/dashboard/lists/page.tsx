@@ -12,6 +12,7 @@ import {
 } from "@/lib/data/lists";
 import { CampaignList } from "@/lib/data/types";
 import { formatCreatedAt } from "@/lib/data/utils";
+import { getOrgContextTheme } from "@/lib/org-context-theme";
 
 type ListTag = "outreach" | "finance" | "field" | "volunteer";
 
@@ -48,9 +49,30 @@ function DashboardListsPageContent() {
   const [message, setMessage] = useState("");
   const [newListName, setNewListName] = useState("");
   const [search, setSearch] = useState("");
+  const [contextMode, setContextMode] = useState("default");
 
   useEffect(() => {
     loadLists();
+  }, []);
+
+  useEffect(() => {
+    async function loadOrgContext() {
+      try {
+        const response = await fetch("/api/auth/current-context");
+
+        if (!response.ok) return;
+
+        const data = await response.json();
+
+        setContextMode(
+          data?.organization?.context_mode || "default"
+        );
+      } catch (error) {
+        console.error("Failed to load org context", error);
+      }
+    }
+
+    loadOrgContext();
   }, []);
 
   useEffect(() => {
@@ -90,6 +112,8 @@ function DashboardListsPageContent() {
     }
   }
 
+  const orgTheme = getOrgContextTheme(contextMode);
+
   const filteredLists = useMemo(() => {
     return filterLists(lists, search);
   }, [lists, search]);
@@ -121,7 +145,9 @@ function DashboardListsPageContent() {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-3xl border border-slate-900 bg-gradient-to-r from-slate-950 via-slate-950 to-slate-900 p-6 text-white shadow-sm lg:p-8">
+      <section
+        className={`rounded-3xl border border-slate-900 bg-gradient-to-r p-6 text-white shadow-sm transition-colors duration-300 lg:p-8 ${orgTheme.heroGradient}`}
+      >
         <div className="space-y-3">
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
             List Infrastructure

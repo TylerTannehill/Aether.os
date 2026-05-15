@@ -23,6 +23,7 @@ import {
   getFinanceCallTargets,
   type FinanceCallTarget,
 } from "@/lib/finance/call-targets";
+import { getOrgContextTheme } from "@/lib/org-context-theme";
 
 type FocusLaneItem = {
   id: string;
@@ -245,6 +246,7 @@ export default function FinanceFocusModePage() {
   const [hasFinanceAccess, setHasFinanceAccess] = useState(false);
   const [hasFinanceDirector, setHasFinanceDirector] = useState(false);
   const [hasFinanceUser, setHasFinanceUser] = useState(false);
+  const [contextMode, setContextMode] = useState("default");
 
   useEffect(() => {
     let mounted = true;
@@ -297,6 +299,10 @@ export default function FinanceFocusModePage() {
 
         const currentMemberId = data?.currentMember?.id;
         const roles = Array.isArray(data?.roles) ? data.roles : [];
+
+        setContextMode(
+          data?.organization?.context_mode || "default"
+        );
 
         const myRoles = roles.filter(
           (role: any) => role.organization_member_id === currentMemberId
@@ -352,6 +358,8 @@ export default function FinanceFocusModePage() {
       mounted = false;
     };
   }, []);
+
+  const orgTheme = getOrgContextTheme(contextMode);
 
   const nowLine = useMemo(() => {
     if (hasFinanceDirector) {
@@ -730,7 +738,9 @@ export default function FinanceFocusModePage() {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-6 text-white shadow-sm lg:p-8">
+      <section
+        className={`rounded-3xl border border-slate-200 bg-gradient-to-br p-6 text-white shadow-sm transition-colors duration-300 lg:p-8 ${orgTheme.heroGradient}`}
+      >
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-4">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200">

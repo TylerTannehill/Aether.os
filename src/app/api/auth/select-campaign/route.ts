@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     const { data: organization, error: organizationError } = await supabase
       .from("organizations")
       .select("id, name, slug")
-      .or(`slug.eq.${normalizedCampaign},name.ilike.${campaignInput}`)
+      .eq("slug", normalizedCampaign)
       .maybeSingle();
 
     if (organizationError) {

@@ -35,6 +35,7 @@ import {
   getFinanceSignals,
 } from "@/lib/intelligence/signals";
 import { aggregateAetherIntelligence } from "@/lib/intelligence/aggregator";
+import { getOrgContextTheme } from "@/lib/org-context-theme";
 
 type ListTag = "outreach" | "field" | "finance" | "volunteer";
 
@@ -211,6 +212,7 @@ function OutreachFocusContent() {
   const [hasOutreachDirector, setHasOutreachDirector] = useState(false);
   const [outreachAccessLabel, setOutreachAccessLabel] =
     useState("Checking access");
+  const [contextMode, setContextMode] = useState("default");
 
   useEffect(() => {
     loadWorkspace();
@@ -237,6 +239,10 @@ function OutreachFocusContent() {
         const roles = Array.isArray(payload.roles)
           ? (payload.roles as OrgMemberRole[])
           : [];
+
+        setContextMode(
+          payload?.organization?.context_mode || "default"
+        );
 
         if (!currentMember?.id) {
           setHasOutreachAccess(false);
@@ -618,6 +624,8 @@ function OutreachFocusContent() {
     }));
   }, [visibleLists, selectedListId]);
 
+  const orgTheme = getOrgContextTheme(contextMode);
+
   const visibleContactLaneItems = useMemo(
     () => contactLaneItems.slice(0, 3),
     [contactLaneItems]
@@ -778,7 +786,9 @@ function OutreachFocusContent() {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-6 text-white shadow-sm lg:p-8">
+      <section
+        className={`rounded-3xl border border-slate-200 bg-gradient-to-br p-6 text-white shadow-sm transition-colors duration-300 lg:p-8 ${orgTheme.heroGradient}`}
+      >
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-4">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200">

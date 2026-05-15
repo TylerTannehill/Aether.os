@@ -22,6 +22,8 @@ export default function LoginPage() {
 
     setLoading(true)
 
+    const normalizedCampaign = campaign.trim().toLowerCase()
+
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -38,7 +40,9 @@ export default function LoginPage() {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ campaign }),
+      body: JSON.stringify({
+        campaign: normalizedCampaign,
+      }),
     })
 
     const campaignResult = await campaignResponse.json()
@@ -48,6 +52,11 @@ export default function LoginPage() {
     if (!campaignResponse.ok) {
       await supabase.auth.signOut()
       alert(campaignResult?.error || 'Unable to access this campaign')
+      return
+    }
+
+    if (normalizedCampaign === 'team-aether') {
+      window.location.href = '/team-aether'
       return
     }
 

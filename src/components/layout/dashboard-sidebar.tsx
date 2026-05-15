@@ -8,15 +8,16 @@ import {
   BarChart3,
   DollarSign,
   LayoutDashboard,
+  LogOut,
   MapPinned,
   Megaphone,
   MessageSquare,
   PlugZap,
   Printer,
-  Settings,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { getOrgContextTheme } from "@/lib/org-context-theme";
 
 type DepartmentKey = "field" | "outreach" | "digital" | "finance" | "print";
 
@@ -39,6 +40,7 @@ type CurrentContextResponse = {
     id: string;
     name?: string | null;
     slug?: string | null;
+    context_mode?: string | null;
   } | null;
   membership?: {
     id: string;
@@ -125,12 +127,16 @@ function roleImpliesAdminAccess(role?: string | null, title?: string | null) {
 
 export function DashboardSidebar() {
   const pathname = usePathname();
+
   const [roleLoading, setRoleLoading] = useState(true);
   const [roleError, setRoleError] = useState("");
+
   const [allowedDepartments, setAllowedDepartments] = useState<Set<string>>(
     new Set()
   );
+
   const [hasAdminAccess, setHasAdminAccess] = useState(false);
+  const [contextMode, setContextMode] = useState("default");
 
   useEffect(() => {
     let mounted = true;
@@ -153,18 +159,27 @@ export function DashboardSidebar() {
         if (!mounted) return;
 
         const currentMember = data.membership;
+        const organizationContextMode =
+          data.organization?.context_mode || "default";
+
         const myRoles = data.roles || [];
+
+        setContextMode(organizationContextMode);
 
         const nextDepartments = new Set<string>();
 
         myRoles.forEach((role) => {
           const department = normalizeDepartment(role.department);
+
           if (department) {
             nextDepartments.add(department);
           }
         });
 
-        const fallbackDepartment = normalizeDepartment(currentMember?.department);
+        const fallbackDepartment = normalizeDepartment(
+          currentMember?.department
+        );
+
         if (fallbackDepartment) {
           nextDepartments.add(fallbackDepartment);
         }
@@ -192,6 +207,7 @@ export function DashboardSidebar() {
         if (!mounted) return;
 
         setRoleError(error?.message || "Failed to load workspace context.");
+
         setAllowedDepartments(new Set());
         setHasAdminAccess(false);
       } finally {
@@ -219,34 +235,49 @@ export function DashboardSidebar() {
 
     return navItems.filter((item) => {
       if (item.alwaysVisible) return true;
+
       if (!item.department) return true;
 
       return allowedDepartments.has(item.department);
     });
   }, [allowedDepartments, hasAdminAccess, roleLoading]);
 
+  async function handleLogout() {
+    try {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+      });
+
+      window.location.href = "/login";
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
+  }
+
+  const theme = getOrgContextTheme(contextMode);
+
   return (
     <aside className="flex h-screen w-full max-w-[280px] flex-col border-r border-slate-200 bg-white">
-      <div className="border-b border-slate-200 bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 px-6 py-6 text-white">
+      <div
+        className={cn(
+          "border-b border-slate-200 bg-gradient-to-br px-6 py-6 text-white",
+          theme.sidebarGradient
+        )}
+      >
         <Link href="/dashboard" className="block">
-          <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl border border-white/15 bg-white/10 shadow-sm backdrop-blur">
-              <Image
-                src="/aether-logo.png"
-                alt="Aether.os logo"
-                width={40}
-                height={40}
-                className="h-10 w-10 object-contain"
-                priority
-              />
-            </div>
+          <div className="flex flex-col items-center justify-center">
+            <Image
+              src="/aether-logo-full.png"
+              alt="Aether.os logo"
+              width={180}
+              height={120}
+              className="h-auto w-[170px] object-contain"
+              priority
+            />
 
-            <div>
-              <p className="text-2xl font-semibold tracking-tight">Aether.os</p>
-              <p className="text-sm text-slate-300">
-                Campaign command center
-              </p>
-            </div>
+            <p className="mt-3 text-center text-sm text-slate-300">
+              Campaign command center
+            </p>
           </div>
         </Link>
       </div>
@@ -265,9 +296,11 @@ export function DashboardSidebar() {
         <nav className="space-y-2">
           {visibleNavItems.map((item) => {
             const Icon = item.icon;
+
             const isActive =
               pathname === item.href ||
-              (item.href !== "/dashboard" && pathname.startsWith(item.href));
+              (item.href !== "/dashboard" &&
+                pathname.startsWith(item.href));
 
             return (
               <Link key={item.href} href={item.href}>
@@ -289,29 +322,14 @@ export function DashboardSidebar() {
       </div>
 
       <div className="border-t border-slate-200 p-4">
-        <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
-          <div className="mb-3 flex items-center gap-2">
-            <Settings className="h-4 w-4 text-slate-700" />
-            <p className="text-sm font-semibold text-slate-900">
-              System Status
-            </p>
-          </div>
-
-          <p className="mb-4 text-sm leading-6 text-slate-600">
-            {roleLoading
-              ? "Loading workspace role context..."
-              : hasAdminAccess
-                ? "Admin workspace online. All operating lanes visible."
-                : "Workspace filtered to your assigned operating lanes."}
-          </p>
-
-          <button
-            type="button"
-            className="w-full rounded-2xl bg-slate-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
-          >
-            Manage Workspace
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
+        >
+          <LogOut className="h-4 w-4" />
+          Logout
+        </button>
       </div>
     </aside>
   );

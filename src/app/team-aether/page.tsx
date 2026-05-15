@@ -9,6 +9,7 @@ import {
   Sparkles,
   CheckCircle2,
   ClipboardList,
+  LogOut,
 } from "lucide-react";
 
 type PoliticalMode = "default" | "democrat" | "republican";
@@ -26,16 +27,66 @@ export default function TeamAetherPage() {
   const [orgName, setOrgName] = useState("");
   const [adminEmail, setAdminEmail] = useState("");
   const [mode, setMode] = useState<PoliticalMode>("default");
+
   const [created, setCreated] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const slugPreview = useMemo(() => slugify(orgName), [orgName]);
 
-  function handleCreate() {
-    setCreated(true);
+  async function handleLogout() {
+    try {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+      });
 
-    setTimeout(() => {
+      window.location.href = "/login";
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
+  }
+
+  async function handleCreate() {
+    try {
+      setCreating(true);
+      setError(null);
       setCreated(false);
-    }, 3000);
+
+      const response = await fetch(
+        "/api/team-aether/create-org",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: orgName,
+            admin_email: adminEmail,
+            context_mode: mode,
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result?.error || "Failed to create organization."
+        );
+      }
+
+      setCreated(true);
+
+      setOrgName("");
+      setAdminEmail("");
+      setMode("default");
+    } catch (err: any) {
+      setError(
+        err?.message || "Failed to create organization."
+      );
+    } finally {
+      setCreating(false);
+    }
   }
 
   function buttonStyles(current: PoliticalMode) {
@@ -61,7 +112,7 @@ export default function TeamAetherPage() {
       <div className="mx-auto max-w-6xl space-y-8">
         {/* HERO */}
         <section className="overflow-hidden rounded-[2rem] border border-slate-200 bg-slate-950 p-6 text-white shadow-sm lg:p-8">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-200">
                 <ShieldCheck className="h-3.5 w-3.5" />
@@ -78,8 +129,19 @@ export default function TeamAetherPage() {
               </p>
             </div>
 
-            <div className="rounded-3xl border border-white/10 bg-white/10 p-4 text-sm text-slate-200">
-              Internal provisioning workspace
+            <div className="flex flex-col items-start gap-3 lg:items-end">
+              <div className="rounded-3xl border border-white/10 bg-white/10 p-4 text-sm text-slate-200">
+                Internal provisioning workspace
+              </div>
+
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/15"
+              >
+                <LogOut className="h-4 w-4" />
+                Logout
+              </button>
             </div>
           </div>
         </section>
@@ -143,12 +205,12 @@ export default function TeamAetherPage() {
               </h2>
 
               <p className="mt-1 max-w-2xl text-sm text-slate-500">
-                Placeholder UI pass. Buttons are intentionally unwired for now.
+                Team Aether can now provision real organizations into Supabase.
               </p>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-600">
-              Safe staging environment
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm text-emerald-700">
+              Provisioning route connected
             </div>
           </div>
 
@@ -267,28 +329,37 @@ export default function TeamAetherPage() {
           <div className="mt-8 flex flex-col gap-3 rounded-3xl border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="font-semibold text-slate-900">
-                Ready to stage organization setup?
+                Ready to provision organization?
               </p>
 
               <p className="mt-1 text-sm text-slate-500">
-                Wiring into Supabase provisioning comes next.
+                This now creates a real organization record in Supabase.
               </p>
             </div>
 
             <button
               type="button"
               onClick={handleCreate}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+              disabled={creating}
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-60"
             >
               <ClipboardList className="h-4 w-4" />
-              Create Org
+
+              {creating ? "Creating..." : "Create Org"}
             </button>
           </div>
+
+          {/* ERROR */}
+          {error ? (
+            <div className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">
+              {error}
+            </div>
+          ) : null}
 
           {/* SUCCESS */}
           {created ? (
             <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
-              Org setup package staged successfully.
+              Organization created successfully.
             </div>
           ) : null}
         </section>

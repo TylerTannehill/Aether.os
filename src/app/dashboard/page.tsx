@@ -86,6 +86,7 @@ import {
 } from "@/lib/abe/abe-follow-through";
 import { getOutcomeSignals } from "@/lib/abe/abe-outcomes";
 import { buildAbeOrgLayer } from "@/lib/abe/abe-org-layer";
+import { getOrgContextTheme } from "@/lib/org-context-theme";
 
 function normalizeTaskStatus(status?: string | null) {
   const value = (status || "").trim().toLowerCase();
@@ -613,6 +614,7 @@ type TopActionView = {
 type LiveDashboardUserContext = {
   email: string;
   organizationName: string;
+  contextMode: string;
   role: DemoRole | null;
   department: DemoDepartment | null;
   title: string | null;
@@ -827,6 +829,7 @@ export default function DashboardPage() {
         nextUserContext = {
           email: String(user.email || ""),
           organizationName: organization?.name || "No organization assigned",
+          contextMode: organization?.context_mode || "default",
           role: normalizedRole,
           department: normalizedDepartment,
           title: membership.title || null,
@@ -862,6 +865,8 @@ export default function DashboardPage() {
   const actualDepartment = liveUserContext?.department ?? null;
   const actualOrganizationName =
     liveUserContext?.organizationName ?? "No organization assigned";
+  const actualContextMode = liveUserContext?.contextMode ?? "default";
+  const orgTheme = getOrgContextTheme(actualContextMode);
   const canAccessAdmin = actualRole === "admin";
 
   const availableDemoRoles = useMemo<DemoRole[]>(() => {
@@ -2161,7 +2166,9 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-3xl border border-slate-800 bg-slate-950 p-6 text-white shadow-sm lg:p-8">
+      <section
+        className={`rounded-3xl border border-slate-800 bg-gradient-to-br p-6 text-white shadow-sm transition-colors duration-300 lg:p-8 ${orgTheme.heroGradient}`}
+      >
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-3">
             <div className="flex items-center gap-2 text-sm text-slate-300">

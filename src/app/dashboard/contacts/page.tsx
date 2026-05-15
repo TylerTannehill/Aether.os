@@ -23,6 +23,7 @@ import { getDashboardData } from "@/lib/data/dashboard";
 import { Contact, DashboardData } from "@/lib/data/types";
 import { fullName } from "@/lib/data/utils";
 import { useDashboardOwner } from "../owner-context";
+import { getOrgContextTheme } from "@/lib/org-context-theme";
 
 function normalizeOwner(value?: string | null) {
   return value?.trim() || "Unassigned";
@@ -220,11 +221,33 @@ export default function DashboardContactsPage() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [bulkOwnerName, setBulkOwnerName] = useState("");
   const [bulkSaving, setBulkSaving] = useState(false);
+  const [contextMode, setContextMode] = useState("default");
 
   const { ownerFilter } = useDashboardOwner();
+  const orgTheme = getOrgContextTheme(contextMode);
 
   useEffect(() => {
     loadContactsPageData();
+  }, []);
+
+  useEffect(() => {
+    async function loadOrgContext() {
+      try {
+        const response = await fetch("/api/auth/current-context");
+
+        if (!response.ok) return;
+
+        const data = await response.json();
+
+        setContextMode(
+          data?.organization?.context_mode || "default"
+        );
+      } catch (error) {
+        console.error("Failed to load org context", error);
+      }
+    }
+
+    loadOrgContext();
   }, []);
 
   async function loadContactsPageData() {
@@ -478,7 +501,9 @@ export default function DashboardContactsPage() {
 
   return (
     <div className="space-y-8 pb-10">
-      <section className="rounded-3xl border border-slate-900 bg-gradient-to-r from-slate-950 via-slate-950 to-slate-900 p-5 shadow-sm lg:p-8">
+      <section
+        className={`rounded-3xl border border-slate-900 bg-gradient-to-r p-5 shadow-sm transition-colors duration-300 lg:p-8 ${orgTheme.heroGradient}`}
+      >
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-3">
             <p className="text-sm font-medium uppercase tracking-[0.18em] text-slate-500">

@@ -9,6 +9,7 @@ import {
   Send,
   Sparkles,
 } from "lucide-react";
+import { getOrgContextTheme } from "@/lib/org-context-theme";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -38,6 +39,7 @@ export default function ChatPage() {
   const [input, setInput] = useState("");
   const [user, setUser] = useState<CurrentUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [contextMode, setContextMode] = useState("default");
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
@@ -77,6 +79,11 @@ export default function ChatPage() {
       };
 
       setUser(nextUser);
+
+      setContextMode(
+        data?.organization?.context_mode || "default"
+      );
+
       await loadMessages(nextUser.org_id);
     } catch (error) {
       console.error("Failed to load chat identity:", error);
@@ -161,6 +168,8 @@ export default function ChatPage() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  const orgTheme = getOrgContextTheme(contextMode);
+
   if (loading) {
     return (
       <div className="rounded-3xl border border-slate-200 bg-white p-6 text-sm text-slate-500">
@@ -179,7 +188,9 @@ export default function ChatPage() {
 
   return (
     <div className="flex h-[78vh] flex-col overflow-hidden rounded-3xl border border-slate-200 bg-slate-50 shadow-sm">
-      <div className="border-b border-slate-800 bg-slate-950 px-6 py-5 text-white">
+      <div
+        className={`border-b border-slate-800 bg-gradient-to-br px-6 py-5 text-white ${orgTheme.heroGradient}`}
+      >
         <div className="flex items-center justify-between gap-4">
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-slate-400">

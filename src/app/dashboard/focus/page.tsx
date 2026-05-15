@@ -25,6 +25,7 @@ import {
   executeActionItem,
 } from "@/lib/priority/action-execution-client";
 import { buildDashboardBrainOutput } from "@/lib/brain";
+import { getOrgContextTheme } from "@/lib/org-context-theme";
 
 function isFallbackTask(taskType?: string | null) {
   return (taskType || "").trim().toLowerCase() === "fallback";
@@ -305,6 +306,7 @@ export default function FocusModePage() {
   const [assignedDepartmentRoutes, setAssignedDepartmentRoutes] = useState<
     DemoDepartment[]
   >([]);
+  const [contextMode, setContextMode] = useState("default");
 
   const { ownerFilter, applyMyDashboard } = useDashboardOwner();
   const { focusContext, clearFocusContext } = useFocusContext();
@@ -359,6 +361,10 @@ export default function FocusModePage() {
       const roles = Array.isArray(data?.roles)
         ? (data.roles as OrgMemberRole[])
         : [];
+
+      setContextMode(
+        data?.organization?.context_mode || "default"
+      );
 
       const currentMemberId = currentMember?.id || "";
       const myRoles = roles.filter(
@@ -800,6 +806,8 @@ export default function FocusModePage() {
 
 
 
+  const orgTheme = getOrgContextTheme(contextMode);
+
   async function handlePreviewAction(action: ActionItem) {
     try {
       setPreviewingActionId(action.id);
@@ -878,7 +886,9 @@ export default function FocusModePage() {
 
     return (
       <div className="space-y-8">
-        <section className="rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-6 text-white shadow-sm lg:p-8">
+        <section
+          className={`rounded-3xl border border-slate-200 bg-gradient-to-br p-6 text-white shadow-sm transition-colors duration-300 lg:p-8 ${orgTheme.heroGradient}`}
+        >
           <div className="space-y-4">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200">
               <Crosshair className="h-3.5 w-3.5" />
@@ -937,7 +947,9 @@ export default function FocusModePage() {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-6 text-white shadow-sm lg:p-8">
+      <section
+        className={`rounded-3xl border border-slate-200 bg-gradient-to-br p-6 text-white shadow-sm transition-colors duration-300 lg:p-8 ${orgTheme.heroGradient}`}
+      >
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-4">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200">

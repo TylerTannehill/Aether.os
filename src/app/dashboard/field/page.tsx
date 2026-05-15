@@ -22,6 +22,7 @@ import { filterPatternsForDepartment } from "@/lib/abe/abe-filters";
 import { AbeBriefing } from "@/lib/abe/abe-briefing";
 import { updateAbeMemory } from "@/lib/abe/update-abe-memory";
 import { buildAbeOrgLayer, getOrgContextForDepartment } from "@/lib/abe/abe-org-layer";
+import { getOrgContextTheme } from "@/lib/org-context-theme";
 import {
   getFieldMetricRows,
   type FieldMetricRow,
@@ -415,12 +416,33 @@ export default function FieldDashboardPage() {
   const [demoRole, setDemoRole] = useState<DemoRole>("admin");
   const [demoDepartment, setDemoDepartment] =
     useState<DemoDepartment>("field");
+  const [contextMode, setContextMode] = useState("default");
   const [abeMemory, setAbeMemory] = useState<AbeGlobalMemory>({
     recentPrimaryLanes: [],
     recentPressureLanes: [],
     recentOpportunityLanes: [],
     recentCrossDomainSignals: [],
   });
+
+  useEffect(() => {
+    async function loadOrgContext() {
+      try {
+        const response = await fetch("/api/auth/current-context");
+
+        if (!response.ok) return;
+
+        const data = await response.json();
+
+        setContextMode(
+          data?.organization?.context_mode || "default"
+        );
+      } catch (error) {
+        console.error("Failed to load org context", error);
+      }
+    }
+
+    loadOrgContext();
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -793,9 +815,13 @@ export default function FieldDashboardPage() {
     return "Active Trend";
   }, [demoRole]);
 
+  const orgTheme = getOrgContextTheme(contextMode);
+
   return (
     <div className="space-y-8">
-      <section className="rounded-3xl border border-slate-800 bg-slate-950 p-6 text-white shadow-sm lg:p-8">
+      <section
+        className={`rounded-3xl border border-slate-800 bg-gradient-to-br p-6 text-white shadow-sm transition-colors duration-300 lg:p-8 ${orgTheme.heroGradient}`}
+      >
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-3">
             <p className="text-sm font-medium uppercase tracking-[0.18em] text-slate-300">

@@ -17,11 +17,8 @@ export async function GET() {
     const supabase = await createClient();
     const cookieStore = await cookies();
 
-    const originalActiveOrganizationId =
+    const activeOrganizationId =
       cookieStore.get("active_organization_id")?.value ?? null;
-
-    let activeOrganizationId = originalActiveOrganizationId;
-    let shouldRewriteActiveOrgCookie = false;
 
     const {
       data: { user },
@@ -35,91 +32,64 @@ export async function GET() {
       );
     }
 
+    if (!activeOrganizationId) {
+      return NextResponse.json(
+        { error: "No active organization selected" },
+        { status: 400 }
+      );
+    }
+
     const userId = user.id;
-    let membership: any = null;
 
-    if (activeOrganizationId) {
-      const { data, error } = await supabase
-        .from("organization_members")
-        .select(
-          `
+    const { data: membership, error: membershipError } = await supabase
+      .from("organization_members")
+      .select(
+        `
+          id,
+          user_id,
+          organization_id,
+          role,
+          department,
+          title,
+          organizations (
             id,
-            user_id,
-            organization_id,
-            role,
-            department,
-            title,
-            organizations (
-              id,
-              name,
-              slug
-            )
-          `
-        )
-        .eq("user_id", userId)
-        .eq("organization_id", activeOrganizationId)
-        .maybeSingle();
+            name,
+            slug,
+            context_mode
+          )
+        `
+      )
+      .eq("user_id", userId)
+      .eq("organization_id", activeOrganizationId)
+      .maybeSingle();
 
-      if (error) {
-        return NextResponse.json(
-          { error: error.message },
-          { status: 500 }
-        );
-      }
-
-      membership = data;
+    if (membershipError) {
+      return NextResponse.json(
+        { error: membershipError.message },
+        { status: 500 }
+      );
     }
 
     if (!membership) {
-      const { data: fallbackMembership, error: fallbackError } =
-        await supabase
-          .from("organization_members")
-          .select(
-            `
-              id,
-              user_id,
-              organization_id,
-              role,
-              department,
-              title,
-              organizations (
-                id,
-                name,
-                slug
-              )
-            `
-          )
-          .eq("user_id", userId)
-          .limit(1)
-          .maybeSingle();
-
-      if (fallbackError) {
-        return NextResponse.json(
-          { error: fallbackError.message },
-          { status: 500 }
-        );
-      }
-
-      if (!fallbackMembership?.organization_id) {
-        return NextResponse.json(
-          { error: "No organizations available for this user" },
-          { status: 404 }
-        );
-      }
-
-      membership = fallbackMembership;
-      activeOrganizationId = String(fallbackMembership.organization_id);
-      shouldRewriteActiveOrgCookie =
-        activeOrganizationId !== originalActiveOrganizationId;
+      return NextResponse.json(
+        {
+          error:
+            "No membership found for active organization. Active org cookie may be stale.",
+        },
+        { status: 403 }
+      );
     }
 
-    const resolvedOrganizationId = String(membership.organization_id);
+    const resolvedOrganizationId = String(
+      membership.organization_id
+    );
 
-    const { data: memberRoles, error: rolesError } = await supabase
-      .from("organization_member_roles")
-      .select("department, role_level, is_primary")
-      .eq("organization_member_id", membership.id)
-      .eq("organization_id", resolvedOrganizationId);
+    const { data: memberRoles, error: rolesError } =
+      await supabase
+        .from("organization_member_roles")
+        .select("department, role_level, is_primary")
+        .eq("organization_member_id", membership.id)
+        .eq("organization_id", resolvedOrganizationId);
 
     if (rolesError) {
       return NextResponse.json(
@@ -143,7 +113,9 @@ export async function GET() {
       primaryRole?.department ??
       null;
 
-    const organization = Array.isArray(membership.organizations)
+    const organization = Array.isArray(
+      membership.organizations
+    )
       ? membership.organizations[0] ?? null
       : membership.organizations ?? null;
 
@@ -162,14 +134,18 @@ export async function GET() {
         title: membership.title,
       },
       roles: memberRoles || [],
-      recovered_context: shouldRewriteActiveOrgCookie,
+      recovered_context: false,
     });
 
-    response.cookies.set("active_organization_id", resolvedOrganizationId, {
-      path: "/",
-      sameSite: "lax",
-      httpOnly: false,
-    });
+    response.cookies.set(
+      "active_organization_id",
+      resolvedOrganizationId,
+      {
+        path: "/",
+        sameSite: "lax",
+        httpOnly: false,
+      }
+    );
 
     return response;
   } catch (err: any) {

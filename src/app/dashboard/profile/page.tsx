@@ -31,6 +31,7 @@ type LiveProfile = {
   department: string;
   title: string;
   organizationName: string;
+  contextMode: string;
   status: string;
   tagline: string;
 };
@@ -268,6 +269,7 @@ export default function DashboardProfilePage() {
           department: departmentLabel,
           title: titleLabel,
           organizationName,
+          contextMode: organization?.context_mode || "default",
           status: "Micro-reset in progress",
           tagline: "Building the operating system for execution.",
         });
@@ -298,6 +300,7 @@ export default function DashboardProfilePage() {
         department: "Loading department...",
         title: "Loading title...",
         organizationName: "Loading organization...",
+        contextMode: "default",
         status: "Loading...",
         tagline: "Building the operating system for execution.",
       }
@@ -955,6 +958,9 @@ export default function DashboardProfilePage() {
                 </p>
                 <p className="mt-2 text-lg font-semibold text-slate-900">
                   {identity.organizationName}
+                </p>
+                <p className="mt-1 text-sm text-slate-500">
+                  Context: {identity.contextMode}
                 </p>
               </div>
 

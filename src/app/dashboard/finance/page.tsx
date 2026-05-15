@@ -27,6 +27,7 @@ import { filterPatternsForDepartment } from "@/lib/abe/abe-filters";
 import { AbeBriefing } from "@/lib/abe/abe-briefing";
 import { updateAbeMemory } from "@/lib/abe/update-abe-memory";
 import { buildAbeOrgLayer, getOrgContextForDepartment } from "@/lib/abe/abe-org-layer";
+import { getOrgContextTheme } from "@/lib/org-context-theme";
 
 type FinanceMetricCard = {
   id: string;
@@ -617,6 +618,7 @@ export default function FinanceDashboardPage() {
   const [demoRole, setDemoRole] = useState<DemoRole>("admin");
   const [demoDepartment, setDemoDepartment] =
     useState<DemoDepartment>("finance");
+  const [contextMode, setContextMode] = useState("default");
   const [abeMemory, setAbeMemory] = useState<AbeGlobalMemory>({
     recentPrimaryLanes: [],
     recentPressureLanes: [],
@@ -645,6 +647,26 @@ export default function FinanceDashboardPage() {
   const [loopEmployer, setLoopEmployer] = useState("");
   const [loopOccupation, setLoopOccupation] = useState("");
   const [loopMessage, setLoopMessage] = useState("");
+
+  useEffect(() => {
+    async function loadOrgContext() {
+      try {
+        const response = await fetch("/api/auth/current-context");
+
+        if (!response.ok) return;
+
+        const data = await response.json();
+
+        setContextMode(
+          data?.organization?.context_mode || "default"
+        );
+      } catch (error) {
+        console.error("Failed to load org context", error);
+      }
+    }
+
+    loadOrgContext();
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -1128,6 +1150,8 @@ export default function FinanceDashboardPage() {
     return "Open Finance Focus";
   }, [demoRole]);
 
+  const orgTheme = getOrgContextTheme(contextMode);
+
   const handleAddEntry = () => {
     if (!newContactName.trim() || !newContributionAmount) return;
 
@@ -1222,7 +1246,9 @@ export default function FinanceDashboardPage() {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-3xl border border-slate-800 bg-slate-950 p-6 text-white shadow-sm lg:p-8">
+      <section
+        className={`rounded-3xl border border-slate-800 bg-gradient-to-br p-6 text-white shadow-sm transition-colors duration-300 lg:p-8 ${orgTheme.heroGradient}`}
+      >
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-3">
             <div className="flex items-center gap-2 text-sm text-slate-300">
