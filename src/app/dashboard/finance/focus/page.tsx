@@ -300,9 +300,22 @@ export default function FinanceFocusModePage() {
         const currentMemberId = data?.currentMember?.id;
         const roles = Array.isArray(data?.roles) ? data.roles : [];
 
-        setContextMode(
-          data?.organization?.context_mode || "default"
-        );
+        try {
+          const contextResponse = await fetch("/api/auth/current-context");
+
+          if (contextResponse.ok) {
+            const contextData = await contextResponse.json();
+
+            setContextMode(
+              contextData?.organization?.context_mode || "default"
+            );
+          }
+        } catch (contextError) {
+          console.error(
+            "Failed to load finance focus org context mode:",
+            contextError
+          );
+        }
 
         const myRoles = roles.filter(
           (role: any) => role.organization_member_id === currentMemberId

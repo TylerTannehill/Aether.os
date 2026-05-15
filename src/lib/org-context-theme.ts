@@ -36,12 +36,12 @@ const democratTheme: OrgContextTheme = {
 const republicanTheme: OrgContextTheme = {
   mode: "republican",
   label: "Republican",
-  sidebarGradient: "from-slate-950 via-slate-900 to-rose-950",
-  heroGradient: "from-slate-950 via-slate-900 to-rose-950",
-  accentBorder: "border-rose-200",
-  accentText: "text-rose-800",
-  accentSoftBg: "bg-rose-50",
-  accentRing: "ring-rose-100",
+  sidebarGradient: "from-zinc-950 via-red-950 to-stone-900",
+  heroGradient: "from-zinc-950 via-red-950 to-stone-900",
+  accentBorder: "border-red-300",
+  accentText: "text-red-800",
+  accentSoftBg: "bg-red-50",
+  accentRing: "ring-red-200",
 };
 
 export function normalizeOrgContextMode(

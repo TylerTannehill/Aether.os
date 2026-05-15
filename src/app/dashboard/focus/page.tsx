@@ -362,9 +362,22 @@ export default function FocusModePage() {
         ? (data.roles as OrgMemberRole[])
         : [];
 
-      setContextMode(
-        data?.organization?.context_mode || "default"
-      );
+      try {
+        const contextResponse = await fetch("/api/auth/current-context");
+
+        if (contextResponse.ok) {
+          const contextData = await contextResponse.json();
+
+          setContextMode(
+            contextData?.organization?.context_mode || "default"
+          );
+        }
+      } catch (contextError) {
+        console.error(
+          "Failed to load dashboard focus org context mode:",
+          contextError
+        );
+      }
 
       const currentMemberId = currentMember?.id || "";
       const myRoles = roles.filter(

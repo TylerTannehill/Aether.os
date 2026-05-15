@@ -80,9 +80,19 @@ export default function ChatPage() {
 
       setUser(nextUser);
 
-      setContextMode(
-        data?.organization?.context_mode || "default"
-      );
+      try {
+        const contextResponse = await fetch("/api/auth/current-context");
+
+        if (contextResponse.ok) {
+          const contextData = await contextResponse.json();
+
+          setContextMode(
+            contextData?.organization?.context_mode || "default"
+          );
+        }
+      } catch (contextError) {
+        console.error("Failed to load chat org context mode:", contextError);
+      }
 
       await loadMessages(nextUser.org_id);
     } catch (error) {

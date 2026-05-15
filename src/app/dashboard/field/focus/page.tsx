@@ -238,9 +238,22 @@ export default function FieldFocusModePage() {
         const currentMember = data?.currentMember;
         const roles = Array.isArray(data?.roles) ? data.roles : [];
 
-        setContextMode(
-          data?.organization?.context_mode || "default"
-        );
+        try {
+          const contextResponse = await fetch("/api/auth/current-context");
+
+          if (contextResponse.ok) {
+            const contextData = await contextResponse.json();
+
+            setContextMode(
+              contextData?.organization?.context_mode || "default"
+            );
+          }
+        } catch (contextError) {
+          console.error(
+            "Failed to load field focus org context mode:",
+            contextError
+          );
+        }
 
         const currentMemberRoles = roles.filter(
           (role: any) => role.organization_member_id === currentMember?.id

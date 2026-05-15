@@ -153,9 +153,23 @@ export default function DigitalFocusModePage() {
         const roles = Array.isArray(data?.roles) ? data.roles : [];
         const currentMember = data?.currentMember;
 
-        setContextMode(
-          data?.organization?.context_mode || "default"
-        );
+        try {
+          const contextResponse = await fetch("/api/auth/current-context");
+
+          if (contextResponse.ok) {
+            const contextData = await contextResponse.json();
+
+            setContextMode(
+              contextData?.organization?.context_mode || "default"
+            );
+          }
+        } catch (contextError) {
+          console.error(
+            "Failed to load digital focus org context mode:",
+            contextError
+          );
+        }
+
         const currentMemberId = currentMember?.id;
 
         const myRoles = currentMemberId

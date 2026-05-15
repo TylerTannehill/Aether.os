@@ -240,9 +240,22 @@ function OutreachFocusContent() {
           ? (payload.roles as OrgMemberRole[])
           : [];
 
-        setContextMode(
-          payload?.organization?.context_mode || "default"
-        );
+        try {
+          const contextResponse = await fetch("/api/auth/current-context");
+
+          if (contextResponse.ok) {
+            const contextData = await contextResponse.json();
+
+            setContextMode(
+              contextData?.organization?.context_mode || "default"
+            );
+          }
+        } catch (contextError) {
+          console.error(
+            "Failed to load outreach focus org context mode:",
+            contextError
+          );
+        }
 
         if (!currentMember?.id) {
           setHasOutreachAccess(false);
