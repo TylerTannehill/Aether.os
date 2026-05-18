@@ -1610,164 +1610,107 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
             <div>
               <p className="text-sm font-medium text-slate-500">Human Governance</p>
               <h2 className="text-2xl font-semibold text-slate-900">
-                Manage operating roles
+                Team access snapshot
               </h2>
               <p className="mt-2 text-sm text-slate-600">
-                Assign the real operating lanes that drive visibility, Focus routing, and under-the-surface coordination. Members can hold multiple roles across departments.
+                Quick view of the current organization team. Full member creation, removal, and role assignment now lives in the dedicated team management page.
               </p>
             </div>
 
             <button
-              onClick={loadOrgMembers}
-              disabled={orgMembersLoading}
-              className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+              onClick={() => {
+                window.location.href = "/dashboard/admin/team";
+              }}
+              className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
             >
-              {orgMembersLoading ? "Refreshing Members..." : "Refresh Members"}
+              Manage Team
+              <ArrowRight className="h-4 w-4" />
             </button>
           </div>
 
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-            <span className="font-semibold">Role model:</span> assign department + level pairs, not a single user type. A finance director can also be a field user, print user, or campaign manager while the org grows.
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <p className="text-xs uppercase tracking-wide text-slate-500">
+                Members
+              </p>
+              <p className="mt-2 text-3xl font-semibold text-slate-900">
+                {orgMembers.length}
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-indigo-200 bg-indigo-50 p-4">
+              <p className="text-xs uppercase tracking-wide text-indigo-700">
+                Role Assignments
+              </p>
+              <p className="mt-2 text-3xl font-semibold text-slate-900">
+                {orgMemberRoles.length}
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+              <p className="text-xs uppercase tracking-wide text-amber-700">
+                Primary Lanes
+              </p>
+              <p className="mt-2 text-3xl font-semibold text-slate-900">
+                {orgMemberRoles.filter((role) => role.is_primary).length}
+              </p>
+            </div>
           </div>
 
-          <div className="mt-5 space-y-4">
-            {orgMembers.length === 0 ? (
+          <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+            <span className="font-semibold">Role model:</span> assign department + level pairs, not a single user type. Use Manage Team to add members, revoke access, and update operating lanes.
+          </div>
+
+          <div className="mt-5 space-y-3">
+            {orgMembersLoading ? (
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
-                {orgMembersLoading
-                  ? "Loading organization members..."
-                  : "No organization members found yet. Confirm the signed-in user has an organization_members row."}
+                Loading organization members...
               </div>
             ) : null}
 
-            {orgMembers.map((member) => {
+            {!orgMembersLoading && orgMembers.length === 0 ? (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                No organization members found yet. Confirm the signed-in user has an organization_members row.
+              </div>
+            ) : null}
+
+            {orgMembers.slice(0, 4).map((member) => {
               const roles = getRolesForMember(member.id);
               const primaryRole = roles.find((role) => role.is_primary) || roles[0];
-              const draft = roleDrafts[member.id] || buildDefaultRoleFromMember(member);
-              const isSaving = savingMemberId === member.id;
 
               return (
                 <div
                   key={member.id}
-                  className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                  className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:flex-row lg:items-center lg:justify-between"
                 >
-                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                    <div>
-                      <p className="text-sm font-semibold text-slate-900">
-                        {getMemberDisplayName(member)}
-                      </p>
-                      <p className="mt-1 text-xs text-slate-500">
-                        Member ID: {member.id}
-                      </p>
-                      <p className="mt-1 text-xs text-slate-500">
-                        Base membership: {formatRoleText(member.role)} • {member.department || "No department"}
-                      </p>
-                    </div>
-
-                    <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700">
-                      Primary: {primaryRole ? `${formatRoleText(primaryRole.department)} / ${formatRoleText(primaryRole.role_level)}` : "Not set"}
-                    </div>
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900">
+                      {getMemberDisplayName(member)}
+                    </p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      Base membership: {formatRoleText(member.role)} • {member.department || "No department"}
+                    </p>
                   </div>
 
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {roles.length === 0 ? (
-                      <span className="inline-flex rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600">
-                        No operating roles assigned
-                      </span>
-                    ) : null}
-
-                    {roles.map((role) => (
-                      <span
-                        key={role.id || `${role.organization_member_id}-${role.department}-${role.role_level}`}
-                        className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${
-                          role.is_primary
-                            ? "border-indigo-200 bg-indigo-50 text-indigo-900"
-                            : "border-slate-200 bg-white text-slate-700"
-                        }`}
-                      >
-                        {formatRoleText(role.department)} / {formatRoleText(role.role_level)}
-                        {role.is_primary ? " • primary" : ""}
-                        {!role.is_primary ? (
-                          <button
-                            type="button"
-                            onClick={() => handleSetPrimaryRole(member, role)}
-                            disabled={isSaving}
-                            className="text-indigo-700 underline-offset-2 hover:underline disabled:opacity-50"
-                          >
-                            make primary
-                          </button>
-                        ) : null}
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveRole(member, role.id)}
-                          disabled={isSaving}
-                          className="text-rose-700 underline-offset-2 hover:underline disabled:opacity-50"
-                        >
-                          remove
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="mt-4 grid gap-3 md:grid-cols-[1fr_1fr_auto_auto]">
-                    <select
-                      value={draft.department}
-                      onChange={(event) =>
-                        updateRoleDraft(member.id, {
-                          department: event.target.value as OperatingDepartment,
-                        })
-                      }
-                      className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none"
-                    >
-                      {DEPARTMENT_OPTIONS.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-
-                    <select
-                      value={draft.role_level}
-                      onChange={(event) =>
-                        updateRoleDraft(member.id, {
-                          role_level: event.target.value as OperatingRoleLevel,
-                        })
-                      }
-                      className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none"
-                    >
-                      {ROLE_LEVEL_OPTIONS.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        updateRoleDraft(member.id, {
-                          is_primary: !draft.is_primary,
-                        })
-                      }
-                      className={`rounded-2xl border px-4 py-3 text-sm font-medium transition ${
-                        draft.is_primary
-                          ? "border-indigo-200 bg-indigo-50 text-indigo-900"
-                          : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                      }`}
-                    >
-                      {draft.is_primary ? "Primary" : "Set Primary"}
-                    </button>
-
-                    <button
-                      onClick={() => handleAddRole(member)}
-                      disabled={isSaving}
-                      className="rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {isSaving ? "Saving..." : "Add Role"}
-                    </button>
+                  <div className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-700">
+                    {primaryRole
+                      ? `${formatRoleText(primaryRole.department)} / ${formatRoleText(primaryRole.role_level)}`
+                      : "No primary lane"}
                   </div>
                 </div>
               );
             })}
+
+            {orgMembers.length > 4 ? (
+              <button
+                onClick={() => {
+                  window.location.href = "/dashboard/admin/team";
+                }}
+                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+              >
+                View all {orgMembers.length} members in Manage Team
+              </button>
+            ) : null}
           </div>
         </section>
 

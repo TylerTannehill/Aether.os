@@ -19,8 +19,9 @@ import {
   getContacts,
   updateContactOwner,
 } from "@/lib/data/contacts";
+import { createList } from "@/lib/data/lists";
 import { getDashboardData } from "@/lib/data/dashboard";
-import { Contact, DashboardData } from "@/lib/data/types";
+import { Contact, DashboardData, ListType } from "@/lib/data/types";
 import { fullName } from "@/lib/data/utils";
 import { useDashboardOwner } from "../owner-context";
 import { getOrgContextTheme } from "@/lib/org-context-theme";
@@ -37,6 +38,17 @@ type DonorTierFilter = "any" | "base" | "mid" | "major" | "maxed";
 type PartyFilter = "any" | "Democrat" | "Republican" | "Independent" | "Unknown";
 
 function resolveListTag(list: DashboardList): OutreachListTag {
+  const explicitType = String((list as any).type || "").toLowerCase();
+
+  if (
+    explicitType === "outreach" ||
+    explicitType === "finance" ||
+    explicitType === "field" ||
+    explicitType === "volunteer"
+  ) {
+    return explicitType as OutreachListTag;
+  }
+
   const name = (list.name || "").toLowerCase();
   const owner = (list.default_owner_name || "").toLowerCase();
   const combined = `${name} ${owner}`;
@@ -214,6 +226,7 @@ export default function DashboardContactsPage() {
   const [fecStatusFilter, setFecStatusFilter] = useState<FecStatusFilter>("any");
   const [donorTierFilter, setDonorTierFilter] = useState<DonorTierFilter>("any");
   const [segmentName, setSegmentName] = useState("");
+  const [segmentType, setSegmentType] = useState<ListType>("outreach");
 
   const [editingOwner, setEditingOwner] = useState<Record<string, string>>({});
   const [savingId, setSavingId] = useState<string | null>(null);
@@ -309,7 +322,7 @@ export default function DashboardContactsPage() {
     }
   }
 
-  function stageCurrentSegment() {
+  async function stageCurrentSegment() {
     const trimmedName = segmentName.trim();
 
     if (!trimmedName) {
@@ -317,9 +330,24 @@ export default function DashboardContactsPage() {
       return;
     }
 
-    setMessage(
-      `"${trimmedName}" is staged from ${filteredContacts.length} filtered contact${filteredContacts.length === 1 ? "" : "s"}. Connect this button to the list creation helper to persist it on the Lists page.`
-    );
+    try {
+      setMessage("");
+
+      await createList({
+        name: trimmedName,
+        type: segmentType,
+      });
+
+      setMessage(
+        `"${trimmedName}" (${segmentType}) created from ${filteredContacts.length} filtered contact${filteredContacts.length === 1 ? "" : "s"}.`
+      );
+
+      setSegmentName("");
+      setSegmentType("outreach");
+      await loadContactsPageData();
+    } catch (err: any) {
+      setMessage(err?.message || "Failed to create list.");
+    }
   }
 
   function toggleSelected(contactId: string) {
@@ -675,22 +703,33 @@ export default function DashboardContactsPage() {
               Save Current Segment
             </p>
 
-            <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
+            <div className="grid gap-3 sm:grid-cols-[1fr_180px_auto]">
               <input
                 value={segmentName}
                 onChange={(e) => setSegmentName(e.target.value)}
-                placeholder="Example: IL GOP $500+ donors"
+                placeholder="Example: North Side Turf Walk"
                 className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm"
               />
 
-              <Link
-                href="/dashboard/lists"
+              <select
+                value={segmentType}
+                onChange={(e) => setSegmentType(e.target.value as ListType)}
+                className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700"
+              >
+                <option value="outreach">Outreach</option>
+                <option value="finance">Finance</option>
+                <option value="field">Field</option>
+                <option value="volunteer">Volunteer</option>
+              </select>
+
+              <button
+                type="button"
                 onClick={stageCurrentSegment}
                 className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-100"
               >
                 <Save className="h-4 w-4" />
                 Save List
-              </Link>
+              </button>
             </div>
           </div>
         </div>

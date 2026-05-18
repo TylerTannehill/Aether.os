@@ -38,7 +38,7 @@ export async function getLists(): Promise<CampaignList[]> {
 
   const { data, error } = await supabase
     .from("lists")
-    .select("id, name, created_at, default_owner_name")
+    .select("id, name, type, created_at, default_owner_name")
     .eq("organization_id", organizationId)
     .order("created_at", { ascending: false });
 
@@ -49,15 +49,24 @@ export async function getLists(): Promise<CampaignList[]> {
 
 export async function createList(input: CreateListInput) {
   const organizationId = await getActiveOrganizationId();
+
   const trimmedName = input.name.trim();
 
   if (!trimmedName) {
     throw new Error("Please enter a list name.");
   }
 
+  const normalizedType =
+    input.type === "finance" ||
+    input.type === "field" ||
+    input.type === "volunteer"
+      ? input.type
+      : "outreach";
+
   const { error } = await supabase.from("lists").insert([
     {
       name: trimmedName,
+      type: normalizedType,
       organization_id: organizationId,
     },
   ]);
@@ -65,7 +74,9 @@ export async function createList(input: CreateListInput) {
   if (error) throw error;
 }
 
-export async function updateListDefaultOwner(input: UpdateListDefaultOwnerInput) {
+export async function updateListDefaultOwner(
+  input: UpdateListDefaultOwnerInput
+) {
   const organizationId = await getActiveOrganizationId();
 
   const { error } = await supabase
@@ -87,8 +98,13 @@ export function filterLists(lists: CampaignList[], search: string) {
   return lists.filter((list) => {
     const name = list.name.toLowerCase();
     const owner = (list.default_owner_name || "").toLowerCase();
+    const type = (list.type || "").toLowerCase();
 
-    return name.includes(query) || owner.includes(query);
+    return (
+      name.includes(query) ||
+      owner.includes(query) ||
+      type.includes(query)
+    );
   });
 }
 
@@ -103,12 +119,14 @@ export function getListCounts(
   };
 }
 
-export async function getListDetail(listId: string): Promise<ListDetailData> {
+export async function getListDetail(
+  listId: string
+): Promise<ListDetailData> {
   const organizationId = await getActiveOrganizationId();
 
   const { data: listData, error: listError } = await supabase
     .from("lists")
-    .select("id, name, created_at, default_owner_name")
+    .select("id, name, type, created_at, default_owner_name")
     .eq("id", listId)
     .eq("organization_id", organizationId)
     .single();
@@ -124,7 +142,9 @@ export async function getListDetail(listId: string): Promise<ListDetailData> {
 
   const { data: contactsData, error: contactsError } = await supabase
     .from("contacts")
-    .select("id, first_name, last_name, email, phone, city, state, party")
+    .select(
+      "id, first_name, last_name, email, phone, city, state, party"
+    )
     .eq("organization_id", organizationId)
     .order("last_name", { ascending: true });
 
@@ -132,12 +152,18 @@ export async function getListDetail(listId: string): Promise<ListDetailData> {
   if (contactsError) throw contactsError;
 
   const assignedContacts =
-    ((membershipData ?? []) as unknown as ListContactRow[]).flatMap((row) => {
-      const linked = Array.isArray(row.contacts) ? row.contacts[0] : row.contacts;
-      return linked && (linked as any).organization_id === organizationId
-        ? [linked]
-        : [];
-    });
+    ((membershipData ?? []) as unknown as ListContactRow[]).flatMap(
+      (row) => {
+        const linked = Array.isArray(row.contacts)
+          ? row.contacts[0]
+          : row.contacts;
+
+        return linked &&
+          (linked as any).organization_id === organizationId
+          ? [linked]
+          : [];
+      }
+    );
 
   return {
     list: (listData as CampaignList) ?? null,
@@ -146,7 +172,10 @@ export async function getListDetail(listId: string): Promise<ListDetailData> {
   };
 }
 
-export async function addContactToList(listId: string, contactId: string) {
+export async function addContactToList(
+  listId: string,
+  contactId: string
+) {
   const organizationId = await getActiveOrganizationId();
 
   const { data: list, error: listError } = await supabase
@@ -157,7 +186,10 @@ export async function addContactToList(listId: string, contactId: string) {
     .single();
 
   if (listError) throw listError;
-  if (!list) throw new Error("List not found in active campaign.");
+
+  if (!list) {
+    throw new Error("List not found in active campaign.");
+  }
 
   const { data: contact, error: contactError } = await supabase
     .from("contacts")
@@ -167,7 +199,10 @@ export async function addContactToList(listId: string, contactId: string) {
     .single();
 
   if (contactError) throw contactError;
-  if (!contact) throw new Error("Contact not found in active campaign.");
+
+  if (!contact) {
+    throw new Error("Contact not found in active campaign.");
+  }
 
   const { error } = await supabase.from("list_contacts").insert([
     {
@@ -179,7 +214,10 @@ export async function addContactToList(listId: string, contactId: string) {
   if (error) throw error;
 }
 
-export async function removeContactFromList(listId: string, contactId: string) {
+export async function removeContactFromList(
+  listId: string,
+  contactId: string
+) {
   const organizationId = await getActiveOrganizationId();
 
   const { data: list, error: listError } = await supabase
@@ -190,7 +228,10 @@ export async function removeContactFromList(listId: string, contactId: string) {
     .single();
 
   if (listError) throw listError;
-  if (!list) throw new Error("List not found in active campaign.");
+
+  if (!list) {
+    throw new Error("List not found in active campaign.");
+  }
 
   const { data: contact, error: contactError } = await supabase
     .from("contacts")
@@ -200,7 +241,10 @@ export async function removeContactFromList(listId: string, contactId: string) {
     .single();
 
   if (contactError) throw contactError;
-  if (!contact) throw new Error("Contact not found in active campaign.");
+
+  if (!contact) {
+    throw new Error("Contact not found in active campaign.");
+  }
 
   const { error } = await supabase
     .from("list_contacts")
@@ -216,11 +260,17 @@ export function getAvailableContacts(
   assignedContacts: Contact[]
 ) {
   return allContacts.filter(
-    (contact) => !assignedContacts.some((assigned) => assigned.id === contact.id)
+    (contact) =>
+      !assignedContacts.some(
+        (assigned) => assigned.id === contact.id
+      )
   );
 }
 
-export function filterAssignedContacts(assignedContacts: Contact[], search: string) {
+export function filterAssignedContacts(
+  assignedContacts: Contact[],
+  search: string
+) {
   const query = search.toLowerCase().trim();
 
   if (!query) return assignedContacts;
@@ -231,7 +281,9 @@ export function filterAssignedContacts(assignedContacts: Contact[], search: stri
     const phone = (contact.phone || "").toLowerCase();
 
     return (
-      name.includes(query) || email.includes(query) || phone.includes(query)
+      name.includes(query) ||
+      email.includes(query) ||
+      phone.includes(query)
     );
   });
 }

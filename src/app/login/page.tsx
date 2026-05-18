@@ -68,6 +68,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md space-y-6 rounded-lg border border-white/20 bg-white/5 p-6">
         <div className="space-y-2">
           <h1 className="text-2xl font-bold">Login to Aether.os</h1>
+
           <p className="text-sm text-white/70">
             Enter your campaign workspace to continue.
           </p>
@@ -78,6 +79,7 @@ export default function LoginPage() {
             <label htmlFor="campaign" className="block text-sm font-medium">
               Campaign
             </label>
+
             <input
               id="campaign"
               type="text"
@@ -93,6 +95,7 @@ export default function LoginPage() {
             <label htmlFor="email" className="block text-sm font-medium">
               Email
             </label>
+
             <input
               id="email"
               type="email"
@@ -108,6 +111,7 @@ export default function LoginPage() {
             <label htmlFor="password" className="block text-sm font-medium">
               Password
             </label>
+
             <input
               id="password"
               type="password"
@@ -130,13 +134,25 @@ export default function LoginPage() {
 
         <p className="text-center text-xs text-white/60">
           By logging in, you agree to our{' '}
-          <Link href="/terms" className="underline hover:text-white">
+
+          <Link
+            href="/terms"
+            style={{ color: '#3B82F6' }}
+            className="underline"
+          >
             Terms
           </Link>{' '}
+
           and{' '}
-          <Link href="/privacy" className="underline hover:text-white">
+
+          <Link
+            href="/privacy"
+            style={{ color: '#3B82F6' }}
+            className="underline"
+          >
             Privacy Policy
           </Link>
+
           .
         </p>
       </div>

@@ -1139,11 +1139,11 @@ export default function FieldDashboardPage() {
 
           {chartData.length > 0 ? (
             <div className="h-48 flex items-end gap-2">
-              {chartData.map((point) => {
+              {chartData.map((point, index) => {
                 const height = Math.max((point[trendView] / chartMax) * 100, 6);
 
                 return (
-                  <div key={point.label} className="flex-1">
+                  <div key={`${point.label}-${index}`} className="flex-1">
                     <div
                       className="rounded-t-lg bg-slate-900 transition-all"
                       style={{ height: `${height}%` }}

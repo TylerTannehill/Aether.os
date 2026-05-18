@@ -1,21 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
-
-function toNumber(value: unknown) {
-  const parsed = Number(value ?? 0);
-  return Number.isFinite(parsed) ? parsed : 0;
-}
-
-function toDate(value: unknown) {
-  const raw = String(value ?? "").trim();
-  if (!raw) return null;
-
-  const parsed = new Date(raw);
-  if (Number.isNaN(parsed.getTime())) return null;
-
-  return parsed.toISOString().slice(0, 10);
-}
+import { normalizeAnalyticsEvents } from "@/lib/analytics/normalize-analytics-events";
 
 export async function POST(req: Request) {
   try {
@@ -73,30 +59,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const rows = events.map((event: any) => ({
-      organization_id: member.organization_id,
-
-      source: String(event.source || "csv"),
-      department: String(event.department || "digital"),
-
-      platform: event.platform || null,
-      campaign_name: event.campaign_name || null,
-      asset_name: event.asset_name || null,
-
-      metric_date: toDate(event.metric_date),
-
-      impressions: Math.round(toNumber(event.impressions)),
-      engagements: Math.round(toNumber(event.engagements)),
-      clicks: Math.round(toNumber(event.clicks)),
-      spend: toNumber(event.spend),
-
-      sentiment_positive: Math.round(toNumber(event.sentiment_positive)),
-      sentiment_negative: Math.round(toNumber(event.sentiment_negative)),
-      sentiment_neutral: Math.round(toNumber(event.sentiment_neutral)),
-
-      notes: event.notes || null,
-      raw_payload: event.raw_payload || {},
-    }));
+    const rows = normalizeAnalyticsEvents(events, member.organization_id);
 
     const { data, error } = await supabase
       .from("analytics_events")

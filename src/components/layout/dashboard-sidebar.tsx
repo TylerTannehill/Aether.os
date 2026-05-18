@@ -11,9 +11,8 @@ import {
   LogOut,
   MapPinned,
   Megaphone,
-  MessageSquare,
-  PlugZap,
   Printer,
+  Wrench,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -63,12 +62,6 @@ const navItems: NavItem[] = [
     alwaysVisible: true,
   },
   {
-    title: "Chat",
-    href: "/dashboard/chat",
-    icon: MessageSquare,
-    alwaysVisible: true,
-  },
-  {
     title: "Field",
     href: "/dashboard/field",
     icon: MapPinned,
@@ -99,9 +92,9 @@ const navItems: NavItem[] = [
     department: "print",
   },
   {
-    title: "Integrations",
-    href: "/dashboard/integrations",
-    icon: PlugZap,
+    title: "Tools",
+    href: "/dashboard/tools",
+    icon: Wrench,
     alwaysVisible: true,
   },
 ];

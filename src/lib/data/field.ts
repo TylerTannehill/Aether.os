@@ -10,6 +10,9 @@ export type FieldMetricRow = {
   completion?: number | null;
   canvasser_name?: string | null;
   created_at?: string | null;
+  linked_list_id?: string | null;
+  linked_list_name?: string | null;
+  source_type?: "analytics" | "field_metrics" | "field_list";
 };
 
 export type FieldSnapshot = {
@@ -18,6 +21,14 @@ export type FieldSnapshot = {
   ids: number;
   strongestCanvasser: string;
   issue: string;
+};
+
+type FieldListRow = {
+  id: string;
+  name: string;
+  type?: string | null;
+  default_owner_name?: string | null;
+  created_at?: string | null;
 };
 
 async function getActiveOrganizationId() {
@@ -85,6 +96,9 @@ function normalizeFieldRow(row: Record<string, any>): FieldMetricRow {
       row.staff_name ||
       "Unassigned",
     created_at: row.metric_date ?? row.created_at ?? null,
+    linked_list_id: row.linked_list_id ?? row.list_id ?? null,
+    linked_list_name: row.linked_list_name ?? row.list_name ?? null,
+    source_type: row.source_type || "analytics",
   };
 }
 
@@ -102,12 +116,87 @@ function isFieldAnalyticsRow(row: Record<string, any>) {
   );
 }
 
+function isLikelyFieldList(list: FieldListRow) {
+  const type = normalize(list.type);
+  const name = normalize(list.name);
+
+  if (type === "field") return true;
+
+  return (
+    name.includes("field") ||
+    name.includes("turf") ||
+    name.includes("canvass") ||
+    name.includes("door") ||
+    name.includes("walk")
+  );
+}
+
+function buildFieldListMetricRow(list: FieldListRow): FieldMetricRow {
+  return {
+    id: `field-list-${list.id}`,
+    turf_name: list.name,
+    region: "Field List",
+    doors: 0,
+    conversations: 0,
+    ids: 0,
+    completion: 0,
+    canvasser_name: list.default_owner_name || "Unassigned",
+    created_at: list.created_at || null,
+    linked_list_id: list.id,
+    linked_list_name: list.name,
+    source_type: "field_list",
+  };
+}
+
+function dedupeFieldRows(rows: FieldMetricRow[]) {
+  const seenIds = new Set<string>();
+  const seenTurfNamesWithMetrics = new Set<string>();
+  const result: FieldMetricRow[] = [];
+
+  rows.forEach((row) => {
+    const id = String(row.id);
+
+    if (seenIds.has(id)) return;
+
+    const turfName = normalize(row.turf_name);
+    const hasRealMetrics =
+      toNumber(row.doors) > 0 ||
+      toNumber(row.conversations) > 0 ||
+      toNumber(row.ids) > 0 ||
+      toNumber(row.completion) > 0;
+
+    if (hasRealMetrics && turfName) {
+      seenTurfNamesWithMetrics.add(turfName);
+    }
+
+    seenIds.add(id);
+    result.push(row);
+  });
+
+  return result.filter((row) => {
+    if (row.source_type !== "field_list") return true;
+
+    const turfName = normalize(row.turf_name);
+
+    if (!turfName) return true;
+
+    return !seenTurfNamesWithMetrics.has(turfName);
+  });
+}
+
 function determineStrongestCanvasser(rows: FieldMetricRow[]) {
-  if (!rows.length) return "No canvasser data";
+  const rowsWithOutput = rows.filter(
+    (row) =>
+      toNumber(row.doors) > 0 ||
+      toNumber(row.conversations) > 0 ||
+      toNumber(row.ids) > 0
+  );
+
+  if (!rowsWithOutput.length) return "No canvasser data";
 
   const scoreByCanvasser = new Map<string, number>();
 
-  rows.forEach((row) => {
+  rowsWithOutput.forEach((row) => {
     const name = (row.canvasser_name || "").trim() || "Unknown";
 
     const score =
@@ -128,11 +217,33 @@ function determineStrongestCanvasser(rows: FieldMetricRow[]) {
 function determineFieldIssue(rows: FieldMetricRow[]) {
   if (!rows.length) return "No field issues detected yet.";
 
-  const weakestCompletion = [...rows].sort(
+  const rowsWithMetrics = rows.filter(
+    (row) =>
+      toNumber(row.doors) > 0 ||
+      toNumber(row.conversations) > 0 ||
+      toNumber(row.ids) > 0 ||
+      toNumber(row.completion) > 0
+  );
+
+  if (!rowsWithMetrics.length) {
+    const fieldListCount = rows.filter(
+      (row) => row.source_type === "field_list"
+    ).length;
+
+    if (fieldListCount > 0) {
+      return `${fieldListCount} field list${
+        fieldListCount === 1 ? "" : "s"
+      } created, but no turf output has been logged yet.`;
+    }
+
+    return "No field issues detected yet.";
+  }
+
+  const weakestCompletion = [...rowsWithMetrics].sort(
     (a, b) => toNumber(a.completion) - toNumber(b.completion)
   )[0];
 
-  const weakestConversationYield = [...rows].sort((a, b) => {
+  const weakestConversationYield = [...rowsWithMetrics].sort((a, b) => {
     const aYield =
       toNumber(a.doors) > 0
         ? toNumber(a.conversations) / toNumber(a.doors)
@@ -183,7 +294,12 @@ async function getAnalyticsEventRows(
 
   const rows = ((data as Record<string, any>[]) ?? [])
     .filter(isFieldAnalyticsRow)
-    .map(normalizeFieldRow);
+    .map((row) =>
+      normalizeFieldRow({
+        ...row,
+        source_type: "analytics",
+      })
+    );
 
   console.info("Field analytics_events loaded", {
     organizationId,
@@ -221,7 +337,42 @@ async function getLegacyFieldRows(
     sample: data?.[0] ?? null,
   });
 
-  return (data as FieldMetricRow[]) ?? [];
+  return ((data as FieldMetricRow[]) ?? []).map((row) => ({
+    ...row,
+    source_type: "field_metrics",
+  }));
+}
+
+async function getTypedFieldListRows(
+  organizationId: string
+): Promise<FieldMetricRow[]> {
+  const { data, error } = await supabase
+    .from("lists")
+    .select("id, name, type, default_owner_name, created_at")
+    .eq("organization_id", organizationId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Failed to load typed field lists", {
+      organizationId,
+      error,
+    });
+
+    return [];
+  }
+
+  const rows = ((data as FieldListRow[]) ?? [])
+    .filter(isLikelyFieldList)
+    .map(buildFieldListMetricRow);
+
+  console.info("Typed field lists loaded for field metrics", {
+    organizationId,
+    rawCount: data?.length ?? 0,
+    fieldListCount: rows.length,
+    sample: rows[0] ?? null,
+  });
+
+  return rows;
 }
 
 export async function getFieldMetricRows(): Promise<FieldMetricRow[]> {
@@ -234,13 +385,17 @@ export async function getFieldMetricRows(): Promise<FieldMetricRow[]> {
     return [];
   }
 
-  const analyticsRows = await getAnalyticsEventRows(organizationId);
+  const [analyticsRows, legacyRows, fieldListRows] = await Promise.all([
+    getAnalyticsEventRows(organizationId),
+    getLegacyFieldRows(organizationId),
+    getTypedFieldListRows(organizationId),
+  ]);
 
-  if (analyticsRows.length > 0) {
-    return analyticsRows;
-  }
-
-  return getLegacyFieldRows(organizationId);
+  return dedupeFieldRows([
+    ...analyticsRows,
+    ...legacyRows,
+    ...fieldListRows,
+  ]);
 }
 
 export async function getFieldSnapshot(): Promise<FieldSnapshot> {

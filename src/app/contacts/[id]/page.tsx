@@ -54,6 +54,7 @@ type Contact = {
 type List = {
   id: string;
   name: string;
+  type?: ContactListTag | null;
 };
 
 type ContactListMembership = {
@@ -61,6 +62,7 @@ type ContactListMembership = {
   lists?: {
     id: string;
     name: string;
+    type?: ContactListTag | null;
   } | null;
 };
 
@@ -198,8 +200,24 @@ function priorityClasses(priority: Task["priority"]) {
   }
 }
 
-function resolveListTag(name: string): ContactListTag {
-  const normalized = name.toLowerCase();
+function resolveListTag(list: List | string): ContactListTag {
+  if (typeof list !== "string") {
+    const explicitType = String(list.type || "").toLowerCase();
+
+    if (
+      explicitType === "outreach" ||
+      explicitType === "finance" ||
+      explicitType === "field" ||
+      explicitType === "volunteer"
+    ) {
+      return explicitType as ContactListTag;
+    }
+  }
+
+  const normalized =
+    typeof list === "string"
+      ? list.toLowerCase()
+      : list.name.toLowerCase();
 
   if (
     normalized.includes("finance") ||
@@ -213,7 +231,9 @@ function resolveListTag(name: string): ContactListTag {
     normalized.includes("field") ||
     normalized.includes("turf") ||
     normalized.includes("canvass") ||
-    normalized.includes("door")
+    normalized.includes("door") ||
+    normalized.includes("walk") ||
+    normalized.includes("packet")
   ) {
     return "field";
   }
@@ -590,12 +610,12 @@ export default function ContactDetailPage() {
 
     const { data: listData, error: listError } = await supabase
       .from("lists")
-      .select("id, name")
+      .select("id, name, type")
       .order("created_at", { ascending: false });
 
     const { data: membershipData, error: membershipError } = await supabase
       .from("list_contacts")
-      .select("list_id, lists(id, name)")
+      .select("list_id, lists(id, name, type)")
       .eq("contact_id", contactId);
 
     const { data: logData, error: logError } = await supabase
@@ -629,7 +649,7 @@ export default function ContactDetailPage() {
    const mappedLists =
   ((membershipData ?? []) as any[]).flatMap((row) => {
     const linked = Array.isArray(row.lists) ? row.lists[0] : row.lists;
-    return linked ? [{ id: linked.id, name: linked.name }] : [];
+    return linked ? [{ id: linked.id, name: linked.name, type: linked.type }] : [];
   });
 
       setContactLists(mappedLists);
@@ -778,9 +798,42 @@ export default function ContactDetailPage() {
   const listMembershipSummary = useMemo(() => {
     return contactLists.map((list) => ({
       ...list,
-      tag: resolveListTag(list.name),
+      tag: resolveListTag(list),
     }));
   }, [contactLists]);
+
+  const fieldListMemberships = useMemo(() => {
+    return listMembershipSummary.filter((list) => list.tag === "field");
+  }, [listMembershipSummary]);
+
+  const primaryFieldList = useMemo(() => {
+    return fieldListMemberships[0] || null;
+  }, [fieldListMemberships]);
+
+  const fieldSignal = useMemo(() => {
+    const contactCode = contact?.contact_code || "No support code set";
+    const assignedOwner = contact?.owner_name || "Unassigned";
+
+    if (fieldListMemberships.length > 0) {
+      return {
+        status: "Field routed",
+        turf: primaryFieldList?.name || "Active field list",
+        owner: assignedOwner,
+        support: contactCode,
+        note:
+          "This contact is attached to field routing through list membership. Use Field Focus to move turf execution and follow-up.",
+      };
+    }
+
+    return {
+      status: "No field route",
+      turf: "Not assigned to a field list",
+      owner: assignedOwner,
+      support: contactCode,
+      note:
+        "Add this contact to a Field list when they belong in a turf, canvass packet, door program, or field follow-up lane.",
+    };
+  }, [contact?.contact_code, contact?.owner_name, fieldListMemberships.length, primaryFieldList?.name]);
 
   const latestLog = useMemo(() => (logs.length > 0 ? logs[0] : null), [logs]);
   const intelligence = deriveContactStatusAndNextAction(latestLog);
@@ -1271,7 +1324,109 @@ export default function ContactDetailPage() {
             <p className="mt-2 text-sm text-slate-500">Internal contact identity</p>
           </div>
         </section>
-                <section id="finance-overview" className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
+
+        <section id="field-intelligence" className="rounded-3xl border border-sky-200 bg-sky-50 p-6 shadow-sm lg:p-8">
+          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="text-sm font-medium text-sky-700">Field Intelligence</p>
+              <h2 className="text-xl font-semibold text-slate-900">
+                Turf placement, canvass context, and field follow-up
+              </h2>
+              <p className="mt-1 text-sm text-sky-900/70">
+                Field context is derived from typed Field lists, contact ownership, contact code, and recent execution activity.
+              </p>
+            </div>
+
+            <Link
+              href="/dashboard/field/focus"
+              className="inline-flex items-center gap-2 rounded-2xl border border-sky-200 bg-white px-4 py-3 text-sm font-medium text-sky-700 transition hover:bg-sky-100"
+            >
+              Open Field Focus
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <div className="rounded-2xl border border-sky-200 bg-white p-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-sky-700">Field Status</p>
+              <p className="mt-2 text-lg font-semibold text-slate-900">
+                {fieldSignal.status}
+              </p>
+              <p className="mt-2 text-xs text-slate-500">
+                {fieldListMemberships.length} field list{fieldListMemberships.length === 1 ? "" : "s"} attached
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-sky-200 bg-white p-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-sky-700">Current Turf / List</p>
+              <p className="mt-2 text-lg font-semibold text-slate-900">
+                {fieldSignal.turf}
+              </p>
+              <p className="mt-2 text-xs text-slate-500">
+                Primary field routing surface
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-sky-200 bg-white p-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-sky-700">Assigned Canvasser / Owner</p>
+              <p className="mt-2 text-lg font-semibold text-slate-900">
+                {fieldSignal.owner}
+              </p>
+              <p className="mt-2 text-xs text-slate-500">
+                Uses contact owner until dedicated field assignment exists
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-sky-200 bg-white p-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-sky-700">Support / Contact Code</p>
+              <p className="mt-2 text-lg font-semibold text-slate-900">
+                {fieldSignal.support}
+              </p>
+              <p className="mt-2 text-xs text-slate-500">
+                Can become support ID / field result later
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-5 rounded-2xl border border-sky-200 bg-white p-4 text-sm text-sky-950">
+            {fieldSignal.note}
+          </div>
+
+          <div className="mt-5 space-y-2">
+            <p className="text-sm font-semibold text-slate-900">Field List Memberships</p>
+
+            {fieldListMemberships.length === 0 ? (
+              <div className="rounded-2xl border border-sky-200 bg-white p-4 text-sm text-slate-500">
+                No Field lists are currently attached to this contact. Add the contact to a typed Field list below to make the field route visible here.
+              </div>
+            ) : null}
+
+            {fieldListMemberships.map((list) => (
+              <div
+                key={`field-${list.id}`}
+                className="flex items-center justify-between rounded-2xl border border-sky-200 bg-white p-3"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="rounded-full border border-sky-200 bg-sky-100 px-2 py-0.5 text-xs font-semibold text-sky-700">
+                    field
+                  </span>
+                  <span className="text-sm font-medium text-slate-900">
+                    {list.name}
+                  </span>
+                </div>
+
+                <Link
+                  href="/dashboard/field/focus"
+                  className="text-xs font-medium text-sky-700 hover:underline"
+                >
+                  Work in Field Focus
+                </Link>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section id="finance-overview" className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
           <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <p className="text-sm font-medium text-slate-500">Finance Context</p>
@@ -1611,7 +1766,7 @@ export default function ContactDetailPage() {
                 <option value="">Select list</option>
                 {availableLists.map((list) => (
                   <option key={list.id} value={list.id}>
-                    {list.name}
+                    {list.name} ({resolveListTag(list)})
                   </option>
                 ))}
               </select>

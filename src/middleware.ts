@@ -29,7 +29,10 @@ export async function middleware(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname
 
-  const isLoginPage = pathname === '/login'
+  const publicRoutes = ['/login', '/terms', '/privacy']
+
+  const isPublicRoute = publicRoutes.includes(pathname)
+
   const isPublicAsset =
     pathname.startsWith('/_next') ||
     pathname.startsWith('/favicon.ico') ||
@@ -39,13 +42,13 @@ export async function middleware(request: NextRequest) {
     return response
   }
 
-  if (!user && !isLoginPage) {
+  if (!user && !isPublicRoute) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
   }
 
-  if (user && isLoginPage) {
+  if (user && pathname === '/login') {
     const url = request.nextUrl.clone()
     url.pathname = '/dashboard'
     return NextResponse.redirect(url)

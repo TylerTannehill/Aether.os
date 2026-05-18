@@ -1,5 +1,7 @@
 export type TaskStatus = "open" | "in_progress" | "done" | "cancelled";
+
 export type Priority = "low" | "medium" | "high" | "urgent";
+
 export type TaskType =
   | "follow_up"
   | "call"
@@ -8,9 +10,18 @@ export type TaskType =
   | "data_cleanup"
   | "other";
 
-export type FecMatchStatus = "matched" | "probable" | "unresolved" | "none";
+export type FecMatchStatus =
+  | "matched"
+  | "probable"
+  | "unresolved"
+  | "none";
 
-export type FecDonorTier = "none" | "base" | "mid" | "major" | "maxed";
+export type FecDonorTier =
+  | "none"
+  | "base"
+  | "mid"
+  | "major"
+  | "maxed";
 
 export type JackpotAnomalyType =
   | "dormant_high_value_donor"
@@ -85,9 +96,16 @@ export type Contact = {
   jackpot_reason?: string | null;
 };
 
+export type ListType =
+  | "outreach"
+  | "finance"
+  | "field"
+  | "volunteer";
+
 export type CampaignList = {
   id: string;
   name: string;
+  type?: ListType | null;
   created_at?: string | null;
   default_owner_name?: string | null;
 };
@@ -108,6 +126,7 @@ export type OutreachLog = {
   contacts?: Contact | null;
   lists?: CampaignList | null;
 };
+
 export type ContactIntelligence = {
   lastLog: OutreachLog | null;
   statusLabel: string;
@@ -135,6 +154,7 @@ export type Task = {
   created_at?: string | null;
   updated_at?: string | null;
 };
+
 export type TopListMetric = {
   id: string;
   name: string;
@@ -169,6 +189,7 @@ export type DashboardMetrics = {
   recentActivity: OutreachLog[];
   ownerSegments: OwnerSegment[];
 };
+
 export type AnalyticsDepartment =
   | "outreach"
   | "finance"
@@ -243,6 +264,7 @@ export type ContactCounts = {
   withPhone: number;
   withEmail: number;
 };
+
 export type AutoTaskOutcome = {
   created: boolean;
   skipped: boolean;
@@ -257,6 +279,7 @@ export type ListCounts = {
 
 export type CreateListInput = {
   name: string;
+  type?: ListType;
 };
 
 export type ListDetailData = {
@@ -264,6 +287,7 @@ export type ListDetailData = {
   assignedContacts: Contact[];
   allContacts: Contact[];
 };
+
 export type FocusItem = {
   id: string;
   title: string;
@@ -292,6 +316,7 @@ export type OwnerQueue = {
   overdue: number;
   tasks: Task[];
 };
+
 export type OwnerDashboardSignal = {
   busiestOwner: OwnerQueue | null;
   unassignedQueue: OwnerQueue | null;
@@ -308,6 +333,7 @@ export type UpdateListDefaultOwnerInput = {
   listId: string;
   default_owner_name?: string | null;
 };
+
 // ===============================
 // DASHBOARD TILE SYSTEM
 // ===============================
@@ -328,6 +354,7 @@ export type DashboardTile = {
   roleVisibility: ("admin" | "director" | "user")[];
   order: number;
 };
+
 export type ContributionRecord = {
   id: string;
   contact_id: string;
