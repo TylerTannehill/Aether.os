@@ -14,29 +14,193 @@ import { CampaignList } from "@/lib/data/types";
 import { formatCreatedAt } from "@/lib/data/utils";
 import { getOrgContextTheme } from "@/lib/org-context-theme";
 
-type ListTag = "outreach" | "finance" | "field" | "volunteer";
+type OperationalTag =
+  | "outreach"
+  | "finance"
+  | "field"
+  | "print"
+  | "volunteer"
+  | "walk"
+  | "turf"
+  | "persuasion"
+  | "turnout"
+  | "lit-drop"
+  | "mail"
+  | "door-hanger"
+  | "follow-up"
+  | "high-priority";
 
-function resolveListTag(list: CampaignList): ListTag {
-  const name = (list.name || "").toLowerCase();
+type RouteTarget = "outreach" | "finance" | "field" | "print";
 
-  if (name.includes("finance") || name.includes("donor")) return "finance";
-  if (name.includes("field") || name.includes("turf")) return "field";
-  if (name.includes("volunteer") || name.includes("phone bank"))
-    return "volunteer";
+function normalizeListName(list: CampaignList) {
+  return `${list.name || ""} ${list.type || ""}`.toLowerCase();
+}
 
+function uniqTags(tags: OperationalTag[]) {
+  return Array.from(new Set(tags));
+}
+
+function resolveOperationalTags(list: CampaignList): OperationalTag[] {
+  const normalized = normalizeListName(list);
+  const explicitType = String(list.type || "").toLowerCase();
+  const tags: OperationalTag[] = [];
+
+  if (
+    explicitType === "finance" ||
+    normalized.includes("finance") ||
+    normalized.includes("donor") ||
+    normalized.includes("pledge") ||
+    normalized.includes("fundraising")
+  ) {
+    tags.push("finance");
+  }
+
+  if (
+    explicitType === "field" ||
+    normalized.includes("field") ||
+    normalized.includes("turf") ||
+    normalized.includes("walk") ||
+    normalized.includes("canvass") ||
+    normalized.includes("door") ||
+    normalized.includes("packet")
+  ) {
+    tags.push("field");
+  }
+
+  if (
+    normalized.includes("print") ||
+    normalized.includes("mail") ||
+    normalized.includes("mailer") ||
+    normalized.includes("literature") ||
+    normalized.includes("lit-drop") ||
+    normalized.includes("lit drop") ||
+    normalized.includes("door hanger") ||
+    normalized.includes("door-hanger")
+  ) {
+    tags.push("print");
+  }
+
+  if (
+    explicitType === "volunteer" ||
+    normalized.includes("volunteer") ||
+    normalized.includes("phone bank") ||
+    normalized.includes("phonebank")
+  ) {
+    tags.push("volunteer");
+  }
+
+  if (normalized.includes("walk") || normalized.includes("packet")) {
+    tags.push("walk");
+  }
+
+  if (normalized.includes("turf") || normalized.includes("canvass")) {
+    tags.push("turf");
+  }
+
+  if (normalized.includes("persuasion")) {
+    tags.push("persuasion");
+  }
+
+  if (normalized.includes("turnout") || normalized.includes("gotv")) {
+    tags.push("turnout");
+  }
+
+  if (
+    normalized.includes("literature") ||
+    normalized.includes("lit-drop") ||
+    normalized.includes("lit drop")
+  ) {
+    tags.push("lit-drop");
+  }
+
+  if (normalized.includes("mail") || normalized.includes("mailer")) {
+    tags.push("mail");
+  }
+
+  if (normalized.includes("door hanger") || normalized.includes("door-hanger")) {
+    tags.push("door-hanger");
+  }
+
+  if (normalized.includes("follow-up") || normalized.includes("follow up")) {
+    tags.push("follow-up");
+  }
+
+  if (
+    normalized.includes("high priority") ||
+    normalized.includes("priority") ||
+    normalized.includes("hot")
+  ) {
+    tags.push("high-priority");
+  }
+
+  if (tags.length === 0) {
+    tags.push("outreach");
+  }
+
+  return uniqTags(tags);
+}
+
+function resolveRouteTarget(tags: OperationalTag[]): RouteTarget {
+  if (tags.includes("finance")) return "finance";
+  if (tags.includes("print")) return "print";
+  if (tags.includes("field")) return "field";
   return "outreach";
 }
 
-function tagTone(tag: ListTag) {
+function tagTone(tag: OperationalTag) {
   switch (tag) {
     case "finance":
-      return "bg-emerald-100 text-emerald-700";
+      return "border border-emerald-200 bg-emerald-100 text-emerald-700";
     case "field":
-      return "bg-sky-100 text-sky-700";
+    case "walk":
+    case "turf":
+      return "border border-sky-200 bg-sky-100 text-sky-700";
+    case "print":
+    case "lit-drop":
+    case "mail":
+    case "door-hanger":
+      return "border border-indigo-200 bg-indigo-100 text-indigo-700";
     case "volunteer":
-      return "bg-purple-100 text-purple-700";
+      return "border border-purple-200 bg-purple-100 text-purple-700";
+    case "persuasion":
+      return "border border-fuchsia-200 bg-fuchsia-100 text-fuchsia-700";
+    case "turnout":
+      return "border border-orange-200 bg-orange-100 text-orange-700";
+    case "follow-up":
+      return "border border-amber-200 bg-amber-100 text-amber-800";
+    case "high-priority":
+      return "border border-rose-200 bg-rose-100 text-rose-700";
+    case "outreach":
     default:
-      return "bg-slate-100 text-slate-700";
+      return "border border-slate-200 bg-slate-100 text-slate-700";
+  }
+}
+
+function routeLabel(route: RouteTarget) {
+  switch (route) {
+    case "finance":
+      return "Finance";
+    case "field":
+      return "Field";
+    case "print":
+      return "Print";
+    case "outreach":
+    default:
+      return "Outreach";
+  }
+}
+
+function routeHref(route: RouteTarget, listId: string) {
+  switch (route) {
+    case "finance":
+      return "/dashboard/finance/focus";
+    case "field":
+      return `/dashboard/field/focus?listId=${listId}`;
+    case "print":
+      return "/dashboard/print/focus";
+    case "outreach":
+    default:
+      return `/dashboard/outreach/focus?listId=${listId}`;
   }
 }
 
@@ -158,8 +322,8 @@ function DashboardListsPageContent() {
           </h1>
 
           <p className="max-w-3xl text-sm text-slate-300 lg:text-base">
-            Build, organize, and deploy execution lists across Outreach,
-            Finance, and Field.
+            Build, organize, and deploy operational universes across Outreach,
+            Finance, Field, and Print.
           </p>
         </div>
       </section>
@@ -249,7 +413,7 @@ function DashboardListsPageContent() {
         </div>
       </section>
 
-      <section className="grid gap-4 xl:grid-cols-3">
+      <section className="grid gap-4 xl:grid-cols-4">
         <Link
           href="/dashboard/outreach/focus"
           className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:bg-slate-50"
@@ -309,6 +473,26 @@ function DashboardListsPageContent() {
             <ArrowRight className="h-4 w-4" />
           </div>
         </Link>
+
+        <Link
+          href="/dashboard/print/focus"
+          className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:bg-slate-50"
+        >
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+            Print Route
+          </p>
+          <h2 className="mt-3 text-xl font-semibold text-slate-900">
+            Activate Print Universes
+          </h2>
+          <p className="mt-2 text-sm text-slate-500">
+            Move literature drops, mail universes, and door hanger routes into
+            print execution without breaking list context.
+          </p>
+          <div className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-slate-900">
+            Open Print Focus
+            <ArrowRight className="h-4 w-4" />
+          </div>
+        </Link>
       </section>
 
       <section className="rounded-3xl border-2 border-slate-900 bg-white p-6 shadow-md lg:p-8">
@@ -355,7 +539,7 @@ function DashboardListsPageContent() {
                   Name
                 </th>
                 <th className="px-4 text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                  Type
+                  Operational Identity
                 </th>
                 <th className="px-4 text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                   Default Owner
@@ -375,7 +559,8 @@ function DashboardListsPageContent() {
             <tbody>
               {filteredLists.map((list) => {
                 const hasOwner = !!list.default_owner_name?.trim();
-                const tag = resolveListTag(list);
+                const tags = resolveOperationalTags(list);
+                const route = resolveRouteTarget(tags);
                 const readyLabel = hasOwner ? "Execution Ready" : "Needs Owner";
                 const isHighlighted =
                   listFromQuery &&
@@ -390,13 +575,21 @@ function DashboardListsPageContent() {
                       {list.name}
                     </td>
                     <td className="px-4 py-4">
-                      <span
-                        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${tagTone(
-                          tag
-                        )}`}
-                      >
-                        {tag}
-                      </span>
+                      <div className="flex max-w-md flex-wrap gap-2">
+                        <span className="inline-flex rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-700">
+                          Route: {routeLabel(route)}
+                        </span>
+                        {tags.map((tag) => (
+                          <span
+                            key={`${list.id}-${tag}`}
+                            className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${tagTone(
+                              tag
+                            )}`}
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
                     </td>
                     <td className="px-4 py-4 text-slate-600">
                       {list.default_owner_name || "Unassigned"}
@@ -425,10 +618,10 @@ function DashboardListsPageContent() {
                         </Link>
 
                         <Link
-                          href={`/dashboard/outreach/focus?listId=${list.id}`}
+                          href={routeHref(route, list.id)}
                           className="font-medium text-emerald-700 transition hover:text-emerald-800"
                         >
-                          Start Outreach
+                          Start {routeLabel(route)}
                         </Link>
 
                         <Link
@@ -478,7 +671,7 @@ function DashboardListsPageContent() {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search lists or owner..."
+              placeholder="Search lists, owner, type, or tag..."
               className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400"
             />
 

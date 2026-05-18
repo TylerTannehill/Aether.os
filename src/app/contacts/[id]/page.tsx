@@ -11,22 +11,19 @@ import {
   ListChecks,
   MessageSquare,
   PhoneCall,
+  Printer,
+  Package,
   Sparkles,
   Workflow,
 } from "lucide-react";
 import { supabase } from "../../../lib/supabase";
-import {
-  createAutoTaskForOutcome,
-  saveOutreachLog,
-} from "@/lib/data/outreach";
+import { createAutoTaskForOutcome, saveOutreachLog } from "@/lib/data/outreach";
 import {
   ContactDonorIntelligence,
   ContributionRecord,
   PledgeRecord,
 } from "@/lib/data/types";
-import {
-  buildContactDonorIntelligence,
-} from "@/lib/finance/donor-intelligence";
+import { buildContactDonorIntelligence } from "@/lib/finance/donor-intelligence";
 
 type Contact = {
   id: string;
@@ -100,12 +97,12 @@ type QuickActionDraft = {
   notes: string;
 };
 
-type ContactListTag = "outreach" | "finance" | "field" | "volunteer";
+type ContactListTag = "outreach" | "finance" | "field" | "print" | "volunteer";
 
 type ContactExecutionLink = {
   label: string;
   href: string;
-  icon: "outreach" | "finance" | "lists";
+  icon: "outreach" | "finance" | "print" | "lists";
 };
 
 const currency = new Intl.NumberFormat("en-US", {
@@ -127,7 +124,10 @@ const quickActionResultOptions: Record<QuickActionChannel, string[]> = {
 
 function fullName(contact: Contact | null) {
   if (!contact) return "Contact";
-  return `${contact.first_name ?? ""} ${contact.last_name ?? ""}`.trim() || "Unnamed Contact";
+  return (
+    `${contact.first_name ?? ""} ${contact.last_name ?? ""}`.trim() ||
+    "Unnamed Contact"
+  );
 }
 
 function formatDateTime(value?: string | null) {
@@ -163,7 +163,8 @@ function deriveContactStatusAndNextAction(latestLog: OutreachLog | null) {
       classes: "border border-emerald-200 bg-emerald-100 text-emerald-700",
       description: "Recent outreach shows real engagement.",
       nextAction: "Follow Up",
-      nextActionClasses: "border border-purple-200 bg-purple-100 text-purple-700",
+      nextActionClasses:
+        "border border-purple-200 bg-purple-100 text-purple-700",
     };
   }
 
@@ -200,6 +201,116 @@ function priorityClasses(priority: Task["priority"]) {
   }
 }
 
+function normalizeOperationalText(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function isCleanupListName(value: string) {
+  const normalized = normalizeOperationalText(value);
+
+  return (
+    normalized.includes("missing email") ||
+    normalized.includes("missing phone") ||
+    normalized.includes("missing address") ||
+    normalized.includes("cleanup") ||
+    normalized.includes("clean up") ||
+    normalized.includes("data issue") ||
+    normalized.includes("data quality") ||
+    normalized.includes("enrichment") ||
+    normalized.includes("contact repair") ||
+    normalized.includes("bad email") ||
+    normalized.includes("bad phone") ||
+    normalized.includes("no email") ||
+    normalized.includes("no phone")
+  );
+}
+
+function isPrintMaterialListName(value: string) {
+  const normalized = normalizeOperationalText(value);
+
+  if (isCleanupListName(normalized)) return false;
+
+  return (
+    normalized.includes("print") ||
+    normalized.includes("palm card") ||
+    normalized.includes("palmcard") ||
+    normalized.includes("parm card") ||
+    normalized.includes("door hanger") ||
+    normalized.includes("doorhanger") ||
+    normalized.includes("yard sign") ||
+    normalized.includes("yardsign") ||
+    normalized.includes("mailer") ||
+    normalized.includes("mail piece") ||
+    normalized.includes("direct mail") ||
+    normalized.includes("postcard") ||
+    normalized.includes("literature") ||
+    normalized.includes("lit drop") ||
+    normalized.includes("litdrop") ||
+    normalized.includes("lit piece") ||
+    normalized.includes("walk packet") ||
+    normalized.includes("absentee chase")
+  );
+}
+
+function resolvePrintUseCase(listName: string) {
+  const normalized = normalizeOperationalText(listName);
+
+  if (
+    normalized.includes("palm card") ||
+    normalized.includes("palmcard") ||
+    normalized.includes("parm card")
+  ) {
+    return "Palm cards";
+  }
+
+  if (normalized.includes("door hanger") || normalized.includes("doorhanger")) {
+    return "Door hangers";
+  }
+
+  if (normalized.includes("yard sign") || normalized.includes("yardsign")) {
+    return "Yard signs";
+  }
+
+  if (
+    normalized.includes("mailer") ||
+    normalized.includes("direct mail") ||
+    normalized.includes("mail piece") ||
+    normalized.includes("postcard") ||
+    normalized.includes("absentee chase")
+  ) {
+    return "Mailers";
+  }
+
+  if (
+    normalized.includes("literature") ||
+    normalized.includes("lit drop") ||
+    normalized.includes("litdrop") ||
+    normalized.includes("lit piece")
+  ) {
+    return "Literature drop";
+  }
+
+  if (normalized.includes("walk packet")) {
+    return "Walk packet materials";
+  }
+
+  return "Print materials";
+}
+
+function isPrintOperationalList(list: List & { tag?: ContactListTag }) {
+  const explicitType = String(list.type || "").toLowerCase();
+  const normalized = `${list.name || ""} ${list.type || ""}`.toLowerCase();
+
+  if (isCleanupListName(normalized)) return false;
+  if (explicitType === "print") return true;
+
+  return isPrintMaterialListName(normalized);
+}
+
 function resolveListTag(list: List | string): ContactListTag {
   if (typeof list !== "string") {
     const explicitType = String(list.type || "").toLowerCase();
@@ -208,6 +319,7 @@ function resolveListTag(list: List | string): ContactListTag {
       explicitType === "outreach" ||
       explicitType === "finance" ||
       explicitType === "field" ||
+      explicitType === "print" ||
       explicitType === "volunteer"
     ) {
       return explicitType as ContactListTag;
@@ -215,9 +327,7 @@ function resolveListTag(list: List | string): ContactListTag {
   }
 
   const normalized =
-    typeof list === "string"
-      ? list.toLowerCase()
-      : list.name.toLowerCase();
+    typeof list === "string" ? list.toLowerCase() : list.name.toLowerCase();
 
   if (
     normalized.includes("finance") ||
@@ -225,6 +335,10 @@ function resolveListTag(list: List | string): ContactListTag {
     normalized.includes("fundraising")
   ) {
     return "finance";
+  }
+
+  if (isPrintMaterialListName(normalized)) {
+    return "print";
   }
 
   if (
@@ -249,12 +363,43 @@ function resolveListTag(list: List | string): ContactListTag {
   return "outreach";
 }
 
+function isFieldOperationalList(list: List & { tag?: ContactListTag }) {
+  const normalized = `${list.name || ""} ${list.type || ""}`.toLowerCase();
+
+  if (list.tag === "field") return true;
+
+  if (
+    normalized.includes("field") ||
+    normalized.includes("turf") ||
+    normalized.includes("canvass") ||
+    normalized.includes("door") ||
+    normalized.includes("walk") ||
+    normalized.includes("packet") ||
+    normalized.includes("persuasion") ||
+    normalized.includes("turnout") ||
+    normalized.includes("universe") ||
+    normalized.includes("route") ||
+    normalized.includes("lit drop") ||
+    normalized.includes("lit-drop") ||
+    normalized.includes("literature") ||
+    normalized.includes("volunteer") ||
+    normalized.includes("follow-up") ||
+    normalized.includes("follow up")
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
 function listTagClasses(tag: ContactListTag) {
   switch (tag) {
     case "finance":
       return "border border-emerald-200 bg-emerald-100 text-emerald-700";
     case "field":
       return "border border-sky-200 bg-sky-100 text-sky-700";
+    case "print":
+      return "border border-violet-200 bg-violet-100 text-violet-700";
     case "volunteer":
       return "border border-purple-200 bg-purple-100 text-purple-700";
     case "outreach":
@@ -263,7 +408,9 @@ function listTagClasses(tag: ContactListTag) {
   }
 }
 
-function fecMatchClasses(status?: ContactDonorIntelligence["fec_match_status"] | null) {
+function fecMatchClasses(
+  status?: ContactDonorIntelligence["fec_match_status"] | null,
+) {
   switch (status) {
     case "matched":
       return "border border-emerald-200 bg-emerald-100 text-emerald-700";
@@ -277,7 +424,9 @@ function fecMatchClasses(status?: ContactDonorIntelligence["fec_match_status"] |
   }
 }
 
-function donorTierClasses(tier?: ContactDonorIntelligence["fec_donor_tier"] | null) {
+function donorTierClasses(
+  tier?: ContactDonorIntelligence["fec_donor_tier"] | null,
+) {
   switch (tier) {
     case "maxed":
       return "border border-purple-200 bg-purple-100 text-purple-700";
@@ -293,7 +442,9 @@ function donorTierClasses(tier?: ContactDonorIntelligence["fec_donor_tier"] | nu
   }
 }
 
-function formatDonorTier(tier?: ContactDonorIntelligence["fec_donor_tier"] | null) {
+function formatDonorTier(
+  tier?: ContactDonorIntelligence["fec_donor_tier"] | null,
+) {
   switch (tier) {
     case "maxed":
       return "Maxed";
@@ -309,7 +460,9 @@ function formatDonorTier(tier?: ContactDonorIntelligence["fec_donor_tier"] | nul
   }
 }
 
-function formatFecMatchStatus(status?: ContactDonorIntelligence["fec_match_status"] | null) {
+function formatFecMatchStatus(
+  status?: ContactDonorIntelligence["fec_match_status"] | null,
+) {
   switch (status) {
     case "matched":
       return "Matched";
@@ -341,20 +494,22 @@ function buildDemoDonorIntelligence(args: {
   const lastDonationDate =
     args.contact?.fec_last_donation_date ??
     (directTotal > 0 ? "2026-04-08" : null);
-  const matchStatus = args.contact?.fec_match_status ?? (directTotal > 0 ? "probable" : "none");
-  const confidenceScore = args.contact?.fec_confidence_score ?? (directTotal > 0 ? 84 : null);
+  const matchStatus =
+    args.contact?.fec_match_status ?? (directTotal > 0 ? "probable" : "none");
+  const confidenceScore =
+    args.contact?.fec_confidence_score ?? (directTotal > 0 ? 84 : null);
 
   const donorTier =
     args.contact?.fec_donor_tier ??
     (fecTotal >= 6600
       ? "maxed"
       : fecTotal >= 2500
-      ? "major"
-      : fecTotal >= 500
-      ? "mid"
-      : fecTotal > 0
-      ? "base"
-      : "none");
+        ? "major"
+        : fecTotal >= 500
+          ? "mid"
+          : fecTotal > 0
+            ? "base"
+            : "none");
 
   const jackpotCandidate =
     Boolean(args.contact?.jackpot_candidate) ||
@@ -427,7 +582,7 @@ function buildContactPrioritySignal(args: {
     return {
       label: "High Priority Donor",
       description: `${currency.format(
-        activePledgeTotal
+        activePledgeTotal,
       )} in active pledges requires finance follow-up now.`,
       classes: "border border-amber-200 bg-amber-100 text-amber-800",
       actionLabel: "Open in Finance",
@@ -474,7 +629,7 @@ function buildContactPrioritySignal(args: {
     return {
       label: "Known Donor",
       description: `${currency.format(
-        lifetimeContributionTotal
+        lifetimeContributionTotal,
       )} lifetime contribution total makes this contact worth preserving carefully.`,
       classes: "border border-emerald-200 bg-emerald-100 text-emerald-700",
       actionLabel: "Open in Finance",
@@ -556,7 +711,8 @@ function buildSignalBreakdown(args: {
     {
       label: "FEC",
       value:
-        donorIntelligence?.fec_match_status && donorIntelligence.fec_match_status !== "none"
+        donorIntelligence?.fec_match_status &&
+        donorIntelligence.fec_match_status !== "none"
           ? `${formatFecMatchStatus(donorIntelligence.fec_match_status)}${
               donorIntelligence.fec_confidence_score
                 ? ` · ${donorIntelligence.fec_confidence_score}%`
@@ -586,6 +742,8 @@ export default function ContactDetailPage() {
     notes: "",
   });
   const [quickActionSaving, setQuickActionSaving] = useState(false);
+  const [fieldIntelExpanded, setFieldIntelExpanded] = useState(false);
+  const [printIntelExpanded, setPrintIntelExpanded] = useState(false);
 
   const outreachCallHref = `/dashboard/outreach?contactId=${contactId}&channel=call`;
   const outreachTextHref = `/dashboard/outreach?contactId=${contactId}&channel=text`;
@@ -593,7 +751,7 @@ export default function ContactDetailPage() {
   const financeHref = `/dashboard/finance`;
   const financeFocusHref = `/dashboard/finance/focus`;
   const listsHref = `/dashboard/lists`;
-    useEffect(() => {
+  useEffect(() => {
     if (!contactId) return;
     fetchData();
   }, [contactId]);
@@ -646,11 +804,12 @@ export default function ContactDetailPage() {
     if (membershipError) {
       setMessage(`Error loading list memberships: ${membershipError.message}`);
     } else {
-   const mappedLists =
-  ((membershipData ?? []) as any[]).flatMap((row) => {
-    const linked = Array.isArray(row.lists) ? row.lists[0] : row.lists;
-    return linked ? [{ id: linked.id, name: linked.name, type: linked.type }] : [];
-  });
+      const mappedLists = ((membershipData ?? []) as any[]).flatMap((row) => {
+        const linked = Array.isArray(row.lists) ? row.lists[0] : row.lists;
+        return linked
+          ? [{ id: linked.id, name: linked.name, type: linked.type }]
+          : [];
+      });
 
       setContactLists(mappedLists);
     }
@@ -678,7 +837,9 @@ export default function ContactDetailPage() {
       return;
     }
 
-    const alreadyInList = contactLists.some((list) => list.id === selectedListId);
+    const alreadyInList = contactLists.some(
+      (list) => list.id === selectedListId,
+    );
 
     if (alreadyInList) {
       setMessage("This contact is already in that list.");
@@ -778,13 +939,13 @@ export default function ContactDetailPage() {
       }));
       setMessage(
         `${quickActionDraft.channel === "call" ? "Call" : "Text"} outcome logged for ${fullName(
-          contact
-        )}.`
+          contact,
+        )}.`,
       );
       await fetchData();
     } catch (error: any) {
       setMessage(
-        `Error logging quick action: ${error?.message || "Unknown error"}`
+        `Error logging quick action: ${error?.message || "Unknown error"}`,
       );
     } finally {
       setQuickActionSaving(false);
@@ -792,7 +953,7 @@ export default function ContactDetailPage() {
   }
 
   const availableLists = lists.filter(
-    (list) => !contactLists.some((assigned) => assigned.id === list.id)
+    (list) => !contactLists.some((assigned) => assigned.id === list.id),
   );
 
   const listMembershipSummary = useMemo(() => {
@@ -803,12 +964,49 @@ export default function ContactDetailPage() {
   }, [contactLists]);
 
   const fieldListMemberships = useMemo(() => {
-    return listMembershipSummary.filter((list) => list.tag === "field");
+    return listMembershipSummary.filter((list) => isFieldOperationalList(list));
   }, [listMembershipSummary]);
 
   const primaryFieldList = useMemo(() => {
     return fieldListMemberships[0] || null;
   }, [fieldListMemberships]);
+
+  const printListMemberships = useMemo(() => {
+    return listMembershipSummary.filter((list) => isPrintOperationalList(list));
+  }, [listMembershipSummary]);
+
+  const primaryPrintList = useMemo(() => {
+    return printListMemberships[0] || null;
+  }, [printListMemberships]);
+
+  const printSignal = useMemo(() => {
+    const assignedOwner = contact?.owner_name || "Unassigned";
+    const primaryUseCase = primaryPrintList
+      ? resolvePrintUseCase(primaryPrintList.name)
+      : "No print material route";
+
+    if (printListMemberships.length > 0) {
+      return {
+        status: "Print routed",
+        material: primaryUseCase,
+        owner: assignedOwner,
+        listName: primaryPrintList?.name || "Active print material list",
+        note: "This contact is attached to physical print material routing through list membership. Use Print Focus to manage approvals, inventory, and delivery handoff.",
+      };
+    }
+
+    return {
+      status: "No print route",
+      material: "Not assigned to a print material list",
+      owner: assignedOwner,
+      listName: "No print material list",
+      note: "Add this contact to a palm card, door hanger, mailer, yard sign, literature drop, walk packet, or print universe list when physical materials apply.",
+    };
+  }, [
+    contact?.owner_name,
+    primaryPrintList?.name,
+    printListMemberships.length,
+  ]);
 
   const fieldSignal = useMemo(() => {
     const contactCode = contact?.contact_code || "No support code set";
@@ -820,8 +1018,7 @@ export default function ContactDetailPage() {
         turf: primaryFieldList?.name || "Active field list",
         owner: assignedOwner,
         support: contactCode,
-        note:
-          "This contact is attached to field routing through list membership. Use Field Focus to move turf execution and follow-up.",
+        note: "This contact is attached to field routing through list membership. Use Field Focus to move turf execution and follow-up.",
       };
     }
 
@@ -830,10 +1027,26 @@ export default function ContactDetailPage() {
       turf: "Not assigned to a field list",
       owner: assignedOwner,
       support: contactCode,
-      note:
-        "Add this contact to a Field list when they belong in a turf, canvass packet, door program, or field follow-up lane.",
+      note: "Add this contact to a Field list when they belong in a turf, canvass packet, door program, or field follow-up lane.",
     };
-  }, [contact?.contact_code, contact?.owner_name, fieldListMemberships.length, primaryFieldList?.name]);
+  }, [
+    contact?.contact_code,
+    contact?.owner_name,
+    fieldListMemberships.length,
+    primaryFieldList?.name,
+  ]);
+
+  useEffect(() => {
+    if (fieldListMemberships.length > 0) {
+      setFieldIntelExpanded(true);
+    }
+  }, [fieldListMemberships.length]);
+
+  useEffect(() => {
+    if (printListMemberships.length > 0) {
+      setPrintIntelExpanded(true);
+    }
+  }, [printListMemberships.length]);
 
   const latestLog = useMemo(() => (logs.length > 0 ? logs[0] : null), [logs]);
   const intelligence = deriveContactStatusAndNextAction(latestLog);
@@ -886,7 +1099,7 @@ export default function ContactDetailPage() {
   const financeSummary = useMemo(() => {
     const lifetimeContributionTotal = contributionHistory.reduce(
       (sum, contribution) => sum + contribution.amount,
-      0
+      0,
     );
 
     const activePledgeTotal = pledgeHistory
@@ -894,7 +1107,7 @@ export default function ContactDetailPage() {
       .reduce((sum, pledge) => sum + pledge.amount, 0);
 
     const nonCompliantContributionCount = contributionHistory.filter(
-      (contribution) => !contribution.compliant
+      (contribution) => !contribution.compliant,
     ).length;
 
     return {
@@ -918,9 +1131,9 @@ export default function ContactDetailPage() {
   const openTasksCount = useMemo(
     () =>
       tasks.filter(
-        (task) => task.status !== "done" && task.status !== "cancelled"
+        (task) => task.status !== "done" && task.status !== "cancelled",
       ).length,
-    [tasks]
+    [tasks],
   );
 
   const executionLinks = useMemo<ContactExecutionLink[]>(() => {
@@ -934,6 +1147,11 @@ export default function ContactDetailPage() {
         label: "Open in Finance",
         href: financeHref,
         icon: "finance",
+      },
+      {
+        label: "Open in Print",
+        href: "/dashboard/print/focus",
+        icon: "print",
       },
       {
         label: "Manage Lists",
@@ -952,12 +1170,20 @@ export default function ContactDetailPage() {
         latestLog,
         activePledgeTotal: financeSummary.activePledgeTotal,
         lifetimeContributionTotal: financeSummary.lifetimeContributionTotal,
-        nonCompliantContributionCount: financeSummary.nonCompliantContributionCount,
+        nonCompliantContributionCount:
+          financeSummary.nonCompliantContributionCount,
         openTasksCount,
         listCount: contactLists.length,
         donorIntelligence,
       }),
-    [contactId, latestLog, financeSummary, openTasksCount, contactLists.length, donorIntelligence]
+    [
+      contactId,
+      latestLog,
+      financeSummary,
+      openTasksCount,
+      contactLists.length,
+      donorIntelligence,
+    ],
   );
 
   const signalBreakdown = useMemo(
@@ -965,7 +1191,8 @@ export default function ContactDetailPage() {
       buildSignalBreakdown({
         latestLog,
         activePledgeTotal: financeSummary.activePledgeTotal,
-        nonCompliantContributionCount: financeSummary.nonCompliantContributionCount,
+        nonCompliantContributionCount:
+          financeSummary.nonCompliantContributionCount,
         openTasksCount,
         listCount: contactLists.length,
         donorIntelligence,
@@ -977,7 +1204,7 @@ export default function ContactDetailPage() {
       openTasksCount,
       contactLists.length,
       donorIntelligence,
-    ]
+    ],
   );
 
   useEffect(() => {
@@ -994,7 +1221,7 @@ export default function ContactDetailPage() {
       };
     });
   }, []);
-    if (loading) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-slate-100 p-6 lg:p-10">
         <div className="mx-auto max-w-7xl space-y-6">
@@ -1022,8 +1249,9 @@ export default function ContactDetailPage() {
                     {fullName(contact)}
                   </h1>
                   <p className="max-w-3xl text-sm text-slate-600 lg:text-base">
-                    Operating profile for identity, outreach signal, list placement,
-                    active tasks, finance context, and direct execution on this person.
+                    Operating profile for identity, outreach signal, list
+                    placement, active tasks, finance context, and direct
+                    execution on this person.
                   </p>
                 </div>
               </div>
@@ -1092,12 +1320,14 @@ export default function ContactDetailPage() {
                       <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">
                         {signal.label}
                       </p>
-                      <p className="mt-2 text-sm text-slate-700">{signal.value}</p>
+                      <p className="mt-2 text-sm text-slate-700">
+                        {signal.value}
+                      </p>
                     </div>
                   ))}
                 </div>
 
-                <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                   {executionLinks.map((link) => (
                     <Link
                       key={link.label}
@@ -1108,6 +1338,8 @@ export default function ContactDetailPage() {
                         <PhoneCall className="h-4 w-4" />
                       ) : link.icon === "finance" ? (
                         <Landmark className="h-4 w-4" />
+                      ) : link.icon === "print" ? (
+                        <Printer className="h-4 w-4" />
                       ) : (
                         <ListChecks className="h-4 w-4" />
                       )}
@@ -1168,7 +1400,8 @@ export default function ContactDetailPage() {
                     <select
                       value={quickActionDraft.channel}
                       onChange={(e) => {
-                        const nextChannel = e.target.value as QuickActionChannel;
+                        const nextChannel = e.target
+                          .value as QuickActionChannel;
                         setQuickActionDraft({
                           channel: nextChannel,
                           result: quickActionResultOptions[nextChannel][0],
@@ -1196,7 +1429,7 @@ export default function ContactDetailPage() {
                           <option key={option} value={option}>
                             {option}
                           </option>
-                        )
+                        ),
                       )}
                     </select>
                   </div>
@@ -1219,7 +1452,9 @@ export default function ContactDetailPage() {
                     disabled={quickActionSaving}
                     className="w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    {quickActionSaving ? "Logging Action..." : "Log Quick Action"}
+                    {quickActionSaving
+                      ? "Logging Action..."
+                      : "Log Quick Action"}
                   </button>
                 </div>
               </div>
@@ -1243,7 +1478,9 @@ export default function ContactDetailPage() {
                 {intelligence.label}
               </span>
             </div>
-            <p className="mt-2 text-sm text-slate-500">{intelligence.description}</p>
+            <p className="mt-2 text-sm text-slate-500">
+              {intelligence.description}
+            </p>
           </div>
 
           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -1311,7 +1548,8 @@ export default function ContactDetailPage() {
           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
             <p className="text-sm font-medium text-slate-500">Location</p>
             <p className="mt-3 text-lg font-semibold text-slate-900">
-              {[contact?.city, contact?.state].filter(Boolean).join(", ") || "—"}
+              {[contact?.city, contact?.state].filter(Boolean).join(", ") ||
+                "—"}
             </p>
             <p className="mt-2 text-sm text-slate-500">Geographic reference</p>
           </div>
@@ -1321,120 +1559,27 @@ export default function ContactDetailPage() {
             <p className="mt-3 text-lg font-semibold text-slate-900">
               {contact?.contact_code || "—"}
             </p>
-            <p className="mt-2 text-sm text-slate-500">Internal contact identity</p>
+            <p className="mt-2 text-sm text-slate-500">
+              Internal contact identity
+            </p>
           </div>
         </section>
 
-        <section id="field-intelligence" className="rounded-3xl border border-sky-200 bg-sky-50 p-6 shadow-sm lg:p-8">
+        <section
+          id="finance-overview"
+          className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8"
+        >
           <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p className="text-sm font-medium text-sky-700">Field Intelligence</p>
-              <h2 className="text-xl font-semibold text-slate-900">
-                Turf placement, canvass context, and field follow-up
-              </h2>
-              <p className="mt-1 text-sm text-sky-900/70">
-                Field context is derived from typed Field lists, contact ownership, contact code, and recent execution activity.
+              <p className="text-sm font-medium text-slate-500">
+                Finance Context
               </p>
-            </div>
-
-            <Link
-              href="/dashboard/field/focus"
-              className="inline-flex items-center gap-2 rounded-2xl border border-sky-200 bg-white px-4 py-3 text-sm font-medium text-sky-700 transition hover:bg-sky-100"
-            >
-              Open Field Focus
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <div className="rounded-2xl border border-sky-200 bg-white p-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-sky-700">Field Status</p>
-              <p className="mt-2 text-lg font-semibold text-slate-900">
-                {fieldSignal.status}
-              </p>
-              <p className="mt-2 text-xs text-slate-500">
-                {fieldListMemberships.length} field list{fieldListMemberships.length === 1 ? "" : "s"} attached
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-sky-200 bg-white p-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-sky-700">Current Turf / List</p>
-              <p className="mt-2 text-lg font-semibold text-slate-900">
-                {fieldSignal.turf}
-              </p>
-              <p className="mt-2 text-xs text-slate-500">
-                Primary field routing surface
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-sky-200 bg-white p-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-sky-700">Assigned Canvasser / Owner</p>
-              <p className="mt-2 text-lg font-semibold text-slate-900">
-                {fieldSignal.owner}
-              </p>
-              <p className="mt-2 text-xs text-slate-500">
-                Uses contact owner until dedicated field assignment exists
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-sky-200 bg-white p-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-sky-700">Support / Contact Code</p>
-              <p className="mt-2 text-lg font-semibold text-slate-900">
-                {fieldSignal.support}
-              </p>
-              <p className="mt-2 text-xs text-slate-500">
-                Can become support ID / field result later
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-5 rounded-2xl border border-sky-200 bg-white p-4 text-sm text-sky-950">
-            {fieldSignal.note}
-          </div>
-
-          <div className="mt-5 space-y-2">
-            <p className="text-sm font-semibold text-slate-900">Field List Memberships</p>
-
-            {fieldListMemberships.length === 0 ? (
-              <div className="rounded-2xl border border-sky-200 bg-white p-4 text-sm text-slate-500">
-                No Field lists are currently attached to this contact. Add the contact to a typed Field list below to make the field route visible here.
-              </div>
-            ) : null}
-
-            {fieldListMemberships.map((list) => (
-              <div
-                key={`field-${list.id}`}
-                className="flex items-center justify-between rounded-2xl border border-sky-200 bg-white p-3"
-              >
-                <div className="flex items-center gap-2">
-                  <span className="rounded-full border border-sky-200 bg-sky-100 px-2 py-0.5 text-xs font-semibold text-sky-700">
-                    field
-                  </span>
-                  <span className="text-sm font-medium text-slate-900">
-                    {list.name}
-                  </span>
-                </div>
-
-                <Link
-                  href="/dashboard/field/focus"
-                  className="text-xs font-medium text-sky-700 hover:underline"
-                >
-                  Work in Field Focus
-                </Link>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section id="finance-overview" className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
-          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <p className="text-sm font-medium text-slate-500">Finance Context</p>
               <h2 className="text-xl font-semibold text-slate-900">
                 Contributions, pledges, and compliance
               </h2>
               <p className="mt-1 text-sm text-slate-500">
-                This section reflects donor activity, pending pledges, and any compliance gaps tied to this contact.
+                This section reflects donor activity, pending pledges, and any
+                compliance gaps tied to this contact.
               </p>
             </div>
 
@@ -1449,28 +1594,36 @@ export default function ContactDetailPage() {
 
           <div className="grid gap-4 md:grid-cols-4">
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-xs font-medium text-slate-500">Lifetime Contributions</p>
+              <p className="text-xs font-medium text-slate-500">
+                Lifetime Contributions
+              </p>
               <p className="mt-2 text-xl font-semibold text-slate-900">
                 {currency.format(financeSummary.lifetimeContributionTotal)}
               </p>
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-xs font-medium text-slate-500">Active Pledges</p>
+              <p className="text-xs font-medium text-slate-500">
+                Active Pledges
+              </p>
               <p className="mt-2 text-xl font-semibold text-slate-900">
                 {currency.format(financeSummary.activePledgeTotal)}
               </p>
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-xs font-medium text-slate-500">Compliance Issues</p>
+              <p className="text-xs font-medium text-slate-500">
+                Compliance Issues
+              </p>
               <p className="mt-2 text-xl font-semibold text-rose-700">
                 {financeSummary.nonCompliantContributionCount}
               </p>
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-xs font-medium text-slate-500">Total Records</p>
+              <p className="text-xs font-medium text-slate-500">
+                Total Records
+              </p>
               <p className="mt-2 text-xl font-semibold text-slate-900">
                 {financeSummary.contributionCount + financeSummary.pledgeCount}
               </p>
@@ -1487,8 +1640,8 @@ export default function ContactDetailPage() {
                   External donor signal attached to this contact
                 </h3>
                 <p className="mt-2 max-w-3xl text-sm text-emerald-900/80">
-                  This is the first Phase 5 receiving surface. Matching and ingestion
-                  will wire into these fields next.
+                  This is the first Phase 5 receiving surface. Matching and
+                  ingestion will wire into these fields next.
                 </p>
               </div>
 
@@ -1504,7 +1657,7 @@ export default function ContactDetailPage() {
                 <p className="text-xs font-medium text-slate-500">FEC Match</p>
                 <span
                   className={`mt-2 inline-flex rounded-full px-3 py-1 text-xs font-semibold ${fecMatchClasses(
-                    donorIntelligence.fec_match_status
+                    donorIntelligence.fec_match_status,
                   )}`}
                 >
                   {formatFecMatchStatus(donorIntelligence.fec_match_status)}
@@ -1517,14 +1670,18 @@ export default function ContactDetailPage() {
               </div>
 
               <div className="rounded-2xl border border-emerald-200 bg-white p-4">
-                <p className="text-xs font-medium text-slate-500">FEC Lifetime</p>
+                <p className="text-xs font-medium text-slate-500">
+                  FEC Lifetime
+                </p>
                 <p className="mt-2 text-xl font-semibold text-slate-900">
                   {currency.format(donorIntelligence.fec_total_given ?? 0)}
                 </p>
               </div>
 
               <div className="rounded-2xl border border-emerald-200 bg-white p-4">
-                <p className="text-xs font-medium text-slate-500">Last FEC Gift</p>
+                <p className="text-xs font-medium text-slate-500">
+                  Last FEC Gift
+                </p>
                 <p className="mt-2 text-sm font-semibold text-slate-900">
                   {donorIntelligence.fec_last_donation_date || "—"}
                 </p>
@@ -1534,7 +1691,7 @@ export default function ContactDetailPage() {
                 <p className="text-xs font-medium text-slate-500">Donor Tier</p>
                 <span
                   className={`mt-2 inline-flex rounded-full px-3 py-1 text-xs font-semibold ${donorTierClasses(
-                    donorIntelligence.fec_donor_tier
+                    donorIntelligence.fec_donor_tier,
                   )}`}
                 >
                   {formatDonorTier(donorIntelligence.fec_donor_tier)}
@@ -1542,13 +1699,15 @@ export default function ContactDetailPage() {
               </div>
 
               <div className="rounded-2xl border border-emerald-200 bg-white p-4">
-                <p className="text-xs font-medium text-slate-500">Opportunity</p>
+                <p className="text-xs font-medium text-slate-500">
+                  Opportunity
+                </p>
                 <p className="mt-2 text-sm font-semibold text-slate-900">
                   {donorIntelligence.jackpot_candidate
                     ? "Review now"
                     : donorIntelligence.fec_recent_activity
-                    ? "Recently active"
-                    : "No active anomaly"}
+                      ? "Recently active"
+                      : "No active anomaly"}
                 </p>
               </div>
             </div>
@@ -1644,7 +1803,331 @@ export default function ContactDetailPage() {
           </div>
         </section>
 
-        <section id="contact-tasks" className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
+        <section
+          id="field-intelligence"
+          className="rounded-3xl border border-sky-200 bg-sky-50 p-6 shadow-sm lg:p-8"
+        >
+          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="text-sm font-medium text-sky-700">
+                Field Intelligence
+              </p>
+              <h2 className="text-xl font-semibold text-slate-900">
+                Turf placement, canvass context, and field follow-up
+              </h2>
+              <p className="mt-1 text-sm text-sky-900/70">
+                Field context is derived from Field-tagged lists, operational
+                list names, contact ownership, contact code, and recent
+                execution activity.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <Link
+                href="/dashboard/field/focus"
+                className="inline-flex items-center gap-2 rounded-2xl border border-sky-200 bg-white px-4 py-3 text-sm font-medium text-sky-700 transition hover:bg-sky-100"
+              >
+                Open Field Focus
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+
+              <button
+                type="button"
+                onClick={() => setFieldIntelExpanded((current) => !current)}
+                className="inline-flex items-center gap-2 rounded-2xl border border-sky-200 bg-white px-4 py-3 text-sm font-medium text-sky-700 transition hover:bg-sky-100"
+              >
+                {fieldIntelExpanded ? "Collapse" : "Expand"}
+              </button>
+            </div>
+          </div>
+
+          {!fieldIntelExpanded ? (
+            <div className="rounded-2xl border border-sky-200 bg-white p-4">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">
+                    {fieldSignal.status}
+                  </p>
+                  <p className="mt-1 text-sm text-slate-500">
+                    fieldListMemberships.length field list
+                    {fieldListMemberships.length === 1 ? "" : "s"} attached ·
+                    Primary: {fieldSignal.turf}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setFieldIntelExpanded(true)}
+                  className="rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-semibold text-sky-700 transition hover:bg-sky-100"
+                >
+                  Show details
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <div className="rounded-2xl border border-sky-200 bg-white p-4">
+                  <p className="text-xs font-medium uppercase tracking-wide text-sky-700">
+                    Field Status
+                  </p>
+                  <p className="mt-2 text-lg font-semibold text-slate-900">
+                    {fieldSignal.status}
+                  </p>
+                  <p className="mt-2 text-xs text-slate-500">
+                    {fieldListMemberships.length} field list
+                    {fieldListMemberships.length === 1 ? "" : "s"} attached
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-sky-200 bg-white p-4">
+                  <p className="text-xs font-medium uppercase tracking-wide text-sky-700">
+                    Current Turf / List
+                  </p>
+                  <p className="mt-2 text-lg font-semibold text-slate-900">
+                    {fieldSignal.turf}
+                  </p>
+                  <p className="mt-2 text-xs text-slate-500">
+                    Primary field routing surface
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-sky-200 bg-white p-4">
+                  <p className="text-xs font-medium uppercase tracking-wide text-sky-700">
+                    Assigned Canvasser / Owner
+                  </p>
+                  <p className="mt-2 text-lg font-semibold text-slate-900">
+                    {fieldSignal.owner}
+                  </p>
+                  <p className="mt-2 text-xs text-slate-500">
+                    Uses contact owner until dedicated field assignment exists
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-sky-200 bg-white p-4">
+                  <p className="text-xs font-medium uppercase tracking-wide text-sky-700">
+                    Support / Contact Code
+                  </p>
+                  <p className="mt-2 text-lg font-semibold text-slate-900">
+                    {fieldSignal.support}
+                  </p>
+                  <p className="mt-2 text-xs text-slate-500">
+                    Can become support ID / field result later
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-5 rounded-2xl border border-sky-200 bg-white p-4 text-sm text-sky-950">
+                {fieldSignal.note}
+              </div>
+
+              <div className="mt-5 space-y-2">
+                <p className="text-sm font-semibold text-slate-900">
+                  Field List Memberships
+                </p>
+
+                {fieldListMemberships.length === 0 ? (
+                  <div className="rounded-2xl border border-sky-200 bg-white p-4 text-sm text-slate-500">
+                    No Field or field-adjacent operational lists are currently
+                    attached to this contact. Add the contact to a turf, walk
+                    packet, persuasion, volunteer, route, universe, or follow-up
+                    list below to make the field route visible here.
+                  </div>
+                ) : null}
+
+                {fieldListMemberships.map((list) => (
+                  <div
+                    key={`field-${list.id}`}
+                    className="flex items-center justify-between rounded-2xl border border-sky-200 bg-white p-3"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="rounded-full border border-sky-200 bg-sky-100 px-2 py-0.5 text-xs font-semibold text-sky-700">
+                        field
+                      </span>
+                      <span className="text-sm font-medium text-slate-900">
+                        {list.name}
+                      </span>
+                    </div>
+
+                    <Link
+                      href="/dashboard/field/focus"
+                      className="text-xs font-medium text-sky-700 hover:underline"
+                    >
+                      Work in Field Focus
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </section>
+
+        <section
+          id="print-intelligence"
+          className="rounded-3xl border border-violet-200 bg-violet-50 p-6 shadow-sm lg:p-8"
+        >
+          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="text-sm font-medium text-violet-700">
+                Print Intelligence
+              </p>
+              <h2 className="text-xl font-semibold text-slate-900">
+                Physical materials, print routing, and delivery handoff
+              </h2>
+              <p className="mt-1 text-sm text-violet-900/70">
+                Print context is derived only from physical material lists: palm
+                cards, door hangers, mailers, yard signs, postcards, literature
+                drops, walk packets, and print universes. Cleanup lists like
+                missing email or missing phone are ignored here.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <Link
+                href="/dashboard/print/focus"
+                className="inline-flex items-center gap-2 rounded-2xl border border-violet-200 bg-white px-4 py-3 text-sm font-medium text-violet-700 transition hover:bg-violet-100"
+              >
+                Open Print Focus
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+
+              <button
+                type="button"
+                onClick={() => setPrintIntelExpanded((current) => !current)}
+                className="inline-flex items-center gap-2 rounded-2xl border border-violet-200 bg-white px-4 py-3 text-sm font-medium text-violet-700 transition hover:bg-violet-100"
+              >
+                {printIntelExpanded ? "Collapse" : "Expand"}
+              </button>
+            </div>
+          </div>
+
+          {!printIntelExpanded ? (
+            <div className="rounded-2xl border border-violet-200 bg-white p-4">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">
+                    {printSignal.status}
+                  </p>
+                  <p className="mt-1 text-sm text-slate-500">
+                    printListMemberships.length print material list
+                    {printListMemberships.length === 1 ? "" : "s"} attached ·
+                    Primary: {printSignal.material}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setPrintIntelExpanded(true)}
+                  className="rounded-xl border border-violet-200 bg-violet-50 px-3 py-2 text-xs font-semibold text-violet-700 transition hover:bg-violet-100"
+                >
+                  Show details
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <div className="rounded-2xl border border-violet-200 bg-white p-4">
+                  <p className="text-xs font-medium uppercase tracking-wide text-violet-700">
+                    Print Status
+                  </p>
+                  <p className="mt-2 text-lg font-semibold text-slate-900">
+                    {printSignal.status}
+                  </p>
+                  <p className="mt-2 text-xs text-slate-500">
+                    {printListMemberships.length} print material list
+                    {printListMemberships.length === 1 ? "" : "s"} attached
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-violet-200 bg-white p-4">
+                  <p className="text-xs font-medium uppercase tracking-wide text-violet-700">
+                    Primary Material
+                  </p>
+                  <p className="mt-2 text-lg font-semibold text-slate-900">
+                    {printSignal.material}
+                  </p>
+                  <p className="mt-2 text-xs text-slate-500">
+                    Physical print use case
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-violet-200 bg-white p-4">
+                  <p className="text-xs font-medium uppercase tracking-wide text-violet-700">
+                    Owner / Handoff
+                  </p>
+                  <p className="mt-2 text-lg font-semibold text-slate-900">
+                    {printSignal.owner}
+                  </p>
+                  <p className="mt-2 text-xs text-slate-500">
+                    Uses contact owner until print assignment exists
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-violet-200 bg-white p-4">
+                  <p className="text-xs font-medium uppercase tracking-wide text-violet-700">
+                    Primary Print List
+                  </p>
+                  <p className="mt-2 text-lg font-semibold text-slate-900">
+                    {printSignal.listName}
+                  </p>
+                  <p className="mt-2 text-xs text-slate-500">
+                    Main material routing surface
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-5 rounded-2xl border border-violet-200 bg-white p-4 text-sm text-violet-950">
+                {printSignal.note}
+              </div>
+
+              <div className="mt-5 space-y-2">
+                <p className="text-sm font-semibold text-slate-900">
+                  Print Material List Memberships
+                </p>
+
+                {printListMemberships.length === 0 ? (
+                  <div className="rounded-2xl border border-violet-200 bg-white p-4 text-sm text-slate-500">
+                    No physical print material lists are currently attached to
+                    this contact. Add the contact to a palm card, door hanger,
+                    mailer, yard sign, postcard, literature drop, walk packet,
+                    or print universe list below to make the print route visible
+                    here.
+                  </div>
+                ) : null}
+
+                {printListMemberships.map((list) => (
+                  <div
+                    key={`print-${list.id}`}
+                    className="flex items-center justify-between rounded-2xl border border-violet-200 bg-white p-3"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="rounded-full border border-violet-200 bg-violet-100 px-2 py-0.5 text-xs font-semibold text-violet-700">
+                        print
+                      </span>
+                      <span className="rounded-full border border-violet-200 bg-violet-50 px-2 py-0.5 text-xs font-semibold text-violet-700">
+                        {resolvePrintUseCase(list.name)}
+                      </span>
+                      <span className="text-sm font-medium text-slate-900">
+                        {list.name}
+                      </span>
+                    </div>
+
+                    <Link
+                      href="/dashboard/print/focus"
+                      className="text-xs font-medium text-violet-700 hover:underline"
+                    >
+                      Work in Print Focus
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </section>
+
+        <section
+          id="contact-tasks"
+          className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8"
+        >
           <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <p className="text-sm font-medium text-slate-500">Tasks</p>
@@ -1667,7 +2150,7 @@ export default function ContactDetailPage() {
                   <p className="font-medium text-slate-900">{task.title}</p>
                   <span
                     className={`rounded-full px-3 py-1 text-xs font-semibold ${priorityClasses(
-                      task.priority
+                      task.priority,
                     )}`}
                   >
                     {task.priority}
@@ -1716,7 +2199,8 @@ export default function ContactDetailPage() {
                 List membership and routing
               </h2>
               <p className="mt-1 text-sm text-slate-500">
-                Lists determine how this contact flows through outreach, finance, and field execution.
+                Lists determine how this contact flows through outreach,
+                finance, field, and print execution.
               </p>
             </div>
           </div>
@@ -1731,7 +2215,7 @@ export default function ContactDetailPage() {
                   <div className="flex items-center gap-2">
                     <span
                       className={`rounded-full px-2 py-0.5 text-xs font-semibold ${listTagClasses(
-                        list.tag
+                        list.tag,
                       )}`}
                     >
                       {list.tag}

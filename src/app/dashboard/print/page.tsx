@@ -27,6 +27,8 @@ import {
   getPrintMetricRows,
   type PrintMetricRow,
 } from "@/lib/data/print";
+import { getLists } from "@/lib/data/lists";
+import { CampaignList } from "@/lib/data/types";
 import {
   getDashboardStateTone,
   getDashboardStateTextTone,
@@ -117,6 +119,201 @@ type DemoDepartment = "outreach" | "finance" | "field" | "digital" | "print";
 function toNumber(value: unknown) {
   const num = Number(value ?? 0);
   return Number.isFinite(num) ? num : 0;
+}
+
+type OperationalPrintTag =
+  | "print"
+  | "field"
+  | "walk"
+  | "turf"
+  | "persuasion"
+  | "turnout"
+  | "lit-drop"
+  | "mail"
+  | "door-hanger"
+  | "volunteer"
+  | "high-priority";
+
+type OperationalPrintUniverse = CampaignList & {
+  operationalTags: OperationalPrintTag[];
+  routeLabel: string;
+  useCase: string;
+};
+
+function normalizeListText(list: CampaignList | string) {
+  return typeof list === "string"
+    ? list.toLowerCase()
+    : `${list.name || ""} ${list.type || ""}`.toLowerCase();
+}
+
+function isContactCleanupList(list: CampaignList) {
+  const normalizedName = (list.name || "").toLowerCase();
+
+  return (
+    normalizedName.includes("missing email") ||
+    normalizedName.includes("missing phone") ||
+    normalizedName.includes("missing address") ||
+    normalizedName.includes("missing data") ||
+    normalizedName.includes("cleanup") ||
+    normalizedName.includes("clean up") ||
+    normalizedName.includes("data hygiene") ||
+    normalizedName.includes("hygiene")
+  );
+}
+
+function hasPhysicalPrintSignal(list: CampaignList) {
+  const normalizedName = (list.name || "").toLowerCase();
+  const normalizedType = String(list.type || "").toLowerCase();
+
+  if (isContactCleanupList(list)) return false;
+
+  return (
+    normalizedType === "print" ||
+    normalizedName.includes("print") ||
+    normalizedName.includes("literature") ||
+    normalizedName.includes("lit drop") ||
+    normalizedName.includes("lit-drop") ||
+    normalizedName.includes("palm card") ||
+    normalizedName.includes("palmcard") ||
+    normalizedName.includes("door hanger") ||
+    normalizedName.includes("door-hanger") ||
+    normalizedName.includes("doorhanger") ||
+    normalizedName.includes("yard sign") ||
+    normalizedName.includes("yardsign") ||
+    normalizedName.includes("mailer") ||
+    normalizedName.includes("direct mail") ||
+    normalizedName.includes("mail piece") ||
+    normalizedName.includes("postcard") ||
+    normalizedName.includes("absentee chase") ||
+    normalizedName.includes("walk packet")
+  );
+}
+
+function uniqueTags(tags: OperationalPrintTag[]) {
+  return Array.from(new Set(tags));
+}
+
+function resolveOperationalPrintTags(list: CampaignList): OperationalPrintTag[] {
+  if (isContactCleanupList(list) || !hasPhysicalPrintSignal(list)) {
+    return [];
+  }
+
+  const normalized = normalizeListText(list);
+  const normalizedName = (list.name || "").toLowerCase();
+  const tags: OperationalPrintTag[] = [];
+
+  tags.push("print");
+
+  if (normalized.includes("field")) tags.push("field");
+  if (normalizedName.includes("walk packet")) tags.push("walk");
+  if (normalized.includes("turf") || normalized.includes("canvass")) tags.push("turf");
+  if (normalized.includes("persuasion")) tags.push("persuasion");
+  if (normalized.includes("turnout")) tags.push("turnout");
+  if (normalized.includes("volunteer")) tags.push("volunteer");
+  if (normalized.includes("priority") || normalized.includes("high value")) tags.push("high-priority");
+  if (
+    normalizedName.includes("literature") ||
+    normalizedName.includes("lit-drop") ||
+    normalizedName.includes("lit drop") ||
+    normalizedName.includes("palm card") ||
+    normalizedName.includes("palmcard")
+  ) {
+    tags.push("lit-drop");
+  }
+  if (
+    normalizedName.includes("mailer") ||
+    normalizedName.includes("direct mail") ||
+    normalizedName.includes("mail piece") ||
+    normalizedName.includes("postcard") ||
+    normalizedName.includes("absentee chase")
+  ) {
+    tags.push("mail");
+  }
+  if (
+    normalizedName.includes("door hanger") ||
+    normalizedName.includes("door-hanger") ||
+    normalizedName.includes("doorhanger")
+  ) {
+    tags.push("door-hanger");
+  }
+
+  return uniqueTags(tags);
+}
+
+function isPrintOperationalUniverse(list: CampaignList) {
+  return hasPhysicalPrintSignal(list);
+}
+
+function buildOperationalPrintUniverse(list: CampaignList): OperationalPrintUniverse {
+  const tags = resolveOperationalPrintTags(list);
+
+  let routeLabel = "Print";
+  if (tags.includes("field") || tags.includes("walk") || tags.includes("turf")) {
+    routeLabel = "Print + Field";
+  }
+
+  let useCase = "Print universe";
+  if (tags.includes("lit-drop")) useCase = "Literature drop";
+  else if (tags.includes("door-hanger")) useCase = "Door hanger route";
+  else if (tags.includes("mail")) useCase = "Mail universe";
+  else if (tags.includes("walk")) useCase = "Walk packet materials";
+
+  return {
+    ...list,
+    operationalTags: tags.length > 0 ? tags : ["print"],
+    routeLabel,
+    useCase,
+  };
+}
+
+function inferPrintAssetType(universe: OperationalPrintUniverse): PrintAssetRow["type"] {
+  if (universe.operationalTags.includes("door-hanger")) return "door_hanger";
+  if (universe.operationalTags.includes("mail")) return "mailer";
+  if (universe.operationalTags.includes("walk")) return "lit_piece";
+  if (universe.operationalTags.includes("lit-drop")) return "lit_piece";
+  return "lit_piece";
+}
+
+function buildAssetRowsFromOperationalLists(lists: OperationalPrintUniverse[]): PrintAssetRow[] {
+  return lists.map((list) => ({
+    id: `operational-asset-${list.id}`,
+    name: `${list.name} assets`,
+    type: inferPrintAssetType(list),
+    status: "candidate_review",
+    owner: list.default_owner_name || "Unassigned",
+    candidateApprovedDate: null,
+    expectedDelivery: null,
+    linkedTurf: list.name,
+    linkedUseCase: list.useCase,
+  }));
+}
+
+function buildInventoryRowsFromOperationalLists(lists: OperationalPrintUniverse[]): InventoryRow[] {
+  return lists.map((list, index) => ({
+    id: `operational-inventory-${list.id}`,
+    item: `${list.name} materials`,
+    onHand: 500 + index * 125,
+    reserved: 250 + index * 75,
+    reorderAt: 200,
+    region: list.routeLabel,
+    dailyUsage: 75,
+    linkedTurf: list.name,
+    linkedUseCase: list.useCase,
+  }));
+}
+
+function buildOrderRowsFromOperationalLists(lists: OperationalPrintUniverse[]): PrintOrderRow[] {
+  return lists.map((list) => ({
+    id: `operational-order-${list.id}`,
+    vendor: "Pending vendor",
+    item: `${list.name} production run`,
+    quantity: 500,
+    status: "queued",
+    eta: null,
+    linkedTurf: list.name,
+    linkedUseCase: list.useCase,
+    unblocks: list.routeLabel,
+  }));
 }
 
 function normalizePrintType(value?: string | null): PrintAssetRow["type"] {
@@ -607,6 +804,8 @@ export default function PrintDashboardPage() {
   const [trendView, setTrendView] = useState<PrintTrendView>("inventory");
   const [printMetricRows, setPrintMetricRows] = useState<PrintMetricRow[]>([]);
   const [printLoading, setPrintLoading] = useState(true);
+  const [operationalLists, setOperationalLists] = useState<CampaignList[]>([]);
+  const [listLoading, setListLoading] = useState(true);
 
   const [printLoopMode, setPrintLoopMode] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState("");
@@ -681,17 +880,63 @@ export default function PrintDashboardPage() {
     };
   }, []);
 
-  const assetRows = useMemo<PrintAssetRow[]>(() => {
-    return buildAssetRowsFromMetrics(printMetricRows);
-  }, [printMetricRows]);
+  useEffect(() => {
+    let mounted = true;
 
-    const inventoryRows = useMemo<InventoryRow[]>(() => {
-    return buildInventoryRowsFromMetrics(printMetricRows);
-  }, [printMetricRows]);
+    async function loadOperationalLists() {
+      try {
+        setListLoading(true);
+        const lists = await getLists();
+
+        if (!mounted) return;
+
+        setOperationalLists(lists);
+      } catch (error) {
+        console.error("Failed to load operational print lists:", error);
+
+        if (!mounted) return;
+
+        setOperationalLists([]);
+      } finally {
+        if (mounted) {
+          setListLoading(false);
+        }
+      }
+    }
+
+    loadOperationalLists();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const operationalPrintUniverses = useMemo<OperationalPrintUniverse[]>(() => {
+    return operationalLists
+      .filter(isPrintOperationalUniverse)
+      .map(buildOperationalPrintUniverse);
+  }, [operationalLists]);
+
+  const assetRows = useMemo<PrintAssetRow[]>(() => {
+    return [
+      ...buildAssetRowsFromOperationalLists(operationalPrintUniverses),
+      ...buildAssetRowsFromMetrics(printMetricRows),
+    ];
+  }, [operationalPrintUniverses, printMetricRows]);
+
+  const inventoryRows = useMemo<InventoryRow[]>(() => {
+    return [
+      ...buildInventoryRowsFromOperationalLists(operationalPrintUniverses),
+      ...buildInventoryRowsFromMetrics(printMetricRows),
+    ];
+  }, [operationalPrintUniverses, printMetricRows]);
 
   const orderRows = useMemo<PrintOrderRow[]>(() => {
-    return buildOrderRowsFromMetrics(printMetricRows);
-  }, [printMetricRows]);
+    return [
+      ...buildOrderRowsFromOperationalLists(operationalPrintUniverses),
+      ...buildOrderRowsFromMetrics(printMetricRows),
+    ];
+  }, [operationalPrintUniverses, printMetricRows]);
 
   const focusQueue = useMemo<PrintFocusTask[]>(() => {
     return buildPrintFocusQueue({
@@ -730,12 +975,26 @@ export default function PrintDashboardPage() {
   const chartMax = Math.max(...chartData.map((point) => point[trendView]), 1);
 
   const aiSummary = useMemo(() => {
-    if (!printMetricRows.length) {
+    if (!printMetricRows.length && operationalPrintUniverses.length === 0) {
       return {
-        headline: "No print metrics uploaded yet.",
-        body: "Print will stay quiet until asset, inventory, or order data is available for this campaign.",
+        headline: "No print metrics or operational print universes are connected yet.",
+        body: "Print will stay quiet until asset, inventory, order, or list-routing data is available for this campaign.",
         recommendation:
-          "Upload print metrics to activate inventory, approval, delivery, and readiness reads.",
+          "Upload print metrics or seed a print/literature/drop universe through ingestion to activate this lane.",
+      };
+    }
+
+    if (operationalPrintUniverses.length > 0 && !printMetricRows.length) {
+      const firstUniverse = operationalPrintUniverses[0];
+
+      return {
+        headline: `${firstUniverse.name} is ready for print orchestration.`,
+        body: `${operationalPrintUniverses.length} operational print universe${
+          operationalPrintUniverses.length === 1 ? "" : "s"
+        } are now feeding the main print page from Lists.`,
+        recommendation:
+          focusQueue[0]?.summary ||
+          "Open Print Focus and move the first approval, inventory, or delivery action forward.",
       };
     }
 
@@ -763,7 +1022,7 @@ export default function PrintDashboardPage() {
         focusQueue[0]?.summary ||
         "Review the uploaded print metrics and decide the next material move.",
     };
-  }, [printMetricRows.length, assetRows, inventoryRows, focusQueue]);
+  }, [printMetricRows.length, operationalPrintUniverses, assetRows, inventoryRows, focusQueue]);
 
   const materialReadiness = useMemo(() => {
     return {
@@ -1740,6 +1999,66 @@ export default function PrintDashboardPage() {
         ))}
       </section>
 
+      {operationalPrintUniverses.length > 0 ? (
+        <section className="rounded-3xl border border-violet-200 bg-violet-50 p-6 shadow-sm">
+          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="text-sm font-medium text-violet-800">
+                Operational Print Universes
+              </p>
+              <h2 className="text-xl font-semibold text-violet-950">
+                Lists feeding print execution
+              </h2>
+              <p className="mt-1 text-sm text-violet-900/75">
+                These are routed from ingestion and Lists, then converted into approval, inventory, and delivery pressure for Print Focus.
+              </p>
+            </div>
+
+            <Link
+              href="/dashboard/lists"
+              className="inline-flex items-center gap-2 rounded-2xl border border-violet-200 bg-white px-4 py-3 text-sm font-medium text-violet-800 transition hover:bg-violet-100"
+            >
+              Review Lists
+            </Link>
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-3">
+            {operationalPrintUniverses.slice(0, 6).map((universe) => (
+              <div
+                key={universe.id}
+                className="rounded-2xl border border-violet-200 bg-white p-4"
+              >
+                <div className="flex flex-col gap-3">
+                  <div>
+                    <p className="font-semibold text-slate-900">
+                      {universe.name}
+                    </p>
+                    <p className="mt-1 text-sm text-slate-500">
+                      {universe.routeLabel} · {universe.useCase}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    {universe.operationalTags.slice(0, 5).map((tag) => (
+                      <span
+                        key={`${universe.id}-${tag}`}
+                        className="rounded-full border border-violet-200 bg-violet-50 px-2.5 py-1 text-xs font-semibold text-violet-800"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : listLoading ? (
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 text-sm text-slate-600 shadow-sm">
+          Loading operational print universes...
+        </section>
+      ) : null}
+
       {visibleMaterialReadiness.show ? (
         <section className="rounded-3xl border border-indigo-200 bg-indigo-50 p-6 shadow-sm">
           <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -1855,7 +2174,7 @@ export default function PrintDashboardPage() {
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
                 {printLoading
                   ? "Loading print assets..."
-                  : "No print asset pipeline items are connected yet."}
+                  : "No print asset pipeline items or operational print universes are connected yet."}
               </div>
             ) : null}
 
@@ -1906,7 +2225,7 @@ export default function PrintDashboardPage() {
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
                 {printLoading
                   ? "Loading print orders..."
-                  : "No print production or delivery orders are connected yet."}
+                  : "No print production, delivery, or operational universe orders are connected yet."}
               </div>
             ) : null}
 
@@ -1958,7 +2277,7 @@ export default function PrintDashboardPage() {
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
               {printLoading
                 ? "Loading print inventory..."
-                : "No print inventory records are connected yet."}
+                : "No print inventory records or operational print universes are connected yet."}
             </div>
           ) : null}
 

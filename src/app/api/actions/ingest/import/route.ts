@@ -758,6 +758,10 @@ export async function POST(req: Request) {
 
         assign(contact.id, generalListName);
 
+        suggestedLists.forEach((listName) => {
+          assign(contact.id, listName);
+        });
+
         if (isBlank(contact.phone)) assign(contact.id, "Missing Phone Numbers");
         if (isBlank(contact.email)) assign(contact.id, "Missing Email Addresses");
         if (total >= 250) assign(contact.id, "Priority Outreach Targets");

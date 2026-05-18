@@ -13,6 +13,7 @@ import {
   Zap,
 } from "lucide-react";
 import { getOrgContextTheme } from "@/lib/org-context-theme";
+import { getLists } from "@/lib/data/lists";
 
 type FocusLaneItem = {
   id: string;
@@ -89,6 +90,167 @@ type PrintDeliveryUnlock = {
   updatedAt: string;
 };
 
+type OperationalList = {
+  id: string;
+  name: string;
+  type?: string | null;
+  created_at?: string | null;
+  default_owner_name?: string | null;
+};
+
+function normalizeListName(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function isCleanupOrContactQualityList(list: OperationalList) {
+  const normalized = normalizeListName(list.name);
+
+  return (
+    normalized.includes("missing email") ||
+    normalized.includes("missing phone") ||
+    normalized.includes("email address") ||
+    normalized.includes("email addresses") ||
+    normalized.includes("phone number") ||
+    normalized.includes("phone numbers") ||
+    normalized.includes("cleanup") ||
+    normalized.includes("data hygiene") ||
+    normalized.includes("contact hygiene") ||
+    normalized.includes("invalid email") ||
+    normalized.includes("bad email")
+  );
+}
+
+function isPrintOperationalList(list: OperationalList) {
+  const explicitType = String(list.type || "").toLowerCase();
+  const normalized = normalizeListName(list.name);
+
+  if (isCleanupOrContactQualityList(list)) return false;
+  if (explicitType === "print") return true;
+
+  return (
+    normalized.includes("print") ||
+    normalized.includes("palm card") ||
+    normalized.includes("palm cards") ||
+    normalized.includes("parm card") ||
+    normalized.includes("parm cards") ||
+    normalized.includes("literature") ||
+    normalized.includes("lit drop") ||
+    normalized.includes("litdrop") ||
+    normalized.includes("lit piece") ||
+    normalized.includes("mailer") ||
+    normalized.includes("mail piece") ||
+    normalized.includes("direct mail") ||
+    normalized.includes("postcard") ||
+    normalized.includes("postcards") ||
+    normalized.includes("door hanger") ||
+    normalized.includes("door hangers") ||
+    normalized.includes("doorhanger") ||
+    normalized.includes("yard sign") ||
+    normalized.includes("yard signs") ||
+    normalized.includes("walk packet") ||
+    normalized.includes("canvass packet")
+  );
+}
+
+function resolvePrintUseCase(listName: string) {
+  const normalized = normalizeListName(listName);
+
+  if (normalized.includes("yard sign") || normalized.includes("yard signs")) {
+    return "Yard sign deployment";
+  }
+
+  if (
+    normalized.includes("palm card") ||
+    normalized.includes("palm cards") ||
+    normalized.includes("parm card") ||
+    normalized.includes("parm cards")
+  ) {
+    return "Palm card run";
+  }
+
+  if (normalized.includes("door hanger") || normalized.includes("doorhanger")) {
+    return "Door hanger route";
+  }
+
+  if (
+    normalized.includes("lit drop") ||
+    normalized.includes("litdrop") ||
+    normalized.includes("literature") ||
+    normalized.includes("lit piece")
+  ) {
+    return "Literature drop";
+  }
+
+  if (
+    normalized.includes("mailer") ||
+    normalized.includes("direct mail") ||
+    normalized.includes("mail piece") ||
+    normalized.includes("postcard") ||
+    normalized.includes("postcards")
+  ) {
+    return "Mailer universe";
+  }
+
+  if (
+    normalized.includes("walk packet") ||
+    normalized.includes("canvass packet")
+  ) {
+    return "Field material support";
+  }
+
+  if (normalized.includes("print")) {
+    return "Print universe";
+  }
+
+  return "Operational print support";
+}
+
+function buildPrintFocusItemsFromLists(lists: OperationalList[]) {
+  const operationalLists = lists.filter(isPrintOperationalList).slice(0, 6);
+  const items: FocusLaneItem[] = [];
+
+  operationalLists.forEach((list) => {
+    const linkedUseCase = resolvePrintUseCase(list.name);
+    const owner = list.default_owner_name || "Print lane";
+    const baseId = list.id || list.name.replace(/\s+/g, "-").toLowerCase();
+
+    items.push({
+      id: `approval-${baseId}`,
+      title: `Approve ${list.name} materials`,
+      summary: `${list.name} is an operational universe that needs print approval before production or field handoff.`,
+      priority:
+        linkedUseCase === "Literature drop" || linkedUseCase === "Door hanger route"
+          ? "high"
+          : "medium",
+      type: "approval",
+      linkedTurf: list.name,
+      linkedUseCase,
+    });
+
+    items.push({
+      id: `inventory-${baseId}`,
+      title: `Protect inventory for ${list.name}`,
+      summary: `${owner} should confirm enough print stock exists to support ${list.name} without slowing execution.`,
+      priority: linkedUseCase === "Field material support" ? "high" : "medium",
+      type: "inventory",
+      linkedTurf: list.name,
+      linkedUseCase,
+    });
+
+    items.push({
+      id: `delivery-${baseId}`,
+      title: `Confirm delivery timing for ${list.name}`,
+      summary: `${list.name} needs a clear print-to-field handoff so the operational universe can move on schedule.`,
+      priority: "medium",
+      type: "delivery",
+      linkedTurf: list.name,
+      linkedUseCase,
+    });
+  });
+
+  return items;
+}
+
 function priorityTone(priority: FocusLaneItem["priority"]) {
   switch (priority) {
     case "high":
@@ -141,6 +303,9 @@ export default function PrintFocusModePage() {
   const [hasPrintAccess, setHasPrintAccess] = useState(false);
   const [hasPrintDirector, setHasPrintDirector] = useState(false);
   const [contextMode, setContextMode] = useState("default");
+  const [operationalLists, setOperationalLists] = useState<OperationalList[]>([]);
+  const [listLoading, setListLoading] = useState(true);
+  const [listMessage, setListMessage] = useState("");
 
   useEffect(() => {
     let mounted = true;
@@ -222,24 +387,89 @@ export default function PrintFocusModePage() {
     };
   }, []);
 
-  const orgTheme = getOrgContextTheme(contextMode);
+  useEffect(() => {
+    let mounted = true;
 
-  const nowLine = useMemo(() => {
-    return {
-      headline:
-        "Stay in print flow.",
-      body:
-        "Clear approvals. Protect inventory. Keep deliveries moving.",
+    async function loadOperationalLists() {
+      try {
+        setListLoading(true);
+        setListMessage("");
+
+        const lists = await getLists();
+
+        if (!mounted) return;
+
+        setOperationalLists((lists as OperationalList[]) || []);
+      } catch (error: any) {
+        console.error("Failed to load print operational lists:", error);
+
+        if (!mounted) return;
+
+        setOperationalLists([]);
+        setListMessage(
+          error?.message || "Unable to load operational print lists."
+        );
+      } finally {
+        if (mounted) {
+          setListLoading(false);
+        }
+      }
+    }
+
+    loadOperationalLists();
+
+    return () => {
+      mounted = false;
     };
   }, []);
 
+  const orgTheme = getOrgContextTheme(contextMode);
+
+  const printOperationalLists = useMemo(() => {
+    return operationalLists.filter(isPrintOperationalList);
+  }, [operationalLists]);
+
+  const nowLine = useMemo(() => {
+    if (printOperationalLists.length > 0) {
+      return {
+        headline: "Print universes are ready to move.",
+        body: `${printOperationalLists.length} operational print universe${
+          printOperationalLists.length === 1 ? "" : "s"
+        } can now flow through approval, inventory, and delivery.`,
+      };
+    }
+
+    return {
+      headline: "Stay in print flow.",
+      body: "Clear approvals. Protect inventory. Keep deliveries moving.",
+    };
+  }, [printOperationalLists.length]);
+
   const systemPrintSignals = useMemo(() => {
-    return [];
-  }, []);
+    if (listLoading) {
+      return ["Loading operational print universes from Lists..."];
+    }
+
+    if (listMessage) {
+      return [listMessage];
+    }
+
+    if (printOperationalLists.length === 0) {
+      return [
+        "No print-ready operational lists detected yet. Import or create a Print Universe, Literature Drop, Walk Packet, Door Hanger Route, or similar list to activate this lane.",
+      ];
+    }
+
+    return printOperationalLists.slice(0, 4).map((list) => {
+      return `${list.name} is available for print routing as ${resolvePrintUseCase(
+        list.name
+      ).toLowerCase()}.`;
+    });
+  }, [listLoading, listMessage, printOperationalLists]);
 
   const focusItems = useMemo<FocusLaneItem[]>(() => {
-    return [];
-  }, []);
+    return buildPrintFocusItemsFromLists(operationalLists);
+  }, [operationalLists]);
 
   const grouped = useMemo(() => {
     return {
@@ -286,8 +516,8 @@ export default function PrintFocusModePage() {
         id: item.id,
         title: item.title,
         summary: item.summary,
-        assetName: "Active Asset",
-        owner: "Assigned Owner",
+        assetName: item.linkedUseCase || item.title,
+        owner: "Print lane",
         status: "candidate_review",
         linkedTurf: item.linkedTurf,
         linkedUseCase: item.linkedUseCase,
@@ -354,8 +584,8 @@ export default function PrintFocusModePage() {
         id: item.id,
         title: item.title,
         summary: item.summary,
-        item: "Tracked Inventory",
-        region: "Active Region",
+        item: item.linkedUseCase || "Tracked Inventory",
+        region: item.linkedTurf || "Active Region",
         onHand: 0,
         reserved: 0,
         reorderAt: 0,
@@ -420,8 +650,8 @@ export default function PrintFocusModePage() {
         id: item.id,
         title: item.title,
         summary: item.summary,
-        item: "Tracked Delivery",
-        vendor: "Active Vendor",
+        item: item.linkedUseCase || "Tracked Delivery",
+        vendor: "Print lane",
         eta: "Not set",
         status: "shipped",
         linkedTurf: item.linkedTurf,
@@ -541,7 +771,38 @@ export default function PrintFocusModePage() {
         </div>
       </section>
 
-      
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="text-sm font-medium text-slate-500">
+              Operational Universes
+            </p>
+            <h2 className="text-xl font-semibold text-slate-900">
+              Print-ready list routing
+            </h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Print Focus now reads operational list containers and converts
+              them into approval, inventory, and delivery work.
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700">
+            {printOperationalLists.length} universe
+            {printOperationalLists.length === 1 ? "" : "s"} detected
+          </div>
+        </div>
+
+        <div className="mt-4 grid gap-3 lg:grid-cols-3">
+          {systemPrintSignals.map((signal) => (
+            <div
+              key={signal}
+              className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700"
+            >
+              {signal}
+            </div>
+          ))}
+        </div>
+      </section>
 
       {(readyAssets.length > 0 ||
         inventoryActions.length > 0 ||

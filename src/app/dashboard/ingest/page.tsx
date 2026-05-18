@@ -22,6 +22,43 @@ type ImportResult = {
   listSummary?: ImportSummaryItem[];
 };
 
+type OperationalRoutingType =
+  | "general_outreach"
+  | "field_turf"
+  | "walk_packet"
+  | "persuasion_universe"
+  | "follow_up_queue"
+  | "print_universe"
+  | "literature_drop";
+
+type OperationalRoutingOption = {
+  value: OperationalRoutingType;
+  label: string;
+  description: string;
+  defaultListName: string;
+  routeLabel: string;
+};
+
+const operationalRoutingOptions: OperationalRoutingOption[] = [
+  { value: "general_outreach", label: "General Outreach", description: "Use this upload as a general contact pool for standard outreach work.", defaultListName: "General Outreach Pool", routeLabel: "Outreach" },
+  { value: "field_turf", label: "Field Turf", description: "Seed a turf universe that Field Focus can recognize and deploy.", defaultListName: "Field Turf Universe", routeLabel: "Field" },
+  { value: "walk_packet", label: "Walk Packet", description: "Create a walkable field packet for canvass execution.", defaultListName: "Weekend Walk Packet", routeLabel: "Field" },
+  { value: "persuasion_universe", label: "Persuasion Universe", description: "Seed a persuasion target universe for field and follow-up routing.", defaultListName: "Persuasion Universe", routeLabel: "Field" },
+  { value: "follow_up_queue", label: "Follow-Up Queue", description: "Create a follow-up queue for contacts that need a next touch after field activity.", defaultListName: "Field Follow-Up Queue", routeLabel: "Field Follow-Up" },
+  { value: "print_universe", label: "Print Universe", description: "Seed a print-ready universe that can later feed mail or literature work.", defaultListName: "Print Universe", routeLabel: "Print" },
+  { value: "literature_drop", label: "Literature Drop", description: "Create a literature drop route for future print and field handoff.", defaultListName: "Literature Drop Route", routeLabel: "Print + Field" },
+];
+
+const operationalTagOptions = [
+  "persuasion",
+  "turnout",
+  "walk",
+  "volunteer",
+  "print",
+  "lit-drop",
+  "high-priority",
+];
+
 function IngestPageContent() {
   const searchParams = useSearchParams();
   const source = searchParams.get("source") || "outreach";
@@ -35,6 +72,10 @@ function IngestPageContent() {
   const [listSummary, setListSummary] = useState<ImportSummaryItem[]>([]);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [ownerAssignment, setOwnerAssignment] = useState("");
+  const [operationalType, setOperationalType] =
+    useState<OperationalRoutingType>("general_outreach");
+  const [customListName, setCustomListName] = useState("");
+  const [routingTags, setRoutingTags] = useState<string[]>([]);
 
   function handleFile(e: any) {
     const file = e.target.files?.[0];
@@ -54,9 +95,36 @@ function IngestPageContent() {
       setListsCreated(0);
       setListSummary([]);
       setImportResult(null);
+      setCustomListName("");
+      setRoutingTags([]);
     };
 
     reader.readAsText(file);
+  }
+
+  const selectedOperationalOption = useMemo(() => {
+    return (
+      operationalRoutingOptions.find((option) => option.value === operationalType) ||
+      operationalRoutingOptions[0]
+    );
+  }, [operationalType]);
+
+  const resolvedOperationalListName = useMemo(() => {
+    const customName = customListName.trim();
+
+    if (customName) {
+      return customName;
+    }
+
+    return selectedOperationalOption.defaultListName;
+  }, [customListName, selectedOperationalOption.defaultListName]);
+
+  function toggleRoutingTag(tag: string) {
+    setRoutingTags((current) =>
+      current.includes(tag)
+        ? current.filter((item) => item !== tag)
+        : [...current, tag]
+    );
   }
 
   async function handleImport() {
@@ -91,7 +159,7 @@ function IngestPageContent() {
         body: JSON.stringify({
           contacts,
           fecRecords,
-          suggestedLists: interpretation?.suggestedLists || [],
+          suggestedLists: routingListPayload,
           source,
         }),
       });
@@ -248,6 +316,17 @@ function IngestPageContent() {
               contactsMissingPhone > 0 ? "Missing Phone Numbers" : null,
               "General Finance Follow-Up",
             ]
+          : source === "field"
+          ? [
+              contactsMissingPhone > 0 ? "Field Missing Phone Numbers" : null,
+              contactsMissingEmail > 0 ? "Field Missing Email Addresses" : null,
+              "Field Turf Universe",
+            ]
+          : source === "print"
+          ? [
+              contactsMissingEmail > 0 ? "Print Missing Email Addresses" : null,
+              "Print Universe",
+            ]
           : [
               contactsMissingPhone > 0 ? "Missing Phone Numbers" : null,
               contactsMissingEmail > 0 ? "Missing Email Addresses" : null,
@@ -271,6 +350,26 @@ function IngestPageContent() {
       suggestedLists,
     };
   }, [data, source]);
+
+  const routingListPayload = useMemo(() => {
+    if (source === "fec") return [];
+
+    const baseLists = interpretation?.suggestedLists || [];
+    const operationalList = resolvedOperationalListName.trim();
+    const tagLists = routingTags.map((tag) => {
+      if (tag === "lit-drop") return "Literature Drop Route";
+      if (tag === "high-priority") return "High Priority Targets";
+
+      return `${tag
+        .split("-")
+        .map((piece) => piece.charAt(0).toUpperCase() + piece.slice(1))
+        .join(" ")} Segment`;
+    });
+
+    return Array.from(
+      new Set([operationalList, ...tagLists, ...baseLists].filter(Boolean))
+    );
+  }, [interpretation?.suggestedLists, resolvedOperationalListName, routingTags, source]);
 
   const systemImpact = useMemo(() => {
     if (!importSuccess || !interpretation) return null;
@@ -318,13 +417,25 @@ function IngestPageContent() {
   }, [importSuccess, interpretation, importResult, listSummary, source]);
 
   const primaryActionLabel =
-    source === "finance" ? "Start Donor Follow-Up" : source === "fec" ? "Open Finance Focus" : "Start Outreach";
+    source === "finance"
+      ? "Start Donor Follow-Up"
+      : source === "fec"
+      ? "Open Finance Focus"
+      : source === "field"
+      ? "Open Field Focus"
+      : source === "print"
+      ? "Open Print"
+      : "Start Outreach";
 
   const successBody =
     source === "finance"
       ? "Aether pushed these records into your live contact system. Start donor follow-up now, review contacts directly, or inspect lists next."
       : source === "fec"
       ? "Aether imported FEC records, attempted contact matching, and updated donor intelligence signals."
+      : source === "field"
+      ? "Aether pushed these records into your live contact system and seeded operational field lists for Focus routing."
+      : source === "print"
+      ? "Aether pushed these records into your live contact system and seeded print-ready list infrastructure."
       : "Aether pushed these records into your live contact system. Start outreach now, review contacts directly, or inspect lists next.";
 
   const primaryActionHref =
@@ -332,21 +443,38 @@ function IngestPageContent() {
       ? "/dashboard/outreach?channel=call"
       : source === "fec"
       ? "/dashboard/finance"
+      : source === "field"
+      ? "/dashboard/field/focus"
+      : source === "print"
+      ? "/dashboard/print"
       : "/dashboard/outreach";
+
+  const pageTitle =
+    source === "finance"
+      ? "Finance Data Ingestion"
+      : source === "fec"
+      ? "FEC Donor Intelligence Ingestion"
+      : source === "field"
+      ? "Field Data Ingestion"
+      : source === "print"
+      ? "Print Data Ingestion"
+      : "Outreach Data Ingestion";
+
+  const pageDescription =
+    source === "field"
+      ? "Upload contact or turf data, segment it into operational lists, then route it into Field Focus."
+      : source === "print"
+      ? "Upload contact data, segment it into print-ready universes, then prepare it for downstream print work."
+      : "Upload contact data, verify how Aether understands it, then import it into the system.";
 
   return (
     <div className="space-y-6 p-6">
       <div className="space-y-2">
         <h1 className="text-2xl font-semibold text-slate-900">
-          {source === "finance"
-            ? "Finance Data Ingestion"
-            : source === "fec"
-            ? "FEC Donor Intelligence Ingestion"
-            : "Outreach Data Ingestion"}
+          {pageTitle}
         </h1>
         <p className="text-sm text-slate-600">
-          Upload contact data, verify how Aether understands it, then import it
-          into the system.
+          {pageDescription}
         </p>
       </div>
 
@@ -355,7 +483,13 @@ function IngestPageContent() {
           <div>
             <p className="text-sm font-medium text-slate-900">Upload CSV</p>
             <p className="mt-1 text-sm text-slate-500">
-              {source === "fec" ? "Upload FEC-style donor contribution files for matching and anomaly detection." : "Bring in messy outside data and let Aether organize it."}
+              {source === "fec"
+                ? "Upload FEC-style donor contribution files for matching and anomaly detection."
+                : source === "field"
+                ? "Bring in turf, walk packet, persuasion, or volunteer data and let Aether organize it into execution lists."
+                : source === "print"
+                ? "Bring in print, literature drop, or mail universe data and let Aether organize it for routing."
+                : "Bring in messy outside data and let Aether organize it."}
             </p>
           </div>
 
@@ -713,6 +847,121 @@ function IngestPageContent() {
               />
             </div>
           </section>
+
+          {source !== "fec" ? (
+            <section className="rounded-3xl border border-sky-200 bg-sky-50 p-6 shadow-sm">
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-sky-800">
+                  Operational Routing
+                </p>
+                <h2 className="text-2xl font-semibold text-sky-950">
+                  Segment this upload before it enters Aether
+                </h2>
+                <p className="max-w-3xl text-sm text-sky-900/80">
+                  Choose the operational container this upload should create.
+                  Field Focus and future Print routing can consume these list
+                  names without needing a separate data path.
+                </p>
+              </div>
+
+              <div className="mt-6 grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
+                <div className="rounded-2xl border border-sky-200 bg-white p-5">
+                  <label className="text-sm font-medium text-slate-900">
+                    Operational Type
+                  </label>
+
+                  <select
+                    className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                    value={operationalType}
+                    onChange={(e) =>
+                      setOperationalType(e.target.value as OperationalRoutingType)
+                    }
+                  >
+                    {operationalRoutingOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+
+                  <p className="mt-3 text-sm text-slate-600">
+                    {selectedOperationalOption.description}
+                  </p>
+
+                  <div className="mt-5">
+                    <label className="text-sm font-medium text-slate-900">
+                      Operational List Name
+                    </label>
+                    <input
+                      className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                      value={customListName}
+                      onChange={(e) => setCustomListName(e.target.value)}
+                      placeholder={selectedOperationalOption.defaultListName}
+                    />
+                    <p className="mt-2 text-xs text-slate-500">
+                      Leave blank to use Aether’s recommended list name.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-sky-200 bg-white p-5">
+                  <p className="text-sm font-medium text-slate-900">
+                    Routing Tags
+                  </p>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Optional lightweight segments for demo seeding and launch
+                    cleanup. Each selected tag also creates a usable list
+                    container.
+                  </p>
+
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {operationalTagOptions.map((tag) => {
+                      const selected = routingTags.includes(tag);
+
+                      return (
+                        <button
+                          key={tag}
+                          type="button"
+                          onClick={() => toggleRoutingTag(tag)}
+                          className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                            selected
+                              ? "border-sky-600 bg-sky-600 text-white"
+                              : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+                          }`}
+                        >
+                          {tag}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="mt-5 rounded-2xl border border-sky-200 bg-sky-50 p-4">
+                    <p className="text-sm font-medium text-sky-950">
+                      Routing Preview
+                    </p>
+                    <p className="mt-2 text-sm text-sky-900">
+                      This upload will seed into:
+                    </p>
+
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {routingListPayload.map((listName) => (
+                        <span
+                          key={listName}
+                          className="rounded-full border border-sky-200 bg-white px-3 py-1 text-xs font-semibold text-sky-900"
+                        >
+                          {listName}
+                        </span>
+                      ))}
+                    </div>
+
+                    <p className="mt-3 text-xs text-sky-700">
+                      Primary route: {selectedOperationalOption.routeLabel}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </section>
+          ) : null}
 
           <div className="flex justify-end">
             <button

@@ -4,14 +4,24 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
-function normalizeRole(role?: string | null) {
+function normalizeMembershipRole(role?: string | null) {
   const value = String(role || "").trim().toLowerCase();
 
   if (value === "admin") return "admin";
   if (value === "director") return "director";
   if (value === "campaign_manager") return "campaign_manager";
-  if (value === "general_user") return "user";
-  if (value === "user") return "user";
+  if (value === "general_user") return "general_user";
+  if (value === "user") return "general_user";
+
+  return "general_user";
+}
+
+function normalizeRoleLevel(role?: string | null) {
+  const value = String(role || "").trim().toLowerCase();
+
+  if (value === "admin") return "admin";
+  if (value === "director") return "director";
+  if (value === "campaign_manager") return "campaign_manager";
 
   return "user";
 }
@@ -64,7 +74,8 @@ export async function POST(req: Request) {
       );
     }
 
-    const normalizedCurrentRole = normalizeRole(currentMember.role);
+    const normalizedCurrentRole =
+      normalizeMembershipRole(currentMember.role);
 
     if (normalizedCurrentRole !== "admin") {
       return NextResponse.json(
@@ -159,6 +170,16 @@ export async function POST(req: Request) {
     }
 
     // -----------------------------------
+    // Normalize role values
+    // -----------------------------------
+
+    const normalizedMembershipRole =
+      normalizeMembershipRole(role);
+
+    const normalizedRoleLevel =
+      normalizeRoleLevel(role);
+
+    // -----------------------------------
     // Create organization membership
     // -----------------------------------
 
@@ -169,7 +190,7 @@ export async function POST(req: Request) {
         user_id: authUserId,
         title: title || null,
         department: department || "campaign",
-        role: role || "general_user",
+        role: normalizedMembershipRole,
       })
       .select()
       .single();
@@ -191,7 +212,7 @@ export async function POST(req: Request) {
         organization_member_id: newMember.id,
         organization_id: activeOrganizationId,
         department: department || "campaign",
-        role_level: normalizeRole(role),
+        role_level: normalizedRoleLevel,
         is_primary: true,
       });
 
@@ -255,7 +276,9 @@ export async function DELETE(req: Request) {
       );
     }
 
-    if (normalizeRole(currentMember.role) !== "admin") {
+    if (
+      normalizeMembershipRole(currentMember.role) !== "admin"
+    ) {
       return NextResponse.json(
         { error: "Only admins can remove members" },
         { status: 403 }

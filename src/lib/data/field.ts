@@ -67,6 +67,73 @@ function normalize(value: string | null | undefined) {
   return (value || "").trim().toLowerCase();
 }
 
+function normalizeOperationalText(value: string | null | undefined) {
+  return (value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function isCleanupListName(value: string) {
+  const normalized = normalizeOperationalText(value);
+
+  return (
+    normalized.includes("missing email") ||
+    normalized.includes("missing phone") ||
+    normalized.includes("missing address") ||
+    normalized.includes("cleanup") ||
+    normalized.includes("clean up") ||
+    normalized.includes("data issue") ||
+    normalized.includes("data quality") ||
+    normalized.includes("enrichment") ||
+    normalized.includes("contact repair") ||
+    normalized.includes("bad email") ||
+    normalized.includes("bad phone") ||
+    normalized.includes("no email") ||
+    normalized.includes("no phone")
+  );
+}
+
+function isPrintMaterialListName(value: string) {
+  const normalized = normalizeOperationalText(value);
+
+  if (isCleanupListName(normalized)) return false;
+
+  return (
+    normalized.includes("print") ||
+    normalized.includes("palm card") ||
+    normalized.includes("palmcard") ||
+    normalized.includes("parm card") ||
+    normalized.includes("door hanger") ||
+    normalized.includes("doorhanger") ||
+    normalized.includes("yard sign") ||
+    normalized.includes("yardsign") ||
+    normalized.includes("mailer") ||
+    normalized.includes("mail piece") ||
+    normalized.includes("direct mail") ||
+    normalized.includes("postcard") ||
+    normalized.includes("literature") ||
+    normalized.includes("lit drop") ||
+    normalized.includes("litdrop") ||
+    normalized.includes("lit piece") ||
+    normalized.includes("walk packet") ||
+    normalized.includes("absentee chase")
+  );
+}
+
+function isFieldMaterialSupportName(value: string) {
+  const normalized = normalizeOperationalText(value);
+
+  return (
+    normalized.includes("walk packet") ||
+    normalized.includes("packet") ||
+    normalized.includes("lit drop") ||
+    normalized.includes("litdrop") ||
+    normalized.includes("literature")
+  );
+}
+
 function normalizeFieldRow(row: Record<string, any>): FieldMetricRow {
   return {
     id: String(row.id),
@@ -118,16 +185,28 @@ function isFieldAnalyticsRow(row: Record<string, any>) {
 
 function isLikelyFieldList(list: FieldListRow) {
   const type = normalize(list.type);
-  const name = normalize(list.name);
+  const normalized = normalizeOperationalText(`${list.name || ""} ${list.type || ""}`);
+
+  if (isCleanupListName(normalized)) return false;
 
   if (type === "field") return true;
 
+  if (isPrintMaterialListName(normalized) && !isFieldMaterialSupportName(normalized)) {
+    return false;
+  }
+
   return (
-    name.includes("field") ||
-    name.includes("turf") ||
-    name.includes("canvass") ||
-    name.includes("door") ||
-    name.includes("walk")
+    normalized.includes("field") ||
+    normalized.includes("turf") ||
+    normalized.includes("canvass") ||
+    normalized.includes("walk") ||
+    normalized.includes("walk packet") ||
+    normalized.includes("packet") ||
+    normalized.includes("persuasion") ||
+    normalized.includes("turnout") ||
+    normalized.includes("precinct") ||
+    normalized.includes("route") ||
+    normalized.includes("absentee chase")
   );
 }
 
