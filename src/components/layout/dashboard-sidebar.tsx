@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
 import {
   BarChart3,
+  BookOpen,
   DollarSign,
   LayoutDashboard,
   LogOut,
@@ -90,6 +91,12 @@ const navItems: NavItem[] = [
     href: "/dashboard/print",
     icon: Printer,
     department: "print",
+  },
+  {
+    title: "FAQ",
+    href: "/dashboard/faq",
+    icon: BookOpen,
+    alwaysVisible: true,
   },
   {
     title: "Tools",

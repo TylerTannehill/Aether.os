@@ -29,7 +29,7 @@ export async function middleware(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname
 
-  const publicRoutes = ['/login', '/terms', '/privacy']
+  const publicRoutes = ['/login', '/terms', '/privacy', '/update-password']
 
   const isPublicRoute = publicRoutes.includes(pathname)
 

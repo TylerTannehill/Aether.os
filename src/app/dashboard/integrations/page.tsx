@@ -15,9 +15,19 @@ import {
   Loader2,
   CheckCircle2,
   MapPinned,
+  Settings2,
+  ShieldCheck,
+  Clock3,
+  AlertCircle,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { getOrgContextTheme } from "@/lib/org-context-theme";
+
+type IntegrationStatus =
+  | "not_connected"
+  | "ready_to_configure"
+  | "needs_credentials"
+  | "connected";
 
 type IntegrationCard = {
   id: string;
@@ -26,6 +36,10 @@ type IntegrationCard = {
   description: string;
   endpoint?: string;
   icon: any;
+  status: IntegrationStatus;
+  setupNote: string;
+  credentialHint?: string;
+  lastSync?: string;
 };
 
 const DIGITAL_INTEGRATIONS: IntegrationCard[] = [
@@ -37,6 +51,10 @@ const DIGITAL_INTEGRATIONS: IntegrationCard[] = [
       "Paid reach, spend, creative performance, and audience pressure ingestion.",
     endpoint: "/api/integrations/meta/sync",
     icon: RadioTower,
+    status: "ready_to_configure",
+    setupNote:
+      "Connection pathway staged. Add account credentials when the campaign social assets are ready.",
+    credentialHint: "Meta Business / Ads account access",
   },
   {
     id: "x",
@@ -46,6 +64,10 @@ const DIGITAL_INTEGRATIONS: IntegrationCard[] = [
       "Narrative pressure, reply velocity, engagement, and sentiment volatility.",
     endpoint: "/api/integrations/x/sync",
     icon: MessageSquareMore,
+    status: "ready_to_configure",
+    setupNote:
+      "Connection pathway staged for narrative signal ingestion and future live account sync.",
+    credentialHint: "X account/API access",
   },
   {
     id: "tiktok",
@@ -55,6 +77,10 @@ const DIGITAL_INTEGRATIONS: IntegrationCard[] = [
       "Organic momentum, creator reach, engagement spikes, and audience movement.",
     endpoint: "/api/integrations/tiktok/sync",
     icon: BarChart3,
+    status: "ready_to_configure",
+    setupNote:
+      "Connection pathway staged for organic momentum and creator reach analytics.",
+    credentialHint: "TikTok account/API access",
   },
   {
     id: "youtube",
@@ -64,6 +90,10 @@ const DIGITAL_INTEGRATIONS: IntegrationCard[] = [
       "Long-form message performance, watch behavior, and narrative durability.",
     endpoint: "/api/integrations/youtube/sync",
     icon: BarChart3,
+    status: "ready_to_configure",
+    setupNote:
+      "Connection pathway staged for video performance and long-form message analytics.",
+    credentialHint: "Google/YouTube channel access",
   },
   {
     id: "website",
@@ -73,6 +103,10 @@ const DIGITAL_INTEGRATIONS: IntegrationCard[] = [
       "Website traffic, signup behavior, conversion activity, and owned momentum.",
     endpoint: "/api/integrations/website/sync",
     icon: Workflow,
+    status: "ready_to_configure",
+    setupNote:
+      "Owned-channel pathway staged. This can receive website traffic and conversion data once the site is wired.",
+    credentialHint: "Website analytics source",
   },
 ];
 
@@ -85,6 +119,10 @@ const FINANCE_INTEGRATIONS: IntegrationCard[] = [
       "Online donor ingestion, contact creation, donor enrichment, and finance routing.",
     endpoint: "/api/integrations/actblue/sync",
     icon: Wallet,
+    status: "ready_to_configure",
+    setupNote:
+      "Democratic fundraising connector staged. Add campaign credentials when available.",
+    credentialHint: "ActBlue export/API access",
   },
   {
     id: "winred",
@@ -94,6 +132,10 @@ const FINANCE_INTEGRATIONS: IntegrationCard[] = [
       "Online donor ingestion, high-value donor detection, and finance follow-up routing.",
     endpoint: "/api/integrations/winred/sync",
     icon: Wallet,
+    status: "ready_to_configure",
+    setupNote:
+      "Republican fundraising connector staged. Add campaign credentials when available.",
+    credentialHint: "WinRed export/API access",
   },
 ];
 
@@ -105,6 +147,10 @@ const UTILITY_INTEGRATIONS: IntegrationCard[] = [
     description:
       "Campaign communication infrastructure and shared inbox coordination.",
     icon: Mail,
+    status: "needs_credentials",
+    setupNote:
+      "Workspace connection staging active. OAuth activation is pending organizational Google Workspace setup.",
+    credentialHint: "Google Workspace / Gmail OAuth",
   },
   {
     id: "calendar",
@@ -113,6 +159,10 @@ const UTILITY_INTEGRATIONS: IntegrationCard[] = [
     description:
       "Campaign scheduling, operational timing, and event coordination.",
     icon: CalendarDays,
+    status: "needs_credentials",
+    setupNote:
+      "Calendar pathway staged for scheduling and operational timing once Workspace access is ready.",
+    credentialHint: "Google Calendar OAuth",
   },
   {
     id: "drive",
@@ -121,8 +171,54 @@ const UTILITY_INTEGRATIONS: IntegrationCard[] = [
     description:
       "Shared campaign files, proofs, messaging docs, and operational assets.",
     icon: FolderKanban,
+    status: "needs_credentials",
+    setupNote:
+      "Drive pathway staged for proofs, assets, and campaign documents once Workspace access is ready.",
+    credentialHint: "Google Drive OAuth",
   },
 ];
+
+function statusLabel(status: IntegrationStatus) {
+  switch (status) {
+    case "connected":
+      return "Connected";
+    case "needs_credentials":
+      return "Needs Credentials";
+    case "ready_to_configure":
+      return "Ready to Configure";
+    case "not_connected":
+    default:
+      return "Not Connected";
+  }
+}
+
+function statusClasses(status: IntegrationStatus) {
+  switch (status) {
+    case "connected":
+      return "border-emerald-200 bg-emerald-50 text-emerald-800";
+    case "needs_credentials":
+      return "border-amber-200 bg-amber-50 text-amber-800";
+    case "ready_to_configure":
+      return "border-blue-200 bg-blue-50 text-blue-800";
+    case "not_connected":
+    default:
+      return "border-slate-200 bg-white text-slate-600";
+  }
+}
+
+function statusIcon(status: IntegrationStatus) {
+  switch (status) {
+    case "connected":
+      return CheckCircle2;
+    case "needs_credentials":
+      return AlertCircle;
+    case "ready_to_configure":
+      return Settings2;
+    case "not_connected":
+    default:
+      return PlugZap;
+  }
+}
 
 function IntegrationSection({
   title,
@@ -130,14 +226,18 @@ function IntegrationSection({
   integrations,
   syncingId,
   syncResults,
+  configuredIntegrations,
   onRunSync,
+  onMarkConfigured,
 }: {
   title: string;
   description: string;
   integrations: IntegrationCard[];
   syncingId: string | null;
   syncResults: Record<string, string>;
+  configuredIntegrations: Record<string, boolean>;
   onRunSync: (integration: IntegrationCard) => void;
+  onMarkConfigured: (integration: IntegrationCard) => void;
 }) {
   return (
     <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -156,6 +256,11 @@ function IntegrationSection({
           const Icon = integration.icon;
           const syncing = syncingId === integration.id;
           const result = syncResults[integration.id];
+          const configured = Boolean(configuredIntegrations[integration.id]);
+          const effectiveStatus: IntegrationStatus = configured
+            ? "connected"
+            : integration.status;
+          const StatusIcon = statusIcon(effectiveStatus);
 
           return (
             <div
@@ -167,15 +272,14 @@ function IntegrationSection({
                   <Icon className="h-5 w-5 text-slate-700" />
                 </div>
 
-                {integration.endpoint ? (
-                  <span className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-800">
-                    Test sync
-                  </span>
-                ) : (
-                  <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-600">
-                    Infrastructure
-                  </span>
-                )}
+                <span
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${statusClasses(
+                    effectiveStatus
+                  )}`}
+                >
+                  <StatusIcon className="h-3.5 w-3.5" />
+                  {statusLabel(effectiveStatus)}
+                </span>
               </div>
 
               <p className="text-base font-semibold text-slate-900">
@@ -190,12 +294,52 @@ function IntegrationSection({
                 {integration.description}
               </p>
 
-              {integration.endpoint ? (
-                <>
+              <div className="mt-4 space-y-2 rounded-2xl border border-slate-200 bg-white p-4">
+                <div className="flex items-start gap-2">
+                  <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" />
+                  <p className="text-sm leading-5 text-slate-600">
+                    {configured
+                      ? "Connector marked ready for this organization. Real credential refinement can happen when accounts are available."
+                      : integration.setupNote}
+                  </p>
+                </div>
+
+                {integration.credentialHint ? (
+                  <div className="flex items-start gap-2">
+                    <Settings2 className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" />
+                    <p className="text-xs leading-5 text-slate-500">
+                      Credential path: {integration.credentialHint}
+                    </p>
+                  </div>
+                ) : null}
+
+                <div className="flex items-start gap-2">
+                  <Clock3 className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" />
+                  <p className="text-xs leading-5 text-slate-500">
+                    {result
+                      ? "Last activity: just now"
+                      : configured
+                      ? "Last activity: staged connection"
+                      : integration.lastSync || "Last activity: not synced yet"}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-5 grid gap-2">
+                <button
+                  type="button"
+                  onClick={() => onMarkConfigured(integration)}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-100"
+                >
+                  <PlugZap className="h-4 w-4" />
+                  {configured ? "Configured" : "Mark Ready"}
+                </button>
+
+                {integration.endpoint ? (
                   <button
                     onClick={() => onRunSync(integration)}
                     disabled={Boolean(syncingId)}
-                    className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-70"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-70"
                   >
                     {syncing ? (
                       <>
@@ -209,19 +353,19 @@ function IntegrationSection({
                       </>
                     )}
                   </button>
+                ) : (
+                  <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-4 py-3 text-sm text-slate-500">
+                    OAuth activation pending organization setup.
+                  </div>
+                )}
+              </div>
 
-                  {result ? (
-                    <div className="mt-4 flex items-start gap-3 rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-slate-700">
-                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                      <span>{result}</span>
-                    </div>
-                  ) : null}
-                </>
-              ) : (
-                <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-white px-4 py-3 text-sm text-slate-500">
-                  Wiring through Tools workspace + Google OAuth infrastructure.
+              {result ? (
+                <div className="mt-4 flex items-start gap-3 rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-slate-700">
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+                  <span>{result}</span>
                 </div>
-              )}
+              ) : null}
             </div>
           );
         })}
@@ -235,6 +379,9 @@ export default function IntegrationsPage() {
 
   const [syncingId, setSyncingId] = useState<string | null>(null);
   const [syncResults, setSyncResults] = useState<Record<string, string>>({});
+  const [configuredIntegrations, setConfiguredIntegrations] = useState<
+    Record<string, boolean>
+  >({});
 
   useEffect(() => {
     async function loadOrgContext() {
@@ -281,6 +428,11 @@ export default function IntegrationsPage() {
         return;
       }
 
+      setConfiguredIntegrations((current) => ({
+        ...current,
+        [integration.id]: true,
+      }));
+
       setSyncResults((current) => ({
         ...current,
         [integration.id]:
@@ -295,6 +447,20 @@ export default function IntegrationsPage() {
     } finally {
       setSyncingId(null);
     }
+  }
+
+  function markConfigured(integration: IntegrationCard) {
+    setConfiguredIntegrations((current) => ({
+      ...current,
+      [integration.id]: !current[integration.id],
+    }));
+
+    setSyncResults((current) => ({
+      ...current,
+      [integration.id]: current[integration.id]
+        ? current[integration.id]
+        : `${integration.name} marked ready for credential connection.`,
+    }));
   }
 
   const orgTheme = getOrgContextTheme(contextMode);
@@ -314,6 +480,15 @@ export default function IntegrationsPage() {
 
     return FINANCE_INTEGRATIONS;
   }, [contextMode]);
+
+  const totalVisibleIntegrations =
+    DIGITAL_INTEGRATIONS.length +
+    visibleFinanceIntegrations.length +
+    UTILITY_INTEGRATIONS.length;
+
+  const configuredCount = useMemo(() => {
+    return Object.values(configuredIntegrations).filter(Boolean).length;
+  }, [configuredIntegrations]);
 
   return (
     <div className="space-y-8">
@@ -337,6 +512,18 @@ export default function IntegrationsPage() {
                 engine. Socials, finance, utilities, and future field systems
                 all flow through this infrastructure layer.
               </p>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold text-slate-100">
+                {configuredCount} / {totalVisibleIntegrations} marked ready
+              </span>
+              <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold text-slate-100">
+                Context: {contextMode}
+              </span>
+              <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold text-slate-100">
+                OAuth refinement pending credentials
+              </span>
             </div>
           </div>
 
@@ -386,7 +573,9 @@ export default function IntegrationsPage() {
         integrations={DIGITAL_INTEGRATIONS}
         syncingId={syncingId}
         syncResults={syncResults}
+        configuredIntegrations={configuredIntegrations}
         onRunSync={runTestSync}
+        onMarkConfigured={markConfigured}
       />
 
       <IntegrationSection
@@ -395,7 +584,9 @@ export default function IntegrationsPage() {
         integrations={visibleFinanceIntegrations}
         syncingId={syncingId}
         syncResults={syncResults}
+        configuredIntegrations={configuredIntegrations}
         onRunSync={runTestSync}
+        onMarkConfigured={markConfigured}
       />
 
       <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -431,7 +622,9 @@ export default function IntegrationsPage() {
         integrations={UTILITY_INTEGRATIONS}
         syncingId={syncingId}
         syncResults={syncResults}
+        configuredIntegrations={configuredIntegrations}
         onRunSync={runTestSync}
+        onMarkConfigured={markConfigured}
       />
 
       <section className="hidden">

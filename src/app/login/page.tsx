@@ -4,16 +4,22 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 
+type AuthMode = 'login' | 'reset'
+
 export default function LoginPage() {
   const supabase = createClient()
 
+  const [mode, setMode] = useState<AuthMode>('login')
   const [campaign, setCampaign] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [resetLoading, setResetLoading] = useState(false)
+  const [message, setMessage] = useState('')
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+    setMessage('')
 
     if (!campaign || !email || !password) {
       alert('Enter your campaign, email, and password')
@@ -63,6 +69,43 @@ export default function LoginPage() {
     window.location.href = '/dashboard'
   }
 
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setMessage('')
+
+    const normalizedEmail = email.trim().toLowerCase()
+
+    if (!normalizedEmail) {
+      alert('Enter your email address')
+      return
+    }
+
+    setResetLoading(true)
+
+    const redirectTo =
+      typeof window !== 'undefined'
+        ? `${window.location.origin}/update-password`
+        : undefined
+
+    const { error } = await supabase.auth.resetPasswordForEmail(
+      normalizedEmail,
+      {
+        redirectTo,
+      }
+    )
+
+    setResetLoading(false)
+
+    if (error) {
+      setMessage(error.message)
+      return
+    }
+
+    setMessage(
+      'Password reset email sent. Check your inbox and follow the secure link to set a new password.'
+    )
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-black px-4 text-white">
       <div className="w-full max-w-md space-y-6 rounded-lg border border-white/20 bg-white/5 p-6">
@@ -70,67 +113,127 @@ export default function LoginPage() {
           <h1 className="text-2xl font-bold">Login to Aether.os</h1>
 
           <p className="text-sm text-white/70">
-            Enter your campaign workspace to continue.
+            {mode === 'login'
+              ? 'Enter your campaign workspace to continue.'
+              : 'Enter your email and we’ll send a secure password reset link.'}
           </p>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-4">
-          <div className="space-y-2">
-            <label htmlFor="campaign" className="block text-sm font-medium">
-              Campaign
-            </label>
-
-            <input
-              id="campaign"
-              type="text"
-              placeholder="aether-demo-campaign"
-              value={campaign}
-              onChange={(e) => setCampaign(e.target.value)}
-              className="w-full rounded border border-white bg-white px-3 py-2 text-black"
-              autoComplete="organization"
-            />
+        {message ? (
+          <div className="rounded border border-white/20 bg-white/10 p-3 text-sm text-white/80">
+            {message}
           </div>
+        ) : null}
 
-          <div className="space-y-2">
-            <label htmlFor="email" className="block text-sm font-medium">
-              Email
-            </label>
+        {mode === 'login' ? (
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="campaign" className="block text-sm font-medium">
+                Campaign
+              </label>
 
-            <input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded border border-white bg-white px-3 py-2 text-black"
-              autoComplete="email"
-            />
-          </div>
+              <input
+                id="campaign"
+                type="text"
+                placeholder="aether-demo-campaign"
+                value={campaign}
+                onChange={(e) => setCampaign(e.target.value)}
+                className="w-full rounded border border-white bg-white px-3 py-2 text-black"
+                autoComplete="organization"
+              />
+            </div>
 
-          <div className="space-y-2">
-            <label htmlFor="password" className="block text-sm font-medium">
-              Password
-            </label>
+            <div className="space-y-2">
+              <label htmlFor="email" className="block text-sm font-medium">
+                Email
+              </label>
 
-            <input
-              id="password"
-              type="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded border border-white bg-white px-3 py-2 text-black"
-              autoComplete="current-password"
-            />
-          </div>
+              <input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full rounded border border-white bg-white px-3 py-2 text-black"
+                autoComplete="email"
+              />
+            </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded bg-white px-4 py-2 text-black disabled:opacity-50"
-          >
-            {loading ? 'Logging in...' : 'Log In'}
-          </button>
-        </form>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-3">
+                <label htmlFor="password" className="block text-sm font-medium">
+                  Password
+                </label>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode('reset')
+                    setMessage('')
+                  }}
+                  className="text-xs font-medium text-blue-400 underline underline-offset-2 hover:text-blue-300"
+                >
+                  Forgot password?
+                </button>
+              </div>
+
+              <input
+                id="password"
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full rounded border border-white bg-white px-3 py-2 text-black"
+                autoComplete="current-password"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full rounded bg-white px-4 py-2 text-black disabled:opacity-50"
+            >
+              {loading ? 'Logging in...' : 'Log In'}
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={handlePasswordReset} className="space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="reset-email" className="block text-sm font-medium">
+                Email
+              </label>
+
+              <input
+                id="reset-email"
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full rounded border border-white bg-white px-3 py-2 text-black"
+                autoComplete="email"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={resetLoading}
+              className="w-full rounded bg-white px-4 py-2 text-black disabled:opacity-50"
+            >
+              {resetLoading ? 'Sending reset link...' : 'Send Reset Link'}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setMode('login')
+                setMessage('')
+              }}
+              className="w-full rounded border border-white/30 px-4 py-2 text-white transition hover:bg-white/10"
+            >
+              Back to Login
+            </button>
+          </form>
+        )}
 
         <p className="text-center text-xs text-white/60">
           By logging in, you agree to our{' '}
