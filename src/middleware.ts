@@ -29,7 +29,7 @@ export async function middleware(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname
 
-  const publicRoutes = ['/login', '/terms', '/privacy', '/update-password']
+  const publicRoutes = ['/', '/login', '/terms', '/privacy', '/update-password']
 
   const isPublicRoute = publicRoutes.includes(pathname)
 
@@ -45,12 +45,6 @@ export async function middleware(request: NextRequest) {
   if (!user && !isPublicRoute) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
-    return NextResponse.redirect(url)
-  }
-
-  if (user && pathname === '/login') {
-    const url = request.nextUrl.clone()
-    url.pathname = '/dashboard'
     return NextResponse.redirect(url)
   }
 
