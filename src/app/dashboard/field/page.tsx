@@ -71,6 +71,7 @@ type GeneratedFieldList = {
 
 type DemoRole = "admin" | "director" | "general_user";
 type DemoDepartment = "outreach" | "finance" | "field" | "digital" | "print";
+type AetherTier = "t1" | "t2" | "t3";
 
 
 function toNumber(value: unknown) {
@@ -262,6 +263,19 @@ function getDepartmentLabel(department: DemoDepartment) {
   }
 }
 
+function normalizeAetherTier(value?: string | null): AetherTier {
+  const normalized = String(value || "").trim().toLowerCase();
+
+  if (normalized === "t1") return "t1";
+  if (normalized === "t2") return "t2";
+
+  return "t3";
+}
+
+function canShowDepartmentAbe(tier: AetherTier) {
+  return tier === "t3";
+}
+
 function applyWhyNowGovernor(base: string, modifiers: string[]) {
   const cleanModifiers = modifiers.filter(Boolean);
   if (!cleanModifiers.length) return base;
@@ -417,6 +431,7 @@ export default function FieldDashboardPage() {
   const [demoDepartment, setDemoDepartment] =
     useState<DemoDepartment>("field");
   const [contextMode, setContextMode] = useState("default");
+  const [aetherTier, setAetherTier] = useState<AetherTier>("t3");
   const [abeMemory, setAbeMemory] = useState<AbeGlobalMemory>({
     recentPrimaryLanes: [],
     recentPressureLanes: [],
@@ -435,6 +450,10 @@ export default function FieldDashboardPage() {
 
         setContextMode(
           data?.organization?.context_mode || "default"
+        );
+
+        setAetherTier(
+          normalizeAetherTier(data?.organization?.aether_tier)
         );
       } catch (error) {
         console.error("Failed to load org context", error);
@@ -815,6 +834,8 @@ export default function FieldDashboardPage() {
     return "Active Trend";
   }, [demoRole]);
 
+  const showDepartmentAbe = canShowDepartmentAbe(aetherTier);
+
   const orgTheme = getOrgContextTheme(contextMode);
 
   return (
@@ -906,6 +927,7 @@ export default function FieldDashboardPage() {
         </div>
       </section>
 
+      {showDepartmentAbe ? (
       <section className="rounded-3xl border border-violet-200 bg-violet-50 p-6 shadow-sm">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="space-y-3">
@@ -1009,6 +1031,8 @@ export default function FieldDashboardPage() {
           </div>
         ) : null}
       </section>
+
+      ) : null}
 
       <section
         className={`grid gap-4 ${
@@ -1162,6 +1186,7 @@ export default function FieldDashboardPage() {
           )}
         </section>
       ) : null}
+      <div className="hidden" aria-hidden="true">
       <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex items-start gap-3">
           <Sparkles className="mt-0.5 h-5 w-5 text-slate-500" />
@@ -1178,6 +1203,7 @@ export default function FieldDashboardPage() {
           </div>
         </div>
       </section>
+      </div>
 
       {generatedLists.length > 0 &&
       (demoRole === "admin" || demoRole === "director") ? (

@@ -105,6 +105,21 @@ type ContactExecutionLink = {
   icon: "outreach" | "finance" | "print" | "lists";
 };
 
+type AetherTier = "t1" | "t2" | "t3";
+
+function normalizeAetherTier(value?: string | null): AetherTier {
+  const normalized = String(value || "").trim().toLowerCase();
+
+  if (normalized === "t1") return "t1";
+  if (normalized === "t2") return "t2";
+
+  return "t3";
+}
+
+function canShowFinanceContactProfileSurfaces(tier: AetherTier) {
+  return tier !== "t1";
+}
+
 const currency = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
@@ -744,6 +759,7 @@ export default function ContactDetailPage() {
   const [quickActionSaving, setQuickActionSaving] = useState(false);
   const [fieldIntelExpanded, setFieldIntelExpanded] = useState(false);
   const [printIntelExpanded, setPrintIntelExpanded] = useState(false);
+  const [aetherTier, setAetherTier] = useState<AetherTier>("t3");
 
   const outreachCallHref = `/dashboard/outreach?contactId=${contactId}&channel=call`;
   const outreachTextHref = `/dashboard/outreach?contactId=${contactId}&channel=text`;
@@ -751,10 +767,36 @@ export default function ContactDetailPage() {
   const financeHref = `/dashboard/finance`;
   const financeFocusHref = `/dashboard/finance/focus`;
   const listsHref = `/dashboard/lists`;
+  const showFinanceContactProfileSurfaces =
+    canShowFinanceContactProfileSurfaces(aetherTier);
+
   useEffect(() => {
     if (!contactId) return;
     fetchData();
   }, [contactId]);
+
+  useEffect(() => {
+    async function loadAetherTierContext() {
+      try {
+        const response = await fetch("/api/auth/current-context", {
+          method: "GET",
+          credentials: "include",
+        });
+
+        const data = await response.json().catch(() => null);
+
+        if (!response.ok) return;
+
+        setAetherTier(
+          normalizeAetherTier(data?.organization?.aether_tier)
+        );
+      } catch (error) {
+        console.error("Failed to load Aether tier context", error);
+      }
+    }
+
+    loadAetherTierContext();
+  }, []);
 
   async function fetchData() {
     setLoading(true);
@@ -1160,8 +1202,17 @@ export default function ContactDetailPage() {
       },
     ];
 
+    if (!showFinanceContactProfileSurfaces) {
+      return links.filter((link) => link.icon !== "finance");
+    }
+
     return links;
-  }, [financeHref, listsHref, outreachDefaultHref]);
+  }, [
+    financeHref,
+    listsHref,
+    outreachDefaultHref,
+    showFinanceContactProfileSurfaces,
+  ]);
 
   const prioritySignal = useMemo(
     () =>
@@ -1187,8 +1238,8 @@ export default function ContactDetailPage() {
   );
 
   const signalBreakdown = useMemo(
-    () =>
-      buildSignalBreakdown({
+    () => {
+      const signals = buildSignalBreakdown({
         latestLog,
         activePledgeTotal: financeSummary.activePledgeTotal,
         nonCompliantContributionCount:
@@ -1196,7 +1247,16 @@ export default function ContactDetailPage() {
         openTasksCount,
         listCount: contactLists.length,
         donorIntelligence,
-      }),
+      });
+
+      if (!showFinanceContactProfileSurfaces) {
+        return signals.filter(
+          (signal) => signal.label !== "Finance" && signal.label !== "FEC"
+        );
+      }
+
+      return signals;
+    },
     [
       latestLog,
       financeSummary.activePledgeTotal,
@@ -1204,6 +1264,7 @@ export default function ContactDetailPage() {
       openTasksCount,
       contactLists.length,
       donorIntelligence,
+      showFinanceContactProfileSurfaces,
     ],
   );
 
@@ -1374,6 +1435,7 @@ export default function ContactDetailPage() {
                     Text
                   </Link>
 
+                  {showFinanceContactProfileSurfaces ? (
                   <Link
                     href={financeFocusHref}
                     className="inline-flex items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700 transition hover:bg-emerald-100"
@@ -1381,6 +1443,7 @@ export default function ContactDetailPage() {
                     <Landmark className="h-4 w-4" />
                     Finance Focus
                   </Link>
+                  ) : null}
 
                   <a
                     href="#contact-tasks"
@@ -1565,6 +1628,7 @@ export default function ContactDetailPage() {
           </div>
         </section>
 
+        {showFinanceContactProfileSurfaces ? (
         <section
           id="finance-overview"
           className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8"
@@ -1802,6 +1866,8 @@ export default function ContactDetailPage() {
             </div>
           </div>
         </section>
+
+        ) : null}
 
         <section
           id="field-intelligence"

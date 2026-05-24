@@ -229,6 +229,21 @@ const ROLE_LEVEL_OPTIONS: { value: OperatingRoleLevel; label: string }[] = [
   { value: "user", label: "User" },
 ];
 
+type AetherTier = "t1" | "t2" | "t3";
+
+function normalizeAetherTier(value?: string | null): AetherTier {
+  const normalized = String(value || "").trim().toLowerCase();
+
+  if (normalized === "t1") return "t1";
+  if (normalized === "t2") return "t2";
+
+  return "t3";
+}
+
+function canShowAetherStrategyLayer(tier: AetherTier) {
+  return tier !== "t1";
+}
+
 function formatRoleText(value?: string | null) {
   if (!value) return "Unassigned";
 
@@ -499,10 +514,31 @@ const [selectedAdminFocusTaskId, setSelectedAdminFocusTaskId] =
 const [advancedOpen, setAdvancedOpen] = useState(false);
 const [orgMembersLoading, setOrgMembersLoading] = useState(false);
 const [organizationId, setOrganizationId] = useState<string | null>(null);
+const [aetherTier, setAetherTier] = useState<AetherTier>("t3");
 const [orgMembers, setOrgMembers] = useState<OrgMemberRecord[]>([]);
 const [orgMemberRoles, setOrgMemberRoles] = useState<OrgMemberRole[]>([]);
 const [roleDrafts, setRoleDrafts] = useState<Record<string, RoleDraft>>({});
 const [savingMemberId, setSavingMemberId] = useState<string | null>(null);
+const showAetherStrategyLayer = canShowAetherStrategyLayer(aetherTier);
+
+async function loadAetherTierContext() {
+  try {
+    const response = await fetch("/api/auth/current-context", {
+      method: "GET",
+      credentials: "include",
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) return;
+
+    setAetherTier(
+      normalizeAetherTier(data?.organization?.aether_tier)
+    );
+  } catch (error) {
+    console.error("Failed to load Aether tier context", error);
+  }
+}
 
 async function loadOrgMembers() {
   try {
@@ -688,6 +724,7 @@ async function handleSetPrimaryRole(member: OrgMemberRecord, primaryRole: OrgMem
   }, []);
 
   useEffect(() => {
+    loadAetherTierContext();
     loadOrgMembers();
   }, []);
 
@@ -1714,6 +1751,7 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
           </div>
         </section>
 
+{showAetherStrategyLayer ? (
         <section className="rounded-3xl border border-fuchsia-200 bg-fuchsia-50 p-6 shadow-sm">
           <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div>
@@ -1781,6 +1819,7 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
             <p className="mt-2 text-xs text-fuchsia-700">{strategyDecision.reason}</p>
           </div>
         </section>
+        ) : null}
       </section>
 
       <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">

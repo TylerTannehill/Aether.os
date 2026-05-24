@@ -77,6 +77,7 @@ type OutreachCommandSignal = {
 
 type DemoRole = "admin" | "director" | "general_user";
 type DemoDepartment = "outreach" | "finance" | "field" | "digital" | "print";
+type AetherTier = "t1" | "t2" | "t3";
 
 function normalizeOwner(value?: string | null) {
   return value?.trim() || "Unassigned";
@@ -161,6 +162,19 @@ function getDepartmentLabel(department: DemoDepartment) {
     default:
       return "Outreach";
   }
+}
+
+function normalizeAetherTier(value?: string | null): AetherTier {
+  const normalized = String(value || "").trim().toLowerCase();
+
+  if (normalized === "t1") return "t1";
+  if (normalized === "t2") return "t2";
+
+  return "t3";
+}
+
+function canShowDepartmentAbe(tier: AetherTier) {
+  return tier === "t3";
 }
 
 function applyWhyNowGovernor(base: string, modifiers: string[]) {
@@ -321,6 +335,7 @@ function OutreachPageContent() {
   const [demoDepartment, setDemoDepartment] =
     useState<DemoDepartment>("outreach");
   const [contextMode, setContextMode] = useState("default");
+  const [aetherTier, setAetherTier] = useState<AetherTier>("t3");
   const [abeMemory, setAbeMemory] = useState<AbeGlobalMemory>({
     recentPrimaryLanes: [],
     recentPressureLanes: [],
@@ -347,6 +362,10 @@ function OutreachPageContent() {
 
         setContextMode(
           data?.organization?.context_mode || "default"
+        );
+
+        setAetherTier(
+          normalizeAetherTier(data?.organization?.aether_tier)
         );
       } catch (error) {
         console.error("Failed to load org context", error);
@@ -1193,6 +1212,8 @@ function OutreachPageContent() {
     outreachPositiveEngagement,
   ]);
 
+  const showDepartmentAbe = canShowDepartmentAbe(aetherTier);
+
   const orgTheme = getOrgContextTheme(contextMode);
 
   async function handleLog() {
@@ -1393,6 +1414,7 @@ function OutreachPageContent() {
             </div>
           </section>
 
+          {showDepartmentAbe ? (
           <section className="rounded-3xl border border-violet-200 bg-violet-50 p-6 shadow-sm">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
               <div className="space-y-3">
@@ -1496,6 +1518,9 @@ function OutreachPageContent() {
             ) : null}
           </section>
 
+          ) : null}
+
+          <div className="hidden" aria-hidden="true">
           <div
             className={`rounded-3xl border p-5 shadow-sm ${outreachCommandTone.card}`}
           >
@@ -1547,6 +1572,9 @@ function OutreachPageContent() {
             </div>
           </div>
 
+          </div>
+
+          <div className="hidden" aria-hidden="true">
           {(demoRole === "admin" ||
             demoDepartment === "outreach" ||
             demoDepartment === "finance") && (
@@ -1602,6 +1630,8 @@ function OutreachPageContent() {
               </div>
             </section>
           )}
+
+          </div>
 
       <section
         className={`grid gap-4 ${

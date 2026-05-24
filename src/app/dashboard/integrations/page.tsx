@@ -42,6 +42,21 @@ type IntegrationCard = {
   lastSync?: string;
 };
 
+type AetherTier = "t1" | "t2" | "t3";
+
+function normalizeAetherTier(value?: string | null): AetherTier {
+  const normalized = String(value || "").trim().toLowerCase();
+
+  if (normalized === "t1") return "t1";
+  if (normalized === "t2") return "t2";
+
+  return "t3";
+}
+
+function canShowToolsWorkspaceLink(tier: AetherTier) {
+  return tier === "t3";
+}
+
 const DIGITAL_INTEGRATIONS: IntegrationCard[] = [
   {
     id: "meta",
@@ -376,6 +391,7 @@ function IntegrationSection({
 
 export default function IntegrationsPage() {
   const [contextMode, setContextMode] = useState("default");
+  const [aetherTier, setAetherTier] = useState<AetherTier>("t3");
 
   const [syncingId, setSyncingId] = useState<string | null>(null);
   const [syncResults, setSyncResults] = useState<Record<string, string>>({});
@@ -393,6 +409,10 @@ export default function IntegrationsPage() {
         const data = await response.json();
 
         setContextMode(data?.organization?.context_mode || "default");
+
+        setAetherTier(
+          normalizeAetherTier(data?.organization?.aether_tier)
+        );
       } catch (error) {
         console.error("Failed to load org context", error);
       }
@@ -464,6 +484,8 @@ export default function IntegrationsPage() {
   }
 
   const orgTheme = getOrgContextTheme(contextMode);
+  const showToolsWorkspaceLink =
+    canShowToolsWorkspaceLink(aetherTier);
 
   const visibleFinanceIntegrations = useMemo(() => {
     if (contextMode === "democrat") {
@@ -527,6 +549,7 @@ export default function IntegrationsPage() {
             </div>
           </div>
 
+          {showToolsWorkspaceLink ? (
           <Link
             href="/dashboard/tools"
             className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
@@ -534,6 +557,7 @@ export default function IntegrationsPage() {
             Open Tools Workspace
             <ArrowRight className="h-4 w-4" />
           </Link>
+          ) : null}
         </div>
       </section>
 

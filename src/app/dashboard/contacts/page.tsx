@@ -37,6 +37,21 @@ type FecStatusFilter = "any" | "matched" | "probable" | "none";
 type DonorTierFilter = "any" | "base" | "mid" | "major" | "maxed";
 type PartyFilter = "any" | "Democrat" | "Republican" | "Independent" | "Unknown";
 
+type AetherTier = "t1" | "t2" | "t3";
+
+function normalizeAetherTier(value?: string | null): AetherTier {
+  const normalized = String(value || "").trim().toLowerCase();
+
+  if (normalized === "t1") return "t1";
+  if (normalized === "t2") return "t2";
+
+  return "t3";
+}
+
+function canShowFinanceContactSurfaces(tier: AetherTier) {
+  return tier !== "t1";
+}
+
 function resolveListTag(list: DashboardList): OutreachListTag {
   const explicitType = String((list as any).type || "").toLowerCase();
 
@@ -235,9 +250,11 @@ export default function DashboardContactsPage() {
   const [bulkOwnerName, setBulkOwnerName] = useState("");
   const [bulkSaving, setBulkSaving] = useState(false);
   const [contextMode, setContextMode] = useState("default");
+  const [aetherTier, setAetherTier] = useState<AetherTier>("t3");
 
   const { ownerFilter } = useDashboardOwner();
   const orgTheme = getOrgContextTheme(contextMode);
+  const showFinanceContactSurfaces = canShowFinanceContactSurfaces(aetherTier);
 
   useEffect(() => {
     loadContactsPageData();
@@ -254,6 +271,10 @@ export default function DashboardContactsPage() {
 
         setContextMode(
           data?.organization?.context_mode || "default"
+        );
+
+        setAetherTier(
+          normalizeAetherTier(data?.organization?.aether_tier)
         );
       } catch (error) {
         console.error("Failed to load org context", error);
@@ -605,6 +626,7 @@ export default function DashboardContactsPage() {
         </div>
       </section>
 
+      {showFinanceContactSurfaces ? (
       <section className="grid gap-4 md:grid-cols-3">
         <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm">
           <p className="text-sm font-medium text-emerald-800">FEC Matched</p>
@@ -636,6 +658,7 @@ export default function DashboardContactsPage() {
           </p>
         </div>
       </section>
+      ) : null}
 
       <section className="rounded-3xl border-2 border-slate-900 bg-white p-6 shadow-md lg:p-8">
         {message ? (
@@ -717,7 +740,9 @@ export default function DashboardContactsPage() {
                 className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700"
               >
                 <option value="outreach">Outreach</option>
-                <option value="finance">Finance</option>
+                {showFinanceContactSurfaces ? (
+                  <option value="finance">Finance</option>
+                ) : null}
                 <option value="field">Field</option>
                 <option value="volunteer">Volunteer</option>
               </select>
@@ -735,6 +760,7 @@ export default function DashboardContactsPage() {
         </div>
 
         <div className="mt-4 grid gap-4 lg:grid-cols-3">
+          {showFinanceContactSurfaces ? (
           <div className="rounded-3xl bg-white/70 p-4 ring-1 ring-slate-200/70">
             <p className="mb-3 text-sm font-semibold text-slate-900">Giving History</p>
             <div className="flex flex-wrap gap-2">
@@ -756,7 +782,9 @@ export default function DashboardContactsPage() {
               ))}
             </div>
           </div>
+          ) : null}
 
+          {showFinanceContactSurfaces ? (
           <div className="rounded-3xl bg-white/70 p-4 ring-1 ring-slate-200/70">
             <p className="mb-3 text-sm font-semibold text-slate-900">FEC + Donor Tier</p>
             <div className="flex flex-wrap gap-2">
@@ -794,6 +822,7 @@ export default function DashboardContactsPage() {
               ))}
             </div>
           </div>
+          ) : null}
 
           <div className="rounded-3xl bg-white/70 p-4 ring-1 ring-slate-200/70">
             <p className="mb-3 text-sm font-semibold text-slate-900">Party</p>
@@ -896,12 +925,16 @@ export default function DashboardContactsPage() {
                 <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                   Party
                 </th>
+                {showFinanceContactSurfaces ? (
+                  <>
                 <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                   Giving
                 </th>
                 <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                   Donor Signal
                 </th>
+                  </>
+                ) : null}
                 <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                   Owner
                 </th>
@@ -962,6 +995,8 @@ export default function DashboardContactsPage() {
                       {contact.party || "—"}
                     </td>
 
+                    {showFinanceContactSurfaces ? (
+                      <>
                     <td className="border-b border-slate-100 px-4 py-3 text-sm font-semibold text-slate-700">
                       {formatCurrency(contact.fec_total_given)}
                     </td>
@@ -997,6 +1032,8 @@ export default function DashboardContactsPage() {
                         ) : null}
                       </div>
                     </td>
+                      </>
+                    ) : null}
 
                     <td className="border-b border-slate-100 px-4 py-3">
                       <input
@@ -1028,7 +1065,7 @@ export default function DashboardContactsPage() {
               {filteredContacts.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={11}
+                    colSpan={showFinanceContactSurfaces ? 11 : 9}
                     className="bg-white px-4 py-8 text-center text-slate-500"
                   >
                     No contacts matched your filters.

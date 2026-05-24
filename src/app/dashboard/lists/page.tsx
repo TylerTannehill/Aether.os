@@ -32,6 +32,21 @@ type OperationalTag =
 
 type RouteTarget = "outreach" | "finance" | "field" | "print";
 
+type AetherTier = "t1" | "t2" | "t3";
+
+function normalizeAetherTier(value?: string | null): AetherTier {
+  const normalized = String(value || "").trim().toLowerCase();
+
+  if (normalized === "t1") return "t1";
+  if (normalized === "t2") return "t2";
+
+  return "t3";
+}
+
+function canShowFinanceListSurfaces(tier: AetherTier) {
+  return tier !== "t1";
+}
+
 function normalizeListName(list: CampaignList) {
   return `${list.name || ""} ${list.type || ""}`.toLowerCase();
 }
@@ -214,6 +229,7 @@ function DashboardListsPageContent() {
   const [newListName, setNewListName] = useState("");
   const [search, setSearch] = useState("");
   const [contextMode, setContextMode] = useState("default");
+  const [aetherTier, setAetherTier] = useState<AetherTier>("t3");
 
   useEffect(() => {
     loadLists();
@@ -230,6 +246,10 @@ function DashboardListsPageContent() {
 
         setContextMode(
           data?.organization?.context_mode || "default"
+        );
+
+        setAetherTier(
+          normalizeAetherTier(data?.organization?.aether_tier)
         );
       } catch (error) {
         console.error("Failed to load org context", error);
@@ -277,6 +297,7 @@ function DashboardListsPageContent() {
   }
 
   const orgTheme = getOrgContextTheme(contextMode);
+  const showFinanceListSurfaces = canShowFinanceListSurfaces(aetherTier);
 
   const filteredLists = useMemo(() => {
     return filterLists(lists, search);
@@ -434,6 +455,7 @@ function DashboardListsPageContent() {
           </div>
         </Link>
 
+        {showFinanceListSurfaces ? (
         <Link
           href="/dashboard/finance/focus"
           className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:bg-slate-50"
@@ -453,6 +475,7 @@ function DashboardListsPageContent() {
             <ArrowRight className="h-4 w-4" />
           </div>
         </Link>
+        ) : null}
 
         <Link
           href="/dashboard/field/focus"
@@ -576,19 +599,26 @@ function DashboardListsPageContent() {
                     </td>
                     <td className="px-4 py-4">
                       <div className="flex max-w-md flex-wrap gap-2">
-                        <span className="inline-flex rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-700">
-                          Route: {routeLabel(route)}
-                        </span>
-                        {tags.map((tag) => (
-                          <span
-                            key={`${list.id}-${tag}`}
-                            className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${tagTone(
-                              tag
-                            )}`}
-                          >
-                            {tag}
+                        {showFinanceListSurfaces || route !== "finance" ? (
+                          <span className="inline-flex rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-700">
+                            Route: {routeLabel(route)}
                           </span>
-                        ))}
+                        ) : null}
+
+                        {tags
+                          .filter((tag) =>
+                            showFinanceListSurfaces ? true : tag !== "finance"
+                          )
+                          .map((tag) => (
+                            <span
+                              key={`${list.id}-${tag}`}
+                              className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${tagTone(
+                                tag
+                              )}`}
+                            >
+                              {tag}
+                            </span>
+                          ))}
                       </div>
                     </td>
                     <td className="px-4 py-4 text-slate-600">

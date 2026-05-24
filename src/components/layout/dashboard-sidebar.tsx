@@ -14,12 +14,15 @@ import {
   Megaphone,
   Printer,
   Wrench,
+  PlugZap,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { getOrgContextTheme } from "@/lib/org-context-theme";
 
 type DepartmentKey = "field" | "outreach" | "digital" | "finance" | "print";
+
+type AetherTier = "t1" | "t2" | "t3";
 
 type NavItem = {
   title: string;
@@ -41,6 +44,7 @@ type CurrentContextResponse = {
     name?: string | null;
     slug?: string | null;
     context_mode?: string | null;
+    aether_tier?: AetherTier | null;
   } | null;
   membership?: {
     id: string;
@@ -99,6 +103,12 @@ const navItems: NavItem[] = [
     alwaysVisible: true,
   },
   {
+    title: "Integrations",
+    href: "/dashboard/integrations",
+    icon: PlugZap,
+    alwaysVisible: true,
+  },
+  {
     title: "Tools",
     href: "/dashboard/tools",
     icon: Wrench,
@@ -114,6 +124,15 @@ function normalizeRoleLevel(value?: string | null) {
   return String(value || "").trim().toLowerCase();
 }
 
+function normalizeAetherTier(value?: string | null): AetherTier {
+  const normalized = String(value || "").trim().toLowerCase();
+
+  if (normalized === "t1") return "t1";
+  if (normalized === "t2") return "t2";
+
+  return "t3";
+}
+
 function roleImpliesAdminAccess(role?: string | null, title?: string | null) {
   const combined = `${role || ""} ${title || ""}`.toLowerCase();
 
@@ -123,6 +142,22 @@ function roleImpliesAdminAccess(role?: string | null, title?: string | null) {
     combined.includes("campaign_manager") ||
     combined.includes("cm")
   );
+}
+
+function canAccessTools(tier: AetherTier) {
+  return tier === "t3";
+}
+
+function canAccessIntegrations(tier: AetherTier) {
+  return tier === "t2";
+}
+
+function canAccessFinance(tier: AetherTier) {
+  return tier !== "t1";
+}
+
+function canAccessDigital(tier: AetherTier) {
+  return tier !== "t1";
 }
 
 export function DashboardSidebar() {
@@ -137,6 +172,7 @@ export function DashboardSidebar() {
 
   const [hasAdminAccess, setHasAdminAccess] = useState(false);
   const [contextMode, setContextMode] = useState("default");
+  const [aetherTier, setAetherTier] = useState<AetherTier>("t3");
 
   useEffect(() => {
     let mounted = true;
@@ -159,12 +195,18 @@ export function DashboardSidebar() {
         if (!mounted) return;
 
         const currentMember = data.membership;
+
         const organizationContextMode =
           data.organization?.context_mode || "default";
+
+        const organizationTier = normalizeAetherTier(
+          data.organization?.aether_tier
+        );
 
         const myRoles = data.roles || [];
 
         setContextMode(organizationContextMode);
+        setAetherTier(organizationTier);
 
         const nextDepartments = new Set<string>();
 
@@ -225,22 +267,47 @@ export function DashboardSidebar() {
   }, []);
 
   const visibleNavItems = useMemo(() => {
+    const tierFiltered = navItems.filter((item) => {
+      if (item.href === "/dashboard/tools") {
+        return canAccessTools(aetherTier);
+      }
+
+      if (item.href === "/dashboard/integrations") {
+        return canAccessIntegrations(aetherTier);
+      }
+
+      if (item.href === "/dashboard/finance") {
+        return canAccessFinance(aetherTier);
+      }
+
+      if (item.href === "/dashboard/digital") {
+        return canAccessDigital(aetherTier);
+      }
+
+      return true;
+    });
+
     if (roleLoading) {
-      return navItems.filter((item) => item.alwaysVisible);
+      return tierFiltered.filter((item) => item.alwaysVisible);
     }
 
     if (hasAdminAccess) {
-      return navItems;
+      return tierFiltered;
     }
 
-    return navItems.filter((item) => {
+    return tierFiltered.filter((item) => {
       if (item.alwaysVisible) return true;
 
       if (!item.department) return true;
 
       return allowedDepartments.has(item.department);
     });
-  }, [allowedDepartments, hasAdminAccess, roleLoading]);
+  }, [
+    allowedDepartments,
+    hasAdminAccess,
+    roleLoading,
+    aetherTier,
+  ]);
 
   async function handleLogout() {
     try {
@@ -278,6 +345,10 @@ export function DashboardSidebar() {
             <p className="mt-3 text-center text-sm text-slate-300">
               Campaign command center
             </p>
+
+            <div className="mt-4 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/90">
+              {aetherTier.toUpperCase()}
+            </div>
           </div>
         </Link>
       </div>

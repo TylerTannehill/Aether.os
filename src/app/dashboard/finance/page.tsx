@@ -109,6 +109,7 @@ type FinanceChartPoint = {
 
 type DemoRole = "admin" | "director" | "general_user";
 type DemoDepartment = "outreach" | "finance" | "field" | "digital" | "print";
+type AetherTier = "t1" | "t2" | "t3";
 
 const currency = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -476,6 +477,19 @@ function getDepartmentLabel(department: DemoDepartment) {
   }
 }
 
+function normalizeAetherTier(value?: string | null): AetherTier {
+  const normalized = String(value || "").trim().toLowerCase();
+
+  if (normalized === "t1") return "t1";
+  if (normalized === "t2") return "t2";
+
+  return "t3";
+}
+
+function canShowDepartmentAbe(tier: AetherTier) {
+  return tier === "t3";
+}
+
 function getChartDataForTimeframe(
   timeframe: FinanceTimeframe
 ): FinanceChartPoint[] {
@@ -619,6 +633,7 @@ export default function FinanceDashboardPage() {
   const [demoDepartment, setDemoDepartment] =
     useState<DemoDepartment>("finance");
   const [contextMode, setContextMode] = useState("default");
+  const [aetherTier, setAetherTier] = useState<AetherTier>("t3");
   const [abeMemory, setAbeMemory] = useState<AbeGlobalMemory>({
     recentPrimaryLanes: [],
     recentPressureLanes: [],
@@ -659,6 +674,10 @@ export default function FinanceDashboardPage() {
 
         setContextMode(
           data?.organization?.context_mode || "default"
+        );
+
+        setAetherTier(
+          normalizeAetherTier(data?.organization?.aether_tier)
         );
       } catch (error) {
         console.error("Failed to load org context", error);
@@ -1150,6 +1169,8 @@ export default function FinanceDashboardPage() {
     return "Open Finance Focus";
   }, [demoRole]);
 
+  const showDepartmentAbe = canShowDepartmentAbe(aetherTier);
+
   const orgTheme = getOrgContextTheme(contextMode);
 
   const handleAddEntry = () => {
@@ -1348,6 +1369,7 @@ export default function FinanceDashboardPage() {
         </div>
       </section>
 
+      {showDepartmentAbe ? (
       <section className="rounded-3xl border border-violet-200 bg-violet-50 p-6 shadow-sm">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="space-y-3">
@@ -1450,6 +1472,8 @@ export default function FinanceDashboardPage() {
           </div>
         ) : null}
       </section>
+
+      ) : null}
 
       <section
         className={`grid gap-4 ${

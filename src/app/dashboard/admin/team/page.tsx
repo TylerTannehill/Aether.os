@@ -14,6 +14,7 @@ type OperatingDepartment =
   | "print";
 
 type OperatingRoleLevel = "admin" | "campaign_manager" | "director" | "user";
+type AetherTier = "t1" | "t2" | "t3";
 
 type OrgMemberRecord = {
   id: string;
@@ -57,6 +58,24 @@ const ROLE_LEVEL_OPTIONS: { value: OperatingRoleLevel; label: string }[] = [
   { value: "director", label: "Director" },
   { value: "user", label: "User" },
 ];
+
+function normalizeAetherTier(value?: string | null): AetherTier {
+  const normalized = String(value || "").trim().toLowerCase();
+
+  if (normalized === "t1") return "t1";
+  if (normalized === "t2") return "t2";
+
+  return "t3";
+}
+
+function canSelectDepartmentForNewUser(
+  tier: AetherTier,
+  department: OperatingDepartment
+) {
+  if (tier !== "t1") return true;
+
+  return department !== "finance" && department !== "digital";
+}
 
 function formatRoleText(value?: string | null) {
   if (!value) return "Unassigned";
@@ -103,6 +122,7 @@ export default function TeamManagementPage() {
   const [creatingMember, setCreatingMember] = useState(false);
   const [message, setMessage] = useState("");
   const [organizationId, setOrganizationId] = useState<string | null>(null);
+  const [aetherTier, setAetherTier] = useState<AetherTier>("t3");
   const [members, setMembers] = useState<OrgMemberRecord[]>([]);
   const [roles, setRoles] = useState<OrgMemberRole[]>([]);
   const [roleDrafts, setRoleDrafts] = useState<Record<string, RoleDraft>>({});
@@ -112,6 +132,32 @@ export default function TeamManagementPage() {
   const [inviteDepartment, setInviteDepartment] =
     useState<OperatingDepartment>("campaign");
   const [inviteRole, setInviteRole] = useState<OperatingRoleLevel>("user");
+
+  async function loadAetherTierContext() {
+    try {
+      const response = await fetch("/api/auth/current-context", {
+        method: "GET",
+        credentials: "include",
+      });
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) return;
+
+      const nextTier = normalizeAetherTier(data?.organization?.aether_tier);
+
+      setAetherTier(nextTier);
+
+      if (
+        nextTier === "t1" &&
+        (inviteDepartment === "finance" || inviteDepartment === "digital")
+      ) {
+        setInviteDepartment("campaign");
+      }
+    } catch (error) {
+      console.error("Failed to load Aether tier context", error);
+    }
+  }
 
   async function loadTeam() {
     try {
@@ -154,6 +200,7 @@ export default function TeamManagementPage() {
   }
 
   useEffect(() => {
+    loadAetherTierContext();
     loadTeam();
   }, []);
 
@@ -178,6 +225,12 @@ export default function TeamManagementPage() {
       return haystack.includes(term);
     });
   }, [members, search]);
+
+  const inviteDepartmentOptions = useMemo(() => {
+    return DEPARTMENT_OPTIONS.filter((option) =>
+      canSelectDepartmentForNewUser(aetherTier, option.value)
+    );
+  }, [aetherTier]);
 
   function getRolesForMember(memberId: string) {
     return roles.filter((role) => role.organization_member_id === memberId);
@@ -492,7 +545,7 @@ export default function TeamManagementPage() {
                 }
                 className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none"
               >
-                {DEPARTMENT_OPTIONS.map((option) => (
+                {inviteDepartmentOptions.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
                   </option>

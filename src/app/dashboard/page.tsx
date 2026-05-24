@@ -166,6 +166,7 @@ function getActionMode(action: any): "auto" | "manual" | "blocked" {
 
 type DemoRole = "admin" | "director" | "general_user";
 type DemoDepartment = AbeDepartment;
+type AetherTier = "t1" | "t2" | "t3";
 
 function getPatternSeverityTone(severity: AbePatternInsight["severity"]) {
   switch (severity) {
@@ -615,6 +616,7 @@ type LiveDashboardUserContext = {
   email: string;
   organizationName: string;
   contextMode: string;
+  aetherTier: AetherTier;
   role: DemoRole | null;
   department: DemoDepartment | null;
   title: string | null;
@@ -652,6 +654,37 @@ function normalizeMembershipDepartment(
   if (value.includes("campaign operations")) return "outreach";
 
   return null;
+}
+
+function normalizeAetherTier(value?: string | null): AetherTier {
+  const normalized = String(value || "").trim().toLowerCase();
+
+  if (normalized === "t1") return "t1";
+  if (normalized === "t2") return "t2";
+
+  return "t3";
+}
+
+function canShowDashboardAbe(tier: AetherTier) {
+  return tier !== "t1";
+}
+
+function canShowDashboardFocusMode(tier: AetherTier) {
+  return tier !== "t1";
+}
+
+function canShowDashboardAdvancedLanes(tier: AetherTier) {
+  return tier !== "t1";
+}
+
+function isFinanceOrDigitalRoute(route?: string | null) {
+  const value = String(route || "").toLowerCase();
+  return value.includes("/dashboard/finance") || value.includes("/dashboard/digital");
+}
+
+function isFinanceOrDigitalId(id?: string | null) {
+  const value = String(id || "").toLowerCase();
+  return value === "finance" || value === "digital";
 }
 
 export default function DashboardPage() {
@@ -830,6 +863,7 @@ export default function DashboardPage() {
           email: String(user.email || ""),
           organizationName: organization?.name || "No organization assigned",
           contextMode: organization?.context_mode || "default",
+          aetherTier: normalizeAetherTier(organization?.aether_tier),
           role: normalizedRole,
           department: normalizedDepartment,
           title: membership.title || null,
@@ -866,6 +900,10 @@ export default function DashboardPage() {
   const actualOrganizationName =
     liveUserContext?.organizationName ?? "No organization assigned";
   const actualContextMode = liveUserContext?.contextMode ?? "default";
+  const actualAetherTier = liveUserContext?.aetherTier ?? "t3";
+  const showDashboardAbe = canShowDashboardAbe(actualAetherTier);
+  const showDashboardFocusMode = canShowDashboardFocusMode(actualAetherTier);
+  const showDashboardAdvancedLanes = canShowDashboardAdvancedLanes(actualAetherTier);
   const orgTheme = getOrgContextTheme(actualContextMode);
   const canAccessAdmin = actualRole === "admin";
 
@@ -1903,14 +1941,23 @@ export default function DashboardPage() {
   ]);
 
   const visibleAbeSignals = useMemo(() => {
+    const tierScopedSignals = showDashboardAdvancedLanes
+      ? abeSignals
+      : abeSignals.filter((signal) => !isFinanceOrDigitalRoute(signal.route));
+
     if (effectiveRole === "admin") {
-      return abeSignals;
+      return tierScopedSignals;
     }
 
-    return abeSignals.filter((signal) =>
+    return tierScopedSignals.filter((signal) =>
       signal.route.includes(effectiveDepartment)
     );
-  }, [abeSignals, effectiveRole, effectiveDepartment]);
+  }, [
+    abeSignals,
+    effectiveRole,
+    effectiveDepartment,
+    showDashboardAdvancedLanes,
+  ]);
 
   const dashboardTeamStates = useMemo<Record<DashboardDepartmentId, DashboardSignalState>>(() => {
     const financePressure = Math.max(
@@ -2006,12 +2053,18 @@ export default function DashboardPage() {
       },
     ];
 
-    if (effectiveRole === "admin") return allCards;
+    const tierScopedCards = showDashboardAdvancedLanes
+      ? allCards
+      : allCards.filter((card) => !isFinanceOrDigitalId(card.id));
+
+    if (effectiveRole === "admin") return tierScopedCards;
     if (effectiveRole === "director") {
-      return allCards.filter((card) => card.id === effectiveDepartment);
+      return tierScopedCards.filter((card) => card.id === effectiveDepartment);
     }
 
-    return allCards.filter((card) => card.id === effectiveDepartment).slice(0, 1);
+    return tierScopedCards
+      .filter((card) => card.id === effectiveDepartment)
+      .slice(0, 1);
   }, [
     effectiveRole,
     effectiveDepartment,
@@ -2021,25 +2074,33 @@ export default function DashboardPage() {
     financeSnapshot.moneyIn,
     financeSnapshot.moneyOut,
     dashboardTeamStates,
+    showDashboardAdvancedLanes,
   ]);
 
   const visibleLaneIds = useMemo(() => {
+    const tierScope = (ids: string[]) => {
+      if (showDashboardAdvancedLanes) return ids;
+      return ids.filter((id) => !isFinanceOrDigitalId(id));
+    };
+
     if (effectiveRole === "admin") {
-      return ["digital", "field", "print", "finance"];
+      return tierScope(["digital", "field", "print", "finance"]);
     }
 
     if (effectiveRole === "director") {
-      return effectiveDepartment === "outreach"
-        ? ["finance"]
-        : [effectiveDepartment];
+      return tierScope(
+        effectiveDepartment === "outreach"
+          ? ["finance"]
+          : [effectiveDepartment]
+      );
     }
 
     if (effectiveDepartment === "outreach") {
-      return ["finance"];
+      return tierScope(["finance"]);
     }
 
-    return [effectiveDepartment];
-  }, [effectiveRole, effectiveDepartment]);
+    return tierScope([effectiveDepartment]);
+  }, [effectiveRole, effectiveDepartment, showDashboardAdvancedLanes]);
 
   const abeRoleLabel = useMemo(() => {
     if (effectiveRole === "admin") return isPreviewingRole ? "Admin Preview" : "Admin View";
@@ -2214,6 +2275,7 @@ export default function DashboardPage() {
               </Link>
             ) : null}
 
+            {showDashboardFocusMode ? (
             <button
               type="button"
               onClick={() =>
@@ -2224,6 +2286,8 @@ export default function DashboardPage() {
               <Zap className="h-4 w-4" />
               Open Focus Mode
             </button>
+
+            ) : null}
 
             <button
               onClick={loadData}
@@ -2321,6 +2385,8 @@ export default function DashboardPage() {
         )}
       </section>
 
+      {showDashboardAbe ? (
+        <>
       <section className="rounded-3xl border border-fuchsia-200 bg-fuchsia-50 p-6 shadow-sm">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-3">
@@ -2419,7 +2485,11 @@ export default function DashboardPage() {
         </section>
       </section>
 
+        </>
+      ) : null}
+
       {effectiveRole === "admin" ? (
+        <div className={showDashboardAdvancedLanes ? "" : "hidden"} aria-hidden={!showDashboardAdvancedLanes}>
         <CrossDomainChart
           finance={{
             moneyIn: financeSnapshot.moneyIn,
@@ -2447,6 +2517,7 @@ export default function DashboardPage() {
             deliveryRisk: Math.max(0, Math.round(printSnapshot.orders / 2)),
           }}
         />
+        </div>
       ) : null}
 
       <section

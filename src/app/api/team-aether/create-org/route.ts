@@ -40,6 +40,10 @@ export async function POST(request: Request) {
       body?.context_mode || "default"
     ).trim();
 
+    const aetherTier = String(
+      body?.aether_tier || "t3"
+    ).trim().toLowerCase();
+
     if (!name) {
       return NextResponse.json(
         { error: "Organization name is required." },
@@ -56,6 +60,15 @@ export async function POST(request: Request) {
     if (!allowedModes.includes(contextMode)) {
       return NextResponse.json(
         { error: "Invalid context mode." },
+        { status: 400 }
+      );
+    }
+
+    const allowedTiers = ["t1", "t2", "t3"];
+
+    if (!allowedTiers.includes(aetherTier)) {
+      return NextResponse.json(
+        { error: "Invalid Aether tier." },
         { status: 400 }
       );
     }
@@ -85,6 +98,7 @@ export async function POST(request: Request) {
           name,
           slug,
           context_mode: contextMode,
+          aether_tier: aetherTier,
         })
         .select()
         .single();

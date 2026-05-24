@@ -2,6 +2,16 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
+type AetherTier = "t1" | "t2" | "t3";
+
+type OrganizationContext = {
+  id: string;
+  name?: string | null;
+  slug?: string | null;
+  context_mode?: string | null;
+  aether_tier?: AetherTier | null;
+};
+
 function normalizeRole(role?: string | null) {
   const value = String(role || "").trim().toLowerCase();
 
@@ -10,6 +20,34 @@ function normalizeRole(role?: string | null) {
   if (value === "general_user") return "general_user";
 
   return null;
+}
+
+function normalizeAetherTier(value?: string | null): AetherTier {
+  const normalized = String(value || "").trim().toLowerCase();
+
+  if (normalized === "t1") return "t1";
+  if (normalized === "t2") return "t2";
+  if (normalized === "t3") return "t3";
+
+  return "t3";
+}
+
+function resolveOrganization(
+  organizations: OrganizationContext | OrganizationContext[] | null | undefined
+): OrganizationContext | null {
+  const organization = Array.isArray(organizations)
+    ? organizations[0] ?? null
+    : organizations ?? null;
+
+  if (!organization) return null;
+
+  return {
+    id: organization.id,
+    name: organization.name ?? null,
+    slug: organization.slug ?? null,
+    context_mode: organization.context_mode ?? "default",
+    aether_tier: normalizeAetherTier(organization.aether_tier),
+  };
 }
 
 export async function GET() {
@@ -55,7 +93,8 @@ export async function GET() {
             id,
             name,
             slug,
-            context_mode
+            context_mode,
+            aether_tier
           )
         `
       )
@@ -113,11 +152,13 @@ export async function GET() {
       primaryRole?.department ??
       null;
 
-    const organization = Array.isArray(
-      membership.organizations
-    )
-      ? membership.organizations[0] ?? null
-      : membership.organizations ?? null;
+    const organization = resolveOrganization(
+      membership.organizations as
+        | OrganizationContext
+        | OrganizationContext[]
+        | null
+        | undefined
+    );
 
     const response = NextResponse.json({
       user: {

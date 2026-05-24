@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 type PoliticalMode = "default" | "democrat" | "republican";
+type AetherTier = "t1" | "t2" | "t3";
 
 function slugify(value: string) {
   return value
@@ -27,6 +28,7 @@ export default function TeamAetherPage() {
   const [orgName, setOrgName] = useState("");
   const [adminEmail, setAdminEmail] = useState("");
   const [mode, setMode] = useState<PoliticalMode>("default");
+  const [tier, setTier] = useState<AetherTier>("t3");
 
   const [created, setCreated] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -63,6 +65,7 @@ export default function TeamAetherPage() {
             name: orgName,
             admin_email: adminEmail,
             context_mode: mode,
+            aether_tier: tier,
           }),
         }
       );
@@ -80,6 +83,7 @@ export default function TeamAetherPage() {
       setOrgName("");
       setAdminEmail("");
       setMode("default");
+      setTier("t3");
     } catch (err: any) {
       setError(
         err?.message || "Failed to create organization."
@@ -133,6 +137,14 @@ export default function TeamAetherPage() {
               <div className="rounded-3xl border border-white/10 bg-white/10 p-4 text-sm text-slate-200">
                 Internal provisioning workspace
               </div>
+
+              <a
+                href="/team-aether/sales-help"
+                className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/15"
+              >
+                <Sparkles className="h-4 w-4" />
+                Sales Help
+              </a>
 
               <button
                 type="button"
@@ -209,8 +221,17 @@ export default function TeamAetherPage() {
               </p>
             </div>
 
-            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm text-emerald-700">
-              Provisioning route connected
+            <div className="flex flex-col items-start gap-3 lg:items-end">
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm text-emerald-700">
+                Provisioning route connected
+              </div>
+
+              <a
+                href="/dashboard/team-aether/sales-talking-points"
+                className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+              >
+                Sales Talking Points
+              </a>
             </div>
           </div>
 
@@ -305,6 +326,109 @@ export default function TeamAetherPage() {
                 <p className="mt-3 text-sm opacity-80">
                   Neutral red/white/blue undertones with full visibility.
                 </p>
+              </button>
+            </div>
+          </div>
+
+
+          {/* TIER */}
+          <div className="mt-8">
+            <p className="text-sm font-semibold text-slate-900">
+              Aether Tier
+            </p>
+
+            <div className="mt-3 grid gap-3 lg:grid-cols-3">
+              <button
+                type="button"
+                onClick={() => setTier("t1")}
+                className={`rounded-3xl border p-5 text-left transition ${
+                  tier === "t1"
+                    ? "border-slate-900 bg-slate-900 text-white ring-2 ring-slate-200"
+                    : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold">T1</span>
+
+                  {tier === "t1" ? (
+                    <CheckCircle2 className="h-5 w-5" />
+                  ) : null}
+                </div>
+
+                <p className="mt-3 text-sm opacity-80">
+                  Ground campaign operating layer designed for underfunded local races,
+                  candidates, volunteers, and lean field-first operations.
+                </p>
+
+                <div className="mt-4 space-y-2 text-xs opacity-80">
+                  <p>• Finance + Digital hidden from UI</p>
+                  <p>• Dashboard Abe hidden</p>
+                  <p>• Department Abe hidden</p>
+                  <p>• Focused on outreach, field, lists, contacts, and print</p>
+                  <p>• Best for local races, township campaigns, and small operations</p>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setTier("t2")}
+                className={`rounded-3xl border p-5 text-left transition ${
+                  tier === "t2"
+                    ? "border-slate-900 bg-slate-900 text-white ring-2 ring-slate-200"
+                    : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold">T2</span>
+
+                  {tier === "t2" ? (
+                    <CheckCircle2 className="h-5 w-5" />
+                  ) : null}
+                </div>
+
+                <p className="mt-3 text-sm opacity-80">
+                  Full operational campaign workspace for growing teams running
+                  coordinated statewide or legislative operations.
+                </p>
+
+                <div className="mt-4 space-y-2 text-xs opacity-80">
+                  <p>• Dashboard Abe visible</p>
+                  <p>• Department Abe hidden</p>
+                  <p>• Finance + Digital fully visible</p>
+                  <p>• Integrations enabled</p>
+                  <p>• Best for state rep, state senate, mayoral, and medium-sized races</p>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setTier("t3")}
+                className={`rounded-3xl border p-5 text-left transition ${
+                  tier === "t3"
+                    ? "border-slate-900 bg-slate-900 text-white ring-2 ring-slate-200"
+                    : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold">T3</span>
+
+                  {tier === "t3" ? (
+                    <CheckCircle2 className="h-5 w-5" />
+                  ) : null}
+                </div>
+
+                <p className="mt-3 text-sm opacity-80">
+                  Full strategic command infrastructure for high-scale campaign organizations
+                  operating across multiple departments and leadership layers.
+                </p>
+
+                <div className="mt-4 space-y-2 text-xs opacity-80">
+                  <p>• Full Aether Political intelligence stack</p>
+                  <p>• Dashboard Abe + Department Abe visible</p>
+                  <p>• Tools workspace enabled</p>
+                  <p>• Full integrations + orchestration visibility</p>
+                  <p>• Best for congressional, senate, governor, PAC, and national-scale races</p>
+                </div>
               </button>
             </div>
           </div>
