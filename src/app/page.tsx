@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import {
   ArrowRight,
   BarChart3,
@@ -42,6 +45,8 @@ const tiers = [
     subtitle: "Ground Campaign OS",
     description:
       "Lean field-first operating system for underfunded local races and volunteer-heavy campaigns.",
+    originalPrice: "$5,000/year",
+    launchPrice: "$2,500/year",
     bullets: [
       "Field + Outreach infrastructure",
       "Contacts, Lists, and Calling",
@@ -55,6 +60,8 @@ const tiers = [
     subtitle: "Operational Campaign OS",
     description:
       "Full campaign operations with finance, digital, dashboard intelligence, and integrations.",
+    originalPrice: "$10,000/year",
+    launchPrice: "$5,000/year",
     bullets: [
       "Finance + Digital departments",
       "Honest Abe intelligence layer",
@@ -68,6 +75,8 @@ const tiers = [
     subtitle: "Command Campaign OS",
     description:
       "Strategic command infrastructure for high-scale campaigns and complex organizations.",
+    originalPrice: "$20,000/year",
+    launchPrice: "$10,000/year",
     bullets: [
       "Full command infrastructure",
       "Tools + coordination layer",
@@ -79,6 +88,39 @@ const tiers = [
 ];
 
 export default function HomePage() {
+  const launchDate = new Date("2026-07-04T00:00:00").getTime();
+
+  const calculateTimeLeft = () => {
+    const now = new Date().getTime();
+    const difference = launchDate - now;
+
+    if (difference <= 0) {
+      return {
+        days: "00",
+        hours: "00",
+        minutes: "00",
+        seconds: "00",
+      };
+    }
+
+    return {
+      days: String(Math.floor(difference / (1000 * 60 * 60 * 24))).padStart(2, "0"),
+      hours: String(Math.floor((difference / (1000 * 60 * 60)) % 24)).padStart(2, "0"),
+      minutes: String(Math.floor((difference / 1000 / 60) % 60)).padStart(2, "0"),
+      seconds: String(Math.floor((difference / 1000) % 60)).padStart(2, "0"),
+    };
+  };
+
+  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeLeft(calculateTimeLeft());
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#07111F] text-white">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -118,7 +160,37 @@ export default function HomePage() {
 
         <section className="grid flex-1 gap-14 py-10 lg:grid-cols-[0.92fr_1fr] lg:items-start lg:py-8">
           <div className="max-w-4xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-300">
+
+            <div className="mt-2 inline-flex flex-col rounded-[1.75rem] border border-violet-400/20 bg-white/[0.03] px-6 py-5 shadow-xl shadow-black/20 backdrop-blur-xl">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-violet-300">
+                Launch Countdown • July 4th 2026
+              </div>
+
+              <div className="mt-4 flex items-center gap-3">
+                {[
+                  { label: "Days", value: timeLeft.days },
+                  { label: "Hours", value: timeLeft.hours },
+                  { label: "Minutes", value: timeLeft.minutes },
+                  { label: "Seconds", value: timeLeft.seconds },
+                ].map((item) => (
+                  <div
+                    key={item.label}
+                    className="flex min-w-[72px] flex-col items-center rounded-2xl border border-white/10 bg-[#0B1629] px-4 py-3"
+                  >
+                    <span className="text-2xl font-black tracking-tight text-white">
+                      {item.value}
+                    </span>
+
+                    <span className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                      {item.label}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+
+            <div className="mt-8 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-300">
               <Building2 className="h-3.5 w-3.5" />
               Campaign Operating System
             </div>
@@ -280,6 +352,22 @@ export default function HomePage() {
                 <p className="mt-4 text-sm leading-7 text-slate-300">
                   {tier.description}
                 </p>
+
+                <div className="mt-8 rounded-2xl border border-violet-400/20 bg-violet-500/5 p-5">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-violet-300">
+                    90-Day Launch Special • Ends 10/4/2026
+                  </p>
+
+                  <div className="mt-3 flex items-end gap-3">
+                    <span className="text-lg font-medium text-slate-500 line-through">
+                      {tier.originalPrice}
+                    </span>
+
+                    <span className="text-3xl font-black tracking-tight text-white">
+                      {tier.launchPrice}
+                    </span>
+                  </div>
+                </div>
 
                 <div className="mt-8 space-y-4">
                   {tier.bullets.map((bullet) => (
