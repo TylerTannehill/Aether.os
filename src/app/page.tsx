@@ -111,9 +111,16 @@ export default function HomePage() {
     };
   };
 
-  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
+  const [timeLeft, setTimeLeft] = useState({
+    days: "00",
+    hours: "00",
+    minutes: "00",
+    seconds: "00",
+  });
 
   useEffect(() => {
+    setTimeLeft(calculateTimeLeft());
+
     const interval = setInterval(() => {
       setTimeLeft(calculateTimeLeft());
     }, 1000);
