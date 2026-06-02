@@ -27,6 +27,7 @@ export default function DashboardListDetailPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [defaultOwnerName, setDefaultOwnerName] = useState("");
+  const [contactSearch, setContactSearch] = useState("");
 
   useEffect(() => {
     if (!listId) return;
@@ -99,6 +100,7 @@ export default function DashboardListDetailPage() {
       setSaving(true);
       await addContactToList(listId, selectedContactId);
       setSelectedContactId("");
+      setContactSearch("");
       setMessage("Contact added to list.");
       await loadData();
     } catch (err: any) {
@@ -125,6 +127,39 @@ export default function DashboardListDetailPage() {
   const availableContacts = useMemo(() => {
     return getAvailableContacts(allContacts, assignedContacts);
   }, [allContacts, assignedContacts]);
+
+  const selectedContact = useMemo(() => {
+    return (
+      availableContacts.find((contact) => contact.id === selectedContactId) ||
+      null
+    );
+  }, [availableContacts, selectedContactId]);
+
+  const filteredAvailableContacts = useMemo(() => {
+    const normalizedSearch = contactSearch.trim().toLowerCase();
+
+    if (!normalizedSearch) {
+      return availableContacts.slice(0, 8);
+    }
+
+    return availableContacts
+      .filter((contact) => {
+        const searchable = [
+          fullName(contact),
+          contact.email,
+          contact.phone,
+          contact.city,
+          contact.state,
+          contact.party,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+
+        return searchable.includes(normalizedSearch);
+      })
+      .slice(0, 8);
+  }, [availableContacts, contactSearch]);
 
   const filteredAssignedContacts = useMemo(() => {
     return filterAssignedContacts(assignedContacts, search);
@@ -169,9 +204,12 @@ export default function DashboardListDetailPage() {
 
             <Link
               href="/dashboard/contacts"
-              className="rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
+              className="rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
             >
-              Open Contacts
+              <span className="block leading-tight text-white">Open Contacts</span>
+              <span className="block text-xs font-medium leading-tight text-slate-300">
+                View all contacts
+              </span>
             </Link>
           </div>
         </div>
@@ -267,7 +305,7 @@ export default function DashboardListDetailPage() {
                       <td className="rounded-l-2xl px-4 py-4 font-medium text-slate-900">
                         <Link
                           href={`/contacts/${contact.id}`}
-                          className="transition hover:text-blue-700"
+                          className="font-semibold text-slate-950 underline-offset-2 transition hover:underline"
                         >
                           {fullName(contact)}
                         </Link>
@@ -344,59 +382,85 @@ export default function DashboardListDetailPage() {
                 Add Contact
               </h2>
               <p className="mt-1 text-sm text-slate-500">
-                Only contacts not already in this list are shown.
+                Search available contacts and add the right person to this list.
               </p>
             </div>
 
             <div className="space-y-4">
-              <select
-                value={selectedContactId}
-                onChange={(e) => setSelectedContactId(e.target.value)}
+              <input
+                value={contactSearch}
+                onChange={(e) => {
+                  setContactSearch(e.target.value);
+                  setSelectedContactId("");
+                }}
+                placeholder="Search contacts by name, email, phone, city, or party..."
                 className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400"
-              >
-                <option value="">Select a contact</option>
-                {availableContacts.map((contact) => (
-                  <option key={contact.id} value={contact.id}>
-                    {fullName(contact)}
-                  </option>
-                ))}
-              </select>
+              />
+
+              <div className="max-h-72 overflow-y-auto rounded-2xl border border-slate-200 bg-slate-50 p-2">
+                {availableContacts.length === 0 ? (
+                  <div className="rounded-xl bg-white px-4 py-3 text-sm text-slate-500">
+                    No contacts are available to add.
+                  </div>
+                ) : filteredAvailableContacts.length === 0 ? (
+                  <div className="rounded-xl bg-white px-4 py-3 text-sm text-slate-500">
+                    No available contacts match that search.
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {filteredAvailableContacts.map((contact) => {
+                      const isSelected = selectedContactId === contact.id;
+
+                      return (
+                        <button
+                          key={contact.id}
+                          type="button"
+                          onClick={() => setSelectedContactId(contact.id)}
+                          className={`w-full rounded-xl border px-4 py-3 text-left transition ${
+                            isSelected
+                              ? "border-slate-950 bg-slate-950 text-white"
+                              : "border-slate-200 bg-white text-slate-900 hover:border-slate-300 hover:bg-slate-100"
+                          }`}
+                        >
+                          <span className="block text-sm font-semibold">
+                            {fullName(contact)}
+                          </span>
+                          <span
+                            className={`mt-1 block text-xs ${
+                              isSelected ? "text-slate-300" : "text-slate-500"
+                            }`}
+                          >
+                            {[contact.email, contact.phone]
+                              .filter(Boolean)
+                              .join(" • ") || "No email or phone"}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {selectedContact ? (
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                  Selected:{" "}
+                  <span className="font-semibold text-slate-950">
+                    {fullName(selectedContact)}
+                  </span>
+                </div>
+              ) : null}
 
               <button
                 onClick={handleAddContactToList}
-                disabled={saving || availableContacts.length === 0}
-                className="w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                disabled={saving || availableContacts.length === 0 || !selectedContactId}
+                className="w-full rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {availableContacts.length === 0 ? "No Contacts Available" : "Add Contact"}
+                {availableContacts.length === 0
+                  ? "No Contacts Available"
+                  : saving
+                    ? "Adding..."
+                    : "Add Contact"}
               </button>
-            </div>
-          </div>
-
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="mb-5">
-              <h2 className="text-lg font-semibold text-slate-900">
-                List Notes
-              </h2>
-            </div>
-
-            <div className="space-y-3">
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <p className="font-medium text-slate-900">
-                  Duplicate protection enabled
-                </p>
-                <p className="mt-1 text-sm text-slate-500">
-                  Assigned contacts are filtered out of the add menu automatically.
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <p className="font-medium text-slate-900">
-                  Automation now list-aware
-                </p>
-                <p className="mt-1 text-sm text-slate-500">
-                  Callback and follow-up tasks can now inherit routing from the list itself.
-                </p>
-              </div>
             </div>
           </div>
 

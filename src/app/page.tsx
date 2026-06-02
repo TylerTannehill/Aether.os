@@ -224,7 +224,7 @@ export default function HomePage() {
               </Link>
 
               <Link
-                href="/login"
+                href="/explore-abe"
                 className="inline-flex min-w-[240px] items-center justify-center gap-3 rounded-2xl border border-white/15 bg-white/[0.03] px-8 py-5 text-base font-black uppercase tracking-[0.08em] text-white shadow-xl shadow-black/20 transition hover:bg-white/[0.08]"
               >
                 <span>Request Demo</span>
@@ -259,13 +259,19 @@ export default function HomePage() {
                 </div>
 
                 <div className="flex flex-col gap-3">
-                  <button className="rounded-2xl border border-amber-300 bg-amber-100 px-5 py-3 text-sm font-semibold text-amber-800 transition hover:bg-amber-200">
+                  <Link
+                    href="/abes-brief"
+                    className="rounded-2xl border border-amber-300 bg-amber-100 px-5 py-3 text-center text-sm font-semibold text-amber-800 transition hover:bg-amber-200"
+                  >
                     Abe&apos;s Brief
-                  </button>
+                  </Link>
 
-                  <button className="rounded-2xl border border-violet-200 bg-white px-5 py-3 text-sm font-semibold text-violet-800 transition hover:bg-violet-50">
+                  <Link
+                    href="/explore-abe"
+                    className="rounded-2xl border border-violet-200 bg-white px-5 py-3 text-center text-sm font-semibold text-violet-800 transition hover:bg-violet-50"
+                  >
                     Explore Abe
-                  </button>
+                  </Link>
                 </div>
               </div>
 

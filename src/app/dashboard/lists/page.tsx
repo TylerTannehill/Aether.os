@@ -594,8 +594,13 @@ function DashboardListsPageContent() {
                     key={list.id}
                     className={isHighlighted ? "bg-amber-50" : "bg-slate-50"}
                   >
-                    <td className="rounded-l-2xl px-4 py-4 font-medium text-slate-900">
-                      {list.name}
+                    <td className="rounded-l-2xl px-4 py-4">
+                      <Link
+                        href={`/dashboard/lists/${list.id}`}
+                        className="font-semibold text-blue-700 underline-offset-2 transition hover:underline"
+                      >
+                        {list.name}
+                      </Link>
                     </td>
                     <td className="px-4 py-4">
                       <div className="flex max-w-md flex-wrap gap-2">
@@ -641,22 +646,15 @@ function DashboardListsPageContent() {
                     <td className="rounded-r-2xl px-4 py-4 text-slate-600">
                       <div className="flex flex-wrap gap-3">
                         <Link
-                          href={`/dashboard/lists/${list.id}`}
-                          className="font-medium transition hover:text-blue-700"
-                        >
-                          View
-                        </Link>
-
-                        <Link
                           href={routeHref(route, list.id)}
-                          className="font-medium text-emerald-700 transition hover:text-emerald-800"
+                          className="font-semibold text-emerald-700 underline underline-offset-2 transition hover:text-emerald-800"
                         >
                           Start {routeLabel(route)}
                         </Link>
 
                         <Link
                           href="/dashboard/contacts"
-                          className="font-medium text-slate-700 transition hover:text-slate-900"
+                          className="font-semibold text-blue-700 underline underline-offset-2 transition hover:text-blue-800"
                         >
                           Open Contacts
                         </Link>

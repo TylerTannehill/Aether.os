@@ -1297,7 +1297,12 @@ export default function FinanceDashboardPage() {
             </Link>
 
             {demoRole !== "general_user" ? (
-              <button className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800">
+              <button
+                onClick={() => {
+                  window.location.href = "/api/finance/export";
+                }}
+                className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+              >
                 <FileSpreadsheet className="h-4 w-4" />
                 Export Finance
               </button>
