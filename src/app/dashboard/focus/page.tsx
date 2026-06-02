@@ -308,7 +308,7 @@ export default function FocusModePage() {
   >([]);
   const [contextMode, setContextMode] = useState("default");
 
-  const { ownerFilter, applyMyDashboard } = useDashboardOwner();
+  const { ownerFilter } = useDashboardOwner();
   const { focusContext, clearFocusContext } = useFocusContext();
 
   useEffect(() => {
@@ -1005,12 +1005,6 @@ export default function FocusModePage() {
               Refresh
             </button>
 
-            <button
-              onClick={applyMyDashboard}
-              className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/15"
-            >
-              My Focus
-            </button>
           </div>
         </div>
       </section>

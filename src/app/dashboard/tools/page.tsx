@@ -85,6 +85,28 @@ type UtilityModule = {
   }[];
 };
 
+
+const FOUNDER_TRIGGER = "its all about the loops";
+
+const FOUNDER_MESSAGE = `Message received.
+
+From: Tyler Tannehill
+Date: June 1, 2026
+
+The LLC was filed with the state today. Aether Systems is officially open for business.
+
+Whether this vision succeeds or fails, remember this:
+
+When life gives you lemons, be bold enough to throw them away. Apple juice is far superior, and we do not settle.
+
+This was built on a dream, a couple hundred bucks, a laptop with a missing S key, and everything going wrong at once.
+
+Remember what you are capable of when everything goes to hell.
+
+And do not be afraid to kick down a few doors in the process.
+
+— Tyler`;
+
 const utilityModules: UtilityModule[] = [
   {
     id: "calendar",
@@ -282,7 +304,26 @@ export default function ToolsPage() {
     if (!input.trim() || !user) return;
 
     const messageText = input.trim();
+    const normalizedMessage = messageText.trim().toLowerCase();
     setInput("");
+
+    if (normalizedMessage === FOUNDER_TRIGGER) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `founder-${Date.now()}`,
+          org_id: user.org_id,
+          sender_id: "founder",
+          sender_name: "Founder Message",
+          sender_role: "System",
+          message: FOUNDER_MESSAGE,
+          created_at: new Date().toISOString(),
+          system: true,
+        },
+      ]);
+
+      return;
+    }
 
     const { error } = await supabase.from("org_messages").insert({
       org_id: user.org_id,

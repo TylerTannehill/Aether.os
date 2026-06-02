@@ -1331,14 +1331,7 @@ export default function ContactDetailPage() {
                 >
                   Back to Contacts
                 </Link>
-
-                <Link
-                  href={outreachDefaultHref}
-                  className="rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
-                >
-                  Open in Outreach
-                </Link>
-              </div>
+</div>
             </div>
 
             <div className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">

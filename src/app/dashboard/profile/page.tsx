@@ -23,6 +23,78 @@ import {
 
 type PreferenceOption = "overview" | "focus" | "outreach" | "admin";
 
+type ProfileStatus =
+  | "active"
+  | "busy"
+  | "inactive"
+  | "break"
+  | "lunch"
+  | "potato";
+
+const PROFILE_STATUS_OPTIONS: { value: ProfileStatus; label: string }[] = [
+  { value: "active", label: "Active" },
+  { value: "busy", label: "Busy" },
+  { value: "inactive", label: "Inactive" },
+  { value: "break", label: "Break" },
+  { value: "lunch", label: "Lunch" },
+  { value: "potato", label: "Potato" },
+];
+
+type PotatoNote = {
+  id: string;
+  message: string;
+  className: string;
+};
+
+const POTATO_NOTES: PotatoNote[] = [
+  {
+    id: "sunlight",
+    message: "Healthy potatoes grow in sunlight.",
+    className: "left-6 top-6",
+  },
+  {
+    id: "snacks",
+    message: "Potatoes make good snacks.",
+    className: "right-10 top-32",
+  },
+  {
+    id: "resilient",
+    message: "Potatoes are resilient.",
+    className: "left-[46%] top-[17rem]",
+  },
+  {
+    id: "time",
+    message: "Good potatoes take time.",
+    className: "right-8 bottom-8",
+  },
+];
+
+function normalizeProfileStatus(value?: string | null): ProfileStatus {
+  const normalized = String(value || "").trim().toLowerCase();
+
+  if (
+    normalized === "active" ||
+    normalized === "busy" ||
+    normalized === "inactive" ||
+    normalized === "break" ||
+    normalized === "lunch" ||
+    normalized === "potato"
+  ) {
+    return normalized;
+  }
+
+  return "active";
+}
+
+function formatProfileStatus(value?: string | null) {
+  const normalized = normalizeProfileStatus(value);
+
+  return (
+    PROFILE_STATUS_OPTIONS.find((option) => option.value === normalized)
+      ?.label || "Active"
+  );
+}
+
 type LiveProfile = {
   email: string;
   name: string;
@@ -32,7 +104,8 @@ type LiveProfile = {
   title: string;
   organizationName: string;
   contextMode: string;
-  status: string;
+  status: ProfileStatus;
+  potatoEasterEggUnlocked: boolean;
   tagline: string;
 };
 
@@ -199,6 +272,12 @@ export default function DashboardProfilePage() {
   const [profileError, setProfileError] = useState("");
   const [liveProfile, setLiveProfile] = useState<LiveProfile | null>(null);
   const [orgRoles, setOrgRoles] = useState<OrgRole[]>([]);
+  const [currentMemberId, setCurrentMemberId] = useState("");
+  const [statusSaving, setStatusSaving] = useState(false);
+  const [statusMessage, setStatusMessage] = useState("");
+  const [activePotatoNote, setActivePotatoNote] = useState<PotatoNote | null>(
+    null
+  );
 
   useEffect(() => {
     let isMounted = true;
@@ -229,17 +308,18 @@ export default function DashboardProfilePage() {
         }
 
         let currentUserRoles: OrgRole[] = [];
+        let resolvedMemberId = String(membership?.id || "");
 
         try {
           const roleResponse = await fetch("/api/admin/org-members");
           const roleData = await roleResponse.json();
 
           if (roleResponse.ok) {
-            const currentMemberId = roleData?.currentMember?.id;
             const roles = Array.isArray(roleData?.roles) ? roleData.roles : [];
 
             currentUserRoles = roles.filter(
-              (role: OrgRole) => role.organization_member_id === currentMemberId
+              (role: OrgRole) =>
+                String(role.organization_member_id) === resolvedMemberId
             );
           }
         } catch (roleError) {
@@ -260,6 +340,7 @@ export default function DashboardProfilePage() {
         if (!isMounted) return;
 
         setOrgRoles(currentUserRoles);
+        setCurrentMemberId(resolvedMemberId);
 
         setLiveProfile({
           email: String(user.email || ""),
@@ -270,7 +351,10 @@ export default function DashboardProfilePage() {
           title: titleLabel,
           organizationName,
           contextMode: organization?.context_mode || "default",
-          status: "Micro-reset in progress",
+          status: normalizeProfileStatus(membership?.profile_status),
+          potatoEasterEggUnlocked: Boolean(
+            membership?.potato_easter_egg_unlocked
+          ),
           tagline: "Building the operating system for execution.",
         });
       } catch (err: any) {
@@ -290,6 +374,71 @@ export default function DashboardProfilePage() {
     };
   }, []);
 
+  async function handleStatusChange(nextStatus: ProfileStatus) {
+    if (!currentMemberId) {
+      setProfileError("No active organization member was found for this profile.");
+      return;
+    }
+
+    setStatusSaving(true);
+    setStatusMessage("");
+    setProfileError("");
+
+    const previousStatus = normalizeProfileStatus(liveProfile?.status || identity.status);
+
+    setLiveProfile((current) =>
+      current
+        ? {
+            ...current,
+            status: nextStatus,
+          }
+        : current
+    );
+
+    try {
+      const response = await fetch("/api/profile/status", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          status: nextStatus,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result?.error || "Failed to update status.");
+      }
+
+      const membership = result?.membership;
+
+      if (liveProfile) {
+        setLiveProfile({
+          ...liveProfile,
+          status: normalizeProfileStatus(membership?.profile_status ?? nextStatus),
+          potatoEasterEggUnlocked: Boolean(
+            membership?.potato_easter_egg_unlocked
+          ),
+        });
+      }
+
+      setStatusMessage("Status updated.");
+    } catch (error: any) {
+      if (liveProfile) {
+        setLiveProfile({
+          ...liveProfile,
+          status: previousStatus,
+        });
+      }
+
+      setProfileError(error?.message || "Failed to update status.");
+    } finally {
+      setStatusSaving(false);
+    }
+  }
+
   const identity = useMemo(() => {
     return (
       liveProfile ?? {
@@ -301,7 +450,8 @@ export default function DashboardProfilePage() {
         title: "Loading title...",
         organizationName: "Loading organization...",
         contextMode: "default",
-        status: "Loading...",
+        status: "active",
+        potatoEasterEggUnlocked: false,
         tagline: "Building the operating system for execution.",
       }
     );
@@ -632,7 +782,22 @@ export default function DashboardProfilePage() {
         </section>
       ) : null}
 
-      <section className="rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-6 shadow-sm lg:p-8">
+      <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-6 shadow-sm lg:p-8">
+        {identity.potatoEasterEggUnlocked ? (
+          <div className="pointer-events-none absolute inset-0 z-10">
+            {POTATO_NOTES.map((potato) => (
+              <button
+                key={potato.id}
+                type="button"
+                onClick={() => setActivePotatoNote(potato)}
+                className={`pointer-events-auto absolute ${potato.className} rounded-full border border-amber-200/60 bg-amber-50/90 px-2 py-1 text-base shadow-sm transition hover:scale-110 hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-300`}
+                aria-label="Good potato"
+              >
+                🥔
+              </button>
+            ))}
+          </div>
+        ) : null}
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
           <div className="flex items-start gap-5">
             <div className="flex h-20 w-20 items-center justify-center rounded-3xl border border-slate-700 bg-slate-800 text-2xl font-semibold text-white">
@@ -659,9 +824,9 @@ export default function DashboardProfilePage() {
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
-                <div className="inline-flex items-center gap-2 rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-900">
+                <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-900">
                   <Sparkles className="h-3.5 w-3.5" />
-                  🥔 {profileLoading ? "Loading..." : identity.status}
+                  Status: {profileLoading ? "Loading..." : formatProfileStatus(identity.status)}
                 </div>
 
                 <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-900">
@@ -697,9 +862,34 @@ export default function DashboardProfilePage() {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                <span className="font-semibold">Potato status:</span> {identity.status}.
-                <span className="ml-2 text-amber-800/80">Brief reset to restore focus and preserve signal quality before returning to execution.</span>
+              <div className="rounded-2xl border border-slate-700 bg-slate-900/50 px-4 py-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                      Current status
+                    </p>
+                    {statusMessage ? (
+                      <p className="mt-1 text-xs text-slate-400">
+                        {statusMessage}
+                      </p>
+                    ) : null}
+                  </div>
+
+                  <select
+                    value={identity.status}
+                    disabled={profileLoading || statusSaving}
+                    onChange={(event) =>
+                      handleStatusChange(event.target.value as ProfileStatus)
+                    }
+                    className="rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm font-semibold text-white outline-none transition hover:bg-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {PROFILE_STATUS_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               <div className="flex flex-wrap gap-2">
@@ -1205,6 +1395,25 @@ export default function DashboardProfilePage() {
             ))}
           </div>
         </details>
+
+
+      {activePotatoNote ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4">
+          <div className="w-full max-w-sm rounded-3xl border border-amber-200 bg-amber-50 p-6 text-center shadow-2xl">
+            <div className="text-4xl">🥔</div>
+            <p className="mt-4 text-lg font-semibold text-slate-950">
+              {activePotatoNote.message}
+            </p>
+            <button
+              type="button"
+              onClick={() => setActivePotatoNote(null)}
+              className="mt-6 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+            >
+              Thanks, potato
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       <section className="hidden" aria-hidden="true">
         <div className="flex items-center gap-2 text-sm text-emerald-800">

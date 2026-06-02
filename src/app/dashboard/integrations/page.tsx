@@ -16,9 +16,10 @@ import {
   CheckCircle2,
   MapPinned,
   Settings2,
-  ShieldCheck,
   Clock3,
   AlertCircle,
+  X,
+  ShieldCheck,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { getOrgContextTheme } from "@/lib/org-context-theme";
@@ -40,9 +41,17 @@ type IntegrationCard = {
   setupNote: string;
   credentialHint?: string;
   lastSync?: string;
+  logoText: string;
+  logoSubtext?: string;
 };
 
 type AetherTier = "t1" | "t2" | "t3";
+
+type CredentialState = {
+  accountName: string;
+  accessToken: string;
+  accountId: string;
+};
 
 function normalizeAetherTier(value?: string | null): AetherTier {
   const normalized = String(value || "").trim().toLowerCase();
@@ -57,71 +66,84 @@ function canShowToolsWorkspaceLink(tier: AetherTier) {
   return tier === "t3";
 }
 
+const CARD_STYLE =
+  "rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md";
+
 const DIGITAL_INTEGRATIONS: IntegrationCard[] = [
   {
     id: "meta",
     name: "Meta",
-    category: "Ads / Digital",
+    category: "Digital Team",
     description:
-      "Paid reach, spend, creative performance, and audience pressure ingestion.",
+      "Track ads, reach, engagement, and campaign momentum from Meta.",
     endpoint: "/api/integrations/meta/sync",
     icon: RadioTower,
     status: "ready_to_configure",
     setupNote:
-      "Connection pathway staged. Add account credentials when the campaign social assets are ready.",
-    credentialHint: "Meta Business / Ads account access",
+      "Connect Meta to bring ad performance and audience activity into Aether.",
+    credentialHint: "Meta Business account",
+    logoText: "∞",
+    logoSubtext: "Meta",
   },
   {
     id: "x",
     name: "X",
-    category: "Narrative / Digital",
+    category: "Digital Team",
     description:
-      "Narrative pressure, reply velocity, engagement, and sentiment volatility.",
+      "Monitor engagement, replies, and narrative movement from X.",
     endpoint: "/api/integrations/x/sync",
     icon: MessageSquareMore,
     status: "ready_to_configure",
     setupNote:
-      "Connection pathway staged for narrative signal ingestion and future live account sync.",
-    credentialHint: "X account/API access",
+      "Connect X so your digital team can follow message movement and engagement.",
+    credentialHint: "X account login",
+    logoText: "𝕏",
+    logoSubtext: "X",
   },
   {
     id: "tiktok",
     name: "TikTok",
-    category: "Momentum / Digital",
+    category: "Digital Team",
     description:
-      "Organic momentum, creator reach, engagement spikes, and audience movement.",
+      "Bring TikTok performance and audience momentum into Aether.",
     endpoint: "/api/integrations/tiktok/sync",
     icon: BarChart3,
     status: "ready_to_configure",
     setupNote:
-      "Connection pathway staged for organic momentum and creator reach analytics.",
-    credentialHint: "TikTok account/API access",
+      "Connect TikTok to help the campaign understand short-form content momentum.",
+    credentialHint: "TikTok account login",
+    logoText: "♪",
+    logoSubtext: "TikTok",
   },
   {
     id: "youtube",
     name: "YouTube",
-    category: "Narrative / Video",
+    category: "Digital Team",
     description:
-      "Long-form message performance, watch behavior, and narrative durability.",
+      "Track video performance, watch activity, and long-form messaging.",
     endpoint: "/api/integrations/youtube/sync",
     icon: BarChart3,
     status: "ready_to_configure",
     setupNote:
-      "Connection pathway staged for video performance and long-form message analytics.",
-    credentialHint: "Google/YouTube channel access",
+      "Connect YouTube to bring campaign video performance into Aether.",
+    credentialHint: "YouTube channel login",
+    logoText: "▶",
+    logoSubtext: "YouTube",
   },
   {
     id: "website",
     name: "Campaign Website",
-    category: "Owned Infrastructure",
+    category: "Digital Team",
     description:
-      "Website traffic, signup behavior, conversion activity, and owned momentum.",
+      "Monitor website traffic, signups, and supporter activity.",
     endpoint: "/api/integrations/website/sync",
     icon: Workflow,
     status: "ready_to_configure",
     setupNote:
-      "Owned-channel pathway staged. This can receive website traffic and conversion data once the site is wired.",
-    credentialHint: "Website analytics source",
+      "Connect your campaign website to follow supporter activity and conversions.",
+    credentialHint: "Website analytics access",
+    logoText: "◎",
+    logoSubtext: "Site",
   },
 ];
 
@@ -129,28 +151,32 @@ const FINANCE_INTEGRATIONS: IntegrationCard[] = [
   {
     id: "actblue",
     name: "ActBlue",
-    category: "Fundraising / Finance",
+    category: "Finance Team",
     description:
-      "Online donor ingestion, contact creation, donor enrichment, and finance routing.",
+      "Bring donor activity and fundraising performance into Aether.",
     endpoint: "/api/integrations/actblue/sync",
     icon: Wallet,
     status: "ready_to_configure",
     setupNote:
-      "Democratic fundraising connector staged. Add campaign credentials when available.",
-    credentialHint: "ActBlue export/API access",
+      "Connect ActBlue so finance can follow online donations and donor movement.",
+    credentialHint: "ActBlue account access",
+    logoText: "AB",
+    logoSubtext: "ActBlue",
   },
   {
     id: "winred",
     name: "WinRed",
-    category: "Fundraising / Finance",
+    category: "Finance Team",
     description:
-      "Online donor ingestion, high-value donor detection, and finance follow-up routing.",
+      "Track online fundraising activity and donor momentum.",
     endpoint: "/api/integrations/winred/sync",
     icon: Wallet,
     status: "ready_to_configure",
     setupNote:
-      "Republican fundraising connector staged. Add campaign credentials when available.",
-    credentialHint: "WinRed export/API access",
+      "Connect WinRed so finance can follow online donations and donor movement.",
+    credentialHint: "WinRed account access",
+    logoText: "WR",
+    logoSubtext: "WinRed",
   },
 ];
 
@@ -158,38 +184,44 @@ const UTILITY_INTEGRATIONS: IntegrationCard[] = [
   {
     id: "gmail",
     name: "Gmail",
-    category: "Workspace Utility",
+    category: "Campaign Operations",
     description:
-      "Campaign communication infrastructure and shared inbox coordination.",
+      "Connect campaign email and shared inbox communication.",
     icon: Mail,
     status: "needs_credentials",
     setupNote:
-      "Workspace connection staging active. OAuth activation is pending organizational Google Workspace setup.",
-    credentialHint: "Google Workspace / Gmail OAuth",
+      "Connect Gmail so campaign communication can work inside Aether.",
+    credentialHint: "Google account login",
+    logoText: "M",
+    logoSubtext: "Gmail",
   },
   {
     id: "calendar",
     name: "Google Calendar",
-    category: "Workspace Utility",
+    category: "Campaign Operations",
     description:
-      "Campaign scheduling, operational timing, and event coordination.",
+      "Coordinate campaign schedules, meetings, and events.",
     icon: CalendarDays,
     status: "needs_credentials",
     setupNote:
-      "Calendar pathway staged for scheduling and operational timing once Workspace access is ready.",
-    credentialHint: "Google Calendar OAuth",
+      "Connect Calendar so the campaign schedule supports operations.",
+    credentialHint: "Google account login",
+    logoText: "31",
+    logoSubtext: "Calendar",
   },
   {
     id: "drive",
     name: "Google Drive",
-    category: "Workspace Utility",
+    category: "Campaign Operations",
     description:
-      "Shared campaign files, proofs, messaging docs, and operational assets.",
+      "Access campaign files, messaging docs, and shared assets.",
     icon: FolderKanban,
     status: "needs_credentials",
     setupNote:
-      "Drive pathway staged for proofs, assets, and campaign documents once Workspace access is ready.",
-    credentialHint: "Google Drive OAuth",
+      "Connect Drive so campaign files are easier to use inside Aether.",
+    credentialHint: "Google account login",
+    logoText: "△",
+    logoSubtext: "Drive",
   },
 ];
 
@@ -198,9 +230,9 @@ function statusLabel(status: IntegrationStatus) {
     case "connected":
       return "Connected";
     case "needs_credentials":
-      return "Needs Credentials";
+      return "Needs Login";
     case "ready_to_configure":
-      return "Ready to Configure";
+      return "Ready";
     case "not_connected":
     default:
       return "Not Connected";
@@ -221,18 +253,66 @@ function statusClasses(status: IntegrationStatus) {
   }
 }
 
-function statusIcon(status: IntegrationStatus) {
-  switch (status) {
-    case "connected":
-      return CheckCircle2;
-    case "needs_credentials":
-      return AlertCircle;
-    case "ready_to_configure":
-      return Settings2;
-    case "not_connected":
-    default:
-      return PlugZap;
-  }
+function BrandLogo({ integration }: { integration: IntegrationCard }) {
+  return (
+    <div className="flex items-center gap-3">
+      <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-2xl font-black tracking-tight text-slate-950 shadow-sm">
+        {integration.logoText}
+      </div>
+
+      <div className="hidden min-w-0 sm:block">
+        <p className="truncate text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+          {integration.logoSubtext || integration.name}
+        </p>
+
+        <p className="truncate text-sm font-semibold text-slate-700">
+          {integration.credentialHint || "Campaign account"}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function ConnectionProgress() {
+  return (
+    <div className="mt-8 rounded-3xl border border-slate-200 bg-slate-50 p-5">
+      <div className="flex items-center">
+        <div className="flex flex-col items-center gap-2">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-700 text-sm font-bold text-white">
+            1
+          </div>
+
+          <p className="text-xs font-semibold text-blue-700">
+            Login
+          </p>
+        </div>
+
+        <div className="mx-3 h-px flex-1 bg-slate-200" />
+
+        <div className="flex flex-col items-center gap-2">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-sm font-bold text-slate-500">
+            2
+          </div>
+
+          <p className="text-xs font-semibold text-slate-500">
+            Review
+          </p>
+        </div>
+
+        <div className="mx-3 h-px flex-1 bg-slate-200" />
+
+        <div className="flex flex-col items-center gap-2">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-sm font-bold text-slate-500">
+            3
+          </div>
+
+          <p className="text-xs font-semibold text-slate-500">
+            Finish
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function IntegrationSection({
@@ -243,7 +323,7 @@ function IntegrationSection({
   syncResults,
   configuredIntegrations,
   onRunSync,
-  onMarkConfigured,
+  onOpenConnection,
 }: {
   title: string;
   description: string;
@@ -252,90 +332,85 @@ function IntegrationSection({
   syncResults: Record<string, string>;
   configuredIntegrations: Record<string, boolean>;
   onRunSync: (integration: IntegrationCard) => void;
-  onMarkConfigured: (integration: IntegrationCard) => void;
+  onOpenConnection: (integration: IntegrationCard) => void;
 }) {
   return (
     <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div className="mb-6">
-        <h2 className="text-2xl font-semibold text-slate-900">
-          {title}
-        </h2>
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h2 className="text-2xl font-semibold text-slate-900">
+            {title}
+          </h2>
 
-        <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-          {description}
-        </p>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+            {description}
+          </p>
+        </div>
+
+        <div className="inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600">
+          <PlugZap className="h-3.5 w-3.5" />
+          {integrations.length} available
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {integrations.map((integration) => {
-          const Icon = integration.icon;
+        {integrations.map((integration: IntegrationCard) => {
           const syncing = syncingId === integration.id;
           const result = syncResults[integration.id];
           const configured = Boolean(configuredIntegrations[integration.id]);
+
           const effectiveStatus: IntegrationStatus = configured
             ? "connected"
             : integration.status;
-          const StatusIcon = statusIcon(effectiveStatus);
 
           return (
-            <div
-              key={integration.id}
-              className="rounded-3xl border border-slate-200 bg-slate-50 p-5"
-            >
-              <div className="mb-4 flex items-start justify-between gap-3">
-                <div className="rounded-2xl border border-slate-200 bg-white p-3">
-                  <Icon className="h-5 w-5 text-slate-700" />
-                </div>
+            <div key={integration.id} className={CARD_STYLE}>
+              <div className="mb-5 flex items-start justify-between gap-3">
+                <BrandLogo integration={integration} />
 
                 <span
-                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${statusClasses(
+                  className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${statusClasses(
                     effectiveStatus
                   )}`}
                 >
-                  <StatusIcon className="h-3.5 w-3.5" />
+                  {effectiveStatus === "connected" ? (
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                  ) : (
+                    <AlertCircle className="h-3.5 w-3.5" />
+                  )}
+
                   {statusLabel(effectiveStatus)}
                 </span>
               </div>
 
-              <p className="text-base font-semibold text-slate-900">
+              <h3 className="text-lg font-semibold text-slate-950">
                 {integration.name}
-              </p>
+              </h3>
 
               <p className="mt-1 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
                 {integration.category}
               </p>
 
-              <p className="mt-3 text-sm leading-6 text-slate-600">
+              <p className="mt-3 min-h-[72px] text-sm leading-6 text-slate-600">
                 {integration.description}
               </p>
 
-              <div className="mt-4 space-y-2 rounded-2xl border border-slate-200 bg-white p-4">
-                <div className="flex items-start gap-2">
-                  <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" />
-                  <p className="text-sm leading-5 text-slate-600">
-                    {configured
-                      ? "Connector marked ready for this organization. Real credential refinement can happen when accounts are available."
-                      : integration.setupNote}
-                  </p>
-                </div>
+              <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <p className="text-sm leading-6 text-slate-700">
+                  {configured
+                    ? `${integration.name} is connected for this campaign.`
+                    : integration.setupNote}
+                </p>
 
-                {integration.credentialHint ? (
-                  <div className="flex items-start gap-2">
-                    <Settings2 className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" />
-                    <p className="text-xs leading-5 text-slate-500">
-                      Credential path: {integration.credentialHint}
-                    </p>
-                  </div>
-                ) : null}
+                <div className="mt-3 flex items-start gap-2">
+                  <Clock3 className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
 
-                <div className="flex items-start gap-2">
-                  <Clock3 className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" />
                   <p className="text-xs leading-5 text-slate-500">
                     {result
-                      ? "Last activity: just now"
+                      ? "Last update: just now"
                       : configured
-                      ? "Last activity: staged connection"
-                      : integration.lastSync || "Last activity: not synced yet"}
+                      ? "Last update: connected"
+                      : "Last update: not connected yet"}
                   </p>
                 </div>
               </div>
@@ -343,49 +418,224 @@ function IntegrationSection({
               <div className="mt-5 grid gap-2">
                 <button
                   type="button"
-                  onClick={() => onMarkConfigured(integration)}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-100"
+                  onClick={() => onOpenConnection(integration)}
+                  className={`inline-flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
+                    configured
+                      ? "border border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
+                      : "bg-slate-950 text-white hover:bg-slate-800"
+                  }`}
                 >
-                  <PlugZap className="h-4 w-4" />
-                  {configured ? "Configured" : "Mark Ready"}
+                  {configured ? (
+                    <>
+                      <Settings2 className="h-4 w-4" />
+                      Manage Connection
+                    </>
+                  ) : (
+                    <>
+                      <PlugZap className="h-4 w-4" />
+                      Connect
+                    </>
+                  )}
                 </button>
 
                 {integration.endpoint ? (
                   <button
                     onClick={() => onRunSync(integration)}
-                    disabled={Boolean(syncingId)}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-70"
+                    disabled={!configured || Boolean(syncingId)}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {syncing ? (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin" />
-                        Running sync...
+                        Syncing...
                       </>
                     ) : (
                       <>
-                        <RadioTower className="h-4 w-4" />
-                        Run {integration.name} sync
+                        <BarChart3 className="h-4 w-4" />
+                        Sync Now
                       </>
                     )}
                   </button>
-                ) : (
-                  <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-4 py-3 text-sm text-slate-500">
-                    OAuth activation pending organization setup.
-                  </div>
-                )}
+                ) : null}
               </div>
-
-              {result ? (
-                <div className="mt-4 flex items-start gap-3 rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-slate-700">
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                  <span>{result}</span>
-                </div>
-              ) : null}
             </div>
           );
         })}
       </div>
     </section>
+  );
+}
+
+function ConnectionPanel({
+  integration,
+  credentials,
+  setCredentials,
+  onClose,
+  onSave,
+}: {
+  integration: IntegrationCard;
+  credentials: Record<string, CredentialState>;
+  setCredentials: React.Dispatch<
+    React.SetStateAction<Record<string, CredentialState>>
+  >;
+  onClose: () => void;
+  onSave: () => void;
+}) {
+  const currentCredentials = credentials[integration.id] || {
+    accountName: "",
+    accessToken: "",
+    accountId: "",
+  };
+
+  function updateField(field: keyof CredentialState, value: string) {
+    setCredentials((current) => ({
+      ...current,
+      [integration.id]: {
+        accountName: current[integration.id]?.accountName || "",
+        accessToken: current[integration.id]?.accessToken || "",
+        accountId: current[integration.id]?.accountId || "",
+        [field]: value,
+      },
+    }));
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-stretch justify-end bg-slate-950/50">
+      <button
+        type="button"
+        aria-label="Close connection panel"
+        onClick={onClose}
+        className="hidden flex-1 cursor-default lg:block"
+      />
+
+      <aside className="flex h-full w-full max-w-xl flex-col overflow-y-auto bg-white shadow-2xl">
+        <div className="border-b border-slate-200 p-6">
+          <div className="flex items-start justify-between gap-4">
+            <BrandLogo integration={integration} />
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-xl border border-slate-200 p-2 text-slate-500 transition hover:bg-slate-100"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+
+          <div className="mt-6">
+            <h3 className="text-3xl font-semibold tracking-tight text-slate-950">
+              Connect {integration.name}
+            </h3>
+
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              Add the account details your campaign uses for this tool. Once
+              saved, this integration will show as connected.
+            </p>
+          </div>
+
+          <ConnectionProgress />
+        </div>
+
+        <div className="flex-1 space-y-5 p-6">
+          <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+            <p className="text-sm font-semibold text-slate-900">
+              What this connects
+            </p>
+
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              {integration.description}
+            </p>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-semibold text-slate-700">
+              Account Email / Username
+            </label>
+
+            <input
+              value={currentCredentials.accountName}
+              onChange={(event) =>
+                updateField("accountName", event.target.value)
+              }
+              placeholder="campaign@example.com"
+              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400"
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-semibold text-slate-700">
+              Access Key / Token
+            </label>
+
+            <input
+              type="password"
+              value={currentCredentials.accessToken}
+              onChange={(event) =>
+                updateField("accessToken", event.target.value)
+              }
+              placeholder="Paste access token"
+              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400"
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-semibold text-slate-700">
+              Account ID
+              <span className="ml-1 font-normal text-slate-400">
+                optional
+              </span>
+            </label>
+
+            <input
+              value={currentCredentials.accountId}
+              onChange={(event) =>
+                updateField("accountId", event.target.value)
+              }
+              placeholder="Enter account ID"
+              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400"
+            />
+          </div>
+
+          <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
+            <div className="flex items-start gap-3">
+              <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
+
+              <div>
+                <p className="text-sm font-semibold text-emerald-950">
+                  Secure connection
+                </p>
+
+                <p className="mt-1 text-sm leading-6 text-emerald-800/80">
+                  Your campaign controls which accounts are connected. This
+                  screen is designed for credentials now and can be wired into
+                  provider OAuth when the live permission flow is ready.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="border-t border-slate-200 bg-white p-6">
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="button"
+              onClick={onSave}
+              className="flex-1 rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-800"
+            >
+              Save & Connect
+            </button>
+          </div>
+        </div>
+      </aside>
+    </div>
   );
 }
 
@@ -397,6 +647,13 @@ export default function IntegrationsPage() {
   const [syncResults, setSyncResults] = useState<Record<string, string>>({});
   const [configuredIntegrations, setConfiguredIntegrations] = useState<
     Record<string, boolean>
+  >({});
+
+  const [activeIntegration, setActiveIntegration] =
+    useState<IntegrationCard | null>(null);
+
+  const [credentials, setCredentials] = useState<
+    Record<string, CredentialState>
   >({});
 
   useEffect(() => {
@@ -427,63 +684,48 @@ export default function IntegrationsPage() {
     try {
       setSyncingId(integration.id);
 
-      setSyncResults((current) => ({
-        ...current,
-        [integration.id]: "",
-      }));
-
       const response = await fetch(integration.endpoint, {
         method: "POST",
       });
 
       const result = await response.json();
 
-      if (!response.ok || !result?.success) {
-        setSyncResults((current) => ({
-          ...current,
-          [integration.id]:
-            result?.error || `${integration.name} sync failed.`,
-        }));
-
-        return;
-      }
-
-      setConfiguredIntegrations((current) => ({
-        ...current,
-        [integration.id]: true,
-      }));
-
       setSyncResults((current) => ({
         ...current,
         [integration.id]:
-          `${integration.name} test sync imported ${result.imported} records.`,
+          result?.success
+            ? `${integration.name} synced ${result.imported} records.`
+            : `${integration.name} sync failed.`,
       }));
-    } catch (error: any) {
+    } catch {
       setSyncResults((current) => ({
         ...current,
-        [integration.id]:
-          error?.message || `${integration.name} sync failed.`,
+        [integration.id]: `${integration.name} sync failed.`,
       }));
     } finally {
       setSyncingId(null);
     }
   }
 
-  function markConfigured(integration: IntegrationCard) {
+  function saveConnection() {
+    if (!activeIntegration) return;
+
     setConfiguredIntegrations((current) => ({
       ...current,
-      [integration.id]: !current[integration.id],
+      [activeIntegration.id]: true,
     }));
 
     setSyncResults((current) => ({
       ...current,
-      [integration.id]: current[integration.id]
-        ? current[integration.id]
-        : `${integration.name} marked ready for credential connection.`,
+      [activeIntegration.id]:
+        `${activeIntegration.name} connected for this campaign.`,
     }));
+
+    setActiveIntegration(null);
   }
 
   const orgTheme = getOrgContextTheme(contextMode);
+
   const showToolsWorkspaceLink =
     canShowToolsWorkspaceLink(aetherTier);
 
@@ -513,149 +755,157 @@ export default function IntegrationsPage() {
   }, [configuredIntegrations]);
 
   return (
-    <div className="space-y-8">
-      <section
-        className={`rounded-3xl border border-slate-200 bg-gradient-to-br p-6 text-white shadow-sm transition-colors duration-300 lg:p-8 ${orgTheme.heroGradient}`}
-      >
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200">
-              <PlugZap className="h-3.5 w-3.5" />
-              Integrations Infrastructure
+    <>
+      <div className="space-y-8">
+        <section
+          className={`rounded-3xl border border-slate-200 bg-gradient-to-br p-6 text-white shadow-sm transition-colors duration-300 lg:p-8 ${orgTheme.heroGradient}`}
+        >
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div className="space-y-4">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200">
+                <PlugZap className="h-3.5 w-3.5" />
+                Campaign Integrations
+              </div>
+
+              <div className="space-y-3">
+                <h1 className="text-3xl font-semibold tracking-tight lg:text-4xl">
+                  Connect the tools your campaign already uses.
+                </h1>
+
+                <p className="max-w-3xl text-sm text-slate-300 lg:text-base">
+                  Bring your campaign’s digital, finance, and workspace tools
+                  into Aether so your team can work from one command center.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold text-slate-100">
+                  {configuredCount} / {totalVisibleIntegrations} connected
+                </span>
+
+                <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold text-slate-100">
+                  Context: {contextMode}
+                </span>
+
+                <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold text-slate-100">
+                  Connections available anytime
+                </span>
+              </div>
             </div>
 
-            <div className="space-y-3">
-              <h1 className="text-3xl font-semibold tracking-tight lg:text-4xl">
-                External signal and utility pathways.
-              </h1>
+            {showToolsWorkspaceLink ? (
+              <Link
+                href="/dashboard/tools"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
+              >
+                Open Tools Workspace
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            ) : null}
+          </div>
+        </section>
 
-              <p className="max-w-3xl text-sm text-slate-300 lg:text-base">
-                Integrations routes outside systems into Aether’s operational
-                engine. Socials, finance, utilities, and future field systems
-                all flow through this infrastructure layer.
-              </p>
+        <section className="rounded-3xl border-2 border-emerald-300 bg-gradient-to-br from-emerald-50 to-white p-6 shadow-sm lg:p-8">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div className="space-y-4">
+              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800">
+                <BarChart3 className="h-3.5 w-3.5" />
+                Live Analytics Import
+              </div>
+
+              <div>
+                <h2 className="text-2xl font-semibold tracking-tight text-emerald-950">
+                  Analytics CSV Import
+                </h2>
+
+                <p className="mt-2 max-w-3xl text-sm leading-6 text-emerald-900/80">
+                  Import campaign analytics and reporting data directly into
+                  Aether.
+                </p>
+              </div>
             </div>
 
-            <div className="flex flex-wrap gap-2">
-              <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold text-slate-100">
-                {configuredCount} / {totalVisibleIntegrations} marked ready
-              </span>
-              <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold text-slate-100">
-                Context: {contextMode}
-              </span>
-              <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold text-slate-100">
-                OAuth refinement pending credentials
-              </span>
-            </div>
+            <Link
+              href="/dashboard/import/analytics"
+              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-2xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800"
+            >
+              Open Analytics Import
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </section>
+
+        <IntegrationSection
+          title="Digital"
+          description="Connect the channels your digital team uses to track reach, content, engagement, and momentum."
+          integrations={DIGITAL_INTEGRATIONS}
+          syncingId={syncingId}
+          syncResults={syncResults}
+          configuredIntegrations={configuredIntegrations}
+          onRunSync={runTestSync}
+          onOpenConnection={setActiveIntegration}
+        />
+
+        <IntegrationSection
+          title="Finance"
+          description="Connect fundraising tools so donor activity and contribution movement can support finance work."
+          integrations={visibleFinanceIntegrations}
+          syncingId={syncingId}
+          syncResults={syncResults}
+          configuredIntegrations={configuredIntegrations}
+          onRunSync={runTestSync}
+          onOpenConnection={setActiveIntegration}
+        />
+
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="mb-6">
+            <h2 className="text-2xl font-semibold text-slate-900">
+              Field
+            </h2>
+
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+              Field tools and operational integrations are planned for a future
+              rollout.
+            </p>
           </div>
 
-          {showToolsWorkspaceLink ? (
-          <Link
-            href="/dashboard/tools"
-            className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
-          >
-            Open Tools Workspace
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-          ) : null}
-        </div>
-      </section>
-
-      <section className="rounded-3xl border-2 border-emerald-300 bg-emerald-50 p-6 shadow-sm lg:p-8">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800">
-              <BarChart3 className="h-3.5 w-3.5" />
-              Live Ingestion Pathway
+          <div className="rounded-3xl border border-dashed border-slate-300 bg-gradient-to-br from-slate-50 to-white p-8 text-center">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <MapPinned className="h-7 w-7 text-slate-500" />
             </div>
 
-            <div>
-              <h2 className="text-2xl font-semibold tracking-tight text-emerald-950">
-                Analytics CSV Import
-              </h2>
+            <p className="mt-4 text-lg font-semibold text-slate-800">
+              Field is part of the roadmap.
+            </p>
 
-              <p className="mt-2 max-w-3xl text-sm leading-6 text-emerald-900/80">
-                The active ingestion layer currently feeding analytics_events
-                and downstream digital signal interpretation.
-              </p>
-            </div>
+            <p className="mx-auto mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+              Aether’s first launch focus is digital, finance, and campaign
+              operations. Dedicated field integrations will expand over time.
+            </p>
           </div>
+        </section>
 
-          <Link
-            href="/dashboard/import/analytics"
-            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-2xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800"
-          >
-            Open Analytics Import
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </section>
+        <IntegrationSection
+          title="Utilities"
+          description="Connect the workspace tools your campaign uses to coordinate email, schedules, and shared files."
+          integrations={UTILITY_INTEGRATIONS}
+          syncingId={syncingId}
+          syncResults={syncResults}
+          configuredIntegrations={configuredIntegrations}
+          onRunSync={runTestSync}
+          onOpenConnection={setActiveIntegration}
+        />
+      </div>
 
-      <IntegrationSection
-        title="Digital"
-        description="Digital ingestion pathways feeding analytics, momentum reads, narrative pressure, and owned-channel intelligence."
-        integrations={DIGITAL_INTEGRATIONS}
-        syncingId={syncingId}
-        syncResults={syncResults}
-        configuredIntegrations={configuredIntegrations}
-        onRunSync={runTestSync}
-        onMarkConfigured={markConfigured}
-      />
-
-      <IntegrationSection
-        title="Finance"
-        description="Finance ingestion pathways powering donor routing, contribution enrichment, and future donor intelligence systems."
-        integrations={visibleFinanceIntegrations}
-        syncingId={syncingId}
-        syncResults={syncResults}
-        configuredIntegrations={configuredIntegrations}
-        onRunSync={runTestSync}
-        onMarkConfigured={markConfigured}
-      />
-
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="mb-6">
-          <h2 className="text-2xl font-semibold text-slate-900">
-            Field
-          </h2>
-
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-            Future field infrastructure pathways will route canvassing,
-            volunteer, turf, event, and deployment systems into Aether.
-          </p>
-        </div>
-
-        <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
-          <MapPinned className="mx-auto h-8 w-8 text-slate-400" />
-
-          <p className="mt-4 text-lg font-semibold text-slate-800">
-            Field integrations staged for future phase
-          </p>
-
-          <p className="mt-2 text-sm text-slate-500">
-            Turf systems, canvassing infrastructure, volunteer routing,
-            deployment tracking, and field coordination connectors will
-            appear here later.
-          </p>
-        </div>
-      </section>
-
-      <IntegrationSection
-        title="Utilities"
-        description="Workspace infrastructure connections powering campaign coordination utilities inside Tools."
-        integrations={UTILITY_INTEGRATIONS}
-        syncingId={syncingId}
-        syncResults={syncResults}
-        configuredIntegrations={configuredIntegrations}
-        onRunSync={runTestSync}
-        onMarkConfigured={markConfigured}
-      />
-
-      <section className="hidden">
-        <div>
-          Hidden ambient infrastructure metrics preserved for future logic expansion.
-        </div>
-      </section>
-    </div>
+      {activeIntegration ? (
+        <ConnectionPanel
+          integration={activeIntegration}
+          credentials={credentials}
+          setCredentials={setCredentials}
+          onClose={() => setActiveIntegration(null)}
+          onSave={saveConnection}
+        />
+      ) : null}
+    </>
   );
 }
