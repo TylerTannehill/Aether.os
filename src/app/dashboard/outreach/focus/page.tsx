@@ -37,7 +37,7 @@ import {
 import { aggregateAetherIntelligence } from "@/lib/intelligence/aggregator";
 import { getOrgContextTheme } from "@/lib/org-context-theme";
 
-type ListTag = "outreach" | "field" | "finance" | "volunteer";
+type ListTag = "outreach" | "field" | "finance" | "print";
 
 type FocusLaneItem = {
   id: string;
@@ -121,16 +121,30 @@ function normalizeOwner(value?: string | null) {
 }
 
 function resolveListTag(list: CampaignList): ListTag {
+  const explicitType = String((list as any).type || "").toLowerCase();
+
+  if (
+    explicitType === "outreach" ||
+    explicitType === "field" ||
+    explicitType === "finance" ||
+    explicitType === "print"
+  ) {
+    return explicitType as ListTag;
+  }
+
   const name = (list.name || "").toLowerCase();
   const owner = (list.default_owner_name || "").toLowerCase();
   const combined = `${name} ${owner}`;
 
   if (
-    combined.includes("volunteer") ||
-    combined.includes("phone bank") ||
-    combined.includes("phonebank")
+    combined.includes("print") ||
+    combined.includes("mailer") ||
+    combined.includes("mail") ||
+    combined.includes("yard sign") ||
+    combined.includes("palm card") ||
+    combined.includes("literature")
   ) {
-    return "volunteer";
+    return "print";
   }
 
   if (
@@ -153,14 +167,19 @@ function resolveListTag(list: CampaignList): ListTag {
   return "outreach";
 }
 
+function isOutreachWorkList(list: CampaignList) {
+  return resolveListTag(list) === "outreach";
+}
+
 function tagTone(tag: ListTag) {
   switch (tag) {
     case "field":
       return "bg-sky-100 text-sky-700";
     case "finance":
       return "bg-emerald-100 text-emerald-700";
-    case "volunteer":
+    case "print":
       return "bg-purple-100 text-purple-700";
+    case "outreach":
     default:
       return "bg-slate-100 text-slate-700";
   }
@@ -339,23 +358,32 @@ function OutreachFocusContent() {
       setMessage("");
 
       const loadedLists = await getOutreachLists();
-      setLists(loadedLists);
-
       const matchedPreferredList =
         preferredListId && loadedLists.find((list) => list.id === preferredListId);
 
-      const listsToLoad =
-        matchedPreferredList ? [matchedPreferredList] : loadedLists;
+      const outreachLists = loadedLists.filter(isOutreachWorkList);
+      const workspaceLists =
+        matchedPreferredList ? [matchedPreferredList] : outreachLists;
 
-      let allContacts: Contact[] = [];
-      let allLogs: OutreachLog[] = [];
+      setLists(matchedPreferredList ? [matchedPreferredList, ...outreachLists.filter((list) => list.id !== matchedPreferredList.id)] : outreachLists);
 
-      for (const list of listsToLoad) {
-        const listContacts = await getListContacts(list.id);
-        const listLogs = await getOutreachLogs(list.id);
-        allContacts = [...allContacts, ...listContacts];
-        allLogs = [...allLogs, ...listLogs];
-      }
+      const listPayloads = await Promise.all(
+        workspaceLists.map(async (list) => {
+          const [listContacts, listLogs] = await Promise.all([
+            getListContacts(list.id),
+            getOutreachLogs(list.id),
+          ]);
+
+          return {
+            list,
+            contacts: listContacts,
+            logs: listLogs,
+          };
+        })
+      );
+
+      const allContacts = listPayloads.flatMap((payload) => payload.contacts);
+      const allLogs = listPayloads.flatMap((payload) => payload.logs);
 
       const uniqueContacts = Array.from(
         new Map(allContacts.map((contact) => [contact.id, contact])).values()
@@ -374,7 +402,7 @@ function OutreachFocusContent() {
           id: matchedPreferredList.id,
           name: matchedPreferredList.name,
           tag: resolveListTag(matchedPreferredList),
-          size: (matchedPreferredList as any).size || uniqueContacts.length,
+          size: uniqueContacts.length,
         });
       }
 
@@ -627,8 +655,8 @@ function OutreachFocusContent() {
       title: list.name,
       summary:
         selectedListId && list.id === selectedListId
-          ? "Active focus list"
-          : "Active outreach segment",
+          ? "Active outreach focus list"
+          : "Relationship outreach segment",
       priority: index < 2 ? "high" : "medium",
       type: "list",
       listId: list.id,
@@ -977,7 +1005,7 @@ function OutreachFocusContent() {
                     </button>
 
                     <Link
-                      href={`/dashboard/contacts/${item.contactId}`}
+                      href={`/contacts/${item.contactId}`}
                       className="rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-700 hover:bg-slate-100"
                     >
                       Contact
@@ -1054,7 +1082,7 @@ function OutreachFocusContent() {
                     </button>
 
                     <Link
-                      href={`/dashboard/contacts/${item.contactId}`}
+                      href={`/contacts/${item.contactId}`}
                       className="rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-700 hover:bg-slate-100"
                     >
                       Contact
@@ -1132,7 +1160,7 @@ function OutreachFocusContent() {
                       }
                       className="flex-1 rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white hover:bg-slate-800"
                     >
-                      Activate
+                      Review
                     </button>
 
                     <Link
@@ -1177,8 +1205,15 @@ function OutreachFocusContent() {
               Working contact: {activeContact.name}
             </p>
             <p className="text-sm text-slate-500">
-              {activeContact.phone}
+              {activeContact.phone || "No phone on file"}
             </p>
+
+            <Link
+              href={`/contacts/${activeContact.id}`}
+              className="inline-flex w-fit items-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
+            >
+              Open Contact Profile
+            </Link>
 
             <div className="grid grid-cols-2 gap-2">
               <button
@@ -1249,20 +1284,33 @@ function OutreachFocusContent() {
 
         {activeList ? (
           <div className="space-y-4">
-            <p className="font-semibold text-slate-900">
-              Active list: {activeList.name}
-            </p>
+            <div>
+              <p className="font-semibold text-slate-900">
+                Reviewing list: {activeList.name}
+              </p>
 
-            <p className="text-sm text-slate-500">
-              {activeList.size} contacts in this list
-            </p>
+              <p className="mt-1 text-sm text-slate-500">
+                {activeList.size > 0
+                  ? `${activeList.size} contact${activeList.size === 1 ? "" : "s"} loaded for this list.`
+                  : "Open this list in Outreach to load and review its contacts."}
+              </p>
+            </div>
 
-            <Link
-              href={`/dashboard/outreach?listId=${activeList.id}`}
-              className="inline-flex w-full items-center justify-center rounded-xl bg-slate-900 px-4 py-3 text-sm text-white"
-            >
-              Open List in Outreach
-            </Link>
+            <div className="flex flex-wrap gap-2">
+              <Link
+                href={`/dashboard/outreach?listId=${activeList.id}`}
+                className="inline-flex flex-1 items-center justify-center rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+              >
+                Open List in Outreach
+              </Link>
+
+              <Link
+                href="/dashboard/lists"
+                className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+              >
+                Manage Lists
+              </Link>
+            </div>
           </div>
         ) : null}
       </section>

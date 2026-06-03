@@ -100,7 +100,7 @@ export type ListType =
   | "outreach"
   | "finance"
   | "field"
-  | "volunteer";
+  | "print";
 
 export type CampaignList = {
   id: string;
@@ -280,6 +280,7 @@ export type ListCounts = {
 export type CreateListInput = {
   name: string;
   type?: ListType;
+  contactIds?: string[];
 };
 
 export type ListDetailData = {

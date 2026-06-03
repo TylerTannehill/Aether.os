@@ -15,53 +15,15 @@ import {
   PhoneCall,
   PhoneForwarded,
   Sparkles,
-  Users,
+  UserRoundCheck,
   Zap,
 } from "lucide-react";
 import { createAutoTaskForOutcome, saveOutreachLog } from "@/lib/data/outreach";
-import {
-  getFinanceCallTargets,
-  type FinanceCallTarget,
-} from "@/lib/finance/call-targets";
+import { supabase } from "@/lib/supabase";
 import { getOrgContextTheme } from "@/lib/org-context-theme";
 
-type FocusLaneItem = {
-  id: string;
-  title: string;
-  summary: string;
-  priority: "high" | "medium" | "low";
-  type: "pledge" | "compliance" | "entry";
-  contactName?: string;
-  amount?: number;
-  callTargetStatus?: FinanceCallTarget["status"];
-};
-
-type ActivePledgeExecution = {
-  id: string;
-  title: string;
-  summary: string;
-  contactName: string;
-  amount: number;
-  status: "pledged" | "follow_up";
-};
-
-type ActiveComplianceExecution = {
-  id: string;
-  title: string;
-  summary: string;
-  contactName: string;
-  missingFields: string[];
-  amount: number;
-};
-
-type ActiveEntryExecution = {
-  id: string;
-  title: string;
-  summary: string;
-  entryType: "check" | "cash" | "online";
-  amount: number;
-  owner: string;
-};
+type Priority = "high" | "medium" | "low";
+type PaymentMethod = "check" | "cash" | "online";
 
 type CallOutcome =
   | "pledged"
@@ -70,10 +32,94 @@ type CallOutcome =
   | "wrong_time"
   | "completed";
 
+type ContactRecord = {
+  id: string;
+  first_name?: string | null;
+  last_name?: string | null;
+  full_name?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  street?: string | null;
+  address?: string | null;
+  city?: string | null;
+  state?: string | null;
+  zip?: string | null;
+  employer?: string | null;
+  occupation?: string | null;
+  organization_id?: string | null;
+  donation_total?: number | string | null;
+  pledge_amount?: number | string | null;
+  fec_total_given?: number | string | null;
+  fec_donor_tier?: string | null;
+  jackpot_candidate?: boolean | null;
+  jackpot_anomaly_type?: string | null;
+  jackpot_reason?: string | null;
+  updated_at?: string | null;
+};
+
+type ContributionRecord = {
+  id: string;
+  contact_id?: string | null;
+  amount?: number | string | null;
+  source?: string | null;
+  date?: string | null;
+  created_at?: string | null;
+  organization_id?: string | null;
+};
+
+type PledgeRecord = {
+  id: string;
+  contact_id?: string | null;
+  amount_pledged?: number | string | null;
+  amount_fulfilled?: number | string | null;
+  status?: string | null;
+  next_follow_up?: string | null;
+  created_at?: string | null;
+};
+
+type FocusPledge = {
+  id: string;
+  contactId: string;
+  contactName: string;
+  phone: string;
+  amount: number;
+  amountFulfilled: number;
+  remaining: number;
+  status: string;
+  nextFollowUp?: string | null;
+  priority: Priority;
+};
+
+type ComplianceItem = {
+  id: string;
+  contactId: string;
+  contactName: string;
+  amount: number;
+  missingFields: string[];
+  priority: Priority;
+  contact: ContactRecord;
+};
+
+type FinanceCallTarget = {
+  id: string;
+  contactId: string;
+  contactName: string;
+  phone: string;
+  city: string;
+  state: string;
+  amount: number;
+  priority: Priority;
+  reason: string;
+  suggestedAsk: string;
+  script: string;
+  status: "pledged" | "follow_up" | "reconnect";
+  lastContact: string;
+};
+
 type NextActionPlan = {
   title: string;
   summary: string;
-  priority: "high" | "medium" | "low";
+  priority: Priority;
   category: "conversion" | "retry" | "task" | "review";
   autoReady: boolean;
 };
@@ -84,7 +130,30 @@ const currency = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 0,
 });
 
-function priorityTone(priority: "high" | "medium" | "low") {
+function todayIsoDate() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function toNumber(value: unknown) {
+  const numeric = Number(value ?? 0);
+  return Number.isFinite(numeric) ? numeric : 0;
+}
+
+function isUuid(value: string) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    value,
+  );
+}
+
+function fullName(contact: ContactRecord) {
+  const name =
+    contact.full_name ||
+    [contact.first_name, contact.last_name].filter(Boolean).join(" ").trim();
+
+  return name || contact.email || "Unnamed Contact";
+}
+
+function priorityTone(priority: Priority) {
   switch (priority) {
     case "high":
       return "bg-rose-100 text-rose-700 border border-rose-200";
@@ -93,18 +162,6 @@ function priorityTone(priority: "high" | "medium" | "low") {
     case "low":
     default:
       return "bg-slate-100 text-slate-700 border border-slate-200";
-  }
-}
-
-function typeTone(type: FocusLaneItem["type"]) {
-  switch (type) {
-    case "pledge":
-      return "bg-emerald-100 text-emerald-700 border border-emerald-200";
-    case "compliance":
-      return "bg-amber-100 text-amber-800 border border-amber-200";
-    case "entry":
-    default:
-      return "bg-sky-100 text-sky-700 border border-sky-200";
   }
 }
 
@@ -138,24 +195,55 @@ function nextActionCategoryTone(category: NextActionPlan["category"]) {
   }
 }
 
-function isUuid(value: string) {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
-    value
-  );
+function getSuggestedAsk(contact: ContactRecord, amount: number) {
+  if (toNumber(contact.pledge_amount) > 0) {
+    return `Confirm the ${currency.format(toNumber(contact.pledge_amount))} pledge and collect cleanly.`;
+  }
+
+  if (contact.jackpot_candidate) {
+    return `Open with the donor opportunity context and test a ${currency.format(amount)} ask.`;
+  }
+
+  if (toNumber(contact.donation_total) > 0) {
+    return `Thank them for prior support and ask for ${currency.format(amount)} today.`;
+  }
+
+  return `Lead with campaign urgency and ask for ${currency.format(amount)}.`;
+}
+
+function getScript(contact: ContactRecord, amount: number) {
+  const name = fullName(contact);
+
+  if (toNumber(contact.pledge_amount) > 0) {
+    return `${name}, thanks again for backing the campaign. I’m reaching out to confirm your ${currency.format(
+      toNumber(contact.pledge_amount),
+    )} pledge and lock in collection today so we can keep finance clean and moving.`;
+  }
+
+  return `${name}, thank you again for being in our campaign orbit. I’m reaching out because we’re in an active push and wanted to ask whether ${currency.format(
+    amount,
+  )} is possible today to help us close strong.`;
+}
+
+function getPriority(amount: number, contact?: ContactRecord): Priority {
+  if (contact?.jackpot_candidate) return "high";
+  if (amount >= 1000) return "high";
+  if (amount >= 250) return "medium";
+  return "low";
 }
 
 function buildNextActionPlan(
   outcome: CallOutcome,
   contactName: string,
   followUpDate: string,
-  amount: number
+  amount: number,
 ): NextActionPlan {
   if (outcome === "pledged") {
     return {
       title: "Lock conversion",
       summary: `Confirm the ${currency.format(
-        amount
-      )} donation from ${contactName}, send acknowledgement, and keep this contact in a short conversion follow-up window.`,
+        amount,
+      )} commitment from ${contactName}, send acknowledgement, and keep the record clean.`,
       priority: "high",
       category: "conversion",
       autoReady: true,
@@ -165,7 +253,7 @@ function buildNextActionPlan(
   if (outcome === "follow_up") {
     return {
       title: "Schedule pledge conversion follow-up",
-      summary: `Follow up with ${contactName} on ${followUpDate} and keep this contact near the top of the finance call queue until resolved.`,
+      summary: `Follow up with ${contactName} on ${followUpDate} and keep this contact near the top of the finance queue.`,
       priority: "high",
       category: "task",
       autoReady: true,
@@ -175,7 +263,7 @@ function buildNextActionPlan(
   if (outcome === "wrong_time") {
     return {
       title: "Retry at better time",
-      summary: `Retry ${contactName} on ${followUpDate} and preserve context from this call so the next touch is cleaner.`,
+      summary: `Retry ${contactName} on ${followUpDate} and preserve context from this call.`,
       priority: "medium",
       category: "retry",
       autoReady: true,
@@ -185,7 +273,7 @@ function buildNextActionPlan(
   if (outcome === "no_answer") {
     return {
       title: "Requeue contact",
-      summary: `Requeue ${contactName} for another attempt and keep them in rotation without losing the finance ask context.`,
+      summary: `Requeue ${contactName} for another attempt without losing the finance ask context.`,
       priority: "medium",
       category: "retry",
       autoReady: true,
@@ -194,36 +282,44 @@ function buildNextActionPlan(
 
   return {
     title: "Review call outcome",
-    summary: `Review the result for ${contactName}, decide whether this should become a finance task, and determine whether the contact should remain active in the queue.`,
+    summary: `Review the result for ${contactName} and decide whether this should remain active in the queue.`,
     priority: "low",
     category: "review",
     autoReady: false,
   };
 }
 
+async function getActiveOrganizationId() {
+  try {
+    const response = await fetch("/api/auth/current-context", {
+      credentials: "include",
+    });
+
+    if (!response.ok) return null;
+
+    const payload = await response.json();
+
+    return (
+      payload?.organization?.id ||
+      payload?.membership?.organization_id ||
+      null
+    );
+  } catch (error) {
+    console.error("Failed to resolve finance focus org:", error);
+    return null;
+  }
+}
+
 export default function FinanceFocusModePage() {
-  const [activePledge, setActivePledge] =
-    useState<ActivePledgeExecution | null>(null);
-  const [activeCompliance, setActiveCompliance] =
-    useState<ActiveComplianceExecution | null>(null);
-  const [activeEntry, setActiveEntry] =
-    useState<ActiveEntryExecution | null>(null);
-
-  const [pledgeConfirmed, setPledgeConfirmed] = useState<string | null>(null);
-  const [complianceConfirmed, setComplianceConfirmed] = useState<string | null>(
-    null
-  );
-  const [entryConfirmed, setEntryConfirmed] = useState<string | null>(null);
-
-  const [pledgeAction, setPledgeAction] = useState<
-    "Convert Pledge" | "Schedule Follow-Up"
-  >("Convert Pledge");
-  const [entryMethod, setEntryMethod] = useState<"check" | "cash" | "online">(
-    "check"
-  );
-
-  const [fieldEmployer, setFieldEmployer] = useState("Updated Employer");
-  const [fieldOccupation, setFieldOccupation] = useState("Updated Occupation");
+  const [contacts, setContacts] = useState<ContactRecord[]>([]);
+  const [contributions, setContributions] = useState<ContributionRecord[]>([]);
+  const [pledges, setPledges] = useState<PledgeRecord[]>([]);
+  const [loadingTargets, setLoadingTargets] = useState(true);
+  const [roleLoading, setRoleLoading] = useState(true);
+  const [hasFinanceAccess, setHasFinanceAccess] = useState(false);
+  const [hasFinanceDirector, setHasFinanceDirector] = useState(false);
+  const [hasFinanceUser, setHasFinanceUser] = useState(false);
+  const [contextMode, setContextMode] = useState("default");
 
   const [callSessionStarted, setCallSessionStarted] = useState(false);
   const [callIndex, setCallIndex] = useState(0);
@@ -238,43 +334,100 @@ export default function FinanceFocusModePage() {
   >([]);
   const [lastCallMessage, setLastCallMessage] = useState("");
   const [nextAction, setNextAction] = useState<NextActionPlan | null>(null);
-  const [followUpDate, setFollowUpDate] = useState("2026-04-13");
+  const [followUpDate, setFollowUpDate] = useState(todayIsoDate());
   const [callNote, setCallNote] = useState("");
-  const [callTargets, setCallTargets] = useState<FinanceCallTarget[]>([]);
-  const [loadingTargets, setLoadingTargets] = useState(true);
-  const [roleLoading, setRoleLoading] = useState(true);
-  const [hasFinanceAccess, setHasFinanceAccess] = useState(false);
-  const [hasFinanceDirector, setHasFinanceDirector] = useState(false);
-  const [hasFinanceUser, setHasFinanceUser] = useState(false);
-  const [contextMode, setContextMode] = useState("default");
+
+  const [paymentAmount, setPaymentAmount] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("check");
+  const [paymentDate, setPaymentDate] = useState(todayIsoDate());
+  const [paymentMessage, setPaymentMessage] = useState("");
+
+  const [activePledgeId, setActivePledgeId] = useState<string | null>(null);
+  const [pledgePaymentAmount, setPledgePaymentAmount] = useState("");
+  const [pledgePaymentMethod, setPledgePaymentMethod] =
+    useState<PaymentMethod>("check");
+  const [pledgePaymentDate, setPledgePaymentDate] = useState(todayIsoDate());
+  const [pledgeMessage, setPledgeMessage] = useState("");
+
+  const [activeComplianceId, setActiveComplianceId] = useState<string | null>(
+    null,
+  );
+  const [complianceDraft, setComplianceDraft] = useState({
+    first_name: "",
+    last_name: "",
+    street: "",
+    city: "",
+    state: "",
+    zip: "",
+    employer: "",
+    occupation: "",
+  });
+  const [complianceMessage, setComplianceMessage] = useState("");
+
+  async function loadFinanceRecords() {
+    try {
+      setLoadingTargets(true);
+
+      const organizationId = await getActiveOrganizationId();
+
+      let contactsQuery = supabase
+        .from("contacts")
+        .select(
+          "id, first_name, last_name, full_name, email, phone, street, address, city, state, zip, employer, occupation, organization_id, donation_total, pledge_amount, fec_total_given, fec_donor_tier, jackpot_candidate, jackpot_anomaly_type, jackpot_reason, updated_at",
+        )
+        .order("updated_at", { ascending: false })
+        .limit(100);
+
+      if (organizationId) {
+        contactsQuery = contactsQuery.eq("organization_id", organizationId);
+      }
+
+      const { data: contactData, error: contactError } = await contactsQuery;
+
+      if (contactError) throw contactError;
+
+      const safeContacts = (contactData as ContactRecord[] | null) ?? [];
+      const contactIds = safeContacts.map((contact) => contact.id);
+
+      if (contactIds.length === 0) {
+        setContacts([]);
+        setContributions([]);
+        setPledges([]);
+        return;
+      }
+
+      const { data: contributionData, error: contributionError } =
+        await supabase
+          .from("contributions")
+          .select("id, contact_id, amount, source, date, created_at, organization_id")
+          .in("contact_id", contactIds)
+          .order("date", { ascending: false });
+
+      if (contributionError) throw contributionError;
+
+      const { data: pledgeData, error: pledgeError } = await supabase
+        .from("pledges")
+        .select("id, contact_id, amount_pledged, amount_fulfilled, status, next_follow_up, created_at")
+        .in("contact_id", contactIds)
+        .order("created_at", { ascending: false });
+
+      if (pledgeError) throw pledgeError;
+
+      setContacts(safeContacts);
+      setContributions((contributionData as ContributionRecord[] | null) ?? []);
+      setPledges((pledgeData as PledgeRecord[] | null) ?? []);
+    } catch (error) {
+      console.error("Failed to load finance focus records:", error);
+      setContacts([]);
+      setContributions([]);
+      setPledges([]);
+    } finally {
+      setLoadingTargets(false);
+    }
+  }
 
   useEffect(() => {
-    let mounted = true;
-
-    async function loadTargets() {
-      try {
-        const liveTargets = await getFinanceCallTargets();
-
-        if (!mounted) return;
-
-        setCallTargets(Array.isArray(liveTargets) ? liveTargets : []);
-      } catch (error) {
-        console.error("Failed to load live finance targets:", error);
-
-        if (!mounted) return;
-        setCallTargets([]);
-      } finally {
-        if (mounted) {
-          setLoadingTargets(false);
-        }
-      }
-    }
-
-    loadTargets();
-
-    return () => {
-      mounted = false;
-    };
+    loadFinanceRecords();
   }, []);
 
   useEffect(() => {
@@ -290,7 +443,6 @@ export default function FinanceFocusModePage() {
         if (!mounted) return;
 
         if (!response.ok) {
-          console.error("Failed to load finance role context:", data?.error);
           setHasFinanceAccess(false);
           setHasFinanceDirector(false);
           setHasFinanceUser(false);
@@ -305,43 +457,34 @@ export default function FinanceFocusModePage() {
 
           if (contextResponse.ok) {
             const contextData = await contextResponse.json();
-
-            setContextMode(
-              contextData?.organization?.context_mode || "default"
-            );
+            setContextMode(contextData?.organization?.context_mode || "default");
           }
         } catch (contextError) {
-          console.error(
-            "Failed to load finance focus org context mode:",
-            contextError
-          );
+          console.error("Failed to load finance focus org context mode:", contextError);
         }
 
         const myRoles = roles.filter(
-          (role: any) => role.organization_member_id === currentMemberId
+          (role: any) => role.organization_member_id === currentMemberId,
         );
 
         const normalizedFinanceRoles = myRoles.filter(
-          (role: any) => String(role.department || "").toLowerCase() === "finance"
+          (role: any) => String(role.department || "").toLowerCase() === "finance",
         );
 
-        const financeDirector = normalizedFinanceRoles.some(
-          (role: any) =>
-            ["admin", "campaign_manager", "director", "finance_director"].includes(
-              String(role.role_level || "").toLowerCase()
-            )
+        const financeDirector = normalizedFinanceRoles.some((role: any) =>
+          ["admin", "campaign_manager", "director", "finance_director"].includes(
+            String(role.role_level || "").toLowerCase(),
+          ),
         );
 
         const financeUser = normalizedFinanceRoles.some((role: any) =>
           ["user", "general_user", "finance_user"].includes(
-            String(role.role_level || "").toLowerCase()
-          )
+            String(role.role_level || "").toLowerCase(),
+          ),
         );
 
         const legacyRole = String(data?.currentMember?.role || "").toLowerCase();
-        const legacyDepartment = String(
-          data?.currentMember?.department || ""
-        ).toLowerCase();
+        const legacyDepartment = String(data?.currentMember?.department || "").toLowerCase();
 
         const legacyAdminAccess = legacyRole === "admin";
         const legacyFinanceAccess = legacyDepartment === "finance";
@@ -349,7 +492,7 @@ export default function FinanceFocusModePage() {
         setHasFinanceDirector(financeDirector || legacyAdminAccess);
         setHasFinanceUser(financeUser || legacyFinanceAccess);
         setHasFinanceAccess(
-          normalizedFinanceRoles.length > 0 || legacyAdminAccess || legacyFinanceAccess
+          normalizedFinanceRoles.length > 0 || legacyAdminAccess || legacyFinanceAccess,
         );
       } catch (error) {
         console.error("Failed to load finance role context:", error);
@@ -372,49 +515,158 @@ export default function FinanceFocusModePage() {
     };
   }, []);
 
-  const orgTheme = getOrgContextTheme(contextMode);
+  const contactById = useMemo(() => {
+    return new Map(contacts.map((contact) => [contact.id, contact]));
+  }, [contacts]);
 
-  const nowLine = useMemo(() => {
-    if (hasFinanceDirector) {
-      return {
-        headline: "Direct the finance lane.",
-        body:
-          "Spot donor pressure, route the highest-value work, and keep calls moving without drowning operators in strategy.",
-      };
+  const contributionTotalByContact = useMemo(() => {
+    const totals = new Map<string, number>();
+
+    for (const contribution of contributions) {
+      if (!contribution.contact_id) continue;
+      totals.set(
+        contribution.contact_id,
+        (totals.get(contribution.contact_id) ?? 0) + toNumber(contribution.amount),
+      );
     }
 
-    return {
-      headline: "Stay in finance execution flow.",
-      body:
-        "Call time comes first. Work the queue, log outcomes, and keep donor follow-up clean.",
-    };
-  }, [hasFinanceDirector]);
+    return totals;
+  }, [contributions]);
 
-  const focusItems = useMemo<FocusLaneItem[]>(() => {
-    return callTargets.slice(0, 4).map((target) => ({
-      id: target.id,
-      title:
-        target.status === "pledged"
-          ? `Collect ${target.contactName} pledge`
-          : target.status === "follow_up"
-            ? `Follow up with ${target.contactName}`
-            : `Call ${target.contactName}`,
-      summary: target.reason,
-      priority: target.priority,
-      type: "pledge",
-      contactName: target.contactName,
-      amount: target.amount,
-      callTargetStatus: target.status,
-    }));
-  }, [callTargets]);
+  const openPledges = useMemo<FocusPledge[]>(() => {
+    return pledges
+      .map((pledge) => {
+        const contact = pledge.contact_id
+          ? contactById.get(pledge.contact_id)
+          : null;
 
-  const grouped = useMemo(() => {
-    return {
-      pledge: focusItems.filter((item) => item.type === "pledge"),
-      compliance: focusItems.filter((item) => item.type === "compliance"),
-      entry: focusItems.filter((item) => item.type === "entry"),
-    };
-  }, [focusItems]);
+        if (!contact || !pledge.contact_id) return null;
+
+        const status = String(pledge.status || "pledged").toLowerCase();
+        const amount = toNumber(pledge.amount_pledged);
+        const amountFulfilled = toNumber(pledge.amount_fulfilled);
+        const remaining = Math.max(amount - amountFulfilled, 0);
+
+        if (status === "converted" || remaining <= 0) return null;
+
+        return {
+          id: pledge.id,
+          contactId: pledge.contact_id,
+          contactName: fullName(contact),
+          phone: contact.phone || "—",
+          amount,
+          amountFulfilled,
+          remaining,
+          status,
+          nextFollowUp: pledge.next_follow_up ?? null,
+          priority: getPriority(remaining, contact),
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) => {
+        const priorityRank = { high: 3, medium: 2, low: 1 };
+        const priorityDiff = priorityRank[(b as FocusPledge).priority] - priorityRank[(a as FocusPledge).priority];
+        if (priorityDiff !== 0) return priorityDiff;
+        return (b as FocusPledge).remaining - (a as FocusPledge).remaining;
+      }) as FocusPledge[];
+  }, [pledges, contactById]);
+
+  const complianceItems = useMemo<ComplianceItem[]>(() => {
+    return contacts
+      .map((contact) => {
+        const contributionTotal =
+          contributionTotalByContact.get(contact.id) ?? toNumber(contact.donation_total);
+
+        if (contributionTotal <= 0) return null;
+
+        const missingFields: string[] = [];
+
+        if (!String(contact.first_name || "").trim()) missingFields.push("First Name");
+        if (!String(contact.last_name || "").trim()) missingFields.push("Last Name");
+        if (!String(contact.street || contact.address || "").trim()) missingFields.push("Street / Address");
+        if (!String(contact.city || "").trim()) missingFields.push("City");
+        if (!String(contact.state || "").trim()) missingFields.push("State");
+        if (!String(contact.zip || "").trim()) missingFields.push("Zip");
+        if (!String(contact.employer || "").trim()) missingFields.push("Employer");
+        if (!String(contact.occupation || "").trim()) missingFields.push("Occupation");
+
+        if (!missingFields.length) return null;
+
+        return {
+          id: `compliance-${contact.id}`,
+          contactId: contact.id,
+          contactName: fullName(contact),
+          amount: contributionTotal,
+          missingFields,
+          priority: missingFields.includes("Employer") || missingFields.includes("Occupation") ? "high" : "medium",
+          contact,
+        };
+      })
+      .filter(Boolean) as ComplianceItem[];
+  }, [contacts, contributionTotalByContact]);
+
+  const callTargets = useMemo<FinanceCallTarget[]>(() => {
+    const pledgeTargets = openPledges.map((pledge) => {
+      const contact = contactById.get(pledge.contactId);
+
+      return {
+        id: `call-pledge-${pledge.id}`,
+        contactId: pledge.contactId,
+        contactName: pledge.contactName,
+        phone: pledge.phone,
+        city: contact?.city || "Unknown",
+        state: contact?.state || "—",
+        amount: pledge.remaining,
+        priority: pledge.priority,
+        reason: `Open pledge should be followed up before it cools.`,
+        suggestedAsk: `Collect ${currency.format(pledge.remaining)} from open pledge.`,
+        script: getScript(contact || { id: pledge.contactId }, pledge.remaining),
+        status: "pledged" as const,
+        lastContact: pledge.nextFollowUp ? `Next follow-up: ${pledge.nextFollowUp}` : "Open pledge record",
+      };
+    });
+
+    const donorTargets = contacts
+      .filter((contact) => !pledgeTargets.some((target) => target.contactId === contact.id))
+      .filter((contact) => contact.phone)
+      .map((contact) => {
+        const amount = Math.max(
+          toNumber(contact.pledge_amount),
+          toNumber(contact.donation_total),
+          toNumber(contact.fec_total_given),
+          contact.jackpot_candidate ? 1000 : 250,
+        );
+
+        return {
+          id: `call-contact-${contact.id}`,
+          contactId: contact.id,
+          contactName: fullName(contact),
+          phone: contact.phone || "—",
+          city: contact.city || "Unknown",
+          state: contact.state || "—",
+          amount,
+          priority: getPriority(amount, contact),
+          reason:
+            contact.jackpot_reason ||
+            (toNumber(contact.donation_total) > 0
+              ? "Prior donor should be worked for follow-up."
+              : "Callable finance contact is available for donor outreach."),
+          suggestedAsk: getSuggestedAsk(contact, amount),
+          script: getScript(contact, amount),
+          status: contact.jackpot_candidate ? "follow_up" as const : "reconnect" as const,
+          lastContact: contact.updated_at ? `Updated: ${contact.updated_at.slice(0, 10)}` : "Live contact record",
+        };
+      });
+
+    return [...pledgeTargets, ...donorTargets]
+      .sort((a, b) => {
+        const priorityRank = { high: 3, medium: 2, low: 1 };
+        const priorityDiff = priorityRank[b.priority] - priorityRank[a.priority];
+        if (priorityDiff !== 0) return priorityDiff;
+        return b.amount - a.amount;
+      })
+      .slice(0, 50);
+  }, [contacts, openPledges, contactById]);
 
   const activeCallTarget = callTargets[callIndex] ?? null;
   const activeCallContactHref =
@@ -422,13 +674,35 @@ export default function FinanceFocusModePage() {
       ? `/dashboard/contacts/${activeCallTarget.contactId}`
       : "/dashboard/contacts";
 
+  const activePledge = openPledges.find((pledge) => pledge.id === activePledgeId) ?? null;
+  const activeCompliance =
+    complianceItems.find((item) => item.id === activeComplianceId) ?? null;
+
+  const orgTheme = getOrgContextTheme(contextMode);
+
+  const nowLine = useMemo(() => {
+    if (hasFinanceDirector) {
+      return {
+        headline: "Direct the finance lane.",
+        body:
+          "Work real pledges, collect real payments, and clean donor records before exports drift.",
+      };
+    }
+
+    return {
+      headline: "Stay in finance execution flow.",
+      body:
+        "Call donors, record payments, convert pledges, and clean compliance fields without leaving the lane.",
+    };
+  }, [hasFinanceDirector]);
+
   const callSessionStats = useMemo(() => {
     const pledgedTotal = callLog
       .filter((item) => item.outcome === "pledged")
       .reduce((sum, item) => sum + item.amount, 0);
 
     const followUps = callLog.filter(
-      (item) => item.outcome === "follow_up" || item.outcome === "wrong_time"
+      (item) => item.outcome === "follow_up" || item.outcome === "wrong_time",
     ).length;
 
     const completed = callLog.length;
@@ -442,6 +716,15 @@ export default function FinanceFocusModePage() {
     };
   }, [callLog, callTargets.length]);
 
+  const callSessionComplete =
+    callSessionStarted && callSessionStats.completed >= callTargets.length;
+
+  const financeRoleLabel = hasFinanceDirector
+    ? "Finance Director"
+    : hasFinanceUser
+      ? "Finance User"
+      : "No Finance Role";
+
   function startCallSession() {
     setCallSessionStarted(true);
     setCallIndex(0);
@@ -449,7 +732,11 @@ export default function FinanceFocusModePage() {
     setLastCallMessage("");
     setNextAction(null);
     setCallNote("");
-    setFollowUpDate("2026-04-13");
+    setPaymentAmount("");
+    setPaymentMethod("check");
+    setPaymentDate(todayIsoDate());
+    setPaymentMessage("");
+    setFollowUpDate(todayIsoDate());
   }
 
   function resetCallSession() {
@@ -459,16 +746,187 @@ export default function FinanceFocusModePage() {
     setLastCallMessage("");
     setNextAction(null);
     setCallNote("");
-    setFollowUpDate("2026-04-13");
+    setPaymentMessage("");
+    setFollowUpDate(todayIsoDate());
+  }
+
+  async function saveContributionForContact(input: {
+    contactId: string;
+    amount: number;
+    source: PaymentMethod;
+    date: string;
+  }) {
+    const contact = contactById.get(input.contactId);
+
+    if (!contact) {
+      throw new Error("Contact not found.");
+    }
+
+    const { error: insertError } = await supabase.from("contributions").insert([
+      {
+        contact_id: input.contactId,
+        amount: input.amount,
+        source: input.source,
+        date: input.date,
+        organization_id: contact.organization_id ?? null,
+      },
+    ]);
+
+    if (insertError) throw insertError;
+
+    const currentDonationTotal =
+      contributionTotalByContact.get(input.contactId) ??
+      toNumber(contact.donation_total);
+
+    const nextDonationTotal = currentDonationTotal + input.amount;
+
+    const { error: updateError } = await supabase
+      .from("contacts")
+      .update({
+        donation_total: nextDonationTotal,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", input.contactId);
+
+    if (updateError) throw updateError;
+  }
+
+  async function recordActiveCallPayment() {
+    if (!activeCallTarget) return;
+
+    const amount = toNumber(paymentAmount || activeCallTarget.amount);
+
+    setPaymentMessage("");
+
+    if (amount <= 0) {
+      setPaymentMessage("Enter a valid payment amount.");
+      return;
+    }
+
+    try {
+      await saveContributionForContact({
+        contactId: activeCallTarget.contactId,
+        amount,
+        source: paymentMethod,
+        date: paymentDate || todayIsoDate(),
+      });
+
+      setPaymentAmount("");
+      setPaymentMessage(
+        `${currency.format(amount)} ${paymentMethod} payment saved for ${activeCallTarget.contactName}.`,
+      );
+
+      await loadFinanceRecords();
+    } catch (error: any) {
+      setPaymentMessage(error?.message || "Payment did not save.");
+    }
+  }
+
+  async function recordPledgePayment() {
+    if (!activePledge) return;
+
+    const amount = toNumber(pledgePaymentAmount || activePledge.remaining);
+
+    setPledgeMessage("");
+
+    if (amount <= 0) {
+      setPledgeMessage("Enter a valid pledge payment amount.");
+      return;
+    }
+
+    try {
+      await saveContributionForContact({
+        contactId: activePledge.contactId,
+        amount,
+        source: pledgePaymentMethod,
+        date: pledgePaymentDate || todayIsoDate(),
+      });
+
+      const fulfilled = activePledge.amountFulfilled + amount;
+      const converted = fulfilled >= activePledge.amount;
+
+      const { error: pledgeError } = await supabase
+        .from("pledges")
+        .update({
+          amount_fulfilled: Math.min(fulfilled, activePledge.amount),
+          status: converted ? "converted" : activePledge.status || "follow_up",
+        })
+        .eq("id", activePledge.id);
+
+      if (pledgeError) throw pledgeError;
+
+      const { error: contactError } = await supabase
+        .from("contacts")
+        .update({
+          pledge_amount: converted
+            ? 0
+            : Math.max(activePledge.amount - fulfilled, 0),
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", activePledge.contactId);
+
+      if (contactError) throw contactError;
+
+      setPledgePaymentAmount("");
+      setPledgeMessage(
+        converted
+          ? `${currency.format(amount)} saved and pledge marked converted.`
+          : `${currency.format(amount)} saved against pledge.`,
+      );
+
+      await loadFinanceRecords();
+    } catch (error: any) {
+      setPledgeMessage(error?.message || "Pledge payment did not save.");
+    }
+  }
+
+  async function saveComplianceDraft() {
+    if (!activeCompliance) return;
+
+    setComplianceMessage("");
+
+    try {
+      const nextFullName = [
+        complianceDraft.first_name.trim(),
+        complianceDraft.last_name.trim(),
+      ]
+        .filter(Boolean)
+        .join(" ");
+
+      const { error } = await supabase
+        .from("contacts")
+        .update({
+          first_name: complianceDraft.first_name.trim() || null,
+          last_name: complianceDraft.last_name.trim() || null,
+          full_name: nextFullName || null,
+          street: complianceDraft.street.trim() || null,
+          address: complianceDraft.street.trim() || null,
+          city: complianceDraft.city.trim() || null,
+          state: complianceDraft.state.trim() || null,
+          zip: complianceDraft.zip.trim() || null,
+          employer: complianceDraft.employer.trim() || null,
+          occupation: complianceDraft.occupation.trim() || null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", activeCompliance.contactId);
+
+      if (error) throw error;
+
+      setComplianceMessage("Compliance fields saved.");
+      await loadFinanceRecords();
+    } catch (error: any) {
+      setComplianceMessage(error?.message || "Compliance fields did not save.");
+    }
   }
 
   async function advanceCallSession(
     outcome: CallOutcome,
     defaultNote?: string,
-    amountOverride?: number
+    amountOverride?: number,
   ) {
     if (!activeCallTarget) return;
-        const entryAmount =
+
+    const entryAmount =
       typeof amountOverride === "number" ? amountOverride : activeCallTarget.amount;
 
     const entryNote = callNote.trim() || defaultNote || "Finance call logged.";
@@ -522,24 +980,24 @@ export default function FinanceFocusModePage() {
     if (outcome === "pledged") {
       setLastCallMessage(
         `${activeCallTarget.contactName} committed ${currency.format(
-          entryAmount
-        )}. Logged into outreach and moving to next call target.`
+          entryAmount,
+        )}. Log payment when collected, or keep them in pledge follow-up.`,
       );
     } else if (outcome === "follow_up") {
       setLastCallMessage(
-        `Follow-up scheduled for ${activeCallTarget.contactName} on ${followUpDate}. Logged into outreach and moving to next call target.`
+        `Follow-up scheduled for ${activeCallTarget.contactName} on ${followUpDate}.`,
       );
     } else if (outcome === "wrong_time") {
       setLastCallMessage(
-        `${activeCallTarget.contactName} asked for a better time. Added follow-up for ${followUpDate} and logged into outreach.`
+        `${activeCallTarget.contactName} asked for a better time. Follow-up target: ${followUpDate}.`,
       );
     } else if (outcome === "no_answer") {
       setLastCallMessage(
-        `No answer from ${activeCallTarget.contactName}. Logged into outreach and recycling attention to the next target.`
+        `No answer from ${activeCallTarget.contactName}. Logged and moving to next target.`,
       );
     } else {
       setLastCallMessage(
-        `Call completed for ${activeCallTarget.contactName}. Logged into outreach and moving forward.`
+        `Call completed for ${activeCallTarget.contactName}. Logged and moving forward.`,
       );
     }
 
@@ -548,157 +1006,40 @@ export default function FinanceFocusModePage() {
         outcome,
         activeCallTarget.contactName,
         followUpDate,
-        entryAmount
-      )
+        entryAmount,
+      ),
     );
 
     setCallNote("");
+    setPaymentMessage("");
+    setPaymentAmount("");
     setCallIndex((current) => current + 1);
   }
 
-  function openPledgePanel(item: FocusLaneItem) {
-    const mapped: Record<string, ActivePledgeExecution> = {
-      "focus-1": {
-        id: item.id,
-        title: item.title,
-        summary: item.summary,
-        contactName: "Michael Ross",
-        amount: 3200,
-        status: "pledged",
-      },
-      "focus-4": {
-        id: item.id,
-        title: item.title,
-        summary: item.summary,
-        contactName: "Open pledge block",
-        amount: 5400,
-        status: "follow_up",
-      },
-    };
-
-    const selected = mapped[item.id] ?? {
-      id: item.id,
-      title: item.title,
-      summary: item.summary,
-      contactName: item.contactName || "Finance Contact",
-      amount: item.amount || 1000,
-      status: item.callTargetStatus === "follow_up" ? "follow_up" : "pledged",
-    };
-
-    setActivePledge(selected);
-    setPledgeAction(
-      selected.status === "pledged" ? "Convert Pledge" : "Schedule Follow-Up"
-    );
-    setPledgeConfirmed(null);
+  function openPledge(pledge: FocusPledge) {
+    setActivePledgeId(pledge.id);
+    setPledgePaymentAmount(String(pledge.remaining || ""));
+    setPledgePaymentMethod("check");
+    setPledgePaymentDate(todayIsoDate());
+    setPledgeMessage("");
   }
 
-  function confirmPledgeAction() {
-    if (!activePledge) return;
-    setPledgeConfirmed(activePledge.id);
+  function openCompliance(item: ComplianceItem) {
+    const contact = item.contact;
+
+    setActiveComplianceId(item.id);
+    setComplianceDraft({
+      first_name: contact.first_name || "",
+      last_name: contact.last_name || "",
+      street: contact.street || contact.address || "",
+      city: contact.city || "",
+      state: contact.state || "",
+      zip: contact.zip || "",
+      employer: contact.employer || "",
+      occupation: contact.occupation || "",
+    });
+    setComplianceMessage("");
   }
-
-  function clearPledgePanel() {
-    setActivePledge(null);
-    setPledgeConfirmed(null);
-  }
-
-  function openCompliancePanel(item: FocusLaneItem) {
-    const mapped: Record<string, ActiveComplianceExecution> = {
-      "focus-2": {
-        id: item.id,
-        title: item.title,
-        summary: item.summary,
-        contactName: "James Carter",
-        missingFields: ["Employer", "Occupation"],
-        amount: 1000,
-      },
-      "focus-5": {
-        id: item.id,
-        title: item.title,
-        summary: item.summary,
-        contactName: "Multiple contribution records",
-        missingFields: ["Employer", "Occupation"],
-        amount: 2500,
-      },
-    };
-
-    const selected = mapped[item.id] ?? {
-      id: item.id,
-      title: item.title,
-      summary: item.summary,
-      contactName: "Finance Contact",
-      missingFields: ["Employer", "Occupation"],
-      amount: 500,
-    };
-
-    setActiveCompliance(selected);
-    setFieldEmployer("Updated Employer");
-    setFieldOccupation("Updated Occupation");
-    setComplianceConfirmed(null);
-  }
-
-  function confirmComplianceAction() {
-    if (!activeCompliance) return;
-    setComplianceConfirmed(activeCompliance.id);
-  }
-
-  function clearCompliancePanel() {
-    setActiveCompliance(null);
-    setComplianceConfirmed(null);
-  }
-
-  function openEntryPanel(item: FocusLaneItem) {
-    const mapped: Record<string, ActiveEntryExecution> = {
-      "focus-3": {
-        id: item.id,
-        title: item.title,
-        summary: item.summary,
-        entryType: "check",
-        amount: 4800,
-        owner: "Maya",
-      },
-      "focus-6": {
-        id: item.id,
-        title: item.title,
-        summary: item.summary,
-        entryType: "cash",
-        amount: 650,
-        owner: "Finance Team",
-      },
-    };
-
-    const selected = mapped[item.id] ?? {
-      id: item.id,
-      title: item.title,
-      summary: item.summary,
-      entryType: "online" as const,
-      amount: 1000,
-      owner: "Finance Team",
-    };
-
-    setActiveEntry(selected);
-    setEntryMethod(selected.entryType);
-    setEntryConfirmed(null);
-  }
-
-  function confirmEntryAction() {
-    if (!activeEntry) return;
-    setEntryConfirmed(activeEntry.id);
-  }
-
-  function clearEntryPanel() {
-    setActiveEntry(null);
-    setEntryConfirmed(null);
-  }
-
-  const callSessionComplete =
-    callSessionStarted && callSessionStats.completed >= callTargets.length;
-
-  const financeRoleLabel = hasFinanceDirector
-    ? "Finance Director"
-    : hasFinanceUser
-      ? "Finance User"
-      : "No Finance Role";
 
   if (roleLoading) {
     return (
@@ -772,9 +1113,6 @@ export default function FinanceFocusModePage() {
               <p className="max-w-3xl text-sm text-slate-300 lg:text-base">
                 {nowLine.body}
               </p>
-              <p className="text-sm text-slate-400">
-                
-              </p>
             </div>
           </div>
 
@@ -806,90 +1144,53 @@ export default function FinanceFocusModePage() {
         </div>
       </section>
 
-      {!hasFinanceDirector ? (
-        <section className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+      {hasFinanceDirector && callTargets.length > 0 ? (
+        <section className="rounded-3xl border-2 border-amber-300 bg-gradient-to-br from-amber-50 via-yellow-50 to-white p-6 shadow-md">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800">
-                Execution Lane
-              </p>
-              <h2 className="mt-2 text-xl font-semibold text-emerald-950">
-                Your finance work starts with donor calls.
+              <div className="inline-flex items-center gap-2 rounded-full border border-amber-300 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-amber-800">
+                <Sparkles className="h-3.5 w-3.5" />
+                Jackpot Priority Bridge
+              </div>
+              <h2 className="mt-4 text-2xl font-semibold text-slate-900">
+                Neglected opportunity detected
               </h2>
-              <p className="mt-1 max-w-3xl text-sm text-emerald-800">
-                Strategy signals stay with finance leadership. Your job is to work the call queue, log clean outcomes, and keep pledge follow-up moving.
+              <p className="mt-2 max-w-3xl text-sm text-slate-700">
+                Aether is routing live pledge pressure and donor opportunity into execution before normal call flow.
               </p>
-            </div>
 
-            <a
-              href="#finance-call-time"
-              className="inline-flex w-fit items-center gap-2 rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-emerald-700"
-            >
-              Start with calls
-              <PhoneCall className="h-4 w-4" />
-            </a>
+              <div className="mt-4">
+                <Link
+                  href="/dashboard/finance/jackpot"
+                  className="inline-flex items-center gap-2 rounded-xl border border-amber-300 bg-white px-4 py-2 text-sm font-medium text-amber-800 transition hover:bg-amber-100"
+                >
+                  Open Jackpot Queue
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-3">
+              <div className="rounded-2xl border border-amber-200 bg-white p-4">
+                <p className="text-xs text-slate-500">Latent Value</p>
+                <p className="mt-2 text-xl font-semibold text-amber-800">
+                  {currency.format(callTargets.reduce((sum, target) => sum + target.amount, 0))}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-amber-200 bg-white p-4">
+                <p className="text-xs text-slate-500">Priority Donors</p>
+                <p className="mt-2 text-xl font-semibold text-slate-900">
+                  {callTargets.filter((target) => target.priority === "high").length}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-amber-200 bg-white p-4">
+                <p className="text-xs text-slate-500">Open Pledges</p>
+                <p className="mt-2 text-xl font-semibold text-rose-700">
+                  {openPledges.length}
+                </p>
+              </div>
+            </div>
           </div>
         </section>
-      ) : null}
-
-
-      {hasFinanceDirector && callTargets.length > 0 ? (
-      <section className="rounded-3xl border-2 border-amber-300 bg-gradient-to-br from-amber-50 via-yellow-50 to-white p-6 shadow-md">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-amber-300 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-amber-800">
-              <Sparkles className="h-3.5 w-3.5" />
-              Jackpot Priority Bridge
-            </div>
-            <h2 className="mt-4 text-2xl font-semibold text-slate-900">
-              Neglected opportunity detected
-            </h2>
-            <p className="mt-2 max-w-3xl text-sm text-slate-700">
-              Aether has identified donor value currently underworked. Route high-opportunity signals into execution before normal call flow.
-            </p>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-3">
-            <div className="rounded-2xl border border-amber-200 bg-white p-4">
-              <p className="text-xs text-slate-500">Latent Value</p>
-              <p className="mt-2 text-xl font-semibold text-amber-800">
-                {currency.format(callTargets.reduce((sum, target) => sum + target.amount, 0))}
-              </p>
-            </div>
-            <div className="rounded-2xl border border-amber-200 bg-white p-4">
-              <p className="text-xs text-slate-500">Priority Donors</p>
-              <p className="mt-2 text-xl font-semibold text-slate-900">
-                {callTargets.filter((target) => target.priority === "high").length}
-              </p>
-            </div>
-            <div className="rounded-2xl border border-amber-200 bg-white p-4">
-              <p className="text-xs text-slate-500">Conversion Risk</p>
-              <p className="mt-2 text-xl font-semibold text-rose-700">
-                {callTargets.filter((target) => target.status === "pledged" || target.status === "follow_up").length}
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className="mt-5 rounded-2xl border border-amber-200 bg-white p-5">
-          <p className="text-xs uppercase tracking-wide text-amber-700">Abe Read</p>
-          <p className="mt-2 text-sm text-slate-700">
-            Jackpot Priority Bridge is using live finance call targets. Recommended first action: work the highest-priority target in the call session.
-          </p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Link
-              href="/dashboard/finance/jackpot"
-              className="rounded-xl bg-amber-500 px-3 py-2 text-xs font-medium text-white transition hover:bg-amber-600"
-            >
-              Open Jackpot Queue
-            </Link>
-            <a
-              href="#finance-call-time"
-              className="rounded-xl border border-amber-300 bg-white px-3 py-2 text-xs font-medium text-amber-800 transition hover:bg-amber-50"
-            >
-              Route to Call Session
-            </a>
-          </div>
-        </div>
-      </section>
       ) : null}
 
       <section id="finance-call-time" className="rounded-3xl border-2 border-emerald-300 bg-emerald-50 p-6 shadow-md">
@@ -902,8 +1203,7 @@ export default function FinanceFocusModePage() {
               Run Donor Calls Inside Aether
             </h2>
             <p className="mt-1 text-sm text-emerald-800">
-              Convert pledges, re-engage donors, and log outcomes without leaving
-              the system.
+              Call, log outcomes, and record payments directly back to contact profiles.
             </p>
           </div>
 
@@ -958,7 +1258,7 @@ export default function FinanceFocusModePage() {
                       <div className="flex flex-wrap items-center gap-2">
                         <span
                           className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${priorityTone(
-                            activeCallTarget.priority
+                            activeCallTarget.priority,
                           )}`}
                         >
                           {activeCallTarget.priority}
@@ -974,7 +1274,8 @@ export default function FinanceFocusModePage() {
                       <p className="text-sm text-slate-500">
                         {activeCallTarget.city}, {activeCallTarget.state}
                       </p>
-                                            <div className="mt-4 grid grid-cols-2 gap-3">
+
+                      <div className="mt-4 grid grid-cols-2 gap-3">
                         <div className="rounded-xl border border-slate-200 p-3">
                           <p className="text-xs text-slate-400">Phone</p>
                           <p className="mt-1 font-medium text-slate-900">
@@ -990,9 +1291,7 @@ export default function FinanceFocusModePage() {
                         </div>
 
                         <div className="rounded-xl border border-slate-200 p-3 col-span-2">
-                          <p className="text-xs text-slate-400">
-                            Suggested Ask
-                          </p>
+                          <p className="text-xs text-slate-400">Suggested Ask</p>
                           <p className="mt-1 font-medium text-slate-900">
                             {activeCallTarget.suggestedAsk}
                           </p>
@@ -1034,22 +1333,56 @@ export default function FinanceFocusModePage() {
 
                       <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
                         <p className="text-xs uppercase tracking-wide text-slate-500">
-                          List Context
-                        </p>
-                        <p className="mt-2 text-sm text-slate-700">
-                          This target should stay tied to finance call lists and donor
-                          follow-up groupings so execution stays aligned across Finance,
-                          Contacts, and Outreach.
-                        </p>
-                      </div>
-
-                      <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
-                        <p className="text-xs uppercase tracking-wide text-slate-500">
                           Script
                         </p>
                         <p className="mt-2 text-sm text-slate-700">
                           {activeCallTarget.script}
                         </p>
+                      </div>
+
+                      <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-emerald-800">
+                          Record Payment
+                        </p>
+                        <div className="mt-3 grid gap-3 md:grid-cols-[1fr_1fr_1fr_auto]">
+                          <input
+                            value={paymentAmount}
+                            onChange={(e) => setPaymentAmount(e.target.value)}
+                            placeholder={String(activeCallTarget.amount)}
+                            className="rounded-xl border border-emerald-200 bg-white px-3 py-2 text-sm"
+                          />
+
+                          <select
+                            value={paymentMethod}
+                            onChange={(e) =>
+                              setPaymentMethod(e.target.value as PaymentMethod)
+                            }
+                            className="rounded-xl border border-emerald-200 bg-white px-3 py-2 text-sm"
+                          >
+                            <option value="check">Check</option>
+                            <option value="cash">Cash</option>
+                            <option value="online">Online</option>
+                          </select>
+
+                          <input
+                            type="date"
+                            value={paymentDate}
+                            onChange={(e) => setPaymentDate(e.target.value)}
+                            className="rounded-xl border border-emerald-200 bg-white px-3 py-2 text-sm"
+                          />
+
+                          <button
+                            onClick={recordActiveCallPayment}
+                            className="rounded-xl bg-emerald-700 px-3 py-2 text-xs font-medium text-white hover:bg-emerald-800"
+                          >
+                            Save Payment
+                          </button>
+                        </div>
+                        {paymentMessage ? (
+                          <p className="mt-3 text-sm font-medium text-emerald-800">
+                            {paymentMessage}
+                          </p>
+                        ) : null}
                       </div>
 
                       <div className="mt-4 space-y-3">
@@ -1074,7 +1407,7 @@ export default function FinanceFocusModePage() {
                             onClick={() =>
                               advanceCallSession(
                                 "follow_up",
-                                "Follow-up scheduled"
+                                "Follow-up scheduled",
                               )
                             }
                             className="rounded-xl bg-amber-500 px-3 py-2 text-xs font-medium text-white hover:bg-amber-600"
@@ -1086,7 +1419,7 @@ export default function FinanceFocusModePage() {
                             onClick={() =>
                               advanceCallSession(
                                 "wrong_time",
-                                "Requested better time"
+                                "Requested better time",
                               )
                             }
                             className="rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-medium text-sky-800"
@@ -1187,13 +1520,13 @@ export default function FinanceFocusModePage() {
               {nextAction ? (
                 <div
                   className={`rounded-2xl border p-4 ${nextActionCategoryTone(
-                    nextAction.category
+                    nextAction.category,
                   )}`}
                 >
                   <div className="flex flex-wrap items-center gap-2">
                     <span
                       className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${priorityTone(
-                        nextAction.priority
+                        nextAction.priority,
                       )}`}
                     >
                       {nextAction.priority}
@@ -1214,21 +1547,17 @@ export default function FinanceFocusModePage() {
               ) : null}
 
               <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                <p className="text-sm font-medium text-slate-500">
-                  Call Log
-                </p>
+                <p className="text-sm font-medium text-slate-500">Call Log</p>
 
                 <div className="mt-3 space-y-2">
                   {callLog.length === 0 ? (
-                    <p className="text-sm text-slate-500">
-                      No calls logged yet.
-                    </p>
+                    <p className="text-sm text-slate-500">No calls logged yet.</p>
                   ) : (
                     callLog.map((entry) => (
                       <div
                         key={entry.targetId + entry.outcome}
                         className={`rounded-xl border px-3 py-2 text-xs ${callOutcomeTone(
-                          entry.outcome
+                          entry.outcome,
                         )}`}
                       >
                         <p className="font-medium">
@@ -1247,8 +1576,7 @@ export default function FinanceFocusModePage() {
         ) : null}
       </section>
 
-      
-            <section className="grid gap-6 xl:grid-cols-[1.5fr_1fr_1fr]">
+      <section className="grid gap-6 xl:grid-cols-[1.2fr_1fr]">
         <div className="rounded-3xl border-2 border-emerald-300 bg-white p-6 shadow-md">
           <div className="mb-5 flex items-center justify-between">
             <div>
@@ -1261,588 +1589,330 @@ export default function FinanceFocusModePage() {
           </div>
 
           <div className="space-y-4">
-            {grouped.pledge.length === 0 ? (
+            {openPledges.length === 0 ? (
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
                 {loadingTargets
                   ? "Loading finance pledge actions..."
-                  : "No live finance pledge or donor call actions are available yet."}
+                  : "No open pledges are available yet."}
               </div>
             ) : null}
 
-            {grouped.pledge.map((item) => {
-              const isActive = activePledge?.id === item.id;
-              const isConfirmed = pledgeConfirmed === item.id;
-
-              if (isActive && activePledge) {
-                return (
-                  <div
-                    key={item.id}
-                    className="rounded-2xl border border-emerald-300 bg-emerald-50 p-4"
-                  >
-                    <div className="flex flex-wrap gap-2">
-                      <span
-                        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${priorityTone(
-                          item.priority
-                        )}`}
-                      >
-                        {item.priority}
-                      </span>
-                      <span
-                        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${typeTone(
-                          item.type
-                        )}`}
-                      >
-                        {item.type}
-                      </span>
-                      {isConfirmed && (
-                        <span className="inline-flex rounded-full border border-emerald-300 bg-white px-3 py-1 text-xs font-semibold text-emerald-700">
-                          completed
-                        </span>
-                      )}
-                    </div>
-
-                    <p className="mt-3 font-semibold text-slate-900">
-                      {activePledge.title}
-                    </p>
-                    <p className="mt-2 text-sm text-slate-600">
-                      {activePledge.summary}
-                    </p>
-
-                    <div className="mt-4 rounded-2xl border border-emerald-200 bg-white p-4">
-                      <p className="text-xs uppercase tracking-wide text-emerald-700">
-                        Pledge Panel
-                      </p>
-
-                      <div className="mt-3 space-y-3">
-                        <div>
-                          <p className="text-sm font-medium text-slate-900">
-                            Contact
-                          </p>
-                          <p className="mt-1 text-sm text-slate-600">
-                            {activePledge.contactName}
-                          </p>
-                        </div>
-
-                        <div>
-                          <p className="text-sm font-medium text-slate-900">
-                            Amount
-                          </p>
-                          <p className="mt-1 text-sm text-slate-600">
-                            {currency.format(activePledge.amount)}
-                          </p>
-                        </div>
-
-                        <div className="grid gap-3 sm:grid-cols-2">
-                          <Link
-                            href="/dashboard/contacts"
-                            className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-                          >
-                            <ContactRound className="h-4 w-4" />
-                            Contacts
-                          </Link>
-
-                          <Link
-                            href="/dashboard/lists"
-                            className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-                          >
-                            <ListChecks className="h-4 w-4" />
-                            Lists
-                          </Link>
-                        </div>
-
-                        <div>
-                          <label className="text-sm font-medium text-slate-900">
-                            Action
-                          </label>
-                          <select
-                            value={pledgeAction}
-                            onChange={(e) =>
-                              setPledgeAction(
-                                e.target.value as
-                                  | "Convert Pledge"
-                                  | "Schedule Follow-Up"
-                              )
-                            }
-                            className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none"
-                          >
-                            <option>Convert Pledge</option>
-                            <option>Schedule Follow-Up</option>
-                          </select>
-                        </div>
-
-                        <div className="flex flex-wrap gap-2">
-                          <button
-                            onClick={confirmPledgeAction}
-                            className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-emerald-700"
-                          >
-                            Confirm Action
-                          </button>
-                          <button
-                            onClick={clearPledgePanel}
-                            className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
-                          >
-                            Clear
-                          </button>
-                        </div>
-
-                        {isConfirmed && (
-                          <p className="text-sm font-medium text-emerald-700">
-                            Pledge action confirmed: {pledgeAction}.
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              }
+            {openPledges.map((pledge) => {
+              const isActive = activePledge?.id === pledge.id;
 
               return (
                 <div
-                  key={item.id}
-                  className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                  key={pledge.id}
+                  className={`rounded-2xl border p-4 ${
+                    isActive
+                      ? "border-emerald-300 bg-emerald-50"
+                      : "border-slate-200 bg-slate-50"
+                  }`}
                 >
                   <div className="flex flex-wrap gap-2">
                     <span
                       className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${priorityTone(
-                        item.priority
+                        pledge.priority,
                       )}`}
                     >
-                      {item.priority}
+                      {pledge.priority}
                     </span>
-                    <span
-                      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${typeTone(
-                        item.type
-                      )}`}
-                    >
-                      {item.type}
+                    <span className="inline-flex rounded-full border border-emerald-200 bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
+                      pledge
                     </span>
                   </div>
 
                   <p className="mt-3 font-semibold text-slate-900">
-                    {item.title}
+                    Collect {pledge.contactName} pledge
                   </p>
                   <p className="mt-2 text-sm text-slate-600">
-                    {item.summary}
+                    {currency.format(pledge.remaining)} remaining from{" "}
+                    {currency.format(pledge.amount)} pledged.
                   </p>
 
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <button
-                      onClick={() => openPledgePanel(item)}
-                      className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white transition hover:bg-slate-800"
-                    >
-                      {item.callTargetStatus === "follow_up"
-                        ? "Schedule Follow-Up"
-                        : item.callTargetStatus === "reconnect"
-                          ? "Open Call"
-                          : "Collect Pledge"}
-                    </button>
-                    <button
-                      onClick={() => openPledgePanel(item)}
-                      className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
-                    >
-                      View Record
-                    </button>
-                  </div>
+                  {isActive ? (
+                    <div className="mt-4 rounded-2xl border border-emerald-200 bg-white p-4">
+                      <p className="text-xs uppercase tracking-wide text-emerald-700">
+                        Pledge Payment
+                      </p>
+
+                      <div className="mt-3 grid gap-3 md:grid-cols-3">
+                        <input
+                          value={pledgePaymentAmount}
+                          onChange={(e) => setPledgePaymentAmount(e.target.value)}
+                          placeholder={String(pledge.remaining)}
+                          className="rounded-xl border border-emerald-200 px-3 py-2 text-sm"
+                        />
+
+                        <select
+                          value={pledgePaymentMethod}
+                          onChange={(e) =>
+                            setPledgePaymentMethod(e.target.value as PaymentMethod)
+                          }
+                          className="rounded-xl border border-emerald-200 px-3 py-2 text-sm"
+                        >
+                          <option value="check">Check</option>
+                          <option value="cash">Cash</option>
+                          <option value="online">Online</option>
+                        </select>
+
+                        <input
+                          type="date"
+                          value={pledgePaymentDate}
+                          onChange={(e) => setPledgePaymentDate(e.target.value)}
+                          className="rounded-xl border border-emerald-200 px-3 py-2 text-sm"
+                        />
+                      </div>
+
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <button
+                          onClick={recordPledgePayment}
+                          className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-emerald-700"
+                        >
+                          Save + Apply to Pledge
+                        </button>
+                        <Link
+                          href={`/dashboard/contacts/${pledge.contactId}`}
+                          className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+                        >
+                          Open Contact
+                        </Link>
+                        <button
+                          onClick={() => setActivePledgeId(null)}
+                          className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+                        >
+                          Clear
+                        </button>
+                      </div>
+
+                      {pledgeMessage ? (
+                        <p className="mt-3 text-sm font-medium text-emerald-700">
+                          {pledgeMessage}
+                        </p>
+                      ) : null}
+                    </div>
+                  ) : (
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      <button
+                        onClick={() => openPledge(pledge)}
+                        className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white transition hover:bg-slate-800"
+                      >
+                        Collect Pledge
+                      </button>
+                      <Link
+                        href={`/dashboard/contacts/${pledge.contactId}`}
+                        className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+                      >
+                        View Record
+                      </Link>
+                    </div>
+                  )}
                 </div>
               );
             })}
           </div>
         </div>
 
-        <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm">
+        <div className="rounded-3xl border border-amber-200 bg-amber-50 p-6 shadow-sm">
           <div className="mb-5 flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-slate-500">
+              <p className="text-sm font-medium text-amber-800">
                 Compliance Lane
               </p>
               <h2 className="text-xl font-semibold text-slate-900">
-                Clear Missing Fields
+                Clear Export Fields
               </h2>
             </div>
             <Landmark className="h-5 w-5 text-amber-600" />
           </div>
 
           <div className="space-y-4">
-            {grouped.compliance.length === 0 ? (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+            {complianceItems.length === 0 ? (
+              <div className="rounded-2xl border border-amber-200 bg-white p-4 text-sm text-slate-600">
                 No live finance compliance actions are available yet.
               </div>
             ) : null}
 
-            {grouped.compliance.map((item) => {
+            {complianceItems.map((item) => {
               const isActive = activeCompliance?.id === item.id;
-              const isConfirmed = complianceConfirmed === item.id;
 
-              if (isActive && activeCompliance) {
-                return (
-                  <div
-                    key={item.id}
-                    className="rounded-2xl border border-amber-300 bg-amber-50 p-4"
-                  >
-                    <div className="flex flex-wrap gap-2">
-                      <span
-                        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${priorityTone(
-                          item.priority
-                        )}`}
-                      >
-                        {item.priority}
-                      </span>
-                      <span
-                        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${typeTone(
-                          item.type
-                        )}`}
-                      >
-                        {item.type}
-                      </span>
-                      {isConfirmed && (
-                        <span className="inline-flex rounded-full border border-amber-300 bg-white px-3 py-1 text-xs font-semibold text-amber-700">
-                          compliant
-                        </span>
-                      )}
-                    </div>
+              return (
+                <div
+                  key={item.id}
+                  className={`rounded-2xl border p-4 ${
+                    isActive
+                      ? "border-amber-300 bg-white"
+                      : "border-amber-200 bg-white/80"
+                  }`}
+                >
+                  <div className="flex flex-wrap gap-2">
+                    <span
+                      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${priorityTone(
+                        item.priority,
+                      )}`}
+                    >
+                      {item.priority}
+                    </span>
+                    <span className="inline-flex rounded-full border border-amber-200 bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
+                      compliance
+                    </span>
+                  </div>
 
-                    <p className="mt-3 font-semibold text-slate-900">
-                      {activeCompliance.title}
-                    </p>
-                    <p className="mt-2 text-sm text-slate-600">
-                      {activeCompliance.summary}
-                    </p>
+                  <p className="mt-3 font-semibold text-slate-900">
+                    Fix {item.contactName} compliance data
+                  </p>
+                  <p className="mt-2 text-sm text-slate-600">
+                    {currency.format(item.amount)} contributed. Missing:{" "}
+                    {item.missingFields.join(", ")}.
+                  </p>
 
-                    <div className="mt-4 rounded-2xl border border-amber-200 bg-white p-4">
+                  {isActive ? (
+                    <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4">
                       <p className="text-xs uppercase tracking-wide text-amber-700">
-                        Compliance Panel
+                        Compliance Editor
                       </p>
 
-                      <div className="mt-3 space-y-3">
-                        <div>
-                          <p className="text-sm font-medium text-slate-900">
-                            Contact
-                          </p>
-                          <p className="mt-1 text-sm text-slate-600">
-                            {activeCompliance.contactName}
-                          </p>
-                        </div>
+                      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                        <input
+                          value={complianceDraft.first_name}
+                          onChange={(e) =>
+                            setComplianceDraft((current) => ({
+                              ...current,
+                              first_name: e.target.value,
+                            }))
+                          }
+                          placeholder="First name"
+                          className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm"
+                        />
 
-                        <div>
-                          <p className="text-sm font-medium text-slate-900">
-                            Contribution Amount
-                          </p>
-                          <p className="mt-1 text-sm text-slate-600">
-                            {currency.format(activeCompliance.amount)}
-                          </p>
-                        </div>
+                        <input
+                          value={complianceDraft.last_name}
+                          onChange={(e) =>
+                            setComplianceDraft((current) => ({
+                              ...current,
+                              last_name: e.target.value,
+                            }))
+                          }
+                          placeholder="Last name"
+                          className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm"
+                        />
 
-                        <div>
-                          <p className="text-sm font-medium text-slate-900">
-                            Missing Fields
-                          </p>
-                          <p className="mt-1 text-sm text-slate-600">
-                            {activeCompliance.missingFields.join(", ")}
-                          </p>
-                        </div>
+                        <input
+                          value={complianceDraft.street}
+                          onChange={(e) =>
+                            setComplianceDraft((current) => ({
+                              ...current,
+                              street: e.target.value,
+                            }))
+                          }
+                          placeholder="Street / full address line"
+                          className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm sm:col-span-2"
+                        />
 
-                        <div>
-                          <label className="text-sm font-medium text-slate-900">
-                            Employer
-                          </label>
-                          <input
-                            value={fieldEmployer}
-                            onChange={(e) => setFieldEmployer(e.target.value)}
-                            className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none"
-                          />
-                        </div>
+                        <input
+                          value={complianceDraft.city}
+                          onChange={(e) =>
+                            setComplianceDraft((current) => ({
+                              ...current,
+                              city: e.target.value,
+                            }))
+                          }
+                          placeholder="City"
+                          className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm"
+                        />
 
-                        <div>
-                          <label className="text-sm font-medium text-slate-900">
-                            Occupation
-                          </label>
-                          <input
-                            value={fieldOccupation}
-                            onChange={(e) => setFieldOccupation(e.target.value)}
-                            className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none"
-                          />
-                        </div>
+                        <input
+                          value={complianceDraft.state}
+                          onChange={(e) =>
+                            setComplianceDraft((current) => ({
+                              ...current,
+                              state: e.target.value,
+                            }))
+                          }
+                          placeholder="State"
+                          className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm"
+                        />
 
-                        <div className="grid gap-3 sm:grid-cols-2">
-                          <Link
-                            href="/dashboard/contacts"
-                            className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-                          >
-                            <ContactRound className="h-4 w-4" />
-                            Contacts
-                          </Link>
+                        <input
+                          value={complianceDraft.zip}
+                          onChange={(e) =>
+                            setComplianceDraft((current) => ({
+                              ...current,
+                              zip: e.target.value,
+                            }))
+                          }
+                          placeholder="Zip"
+                          className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm"
+                        />
 
-                          <Link
-                            href="/dashboard/lists"
-                            className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-                          >
-                            <ListChecks className="h-4 w-4" />
-                            Lists
-                          </Link>
-                        </div>
+                        <input
+                          value={complianceDraft.employer}
+                          onChange={(e) =>
+                            setComplianceDraft((current) => ({
+                              ...current,
+                              employer: e.target.value,
+                            }))
+                          }
+                          placeholder="Employer"
+                          className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm"
+                        />
 
-                        <div className="flex flex-wrap gap-2">
-                          <button
-                            onClick={confirmComplianceAction}
-                            className="rounded-xl bg-amber-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-amber-700"
-                          >
-                            Mark Compliant
-                          </button>
-                          <button
-                            onClick={clearCompliancePanel}
-                            className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
-                          >
-                            Clear
-                          </button>
-                        </div>
-
-                        {isConfirmed && (
-                          <p className="text-sm font-medium text-amber-700">
-                            Compliance fields completed for{" "}
-                            {activeCompliance.contactName}.
-                          </p>
-                        )}
+                        <input
+                          value={complianceDraft.occupation}
+                          onChange={(e) =>
+                            setComplianceDraft((current) => ({
+                              ...current,
+                              occupation: e.target.value,
+                            }))
+                          }
+                          placeholder="Occupation"
+                          className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm sm:col-span-2"
+                        />
                       </div>
-                    </div>
-                  </div>
-                );
-              }
 
-              return (
-                <div
-                  key={item.id}
-                  className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
-                >
-                  <div className="flex flex-wrap gap-2">
-                    <span
-                      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${priorityTone(
-                        item.priority
-                      )}`}
-                    >
-                      {item.priority}
-                    </span>
-                    <span
-                      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${typeTone(
-                        item.type
-                      )}`}
-                    >
-                      {item.type}
-                    </span>
-                  </div>
-
-                  <p className="mt-3 font-semibold text-slate-900">
-                    {item.title}
-                  </p>
-                  <p className="mt-2 text-sm text-slate-600">
-                    {item.summary}
-                  </p>
-
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <button
-                      onClick={() => openCompliancePanel(item)}
-                      className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white transition hover:bg-slate-800"
-                    >
-                      Fix Compliance
-                    </button>
-                    <button
-                      onClick={() => openCompliancePanel(item)}
-                      className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
-                    >
-                      Review Record
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="mb-5 flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-slate-500">Entry Lane</p>
-              <h2 className="text-xl font-semibold text-slate-900">
-                Log + Process
-              </h2>
-            </div>
-            <Users className="h-5 w-5 text-sky-600" />
-          </div>
-                    <div className="space-y-4">
-            {grouped.entry.length === 0 ? (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
-                No live finance entry actions are available yet.
-              </div>
-            ) : null}
-
-            {grouped.entry.map((item) => {
-              const isActive = activeEntry?.id === item.id;
-              const isConfirmed = entryConfirmed === item.id;
-
-              if (isActive && activeEntry) {
-                return (
-                  <div
-                    key={item.id}
-                    className="rounded-2xl border border-sky-300 bg-sky-50 p-4"
-                  >
-                    <div className="flex flex-wrap gap-2">
-                      <span
-                        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${priorityTone(
-                          item.priority
-                        )}`}
-                      >
-                        {item.priority}
-                      </span>
-                      <span
-                        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${typeTone(
-                          item.type
-                        )}`}
-                      >
-                        {item.type}
-                      </span>
-                      {isConfirmed && (
-                        <span className="inline-flex rounded-full border border-sky-300 bg-white px-3 py-1 text-xs font-semibold text-sky-700">
-                          entered
-                        </span>
-                      )}
-                    </div>
-
-                    <p className="mt-3 font-semibold text-slate-900">
-                      {activeEntry.title}
-                    </p>
-                    <p className="mt-2 text-sm text-slate-600">
-                      {activeEntry.summary}
-                    </p>
-
-                    <div className="mt-4 rounded-2xl border border-sky-200 bg-white p-4">
-                      <p className="text-xs uppercase tracking-wide text-sky-700">
-                        Entry Panel
-                      </p>
-
-                      <div className="mt-3 space-y-3">
-                        <div>
-                          <p className="text-sm font-medium text-slate-900">
-                            Owner
-                          </p>
-                          <p className="mt-1 text-sm text-slate-600">
-                            {activeEntry.owner}
-                          </p>
-                        </div>
-
-                        <div>
-                          <p className="text-sm font-medium text-slate-900">
-                            Entry Amount
-                          </p>
-                          <p className="mt-1 text-sm text-slate-600">
-                            {currency.format(activeEntry.amount)}
-                          </p>
-                        </div>
-
-                        <div>
-                          <label className="text-sm font-medium text-slate-900">
-                            Method
-                          </label>
-                          <select
-                            value={entryMethod}
-                            onChange={(e) =>
-                              setEntryMethod(
-                                e.target.value as "check" | "cash" | "online"
-                              )
-                            }
-                            className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none"
-                          >
-                            <option value="check">Check</option>
-                            <option value="cash">Cash</option>
-                            <option value="online">Online</option>
-                          </select>
-                        </div>
-
-                        <div className="grid gap-3 sm:grid-cols-2">
-                          <Link
-                            href="/dashboard/contacts"
-                            className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-                          >
-                            <ContactRound className="h-4 w-4" />
-                            Contacts
-                          </Link>
-
-                          <Link
-                            href="/dashboard/lists"
-                            className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-                          >
-                            <ListChecks className="h-4 w-4" />
-                            Lists
-                          </Link>
-                        </div>
-
-                        <div className="flex flex-wrap gap-2">
-                          <button
-                            onClick={confirmEntryAction}
-                            className="rounded-xl bg-sky-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-sky-700"
-                          >
-                            Confirm Entry
-                          </button>
-                          <button
-                            onClick={clearEntryPanel}
-                            className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
-                          >
-                            Clear
-                          </button>
-                        </div>
-
-                        {isConfirmed && (
-                          <p className="text-sm font-medium text-sky-700">
-                            Finance entry confirmed as {entryMethod}.
-                          </p>
-                        )}
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <button
+                          onClick={saveComplianceDraft}
+                          className="rounded-xl bg-amber-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-amber-700"
+                        >
+                          Save Compliance Fields
+                        </button>
+                        <Link
+                          href={`/dashboard/contacts/${item.contactId}`}
+                          className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+                        >
+                          Open Contact
+                        </Link>
+                        <button
+                          onClick={() => setActiveComplianceId(null)}
+                          className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+                        >
+                          Clear
+                        </button>
                       </div>
+
+                      {complianceMessage ? (
+                        <p className="mt-3 text-sm font-medium text-amber-800">
+                          {complianceMessage}
+                        </p>
+                      ) : null}
                     </div>
-                  </div>
-                );
-              }
-
-              return (
-                <div
-                  key={item.id}
-                  className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
-                >
-                  <div className="flex flex-wrap gap-2">
-                    <span
-                      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${priorityTone(
-                        item.priority
-                      )}`}
-                    >
-                      {item.priority}
-                    </span>
-                    <span
-                      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${typeTone(
-                        item.type
-                      )}`}
-                    >
-                      {item.type}
-                    </span>
-                  </div>
-
-                  <p className="mt-3 font-semibold text-slate-900">
-                    {item.title}
-                  </p>
-                  <p className="mt-2 text-sm text-slate-600">
-                    {item.summary}
-                  </p>
-
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <button
-                      onClick={() => openEntryPanel(item)}
-                      className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white transition hover:bg-slate-800"
-                    >
-                      {item.id === "focus-3" ? "Enter Checks" : "Log Cash"}
-                    </button>
-                    <button
-                      onClick={() => openEntryPanel(item)}
-                      className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
-                    >
-                      Review Batch
-                    </button>
-                  </div>
+                  ) : (
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      <button
+                        onClick={() => openCompliance(item)}
+                        className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white transition hover:bg-slate-800"
+                      >
+                        Fix Compliance
+                      </button>
+                      <Link
+                        href={`/dashboard/contacts/${item.contactId}`}
+                        className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+                      >
+                        Review Record
+                      </Link>
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -1850,115 +1920,55 @@ export default function FinanceFocusModePage() {
         </div>
       </section>
 
-<section className="grid gap-4 md:grid-cols-4">
+      <section className="grid gap-4 md:grid-cols-4">
         <div
           className={`rounded-2xl border p-4 shadow-sm ${
-            grouped.pledge.length > 0
+            openPledges.length > 0
               ? "border-emerald-200 bg-emerald-50"
               : "border-slate-200 bg-white"
           }`}
         >
           <div className="flex items-center justify-between">
-            <p
-              className={`text-sm font-medium ${
-                grouped.pledge.length > 0 ? "text-emerald-800" : "text-slate-700"
-              }`}
-            >
-              Pledge
-            </p>
-            <HandCoins
-              className={`h-5 w-5 ${
-                grouped.pledge.length > 0 ? "text-emerald-700" : "text-slate-500"
-              }`}
-            />
+            <p className="text-sm font-medium text-emerald-800">Pledge</p>
+            <HandCoins className="h-5 w-5 text-emerald-700" />
           </div>
-          <p
-            className={`mt-2 text-xl font-semibold ${
-              grouped.pledge.length > 0 ? "text-emerald-900" : "text-slate-900"
-            }`}
-          >
-            {grouped.pledge.length}
+          <p className="mt-2 text-xl font-semibold text-emerald-900">
+            {openPledges.length}
           </p>
-          <p
-            className={`mt-1 text-xs ${
-              grouped.pledge.length > 0 ? "text-emerald-800" : "text-slate-600"
-            }`}
-          >
+          <p className="mt-1 text-xs text-emerald-800">
             Collection and follow-up actions
           </p>
         </div>
 
         <div
           className={`rounded-2xl border p-4 shadow-sm ${
-            grouped.compliance.length > 0
+            complianceItems.length > 0
               ? "border-rose-200 bg-rose-50"
               : "border-slate-200 bg-white"
           }`}
         >
           <div className="flex items-center justify-between">
-            <p
-              className={`text-xs font-medium ${
-                grouped.compliance.length > 0 ? "text-rose-800" : "text-slate-700"
-              }`}
-            >
-              Compliance
-            </p>
-            <CheckCircle2
-              className={`h-5 w-5 ${
-                grouped.compliance.length > 0 ? "text-rose-700" : "text-slate-500"
-              }`}
-            />
+            <p className="text-xs font-medium text-rose-800">Compliance</p>
+            <CheckCircle2 className="h-5 w-5 text-rose-700" />
           </div>
-          <p
-            className={`mt-2 text-xl font-semibold ${
-              grouped.compliance.length > 0 ? "text-rose-900" : "text-slate-900"
-            }`}
-          >
-            {grouped.compliance.length}
+          <p className="mt-2 text-xl font-semibold text-rose-900">
+            {complianceItems.length}
           </p>
-          <p
-            className={`mt-1 text-xs ${
-              grouped.compliance.length > 0 ? "text-rose-800" : "text-slate-600"
-            }`}
-          >
+          <p className="mt-1 text-xs text-rose-800">
             Missing data and export-readiness work
           </p>
         </div>
 
-        <div
-          className={`rounded-2xl border p-4 shadow-sm ${
-            grouped.entry.length > 0
-              ? "border-rose-200 bg-rose-50"
-              : "border-slate-200 bg-white"
-          }`}
-        >
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="flex items-center justify-between">
-            <p
-              className={`text-xs font-medium ${
-                grouped.entry.length > 0 ? "text-rose-800" : "text-slate-700"
-              }`}
-            >
-              Entry
-            </p>
-            <FileSpreadsheet
-              className={`h-5 w-5 ${
-                grouped.entry.length > 0 ? "text-rose-700" : "text-slate-500"
-              }`}
-            />
+            <p className="text-xs font-medium text-slate-700">Payments</p>
+            <FileSpreadsheet className="h-5 w-5 text-slate-500" />
           </div>
-          <p
-            className={`mt-2 text-xl font-semibold ${
-              grouped.entry.length > 0 ? "text-rose-900" : "text-slate-900"
-            }`}
-          >
-            {grouped.entry.length}
+          <p className="mt-2 text-xl font-semibold text-slate-900">
+            {contributions.length}
           </p>
-          <p
-            className={`mt-1 text-xs ${
-              grouped.entry.length > 0 ? "text-rose-800" : "text-slate-600"
-            }`}
-          >
-            Contribution and receipt entry actions
+          <p className="mt-1 text-xs text-slate-600">
+            Saved contribution records
           </p>
         </div>
 
@@ -1970,51 +1980,19 @@ export default function FinanceFocusModePage() {
           }`}
         >
           <div className="flex items-center justify-between">
-            <p
-              className={`text-xs font-medium ${
-                callTargets.length > 0 ? "text-emerald-800" : "text-slate-700"
-              }`}
-            >
+            <p className="text-xs font-medium text-emerald-800">
               Call Targets
             </p>
-            <Phone
-              className={`h-5 w-5 ${
-                callTargets.length > 0 ? "text-emerald-700" : "text-slate-500"
-              }`}
-            />
+            <Phone className="h-5 w-5 text-emerald-700" />
           </div>
-          <p
-            className={`mt-2 text-xl font-semibold ${
-              callTargets.length > 0 ? "text-emerald-900" : "text-slate-900"
-            }`}
-          >
+          <p className="mt-2 text-xl font-semibold text-emerald-900">
             {callTargets.length}
           </p>
-          <p
-            className={`mt-2 text-sm ${
-              callTargets.length > 0 ? "text-emerald-800" : "text-slate-600"
-            }`}
-          >
+          <p className="mt-2 text-sm text-emerald-800">
             {loadingTargets
               ? "Loading live finance targets"
               : "Native finance call session queue"}
           </p>
-        </div>
-      </section>
-
-      <section className="hidden" aria-hidden="true">
-        <div className="flex items-start gap-3">
-          <Sparkles className="mt-0.5 h-5 w-5 text-amber-700" />
-          <div>
-            <h2 className="text-lg font-semibold text-amber-900">
-              Finance Operating Pattern
-            </h2>
-            <p className="mt-2 text-sm text-amber-800">
-              {hasFinanceDirector
-                ? "Director mode keeps donor strategy, jackpot pressure, pledge conversion, compliance cleanup, and entry work visible in one finance command lane."
-                : "User mode strips out finance strategy and keeps the work focused: run donor calls, log outcomes, collect pledges, and keep records clean."}
-            </p>
-          </div>
         </div>
       </section>
     </div>

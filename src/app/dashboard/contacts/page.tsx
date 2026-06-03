@@ -31,7 +31,7 @@ function normalizeOwner(value?: string | null) {
 }
 
 type DashboardList = DashboardData["lists"][number];
-type OutreachListTag = "outreach" | "field" | "finance" | "volunteer";
+type OutreachListTag = "outreach" | "field" | "finance" | "print";
 type GivingRange = "any" | "none" | "1-99" | "100-499" | "500-999" | "1000+";
 type FecStatusFilter = "any" | "matched" | "probable" | "none";
 type DonorTierFilter = "any" | "base" | "mid" | "major" | "maxed";
@@ -59,7 +59,7 @@ function resolveListTag(list: DashboardList): OutreachListTag {
     explicitType === "outreach" ||
     explicitType === "finance" ||
     explicitType === "field" ||
-    explicitType === "volunteer"
+    explicitType === "print"
   ) {
     return explicitType as OutreachListTag;
   }
@@ -69,11 +69,14 @@ function resolveListTag(list: DashboardList): OutreachListTag {
   const combined = `${name} ${owner}`;
 
   if (
-    combined.includes("volunteer") ||
-    combined.includes("phone bank") ||
-    combined.includes("phonebank")
+    combined.includes("print") ||
+    combined.includes("mailer") ||
+    combined.includes("mail") ||
+    combined.includes("yard sign") ||
+    combined.includes("palm card") ||
+    combined.includes("literature")
   ) {
-    return "volunteer";
+    return "print";
   }
 
   if (
@@ -102,7 +105,7 @@ function listTagTone(tag: OutreachListTag) {
       return "border border-sky-200 bg-sky-100 text-sky-700";
     case "finance":
       return "border border-emerald-200 bg-emerald-100 text-emerald-700";
-    case "volunteer":
+    case "print":
       return "border border-purple-200 bg-purple-100 text-purple-700";
     case "outreach":
     default:
@@ -357,10 +360,11 @@ export default function DashboardContactsPage() {
       await createList({
         name: trimmedName,
         type: segmentType,
+        contactIds: filteredContacts.map((contact) => contact.id),
       });
 
       setMessage(
-        `"${trimmedName}" (${segmentType}) created from ${filteredContacts.length} filtered contact${filteredContacts.length === 1 ? "" : "s"}.`
+        `"${trimmedName}" (${segmentType}) created and populated with ${filteredContacts.length} filtered contact${filteredContacts.length === 1 ? "" : "s"}.`
       );
 
       setSegmentName("");
@@ -744,7 +748,7 @@ export default function DashboardContactsPage() {
                   <option value="finance">Finance</option>
                 ) : null}
                 <option value="field">Field</option>
-                <option value="volunteer">Volunteer</option>
+                <option value="print">Print</option>
               </select>
 
               <button

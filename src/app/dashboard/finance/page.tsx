@@ -15,7 +15,7 @@ import {
   Users,
   Zap,
 } from "lucide-react";
-import { getFinanceCallTargets } from "@/lib/finance/call-targets";
+import { supabase } from "@/lib/supabase";
 import {
   AbeDepartment,
   AbeGlobalMemory,
@@ -65,6 +65,45 @@ type FinanceContactRow = {
   candidateApproved?: boolean;
   contributions: ContributionRecord[];
   pledges: PledgeRecord[];
+};
+
+type FinanceDbContact = {
+  id: string;
+  first_name?: string | null;
+  last_name?: string | null;
+  full_name?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  city?: string | null;
+  state?: string | null;
+  owner_name?: string | null;
+  organization_id?: string | null;
+  employer?: string | null;
+  occupation?: string | null;
+  donation_total?: number | string | null;
+  pledge_amount?: number | string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+};
+
+type ContributionDbRow = {
+  id: string;
+  contact_id?: string | null;
+  amount?: number | string | null;
+  source?: string | null;
+  date?: string | null;
+  created_at?: string | null;
+  organization_id?: string | null;
+};
+
+type PledgeDbRow = {
+  id: string;
+  contact_id?: string | null;
+  amount_pledged?: number | string | null;
+  amount_fulfilled?: number | string | null;
+  status?: string | null;
+  next_follow_up?: string | null;
+  created_at?: string | null;
 };
 
 type FinanceCallRow = {
@@ -127,73 +166,137 @@ function toCurrency(value: unknown) {
   return currency.format(toNumber(value));
 }
 
-function normalizeContactName(target: any) {
-  const full =
-    target?.name ||
-    target?.full_name ||
-    [target?.first_name, target?.last_name].filter(Boolean).join(" ");
+async function getActiveOrganizationId() {
+  try {
+    const response = await fetch("/api/auth/current-context", {
+      credentials: "include",
+    });
 
-  return String(full || "Unnamed Finance Contact");
+    if (!response.ok) return null;
+
+    const payload = await response.json();
+
+    return (
+      payload?.organization?.id ||
+      payload?.membership?.organization_id ||
+      null
+    );
+  } catch (error) {
+    console.error("Failed to resolve active finance organization:", error);
+    return null;
+  }
 }
 
-function buildFinanceContactRows(targets: any[]): FinanceContactRow[] {
-  return targets.map((target, index) => {
-    const donationTotal = toNumber(
-      target?.donation_total ??
-        target?.total_given ??
-        target?.fec_total_given ??
-        target?.amount
+function normalizeContactName(contact: FinanceDbContact | any) {
+  const full =
+    contact?.name ||
+    contact?.full_name ||
+    [contact?.first_name, contact?.last_name].filter(Boolean).join(" ");
+
+  return String(full || contact?.email || "Unnamed Finance Contact");
+}
+
+function normalizeContributionMethod(
+  value?: string | null,
+): ContributionRecord["method"] {
+  const normalized = String(value || "").trim().toLowerCase();
+
+  if (normalized.includes("cash")) return "cash";
+  if (normalized.includes("check")) return "check";
+
+  return "online";
+}
+
+function normalizePledgeStatus(value?: string | null): PledgeRecord["status"] {
+  const normalized = String(value || "").trim().toLowerCase();
+
+  if (normalized === "converted" || normalized === "fulfilled") {
+    return "converted";
+  }
+
+  if (
+    normalized === "follow_up" ||
+    normalized === "follow-up" ||
+    normalized === "follow up"
+  ) {
+    return "follow_up";
+  }
+
+  return "pledged";
+}
+
+function buildFinanceContactRows(input: {
+  contacts: FinanceDbContact[];
+  contributions: ContributionDbRow[];
+  pledges: PledgeDbRow[];
+}): FinanceContactRow[] {
+  const contributionsByContact = new Map<string, ContributionDbRow[]>();
+  const pledgesByContact = new Map<string, PledgeDbRow[]>();
+
+  for (const contribution of input.contributions) {
+    if (!contribution.contact_id) continue;
+
+    const current = contributionsByContact.get(contribution.contact_id) ?? [];
+    current.push(contribution);
+    contributionsByContact.set(contribution.contact_id, current);
+  }
+
+  for (const pledge of input.pledges) {
+    if (!pledge.contact_id) continue;
+
+    const current = pledgesByContact.get(pledge.contact_id) ?? [];
+    current.push(pledge);
+    pledgesByContact.set(pledge.contact_id, current);
+  }
+
+  return input.contacts.map((contact) => {
+    const employer = contact.employer ?? null;
+    const occupation = contact.occupation ?? null;
+    const complianceReady = Boolean(
+      String(employer || "").trim() && String(occupation || "").trim(),
     );
 
-    const pledgeAmount = toNumber(target?.pledge_amount ?? target?.pledge ?? 0);
-
-    const employer = target?.employer ?? null;
-    const occupation = target?.occupation ?? null;
-    const compliant =
-      donationTotal <= 0 || Boolean(String(employer || "").trim() && String(occupation || "").trim());
+    const contributionRows = contributionsByContact.get(contact.id) ?? [];
+    const pledgeRows = pledgesByContact.get(contact.id) ?? [];
 
     return {
-      id: String(target?.id || target?.contact_id || `finance-contact-${index}`),
-      name: normalizeContactName(target),
-      city: target?.city ?? null,
-      state: target?.state ?? null,
-      candidateApproved: Boolean(target?.candidate_approved ?? target?.candidateApproved ?? false),
-      contributions:
-        donationTotal > 0
-          ? [
-              {
-                id: `contribution-${target?.id || index}`,
-                amount: donationTotal,
-                method: "online",
-                date:
-                  target?.last_donation_date ||
-                  target?.fec_last_donation_date ||
-                  target?.created_at ||
-                  new Date().toISOString(),
-                compliant,
-                employer,
-                occupation,
-                notes: target?.notes ?? null,
-              },
-            ]
-          : [],
-      pledges:
-        pledgeAmount > donationTotal
-          ? [
-              {
-                id: `pledge-${target?.id || index}`,
-                amount: pledgeAmount,
-                status: "pledged",
-                created_at: target?.created_at || new Date().toISOString(),
-                converted_at: null,
-                notes: target?.notes ?? null,
-              },
-            ]
-          : [],
+      id: contact.id,
+      name: normalizeContactName(contact),
+      city: contact.city ?? null,
+      state: contact.state ?? null,
+      candidateApproved: false,
+      contributions: contributionRows.map((row) => ({
+        id: row.id,
+        amount: toNumber(row.amount),
+        method: normalizeContributionMethod(row.source),
+        date: row.date || row.created_at || "",
+        compliant: complianceReady,
+        employer,
+        occupation,
+        notes: row.source ? `Source: ${row.source}` : null,
+      })),
+      pledges: pledgeRows.map((row) => {
+        const amountPledged = toNumber(row.amount_pledged);
+        const amountFulfilled = toNumber(row.amount_fulfilled);
+        const remainingAmount = Math.max(amountPledged - amountFulfilled, 0);
+
+        return {
+          id: row.id,
+          amount: remainingAmount || amountPledged,
+          status: normalizePledgeStatus(row.status),
+          created_at: row.created_at || row.next_follow_up || "",
+          converted_at:
+            normalizePledgeStatus(row.status) === "converted"
+              ? row.next_follow_up || row.created_at || null
+              : null,
+          notes: row.next_follow_up
+            ? `Next follow-up: ${row.next_follow_up}`
+            : null,
+        };
+      }),
     };
   });
 }
-
 function buildFinanceWorkflowItems(contactRows: FinanceContactRow[]): FinanceWorkflowItem[] {
   const items: FinanceWorkflowItem[] = [];
 
@@ -232,11 +335,11 @@ function buildFinanceWorkflowItems(contactRows: FinanceContactRow[]): FinanceWor
   return items;
 }
 
-function buildFinanceCallRows(targets: any[]): FinanceCallRow[] {
+function buildFinanceCallRows(contactRows: FinanceContactRow[]): FinanceCallRow[] {
   const grouped = new Map<string, FinanceCallRow>();
 
-  for (const target of targets) {
-    const caller = String(target?.owner_name || target?.caller || "Unassigned");
+  for (const contact of contactRows) {
+    const caller = "Finance Team";
 
     const existing =
       grouped.get(caller) ??
@@ -249,15 +352,13 @@ function buildFinanceCallRows(targets: any[]): FinanceCallRow[] {
         raised: 0,
       };
 
-    existing.calls += toNumber(target?.calls ?? target?.call_count ?? 0);
-    existing.connects += toNumber(target?.connects ?? target?.connect_count ?? 0);
-    existing.pledged += toNumber(target?.pledge_amount ?? target?.pledged ?? 0);
-    existing.raised += toNumber(
-      target?.donation_total ??
-        target?.total_given ??
-        target?.fec_total_given ??
-        target?.raised ??
-        0
+    existing.pledged += contact.pledges
+      .filter((pledge) => pledge.status !== "converted")
+      .reduce((sum, pledge) => sum + pledge.amount, 0);
+
+    existing.raised += contact.contributions.reduce(
+      (sum, contribution) => sum + contribution.amount,
+      0,
     );
 
     grouped.set(caller, existing);
@@ -266,53 +367,69 @@ function buildFinanceCallRows(targets: any[]): FinanceCallRow[] {
   return Array.from(grouped.values()).sort((a, b) => b.raised - a.raised);
 }
 
+function getDateKey(value?: string | null) {
+  if (!value) return "Undated";
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value.slice(0, 10);
+
+  return parsed.toISOString().slice(0, 10);
+}
+
 function buildFinanceChartData(contactRows: FinanceContactRow[]): FinanceChartPoint[] {
-  const rowsWithValue = contactRows
-    .map((contact) => {
-      const moneyIn = contact.contributions.reduce(
-        (sum, item) => sum + item.amount,
-        0
-      );
+  const grouped = new Map<string, FinanceChartPoint>();
 
-      const pledges = contact.pledges
-        .filter((pledge) => pledge.status !== "converted")
-        .reduce((sum, item) => sum + item.amount, 0);
+  for (const contact of contactRows) {
+    for (const contribution of contact.contributions) {
+      const key = getDateKey(contribution.date);
+      const current =
+        grouped.get(key) ??
+        {
+          label: key,
+          money_in: 0,
+          money_out: 0,
+          net: 0,
+          pledges: 0,
+        };
 
-      return {
-        moneyIn,
-        pledges,
-      };
-    })
-    .filter((row) => row.moneyIn > 0 || row.pledges > 0);
+      current.money_in += contribution.amount;
+      current.net = current.money_in - current.money_out;
+      grouped.set(key, current);
+    }
 
-  const totalMoneyIn = rowsWithValue.reduce(
-    (sum, row) => sum + row.moneyIn,
-    0
-  );
+    for (const pledge of contact.pledges) {
+      if (pledge.status === "converted") continue;
 
-  const totalPledges = rowsWithValue.reduce(
-    (sum, row) => sum + row.pledges,
-    0
-  );
+      const key = getDateKey(pledge.created_at);
+      const current =
+        grouped.get(key) ??
+        {
+          label: key,
+          money_in: 0,
+          money_out: 0,
+          net: 0,
+          pledges: 0,
+        };
 
-  if (totalMoneyIn === 0 && totalPledges === 0) {
-    return [];
+      current.pledges += pledge.amount;
+      current.net = current.money_in - current.money_out;
+      grouped.set(key, current);
+    }
   }
 
-  const weekWeights = [0.76, 0.89, 0.96, 1];
-
-  return weekWeights.map((weight, index) => {
-    const moneyIn = Math.round(totalMoneyIn * weight);
-    const pledges = Math.round(totalPledges * weight);
-
-    return {
-      label: `W${index + 1}`,
-      money_in: moneyIn,
-      money_out: 0,
-      net: moneyIn,
-      pledges,
-    };
-  });
+  return Array.from(grouped.values())
+    .sort((a, b) => a.label.localeCompare(b.label))
+    .slice(-8)
+    .map((point) => ({
+      ...point,
+      label:
+        point.label === "Undated"
+          ? point.label
+          : new Date(`${point.label}T00:00:00`).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+            }),
+    }));
 }
 
 function buildFinanceMetrics(input: {
@@ -690,17 +807,78 @@ export default function FinanceDashboardPage() {
   useEffect(() => {
     let mounted = true;
 
-    async function loadFinanceTargets() {
+    async function loadFinanceRecords() {
       try {
         setFinanceLoading(true);
-        const targets = await getFinanceCallTargets();
+
+        const organizationId = await getActiveOrganizationId();
+
+        let contactsQuery = supabase
+          .from("contacts")
+          .select(
+            "id, first_name, last_name, full_name, email, phone, city, state, owner_name, organization_id, employer, occupation, donation_total, pledge_amount, created_at, updated_at",
+          )
+          .order("last_name", { ascending: true });
+
+        if (organizationId) {
+          contactsQuery = contactsQuery.eq("organization_id", organizationId);
+        }
+
+        const { data: contactData, error: contactError } = await contactsQuery;
+
+        if (contactError) {
+          throw contactError;
+        }
+
+        const contacts = ((contactData as FinanceDbContact[] | null) ?? []).filter(
+          (contact) => Boolean(contact.id),
+        );
+
+        const contactIds = contacts.map((contact) => contact.id);
+
+        if (contactIds.length === 0) {
+          if (!mounted) return;
+
+          setFinanceTargets([]);
+          setContactRows([]);
+          setWorkflowItems([]);
+          setSelectedFinanceContactId("");
+          return;
+        }
+
+        const { data: contributionData, error: contributionError } =
+          await supabase
+            .from("contributions")
+            .select("id, contact_id, amount, source, date, created_at, organization_id")
+            .in("contact_id", contactIds)
+            .order("date", { ascending: false });
+
+        if (contributionError) {
+          throw contributionError;
+        }
+
+        const { data: pledgeData, error: pledgeError } = await supabase
+          .from("pledges")
+          .select(
+            "id, contact_id, amount_pledged, amount_fulfilled, status, next_follow_up, created_at",
+          )
+          .in("contact_id", contactIds)
+          .order("created_at", { ascending: false });
+
+        if (pledgeError) {
+          throw pledgeError;
+        }
 
         if (!mounted) return;
 
-        const safeTargets = Array.isArray(targets) ? targets : [];
-        const nextContactRows = buildFinanceContactRows(safeTargets);
+        const nextContactRows = buildFinanceContactRows({
+          contacts,
+          contributions:
+            (contributionData as ContributionDbRow[] | null) ?? [],
+          pledges: (pledgeData as PledgeDbRow[] | null) ?? [],
+        });
 
-        setFinanceTargets(safeTargets);
+        setFinanceTargets([]);
         setContactRows(nextContactRows);
         setWorkflowItems(buildFinanceWorkflowItems(nextContactRows));
 
@@ -708,13 +886,13 @@ export default function FinanceDashboardPage() {
           setSelectedFinanceContactId((current) =>
             nextContactRows.some((contact) => contact.id === current)
               ? current
-              : nextContactRows[0].id
+              : nextContactRows[0].id,
           );
         } else {
           setSelectedFinanceContactId("");
         }
       } catch (error) {
-        console.error("Failed to load finance targets:", error);
+        console.error("Failed to load finance records:", error);
 
         if (!mounted) return;
 
@@ -729,7 +907,7 @@ export default function FinanceDashboardPage() {
       }
     }
 
-    loadFinanceTargets();
+    loadFinanceRecords();
 
     return () => {
       mounted = false;
@@ -778,8 +956,8 @@ export default function FinanceDashboardPage() {
   }, [totalMoneyIn, totalMoneyOut, totalNet, totalPledges]);
 
   const callRows = useMemo<FinanceCallRow[]>(() => {
-    return buildFinanceCallRows(financeTargets);
-  }, [financeTargets]);
+    return buildFinanceCallRows(contactRows);
+  }, [contactRows]);
 
   const selectedChartValues = useMemo(() => {
     return chartData.map((point) => point[chartView]);

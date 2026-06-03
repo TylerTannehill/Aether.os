@@ -59,19 +59,64 @@ export async function createList(input: CreateListInput) {
   const normalizedType =
     input.type === "finance" ||
     input.type === "field" ||
-    input.type === "volunteer"
+    input.type === "print"
       ? input.type
       : "outreach";
 
-  const { error } = await supabase.from("lists").insert([
-    {
-      name: trimmedName,
-      type: normalizedType,
-      organization_id: organizationId,
-    },
-  ]);
+  const uniqueContactIds = Array.from(
+    new Set((input.contactIds ?? []).filter(Boolean))
+  );
 
-  if (error) throw error;
+  const { data: createdList, error: listError } = await supabase
+    .from("lists")
+    .insert([
+      {
+        name: trimmedName,
+        type: normalizedType,
+        organization_id: organizationId,
+      },
+    ])
+    .select("id, name, type, created_at, default_owner_name")
+    .single();
+
+  if (listError) throw listError;
+
+  if (!createdList?.id) {
+    throw new Error("List was created, but no list id was returned.");
+  }
+
+  if (uniqueContactIds.length === 0) {
+    return createdList as CampaignList;
+  }
+
+  const { data: validContacts, error: contactError } = await supabase
+    .from("contacts")
+    .select("id")
+    .eq("organization_id", organizationId)
+    .in("id", uniqueContactIds);
+
+  if (contactError) throw contactError;
+
+  const validContactIds = ((validContacts ?? []) as Array<{ id: string }>).map(
+    (contact) => contact.id
+  );
+
+  if (validContactIds.length === 0) {
+    return createdList as CampaignList;
+  }
+
+  const membershipRows = validContactIds.map((contactId) => ({
+    list_id: createdList.id,
+    contact_id: contactId,
+  }));
+
+  const { error: membershipError } = await supabase
+    .from("list_contacts")
+    .insert(membershipRows);
+
+  if (membershipError) throw membershipError;
+
+  return createdList as CampaignList;
 }
 
 export async function updateListDefaultOwner(

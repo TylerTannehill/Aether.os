@@ -36,6 +36,8 @@ type Contact = {
   party?: string | null;
   contact_code?: string | null;
   owner_name?: string | null;
+  organization_id?: string | null;
+  donation_total?: number | string | null;
   donor_intelligence?: ContactDonorIntelligence | null;
   fec_match_status?: ContactDonorIntelligence["fec_match_status"];
   fec_confidence_score?: ContactDonorIntelligence["fec_confidence_score"];
@@ -81,6 +83,25 @@ type Task = {
   due_date?: string | null;
 };
 
+type ContributionDbRow = {
+  id: string;
+  contact_id: string;
+  amount?: number | string | null;
+  source?: string | null;
+  date?: string | null;
+  created_at?: string | null;
+};
+
+type PledgeDbRow = {
+  id: string;
+  contact_id: string;
+  amount_pledged?: number | string | null;
+  amount_fulfilled?: number | string | null;
+  status?: string | null;
+  next_follow_up?: string | null;
+  created_at?: string | null;
+};
+
 type ContactPrioritySignal = {
   label: string;
   description: string;
@@ -95,6 +116,18 @@ type QuickActionDraft = {
   channel: QuickActionChannel;
   result: string;
   notes: string;
+};
+
+type ContributionDraft = {
+  amount: string;
+  source: ContributionRecord["method"];
+  date: string;
+};
+
+type PledgeDraft = {
+  amount: string;
+  status: "pledged" | "follow_up";
+  nextFollowUp: string;
 };
 
 type ContactListTag = "outreach" | "finance" | "field" | "print" | "volunteer";
@@ -126,6 +159,10 @@ const currency = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 0,
 });
 
+function todayIsoDate() {
+  return new Date().toISOString().slice(0, 10);
+}
+
 const quickActionResultOptions: Record<QuickActionChannel, string[]> = {
   call: [
     "positive - pledge",
@@ -150,6 +187,64 @@ function formatDateTime(value?: string | null) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
   return date.toLocaleString();
+}
+
+function normalizeContributionMethod(
+  value?: string | null,
+): ContributionRecord["method"] {
+  const normalized = String(value || "").trim().toLowerCase();
+
+  if (normalized.includes("check")) return "check";
+  if (normalized.includes("cash")) return "cash";
+
+  return "online";
+}
+
+function normalizePledgeStatus(value?: string | null): PledgeRecord["status"] {
+  const normalized = String(value || "").trim().toLowerCase();
+
+  if (normalized === "converted" || normalized === "fulfilled") {
+    return "converted";
+  }
+
+  if (
+    normalized === "follow_up" ||
+    normalized === "follow-up" ||
+    normalized === "follow up"
+  ) {
+    return "follow_up";
+  }
+
+  return "pledged";
+}
+
+function mapContributionRow(row: ContributionDbRow): ContributionRecord {
+  return {
+    id: row.id,
+    contact_id: row.contact_id,
+    amount: Number(row.amount || 0),
+    method: normalizeContributionMethod(row.source),
+    date: row.date || row.created_at || "",
+    compliant: true,
+    employer: null,
+    occupation: null,
+    notes: row.source ? `Source: ${row.source}` : null,
+  };
+}
+
+function mapPledgeRow(row: PledgeDbRow): PledgeRecord {
+  return {
+    id: row.id,
+    contact_id: row.contact_id,
+    amount: Number(row.amount_pledged || row.amount_fulfilled || 0),
+    status: normalizePledgeStatus(row.status),
+    created_at: row.created_at || row.next_follow_up || "",
+    converted_at:
+      normalizePledgeStatus(row.status) === "converted"
+        ? row.next_follow_up || null
+        : null,
+    notes: row.next_follow_up ? `Next follow-up: ${row.next_follow_up}` : null,
+  };
 }
 
 function deriveContactStatusAndNextAction(latestLog: OutreachLog | null) {
@@ -748,7 +843,10 @@ export default function ContactDetailPage() {
   const [selectedListId, setSelectedListId] = useState("");
   const [logs, setLogs] = useState<OutreachLog[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [contributions, setContributions] = useState<ContributionRecord[]>([]);
+  const [pledges, setPledges] = useState<PledgeRecord[]>([]);
   const [message, setMessage] = useState("");
+  const [contributionMessage, setContributionMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [quickActionDraft, setQuickActionDraft] = useState<QuickActionDraft>({
@@ -756,6 +854,19 @@ export default function ContactDetailPage() {
     result: quickActionResultOptions.call[0],
     notes: "",
   });
+  const [contributionDraft, setContributionDraft] = useState<ContributionDraft>({
+    amount: "",
+    source: "check",
+    date: todayIsoDate(),
+  });
+  const [contributionSaving, setContributionSaving] = useState(false);
+  const [pledgeDraft, setPledgeDraft] = useState<PledgeDraft>({
+    amount: "",
+    status: "pledged",
+    nextFollowUp: todayIsoDate(),
+  });
+  const [pledgeSaving, setPledgeSaving] = useState(false);
+  const [pledgeMessage, setPledgeMessage] = useState("");
   const [quickActionSaving, setQuickActionSaving] = useState(false);
   const [fieldIntelExpanded, setFieldIntelExpanded] = useState(false);
   const [printIntelExpanded, setPrintIntelExpanded] = useState(false);
@@ -831,6 +942,20 @@ export default function ContactDetailPage() {
       .eq("contact_id", contactId)
       .order("created_at", { ascending: false });
 
+    const { data: contributionData, error: contributionError } = await supabase
+      .from("contributions")
+      .select("id, contact_id, amount, source, date, created_at")
+      .eq("contact_id", contactId)
+      .order("date", { ascending: false });
+
+    const { data: pledgeData, error: pledgeError } = await supabase
+      .from("pledges")
+      .select(
+        "id, contact_id, amount_pledged, amount_fulfilled, status, next_follow_up, created_at",
+      )
+      .eq("contact_id", contactId)
+      .order("created_at", { ascending: false });
+
     if (contactError) {
       setMessage(`Error loading contact: ${contactError.message}`);
     } else {
@@ -866,6 +991,24 @@ export default function ContactDetailPage() {
       setMessage(`Error loading tasks: ${taskError.message}`);
     } else {
       setTasks((taskData as Task[]) || []);
+    }
+
+    if (contributionError) {
+      setMessage(`Error loading contributions: ${contributionError.message}`);
+      setContributions([]);
+    } else {
+      setContributions(
+        ((contributionData as ContributionDbRow[]) || []).map(
+          mapContributionRow,
+        ),
+      );
+    }
+
+    if (pledgeError) {
+      setMessage(`Error loading pledges: ${pledgeError.message}`);
+      setPledges([]);
+    } else {
+      setPledges(((pledgeData as PledgeDbRow[]) || []).map(mapPledgeRow));
     }
 
     setLoading(false);
@@ -994,7 +1137,146 @@ export default function ContactDetailPage() {
     }
   }
 
-  const availableLists = lists.filter(
+  async function saveContribution() {
+    if (!contact) return;
+
+    const amount = Number(contributionDraft.amount);
+    const date = contributionDraft.date || todayIsoDate();
+
+    setMessage("");
+    setContributionMessage("");
+
+    if (!Number.isFinite(amount) || amount <= 0) {
+      setContributionMessage("Enter a valid contribution amount.");
+      return;
+    }
+
+    setContributionSaving(true);
+
+    try {
+      const contributionPayload = {
+        contact_id: contactId,
+        amount,
+        source: contributionDraft.source,
+        date,
+        organization_id: contact.organization_id ?? null,
+      };
+
+      const { data: insertedContribution, error: insertError } = await supabase
+        .from("contributions")
+        .insert([contributionPayload])
+        .select("id, contact_id, amount, source, date, created_at")
+        .single();
+
+      if (insertError) {
+        setContributionMessage(
+          `Contribution did not save: ${insertError.message}`,
+        );
+        return;
+      }
+
+      const currentDonationTotal = Number(contact.donation_total || 0);
+      const nextDonationTotal = currentDonationTotal + amount;
+
+      const { error: updateError } = await supabase
+        .from("contacts")
+        .update({
+          donation_total: nextDonationTotal,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", contactId);
+
+      if (updateError) {
+        setContributionMessage(
+          `Contribution saved, but contact total did not update: ${updateError.message}`,
+        );
+      } else {
+        setContributionMessage(
+          `${currency.format(amount)} ${contributionDraft.source} contribution saved.`,
+        );
+      }
+
+      if (insertedContribution) {
+        setContributions((current) => [
+          mapContributionRow(insertedContribution as ContributionDbRow),
+          ...current,
+        ]);
+      }
+
+      setContact((current) =>
+        current
+          ? {
+              ...current,
+              donation_total: nextDonationTotal,
+            }
+          : current,
+      );
+
+      setContributionDraft({
+        amount: "",
+        source: "check",
+        date: todayIsoDate(),
+      });
+
+      await fetchData();
+    } catch (error: any) {
+      setContributionMessage(
+        `Contribution did not save: ${error?.message || "Unknown error"}`,
+      );
+    } finally {
+      setContributionSaving(false);
+    }
+  }
+
+  
+  async function savePledge() {
+    if (!contact) return;
+
+    const amount = Number(pledgeDraft.amount);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      setPledgeMessage("Enter a valid pledge amount.");
+      return;
+    }
+
+    setPledgeSaving(true);
+    setPledgeMessage("");
+
+    try {
+      const { error } = await supabase.from("pledges").insert([{
+        contact_id: contactId,
+        amount_pledged: amount,
+        amount_fulfilled: 0,
+        status: pledgeDraft.status,
+        next_follow_up: pledgeDraft.nextFollowUp || null,
+      }]);
+
+      if (error) {
+        setPledgeMessage(`Pledge did not save: ${error.message}`);
+        return;
+      }
+
+      await supabase
+        .from("contacts")
+        .update({
+          pledge_amount: amount,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", contactId);
+
+      setPledgeMessage(`Pledge for ${currency.format(amount)} saved.`);
+      setPledgeDraft({
+        amount: "",
+        status: "pledged",
+        nextFollowUp: todayIsoDate(),
+      });
+
+      await fetchData();
+    } finally {
+      setPledgeSaving(false);
+    }
+  }
+
+const availableLists = lists.filter(
     (list) => !contactLists.some((assigned) => assigned.id === list.id),
   );
 
@@ -1094,49 +1376,12 @@ export default function ContactDetailPage() {
   const intelligence = deriveContactStatusAndNextAction(latestLog);
 
   const contributionHistory = useMemo<ContributionRecord[]>(() => {
-    if (!contact?.id) return [];
-
-    return [
-      {
-        id: "ctrb-1",
-        contact_id: contact.id,
-        amount: 2500,
-        method: "online",
-        date: "2026-04-01",
-        compliant: true,
-        employer: "Mitchell Advisory",
-        occupation: "Consultant",
-        notes: "High-capacity contribution",
-      },
-      {
-        id: "ctrb-2",
-        contact_id: contact.id,
-        amount: 1000,
-        method: "check",
-        date: "2026-04-08",
-        compliant: false,
-        employer: null,
-        occupation: null,
-        notes: "Missing employer / occupation",
-      },
-    ];
-  }, [contact?.id]);
+    return contributions;
+  }, [contributions]);
 
   const pledgeHistory = useMemo<PledgeRecord[]>(() => {
-    if (!contact?.id) return [];
-
-    return [
-      {
-        id: "plg-1",
-        contact_id: contact.id,
-        amount: 3200,
-        status: "pledged",
-        created_at: "2026-04-04",
-        converted_at: null,
-        notes: "Needs follow-up to collect pledge",
-      },
-    ];
-  }, [contact?.id]);
+    return pledges;
+  }, [pledges]);
 
   const financeSummary = useMemo(() => {
     const lifetimeContributionTotal = contributionHistory.reduce(
@@ -1684,7 +1929,160 @@ export default function ContactDetailPage() {
               <p className="mt-2 text-xl font-semibold text-slate-900">
                 {financeSummary.contributionCount + financeSummary.pledgeCount}
               </p>
+            
+</div>
+          </div>
+
+          <div className="mt-6 rounded-3xl border border-blue-200 bg-blue-50 p-5">
+            <p className="text-sm font-medium text-blue-800">Add Pledge</p>
+            <h3 className="mt-1 text-xl font-semibold text-blue-950">
+              Record a pledge on this contact
+            </h3>
+
+            <div className="mt-4 grid gap-3 md:grid-cols-[1fr_1fr_1fr_auto]">
+              <input
+                type="number"
+                placeholder="500.00"
+                value={pledgeDraft.amount}
+                onChange={(e)=>setPledgeDraft((c)=>({...c,amount:e.target.value}))}
+                className="rounded-xl border border-blue-200 bg-white px-3 py-2"
+              />
+              <select
+                value={pledgeDraft.status}
+                onChange={(e)=>setPledgeDraft((c)=>({...c,status:e.target.value as any}))}
+                className="rounded-xl border border-blue-200 bg-white px-3 py-2"
+              >
+                <option value="pledged">Pledged</option>
+                <option value="follow_up">Follow Up</option>
+              </select>
+              <input
+                type="date"
+                value={pledgeDraft.nextFollowUp}
+                onChange={(e)=>setPledgeDraft((c)=>({...c,nextFollowUp:e.target.value}))}
+                className="rounded-xl border border-blue-200 bg-white px-3 py-2"
+              />
+              <button
+                type="button"
+                onClick={savePledge}
+                disabled={pledgeSaving}
+                className="rounded-xl bg-blue-700 px-4 py-2 text-white"
+              >
+                {pledgeSaving ? "Saving..." : "Save Pledge"}
+              </button>
             </div>
+
+            {pledgeMessage ? (
+              <div className="mt-3 rounded-xl border border-blue-200 bg-white p-3 text-sm">
+                {pledgeMessage}
+              </div>
+            ) : null}
+          </div>
+
+          <div className="mt-6 rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
+            <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div>
+                <p className="text-sm font-medium text-emerald-800">
+                  Add Contribution
+                </p>
+                <h3 className="mt-1 text-xl font-semibold text-emerald-950">
+                  Record a payment on this contact
+                </h3>
+                <p className="mt-2 max-w-3xl text-sm text-emerald-900/80">
+                  Add check, cash, or online contribution activity here. Employer
+                  and occupation stay on the contact record, so compliance can
+                  remain open until those fields are cleaned up.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid gap-3 md:grid-cols-[1fr_1fr_1fr_auto]">
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wide text-emerald-800">
+                  Amount
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={contributionDraft.amount}
+                  onChange={(e) =>
+                    setContributionDraft((current) => ({
+                      ...current,
+                      amount: e.target.value,
+                    }))
+                  }
+                  placeholder="250.00"
+                  className="mt-1 w-full rounded-xl border border-emerald-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wide text-emerald-800">
+                  Payment Type
+                </label>
+                <select
+                  value={contributionDraft.source}
+                  onChange={(e) =>
+                    setContributionDraft((current) => ({
+                      ...current,
+                      source: e.target.value as ContributionRecord["method"],
+                    }))
+                  }
+                  className="mt-1 w-full rounded-xl border border-emerald-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-emerald-500"
+                >
+                  <option value="check">Check</option>
+                  <option value="cash">Cash</option>
+                  <option value="online">Online</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wide text-emerald-800">
+                  Contribution Date
+                </label>
+                <input
+                  type="date"
+                  value={contributionDraft.date}
+                  onChange={(e) =>
+                    setContributionDraft((current) => ({
+                      ...current,
+                      date: e.target.value,
+                    }))
+                  }
+                  className="mt-1 w-full rounded-xl border border-emerald-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-emerald-500"
+                />
+              </div>
+
+              <div className="flex items-end">
+                <button
+                  type="button"
+                  onClick={saveContribution}
+                  disabled={contributionSaving}
+                  className="w-full rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60 md:w-auto"
+                >
+                  {contributionSaving ? "Saving..." : "Save Contribution"}
+                </button>
+              </div>
+            </div>
+
+            {contributionMessage ? (
+              <div
+                className={`mt-4 rounded-2xl border p-4 text-sm font-medium ${
+                  contributionMessage.includes("did not") ||
+                  contributionMessage.includes("failed")
+                    ? "border-rose-200 bg-rose-50 text-rose-700"
+                    : "border-emerald-200 bg-white text-emerald-900"
+                }`}
+              >
+                {contributionMessage}
+              </div>
+            ) : (
+              <div className="mt-4 rounded-2xl border border-emerald-200 bg-white p-4 text-xs text-emerald-900">
+                This records the payment and updates the contact donation total.
+                Compliance fields remain separate so missing employer or occupation
+                details can still be handled intentionally.
+              </div>
+            )}
           </div>
 
           <div className="mt-6 rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
@@ -1784,6 +2182,12 @@ export default function ContactDetailPage() {
               </h3>
 
               <div className="mt-3 space-y-2">
+                {contributionHistory.length === 0 ? (
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
+                    No contributions are recorded for this contact yet.
+                  </div>
+                ) : null}
+
                 {contributionHistory.map((c) => (
                   <div
                     key={c.id}
@@ -1824,6 +2228,12 @@ export default function ContactDetailPage() {
               </h3>
 
               <div className="mt-3 space-y-2">
+                {pledgeHistory.length === 0 ? (
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
+                    No pledges are recorded for this contact yet.
+                  </div>
+                ) : null}
+
                 {pledgeHistory.map((p) => (
                   <div
                     key={p.id}
