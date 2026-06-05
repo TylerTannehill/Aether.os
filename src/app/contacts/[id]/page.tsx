@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import {
   ArrowRight,
   CheckCircle2,
+  ChevronDown,
   ClipboardList,
   Landmark,
   ListChecks,
@@ -31,12 +32,19 @@ type Contact = {
   last_name?: string | null;
   email?: string | null;
   phone?: string | null;
+  secondary_phone?: string | null;
+  address?: string | null;
+  zip?: string | null;
+  employer?: string | null;
+  occupation?: string | null;
   city?: string | null;
   state?: string | null;
   party?: string | null;
   contact_code?: string | null;
   owner_name?: string | null;
   organization_id?: string | null;
+  notes?: string | null;
+  updated_at?: string | null;
   donation_total?: number | string | null;
   donor_intelligence?: ContactDonorIntelligence | null;
   fec_match_status?: ContactDonorIntelligence["fec_match_status"];
@@ -71,6 +79,16 @@ type OutreachLog = {
   channel: "call" | "text";
   result: string;
   notes?: string | null;
+  created_at?: string | null;
+};
+
+type ContactNote = {
+  id: string;
+  contact_id: string;
+  organization_id?: string | null;
+  author_id?: string | null;
+  author_name?: string | null;
+  note: string;
   created_at?: string | null;
 };
 
@@ -842,11 +860,15 @@ export default function ContactDetailPage() {
   const [contactLists, setContactLists] = useState<List[]>([]);
   const [selectedListId, setSelectedListId] = useState("");
   const [logs, setLogs] = useState<OutreachLog[]>([]);
+  const [contactNotes, setContactNotes] = useState<ContactNote[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [contributions, setContributions] = useState<ContributionRecord[]>([]);
   const [pledges, setPledges] = useState<PledgeRecord[]>([]);
   const [message, setMessage] = useState("");
   const [contributionMessage, setContributionMessage] = useState("");
+  const [notesDraft, setNotesDraft] = useState("");
+  const [notesMessage, setNotesMessage] = useState("");
+  const [notesSaving, setNotesSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [quickActionDraft, setQuickActionDraft] = useState<QuickActionDraft>({
@@ -868,9 +890,13 @@ export default function ContactDetailPage() {
   const [pledgeSaving, setPledgeSaving] = useState(false);
   const [pledgeMessage, setPledgeMessage] = useState("");
   const [quickActionSaving, setQuickActionSaving] = useState(false);
+  const [financeExpanded, setFinanceExpanded] = useState(true);
   const [fieldIntelExpanded, setFieldIntelExpanded] = useState(false);
   const [printIntelExpanded, setPrintIntelExpanded] = useState(false);
   const [aetherTier, setAetherTier] = useState<AetherTier>("t3");
+  const [editingContact, setEditingContact] = useState(false);
+  const [editForm, setEditForm] = useState<any>({});
+
 
   const outreachCallHref = `/dashboard/outreach?contactId=${contactId}&channel=call`;
   const outreachTextHref = `/dashboard/outreach?contactId=${contactId}&channel=text`;
@@ -956,10 +982,33 @@ export default function ContactDetailPage() {
       .eq("contact_id", contactId)
       .order("created_at", { ascending: false });
 
+    const { data: contactNoteData, error: contactNoteError } = await supabase
+      .from("contact_notes")
+      .select(
+        "id, contact_id, organization_id, author_id, author_name, note, created_at",
+      )
+      .eq("contact_id", contactId)
+      .order("created_at", { ascending: false });
+
     if (contactError) {
       setMessage(`Error loading contact: ${contactError.message}`);
     } else {
       setContact(contactData);
+      setEditForm({
+        first_name: contactData?.first_name || "",
+        last_name: contactData?.last_name || "",
+        email: contactData?.email || "",
+        phone: contactData?.phone || "",
+        secondary_phone: contactData?.secondary_phone || "",
+        address: contactData?.address || "",
+        city: contactData?.city || "",
+        state: contactData?.state || "",
+        zip: contactData?.zip || "",
+        employer: contactData?.employer || "",
+        occupation: contactData?.occupation || "",
+        owner_name: contactData?.owner_name || "",
+      });
+      setNotesDraft(String(contactData?.notes || ""));
     }
 
     if (listError) {
@@ -1011,10 +1060,29 @@ export default function ContactDetailPage() {
       setPledges(((pledgeData as PledgeDbRow[]) || []).map(mapPledgeRow));
     }
 
+    if (contactNoteError) {
+      setNotesMessage(`Error loading contact notes: ${contactNoteError.message}`);
+      setContactNotes([]);
+    } else {
+      setContactNotes((contactNoteData as ContactNote[]) || []);
+    }
+
     setLoading(false);
   }
 
-  async function addToList() {
+  
+  async function saveContactProfileEdits() {
+    const { error } = await supabase.from("contacts").update(editForm).eq("id", contactId);
+    if (error) {
+      setMessage(`Error saving contact: ${error.message}`);
+      return;
+    }
+    setContact((c:any)=> c ? {...c, ...editForm} : c);
+    setEditingContact(false);
+    setMessage("Contact updated.");
+  }
+
+async function addToList() {
     setMessage("");
 
     if (!selectedListId) {
@@ -1134,6 +1202,65 @@ export default function ContactDetailPage() {
       );
     } finally {
       setQuickActionSaving(false);
+    }
+  }
+
+  async function saveContactNotes() {
+    if (!contact) return;
+
+    const trimmedNote = notesDraft.trim();
+
+    setNotesMessage("");
+    setMessage("");
+
+    if (!trimmedNote) {
+      setNotesMessage("Add a note before saving.");
+      return;
+    }
+
+    setNotesSaving(true);
+
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      const notePayload = {
+        contact_id: contactId,
+        organization_id: contact.organization_id ?? null,
+        author_id: user?.id ?? null,
+        author_name: user?.email ?? "Aether User",
+        note: trimmedNote,
+      };
+
+      const { data: insertedNote, error } = await supabase
+        .from("contact_notes")
+        .insert([notePayload])
+        .select(
+          "id, contact_id, organization_id, author_id, author_name, note, created_at",
+        )
+        .single();
+
+      if (error) {
+        setNotesMessage(`Note did not save: ${error.message}`);
+        return;
+      }
+
+      if (insertedNote) {
+        setContactNotes((current) => [
+          insertedNote as ContactNote,
+          ...current,
+        ]);
+      }
+
+      setNotesDraft("");
+      setNotesMessage("Contact note saved.");
+    } catch (error: any) {
+      setNotesMessage(
+        `Note did not save: ${error?.message || "Unknown error"}`,
+      );
+    } finally {
+      setNotesSaving(false);
     }
   }
 
@@ -1559,6 +1686,37 @@ const availableLists = lists.filter(
                     placement, active tasks, finance context, and direct
                     execution on this person.
                   </p>
+
+                  <div className="mt-4 grid gap-3 text-sm sm:grid-cols-2 xl:grid-cols-4">
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                      <p className="text-xs font-medium text-slate-500">Email</p>
+                      <p className="mt-1 break-words font-semibold text-slate-900">
+                        {contact?.email || "—"}
+                      </p>
+                    </div>
+
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                      <p className="text-xs font-medium text-slate-500">Phone</p>
+                      <p className="mt-1 font-semibold text-slate-900">
+                        {contact?.phone || "—"}
+                      </p>
+                    </div>
+
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                      <p className="text-xs font-medium text-slate-500">Location</p>
+                      <p className="mt-1 font-semibold text-slate-900">
+                        {[contact?.city, contact?.state].filter(Boolean).join(", ") ||
+                          "—"}
+                      </p>
+                    </div>
+
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                      <p className="text-xs font-medium text-slate-500">Contact Code</p>
+                      <p className="mt-1 font-semibold text-slate-900">
+                        {contact?.contact_code || "—"}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -1576,10 +1734,30 @@ const availableLists = lists.filter(
                 >
                   Back to Contacts
                 </Link>
+                <button
+                  onClick={() => setEditingContact((v) => !v)}
+                  className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700"
+                >
+                  {editingContact ? "Cancel Edit" : "Edit Contact"}
+                </button>
 </div>
             </div>
 
-            <div className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
+            
+{editingContact && (
+<div className="mb-6 rounded-3xl border border-blue-200 bg-blue-50 p-5">
+  <h3 className="mb-4 text-lg font-semibold">Edit Contact</h3>
+  <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+    {["first_name","last_name","email","phone","secondary_phone","address","city","state","zip","employer","occupation","owner_name"].map((field)=>(
+      <input key={field} value={editForm[field]||""} onChange={(e)=>setEditForm((c:any)=>({...c,[field]:e.target.value}))} placeholder={field.replace("_"," ")} className="rounded-xl border border-slate-300 bg-white px-3 py-2"/>
+    ))}
+  </div>
+  <div className="mt-4">
+    <button onClick={saveContactProfileEdits} className="rounded-xl bg-slate-900 px-4 py-2 text-white">Save Contact</button>
+  </div>
+</div>
+)}
+<div className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
               <div className="rounded-3xl border border-amber-200 bg-amber-50 p-5 shadow-sm">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div>
@@ -1829,40 +2007,95 @@ const availableLists = lists.filter(
           </div>
         </section>
 
-        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <p className="text-sm font-medium text-slate-500">Email</p>
-            <p className="mt-3 break-words text-lg font-semibold text-slate-900">
-              {contact?.email || "—"}
-            </p>
-            <p className="mt-2 text-sm text-slate-500">Primary email record</p>
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
+          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <p className="text-sm font-medium text-slate-500">
+                Contact Notes
+              </p>
+              <h2 className="text-xl font-semibold text-slate-900">
+                Internal notes for this contact
+              </h2>
+              <p className="mt-1 text-sm text-slate-500">
+                Add timestamped relationship notes, meeting context, donor
+                details, local issues, family references, and anything the team
+                should remember before working this contact.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={saveContactNotes}
+              disabled={notesSaving}
+              className="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {notesSaving ? "Saving Note..." : "Save Note"}
+            </button>
           </div>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <p className="text-sm font-medium text-slate-500">Phone</p>
-            <p className="mt-3 text-lg font-semibold text-slate-900">
-              {contact?.phone || "—"}
-            </p>
-            <p className="mt-2 text-sm text-slate-500">Primary phone record</p>
+          <textarea
+            value={notesDraft}
+            onChange={(e) => setNotesDraft(e.target.value)}
+            placeholder="Add a new note for this contact..."
+            rows={4}
+            className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-900 outline-none transition focus:border-slate-400 focus:bg-white"
+          />
+
+          <div className="mt-3 flex flex-col gap-2 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+            <p>Notes are timestamped and added to this contact record.</p>
+
+            {notesMessage ? (
+              <p
+                className={
+                  notesMessage.includes("did not") ||
+                  notesMessage.includes("Error") ||
+                  notesMessage.includes("before saving")
+                    ? "font-medium text-rose-600"
+                    : "font-medium text-emerald-700"
+                }
+              >
+                {notesMessage}
+              </p>
+            ) : null}
           </div>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <p className="text-sm font-medium text-slate-500">Location</p>
-            <p className="mt-3 text-lg font-semibold text-slate-900">
-              {[contact?.city, contact?.state].filter(Boolean).join(", ") ||
-                "—"}
-            </p>
-            <p className="mt-2 text-sm text-slate-500">Geographic reference</p>
-          </div>
+          <div className="mt-6 space-y-3">
+            {contact?.notes ? (
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-amber-800">
+                  Legacy Profile Note
+                </p>
+                <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-800">
+                  {contact.notes}
+                </p>
+              </div>
+            ) : null}
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <p className="text-sm font-medium text-slate-500">Contact Code</p>
-            <p className="mt-3 text-lg font-semibold text-slate-900">
-              {contact?.contact_code || "—"}
-            </p>
-            <p className="mt-2 text-sm text-slate-500">
-              Internal contact identity
-            </p>
+            {contactNotes.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
+                No contact notes have been added yet.
+              </div>
+            ) : (
+              contactNotes.map((note) => (
+                <div
+                  key={note.id}
+                  className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                >
+                  <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="text-sm font-semibold text-slate-900">
+                      {note.author_name || "Aether User"}
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      {formatDateTime(note.created_at)}
+                    </p>
+                  </div>
+
+                  <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-700">
+                    {note.note}
+                  </p>
+                </div>
+              ))
+            )}
           </div>
         </section>
 
@@ -1874,7 +2107,7 @@ const availableLists = lists.filter(
           <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <p className="text-sm font-medium text-slate-500">
-                Finance Context
+                Finance Intelligence
               </p>
               <h2 className="text-xl font-semibold text-slate-900">
                 Contributions, pledges, and compliance
@@ -1885,15 +2118,32 @@ const availableLists = lists.filter(
               </p>
             </div>
 
-            <Link
-              href={financeHref}
-              className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-            >
-              Open Finance Dashboard
-              <ArrowRight className="h-4 w-4" />
-            </Link>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href={financeHref}
+                className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+              >
+                Open Finance Dashboard
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+
+              <button
+                type="button"
+                onClick={() => setFinanceExpanded((current) => !current)}
+                className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
+              >
+                {financeExpanded ? "Collapse" : "Expand"}
+                <ChevronDown
+                  className={`h-4 w-4 transition ${
+                    financeExpanded ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+            </div>
           </div>
 
+          {financeExpanded ? (
+            <>
           <div className="grid gap-4 md:grid-cols-4">
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
               <p className="text-xs font-medium text-slate-500">
@@ -2268,9 +2518,18 @@ const availableLists = lists.filter(
               </div>
             </div>
           </div>
-        </section>
+                    </>
+          ) : (
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
+              Finance details are collapsed. Expand to view contribution history,
+              pledge history, FEC intelligence, and finance entry tools.
+            </div>
+          )}
+</section>
 
         ) : null}
+
+
 
         <section
           id="field-intelligence"
@@ -2435,7 +2694,7 @@ const availableLists = lists.filter(
           className="rounded-3xl border border-violet-200 bg-violet-50 p-6 shadow-sm lg:p-8"
         >
           <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div>
+            <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-violet-700">
                 Print Intelligence
               </p>
@@ -2450,7 +2709,7 @@ const availableLists = lists.filter(
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-2">
+            <div className="flex shrink-0 flex-row flex-nowrap gap-2">
               <Link
                 href="/dashboard/print/focus"
                 className="inline-flex items-center gap-2 rounded-2xl border border-violet-200 bg-white px-4 py-3 text-sm font-medium text-violet-700 transition hover:bg-violet-100"
@@ -2593,72 +2852,6 @@ const availableLists = lists.filter(
           )}
         </section>
 
-        <section
-          id="contact-tasks"
-          className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8"
-        >
-          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <p className="text-sm font-medium text-slate-500">Tasks</p>
-              <h2 className="text-xl font-semibold text-slate-900">
-                Work tied to this contact
-              </h2>
-              <p className="mt-1 text-sm text-slate-500">
-                Track tasks and close out work as it gets completed.
-              </p>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            {tasks.map((task) => (
-              <div
-                key={task.id}
-                className="rounded-2xl border border-slate-200 bg-white p-4"
-              >
-                <div className="flex items-center justify-between">
-                  <p className="font-medium text-slate-900">{task.title}</p>
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold ${priorityClasses(
-                      task.priority,
-                    )}`}
-                  >
-                    {task.priority}
-                  </span>
-                </div>
-
-                {task.description && (
-                  <p className="mt-1 text-sm text-slate-500">
-                    {task.description}
-                  </p>
-                )}
-
-                <div className="mt-3 flex items-center justify-between">
-                  <p className="text-xs text-slate-400">
-                    {task.due_date ? `Due: ${task.due_date}` : "No due date"}
-                  </p>
-
-                  {task.status !== "done" && task.status !== "cancelled" ? (
-                    <button
-                      onClick={() => completeTask(task.id)}
-                      className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100"
-                    >
-                      <CheckCircle2 className="h-3.5 w-3.5" />
-                      Complete
-                    </button>
-                  ) : (
-                    <span className="text-xs text-emerald-600">Completed</span>
-                  )}
-                </div>
-              </div>
-            ))}
-
-            {tasks.length === 0 && (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
-                No tasks assigned to this contact.
-              </div>
-            )}
-          </div>
-        </section>
 
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
           <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -2734,6 +2927,74 @@ const availableLists = lists.filter(
             </div>
           </div>
         </section>
+
+        <section
+          id="contact-tasks"
+          className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8"
+        >
+          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="text-sm font-medium text-slate-500">Tasks</p>
+              <h2 className="text-xl font-semibold text-slate-900">
+                Work tied to this contact
+              </h2>
+              <p className="mt-1 text-sm text-slate-500">
+                Track tasks and close out work as it gets completed.
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            {tasks.map((task) => (
+              <div
+                key={task.id}
+                className="rounded-2xl border border-slate-200 bg-white p-4"
+              >
+                <div className="flex items-center justify-between">
+                  <p className="font-medium text-slate-900">{task.title}</p>
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-semibold ${priorityClasses(
+                      task.priority,
+                    )}`}
+                  >
+                    {task.priority}
+                  </span>
+                </div>
+
+                {task.description && (
+                  <p className="mt-1 text-sm text-slate-500">
+                    {task.description}
+                  </p>
+                )}
+
+                <div className="mt-3 flex items-center justify-between">
+                  <p className="text-xs text-slate-400">
+                    {task.due_date ? `Due: ${task.due_date}` : "No due date"}
+                  </p>
+
+                  {task.status !== "done" && task.status !== "cancelled" ? (
+                    <button
+                      onClick={() => completeTask(task.id)}
+                      className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100"
+                    >
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                      Complete
+                    </button>
+                  ) : (
+                    <span className="text-xs text-emerald-600">Completed</span>
+                  )}
+                </div>
+              </div>
+            ))}
+
+            {tasks.length === 0 && (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
+                No tasks assigned to this contact.
+              </div>
+            )}
+          </div>
+        </section>
+
       </div>
     </div>
   );

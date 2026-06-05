@@ -5,12 +5,17 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import {
   ArrowRight,
+  CalendarDays,
+  CheckCircle2,
+  Clock3,
   ContactRound,
-  List,
   ListChecks,
+  Mail,
+  MessageSquare,
   Phone,
-  User,
+  UserRound,
   Users,
+  X,
   Zap,
 } from "lucide-react";
 import {
@@ -31,10 +36,9 @@ import {
 import { fullName } from "@/lib/data/utils";
 import { useDashboardOwner } from "../../owner-context";
 import {
-  getOutreachSignals,
   getFinanceSignals,
+  getOutreachSignals,
 } from "@/lib/intelligence/signals";
-import { aggregateAetherIntelligence } from "@/lib/intelligence/aggregator";
 import { getOrgContextTheme } from "@/lib/org-context-theme";
 
 type ListTag = "outreach" | "field" | "finance" | "print";
@@ -55,12 +59,18 @@ type ActiveContact = {
   id: string;
   name: string;
   phone: string;
+  email?: string | null;
+  city?: string | null;
+  state?: string | null;
+  priority: "high" | "medium" | "low";
+  summary: string;
 };
 
 type ActiveFollowUp = {
   id: string;
   name: string;
   note: string;
+  priority: "high" | "medium" | "low";
 };
 
 type ActiveList = {
@@ -77,6 +87,8 @@ type OutreachOutcome =
   | "no_answer"
   | "wrong_time"
   | "completed";
+
+type OutreachAction = "call" | "text" | "email" | "note" | "meeting";
 
 type OrgMemberRole = {
   id?: string;
@@ -114,7 +126,6 @@ function formatRoleText(value?: string | null) {
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
 }
-
 
 function normalizeOwner(value?: string | null) {
   return value?.trim() || "Unassigned";
@@ -181,23 +192,44 @@ function tagTone(tag: ListTag) {
       return "bg-purple-100 text-purple-700";
     case "outreach":
     default:
-      return "bg-slate-100 text-slate-700";
+      return "bg-violet-100 text-violet-700";
   }
 }
 
 function priorityTone(priority: "high" | "medium" | "low") {
   switch (priority) {
     case "high":
-      return "border border-rose-200 bg-rose-100 text-rose-700";
+      return "border border-rose-200 bg-rose-50 text-rose-700";
     case "medium":
-      return "border border-amber-200 bg-amber-100 text-amber-800";
+      return "border border-amber-200 bg-amber-50 text-amber-800";
     case "low":
     default:
-      return "border border-slate-200 bg-slate-100 text-slate-700";
+      return "border border-emerald-200 bg-emerald-50 text-emerald-700";
   }
 }
 
+function priorityLabel(priority: "high" | "medium" | "low") {
+  if (priority === "high") return "High";
+  if (priority === "medium") return "Medium";
+  return "Low";
+}
 
+function outcomeLabel(outcome: OutreachOutcome) {
+  return outcome.replaceAll("_", " ").toLowerCase();
+}
+
+function initials(name: string) {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("") || "OC";
+}
+
+function actionToChannel(action: OutreachAction): "call" | "text" {
+  return action === "text" ? "text" : "call";
+}
 
 function OutreachFocusContent() {
   const searchParams = useSearchParams();
@@ -216,6 +248,9 @@ function OutreachFocusContent() {
   const [selectedContactId, setSelectedContactId] = useState("");
   const [selectedListId, setSelectedListId] = useState(preferredListId);
   const [channel, setChannel] = useState<"call" | "text">(
+    preferredChannel === "text" ? "text" : "call"
+  );
+  const [activeAction, setActiveAction] = useState<OutreachAction>(
     preferredChannel === "text" ? "text" : "call"
   );
   const [activeContact, setActiveContact] = useState<ActiveContact | null>(null);
@@ -264,10 +299,7 @@ function OutreachFocusContent() {
 
           if (contextResponse.ok) {
             const contextData = await contextResponse.json();
-
-            setContextMode(
-              contextData?.organization?.context_mode || "default"
-            );
+            setContextMode(contextData?.organization?.context_mode || "default");
           }
         } catch (contextError) {
           console.error(
@@ -304,8 +336,6 @@ function OutreachFocusContent() {
           );
         });
 
-        // Outreach is the shared contact/list/call execution hub, so any
-        // real org member or assigned operating role should be allowed in.
         const accessAllowed = Boolean(
           isAdmin || isDirector || hasAssignedRoles || hasOutreachRole
         );
@@ -362,10 +392,18 @@ function OutreachFocusContent() {
         preferredListId && loadedLists.find((list) => list.id === preferredListId);
 
       const outreachLists = loadedLists.filter(isOutreachWorkList);
-      const workspaceLists =
-        matchedPreferredList ? [matchedPreferredList] : outreachLists;
+      const workspaceLists = matchedPreferredList
+        ? [matchedPreferredList]
+        : outreachLists;
 
-      setLists(matchedPreferredList ? [matchedPreferredList, ...outreachLists.filter((list) => list.id !== matchedPreferredList.id)] : outreachLists);
+      setLists(
+        matchedPreferredList
+          ? [
+              matchedPreferredList,
+              ...outreachLists.filter((list) => list.id !== matchedPreferredList.id),
+            ]
+          : outreachLists
+      );
 
       const listPayloads = await Promise.all(
         workspaceLists.map(async (list) => {
@@ -462,7 +500,6 @@ function OutreachFocusContent() {
     return buildContactIntelligence(ownerScopedContacts, ownerScopedLogs);
   }, [ownerScopedContacts, ownerScopedLogs]);
 
-
   const outreachBundle = useMemo(() => {
     const staleContacts = ownerScopedContacts.filter((contact: any) =>
       Boolean(contact.is_stale)
@@ -523,15 +560,7 @@ function OutreachFocusContent() {
     });
   }, [ownerScopedContacts]);
 
-
   const outreachContextItems = useMemo(() => {
-    const items: Array<{
-      id: string;
-      label: string;
-      summary: string;
-      tone: "rose" | "emerald" | "sky";
-    }> = [];
-
     const pendingFollowUps =
       (outreachBundle.risks.find(
         (item) => item.id === "outreach-pending-followups"
@@ -557,56 +586,13 @@ function OutreachFocusContent() {
         (item) => item.id === "finance-high-value-donors"
       )?.metadata?.highValueDonorsPending as number) || 0;
 
-    if (pendingFollowUps > 0) {
-      items.push({
-        id: "follow-up-pressure",
-        label: "Follow-up pressure",
-        summary: `${pendingFollowUps} active follow-up ${pendingFollowUps === 1 ? "thread is" : "threads are"} sitting in outreach right now.`,
-        tone: "rose",
-      });
-    }
-
-    if (positiveContacts > 0) {
-      items.push({
-        id: "conversion-opportunity",
-        label: "Conversion opportunity",
-        summary: `${positiveContacts} recent positive ${positiveContacts === 1 ? "contact is" : "contacts are"} ready for tighter follow-through.`,
-        tone: "emerald",
-      });
-    }
-
-    if (overduePledges > 0 || highValueDonorsPending > 0) {
-      const donorPressure = Math.max(overduePledges, highValueDonorsPending);
-      items.push({
-        id: "finance-linked-demand",
-        label: "Finance-linked demand",
-        summary: `${donorPressure} donor ${donorPressure === 1 ? "record is" : "records are"} creating outreach-adjacent follow-up demand.`,
-        tone: "sky",
-      });
-    }
-
-    if (staleContacts > 0 && items.length < 3) {
-      items.push({
-        id: "re-engagement-window",
-        label: "Re-engagement window",
-        summary: `${staleContacts} stale ${staleContacts === 1 ? "contact remains" : "contacts remain"} available for reactivation without disrupting live flow.`,
-        tone: "sky",
-      });
-    }
-
-    if (items.length === 0) {
-      items.push({
-        id: "steady-cadence",
-        label: "Stable cadence",
-        summary: "Outreach is currently in a steady state with room to continue contact and follow-up work cleanly.",
-        tone: "emerald",
-      });
-    }
-
-    return items.slice(0, 3);
+    return {
+      pendingFollowUps,
+      positiveContacts,
+      staleContacts,
+      financeLinkedDemand: Math.max(overduePledges, highValueDonorsPending),
+    };
   }, [financeBundle, outreachBundle]);
-
-
 
   const prioritizedFocusContacts = useMemo(() => {
     return getSortedWorkflowContacts(ownerScopedContacts, ownerScopedLogs).slice(
@@ -615,15 +601,12 @@ function OutreachFocusContent() {
     );
   }, [ownerScopedContacts, ownerScopedLogs]);
 
-
-
   const contactLaneItems = useMemo<FocusLaneItem[]>(() => {
     return prioritizedFocusContacts.map((contact, index) => ({
       id: `contact-${contact.id}`,
       title: fullName(contact),
       summary:
-  intelligenceByContact.get(contact.id)?.nextAction ||
-  "Engage contact",
+        intelligenceByContact.get(contact.id)?.nextAction || "Engage contact",
       priority: index < 2 ? "high" : index < 5 ? "medium" : "low",
       type: "contact",
       contactId: contact.id,
@@ -631,14 +614,49 @@ function OutreachFocusContent() {
   }, [prioritizedFocusContacts, intelligenceByContact]);
 
   const followUpLaneItems = useMemo<FocusLaneItem[]>(() => {
-    return prioritizedFocusContacts
+    const followUpLogs = ownerScopedLogs
+      .filter((log) => {
+        const value = String(log.result || "").toLowerCase();
+        return (
+          value.includes("follow") ||
+          value.includes("callback") ||
+          value.includes("wrong_time") ||
+          value.includes("wrong time")
+        );
+      })
+      .slice(0, 8);
+
+    const fromLogs = followUpLogs
+      .map((log, index): FocusLaneItem | null => {
+        const contact =
+          ownerScopedContacts.find((item) => item.id === log.contact_id) ||
+          log.contacts ||
+          null;
+
+        if (!contact?.id) return null;
+
+        return {
+          id: `follow-log-${log.id}`,
+          title: `Follow up: ${fullName(contact)}`,
+          summary:
+            log.notes ||
+            `Previous ${log.channel || "outreach"} result: ${String(
+              log.result || "follow-up"
+            ).replaceAll("_", " ")}`,
+          priority: index < 2 ? "high" : "medium",
+          type: "follow_up",
+          contactId: contact.id,
+        };
+      })
+      .filter((item): item is FocusLaneItem => Boolean(item));
+
+    const fromIntel = prioritizedFocusContacts
       .filter((contact) => {
         const intel = intelligenceByContact.get(contact.id);
         return intel?.nextAction?.toLowerCase().includes("follow");
       })
-      .slice(0, 5)
-      .map((contact, index) => ({
-        id: `follow-${contact.id}`,
+      .map((contact, index): FocusLaneItem => ({
+        id: `follow-intel-${contact.id}`,
         title: `Follow up: ${fullName(contact)}`,
         summary:
           intelligenceByContact.get(contact.id)?.nextAction ||
@@ -647,7 +665,23 @@ function OutreachFocusContent() {
         type: "follow_up",
         contactId: contact.id,
       }));
-  }, [prioritizedFocusContacts, intelligenceByContact]);
+
+    const merged = new Map<string, FocusLaneItem>();
+
+    [...fromLogs, ...fromIntel].forEach((item) => {
+      if (!item.contactId) return;
+      if (!merged.has(item.contactId)) {
+        merged.set(item.contactId, item);
+      }
+    });
+
+    return Array.from(merged.values()).slice(0, 5);
+  }, [
+    ownerScopedContacts,
+    ownerScopedLogs,
+    prioritizedFocusContacts,
+    intelligenceByContact,
+  ]);
 
   const listLaneItems = useMemo<FocusLaneItem[]>(() => {
     return visibleLists.slice(0, 6).map((list, index) => ({
@@ -668,17 +702,17 @@ function OutreachFocusContent() {
   const orgTheme = getOrgContextTheme(contextMode);
 
   const visibleContactLaneItems = useMemo(
-    () => contactLaneItems.slice(0, 3),
+    () => contactLaneItems.slice(0, 5),
     [contactLaneItems]
   );
 
   const visibleFollowUpLaneItems = useMemo(
-    () => followUpLaneItems.slice(0, 3),
+    () => followUpLaneItems.slice(0, 6),
     [followUpLaneItems]
   );
 
   const visibleListLaneItems = useMemo(
-    () => listLaneItems.slice(0, 3),
+    () => listLaneItems.slice(0, 5),
     [listLaneItems]
   );
 
@@ -688,23 +722,38 @@ function OutreachFocusContent() {
     setActiveList(null);
   }
 
-  function activateContact(contact: Contact) {
+  function activateContact(contact: Contact, item?: FocusLaneItem) {
     setActiveFollowUp(null);
     setActiveList(null);
+    setSelectedContactId(contact.id);
+
+    const nextAction =
+      item?.summary ||
+      intelligenceByContact.get(contact.id)?.nextAction ||
+      "Engage contact";
+
     setActiveContact({
       id: contact.id,
       name: fullName(contact),
       phone: contact.phone || "",
+      email: contact.email,
+      city: contact.city,
+      state: contact.state,
+      priority: item?.priority || "medium",
+      summary: nextAction,
     });
   }
 
-  function activateFollowUp(contact: Contact, note: string) {
+  function activateFollowUp(contact: Contact, item: FocusLaneItem) {
     setActiveContact(null);
     setActiveList(null);
+    setSelectedContactId(contact.id);
+
     setActiveFollowUp({
       id: contact.id,
       name: fullName(contact),
-      note,
+      note: item.summary,
+      priority: item.priority,
     });
   }
 
@@ -765,26 +814,46 @@ function OutreachFocusContent() {
       if (nextContact) {
         activateContact(nextContact);
         setMessage(
-          `${fullName(contact)} logged as ${outcome
-            .replaceAll("_", " ")
-            .toLowerCase()}. Next contact is ready.`
+          `${fullName(contact)} logged as ${outcomeLabel(
+            outcome
+          )}. Next contact is ready.`
         );
       } else {
         clearPanels();
         setMessage(
-          `${fullName(contact)} logged as ${outcome
-            .replaceAll("_", " ")
-            .toLowerCase()}. Queue cleared for now.`
+          `${fullName(contact)} logged as ${outcomeLabel(
+            outcome
+          )}. Queue cleared for now.`
         );
       }
     } catch (err: any) {
       setMessage(
-        `Error loading outreach focus workspace: ${err?.message || "Unknown error"}`
+        `Error logging outreach: ${err?.message || "Unknown error"}`
       );
     } finally {
       setSaving(false);
     }
   }
+
+  async function logActiveContactOutcome(outcome: OutreachOutcome) {
+    const source = activeContact || activeFollowUp;
+
+    if (!source) return;
+
+    const contact =
+      ownerScopedContacts.find((item) => item.id === source.id) ||
+      ({
+        id: source.id,
+        first_name: source.name,
+      } as Contact);
+
+    await logFocusedOutreach(outcome, contact, actionToChannel(activeAction));
+  }
+
+  const totalOutreachContacts = ownerScopedContacts.length;
+  const followUpsDue = visibleFollowUpLaneItems.length;
+  const activeOutreachListCount = lists.length;
+  const contactsToWork = visibleContactLaneItems.length;
 
   if (loading || roleLoading) {
     return (
@@ -808,9 +877,9 @@ function OutreachFocusContent() {
               No Outreach Access Available
             </h1>
             <p className="mt-2 text-sm text-slate-600">
-              Outreach is the shared contact, list, and call execution hub. You
-              need an active organization role before this workspace can route
-              work to you.
+              Outreach is the shared contact, list, and relationship execution
+              hub. You need an active organization role before this workspace can
+              route work to you.
             </p>
             <Link
               href="/dashboard"
@@ -837,12 +906,13 @@ function OutreachFocusContent() {
               Outreach Focus Mode
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3">
               <h1 className="text-3xl font-semibold tracking-tight lg:text-4xl">
-                Stay in outreach flow.
+                Outreach Focus
               </h1>
               <p className="max-w-3xl text-sm text-slate-300 lg:text-base">
-                Contacts first. Follow-ups stay active. Lists stay within reach.
+                Stay in outreach flow. Work contacts, complete follow-ups, and
+                keep relationship lists moving.
               </p>
 
               <div className="flex flex-wrap gap-2">
@@ -889,51 +959,86 @@ function OutreachFocusContent() {
         </div>
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-              Outreach Context
-            </p>
-            <h2 className="mt-2 text-lg font-semibold text-slate-900">
-              Outreach Context
-            </h2>
-            <p className="mt-1 max-w-2xl text-sm text-slate-600">
-              Contact flow is steady. Follow-up demand is manageable.
-            </p>
-            <p className="mt-2 text-xs text-slate-500">
-              {hasOutreachDirector
-                ? "Director-level outreach context is available for this operator."
-                : "Shared outreach execution is scoped through this operator’s assigned roles."}
-            </p>
+      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm lg:p-6">
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+          Today&apos;s Outreach Snapshot
+        </p>
+
+        <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-2xl bg-violet-100 p-3 text-violet-700">
+                <Phone className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-2xl font-semibold text-slate-900">
+                  {contactsToWork}
+                </p>
+                <p className="text-sm font-medium text-slate-700">
+                  Contacts to work
+                </p>
+                <p className="text-xs text-slate-500">Prioritized queue</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-white p-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-2xl bg-emerald-100 p-3 text-emerald-700">
+                <CheckCircle2 className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-2xl font-semibold text-slate-900">
+                  {followUpsDue}
+                </p>
+                <p className="text-sm font-medium text-slate-700">
+                  Follow-ups due
+                </p>
+                <p className="text-xs text-slate-500">Callbacks and replies</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-white p-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-2xl bg-sky-100 p-3 text-sky-700">
+                <ListChecks className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-2xl font-semibold text-slate-900">
+                  {activeOutreachListCount}
+                </p>
+                <p className="text-sm font-medium text-slate-700">
+                  Outreach lists
+                </p>
+                <p className="text-xs text-slate-500">Only outreach tagged</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-white p-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-2xl bg-amber-100 p-3 text-amber-700">
+                <Users className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-2xl font-semibold text-slate-900">
+                  {totalOutreachContacts}
+                </p>
+                <p className="text-sm font-medium text-slate-700">
+                  Total contacts
+                </p>
+                <p className="text-xs text-slate-500">Across outreach lists</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="mt-4 grid gap-3 lg:grid-cols-3">
-          {outreachContextItems.map((item) => {
-            const tone =
-              item.tone === "rose"
-                ? "border-rose-200 bg-rose-50 text-rose-900"
-                : item.tone === "sky"
-                ? "border-sky-200 bg-sky-50 text-sky-900"
-                : "border-emerald-200 bg-emerald-50 text-emerald-900";
-
-            return (
-              <div
-                key={item.id}
-                className={`rounded-2xl border p-4 ${tone}`}
-              >
-                <p className="text-xs font-semibold uppercase tracking-wide">
-                  {item.label}
-                </p>
-                <p className="mt-2 text-sm leading-6">{item.summary}</p>
-              </div>
-            );
-          })}
+        <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-3 text-xs font-medium text-slate-600">
+          Only outreach-tagged lists and contacts are shown here. Use Lists to
+          manage Field, Finance, and Print routing.
         </div>
       </section>
-
-
 
       {message ? (
         <section className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-700 shadow-sm">
@@ -941,16 +1046,15 @@ function OutreachFocusContent() {
         </section>
       ) : null}
 
-      <section className="grid gap-4 lg:grid-cols-[1.35fr_1fr_0.9fr]">
-        {/* CONTACT LANE */}
-        <div className="rounded-3xl border-2 border-slate-900 bg-white p-5 shadow-md">
-          <div className="mb-3 flex items-center justify-between">
+      <section className="grid gap-6 xl:grid-cols-[1.05fr_1fr_1fr]">
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="mb-4 flex items-center justify-between">
             <div>
               <h2 className="text-base font-semibold text-slate-900">
                 Contact Lane
               </h2>
               <p className="text-xs text-slate-500">
-                Active contact work
+                Prioritized outreach contacts
               </p>
             </div>
             <Users className="h-5 w-5 text-slate-500" />
@@ -959,13 +1063,13 @@ function OutreachFocusContent() {
           <div className="space-y-3">
             {visibleContactLaneItems.length === 0 && (
               <div className="rounded-2xl border border-dashed border-slate-200 p-3 text-xs text-slate-500">
-                No active contacts right now.
+                No outreach contacts are available from outreach-tagged lists.
               </div>
             )}
 
             {visibleContactLaneItems.map((item) => {
               const contact = ownerScopedContacts.find(
-                (c) => c.id === item.contactId
+                (candidate) => candidate.id === item.contactId
               );
 
               const isActive = activeContact?.id === item.contactId;
@@ -975,60 +1079,82 @@ function OutreachFocusContent() {
                   key={item.id}
                   className={`rounded-2xl border p-4 transition ${
                     isActive
-                      ? "border-slate-900 bg-slate-100 shadow-md"
-                      : "border-slate-200"
+                      ? "border-slate-900 bg-slate-50 shadow-md"
+                      : "border-slate-200 bg-white"
                   }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-semibold text-slate-900">
-                      {item.title}
-                    </p>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-slate-900">
+                        {item.title}
+                      </p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        {contact?.phone || contact?.email || "No contact method"}
+                      </p>
+                    </div>
                     <span
-                      className={`rounded-full px-2 py-0.5 text-xs font-semibold ${priorityTone(
+                      className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${priorityTone(
                         item.priority
                       )}`}
                     >
-                      {item.priority}
+                      {priorityLabel(item.priority)}
                     </span>
                   </div>
 
-                  <p className="mt-1 text-xs text-slate-600">
-                    {item.summary}
-                  </p>
+                  <p className="mt-2 text-xs text-slate-600">{item.summary}</p>
 
-                  <div className="mt-3 flex gap-2">
+                  <div className="mt-3 grid grid-cols-[1fr_1fr_auto] gap-2">
                     <button
-                      onClick={() => contact && activateContact(contact)}
-                      className="flex-1 rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white hover:bg-slate-800"
+                      onClick={() => contact && activateContact(contact, item)}
+                      className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white hover:bg-slate-800"
                     >
                       Call
                     </button>
 
+                    <button
+                      onClick={() => {
+                        if (!contact) return;
+                        activateContact(contact, item);
+                        setActiveAction("text");
+                        setChannel("text");
+                      }}
+                      className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100"
+                    >
+                      Text
+                    </button>
+
                     <Link
                       href={`/contacts/${item.contactId}`}
-                      className="rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-700 hover:bg-slate-100"
+                      className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100"
                     >
-                      Contact
+                      <UserRound className="h-3.5 w-3.5" />
                     </Link>
                   </div>
                 </div>
               );
             })}
           </div>
+
+          <Link
+            href="/dashboard/outreach"
+            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
+          >
+            View outreach dashboard
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
         </div>
 
-        {/* FOLLOW-UP LANE */}
-        <div className="rounded-2xl border bg-white p-4 shadow-sm">
-          <div className="mb-3 flex items-center justify-between">
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="mb-4 flex items-center justify-between">
             <div>
-              <h2 className="text-sm font-semibold text-slate-800">
+              <h2 className="text-base font-semibold text-slate-900">
                 Follow-Up Lane
               </h2>
               <p className="text-xs text-slate-500">
-                Ongoing conversations
+                Callbacks and unresolved conversations
               </p>
             </div>
-            <User className="h-4 w-4 text-slate-500" />
+            <Clock3 className="h-5 w-5 text-slate-500" />
           </div>
 
           <div className="space-y-3">
@@ -1040,7 +1166,7 @@ function OutreachFocusContent() {
 
             {visibleFollowUpLaneItems.map((item) => {
               const contact = ownerScopedContacts.find(
-                (c) => c.id === item.contactId
+                (candidate) => candidate.id === item.contactId
               );
 
               const isActive = activeFollowUp?.id === item.contactId;
@@ -1048,33 +1174,32 @@ function OutreachFocusContent() {
               return (
                 <div
                   key={item.id}
-                  className={`rounded-2xl border p-3 transition ${
+                  className={`rounded-2xl border p-4 transition ${
                     isActive
-                      ? "border-slate-900 bg-slate-100 shadow-md"
-                      : "border-slate-200"
+                      ? "border-slate-900 bg-slate-50 shadow-md"
+                      : "border-slate-200 bg-white"
                   }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-semibold text-slate-900">
-                      {item.title}
-                    </p>
-                    <span
-                      className={`rounded-full px-2 py-0.5 text-xs font-semibold ${priorityTone(
-                        item.priority
-                      )}`}
-                    >
-                      {item.priority}
-                    </span>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-slate-900">
+                        {item.title}
+                      </p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        {contact?.phone || contact?.email || "No contact method"}
+                      </p>
+                    </div>
+                    <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-slate-400" />
                   </div>
 
-                  <p className="mt-1 text-xs text-slate-600">
+                  <p className="mt-2 text-xs leading-5 text-slate-600">
                     {item.summary}
                   </p>
 
                   <div className="mt-3 flex gap-2">
                     <button
                       onClick={() =>
-                        contact && activateFollowUp(contact, item.summary)
+                        contact && activateFollowUp(contact, item)
                       }
                       className="flex-1 rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white hover:bg-slate-800"
                     >
@@ -1083,35 +1208,40 @@ function OutreachFocusContent() {
 
                     <Link
                       href={`/contacts/${item.contactId}`}
-                      className="rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-700 hover:bg-slate-100"
+                      className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100"
                     >
-                      Contact
+                      Profile
                     </Link>
                   </div>
                 </div>
               );
             })}
           </div>
+
+          <Link
+            href="/dashboard/outreach"
+            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
+          >
+            View all follow-ups
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
         </div>
 
-        {/* LIST LANE */}
-        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
-          <div className="mb-3 flex items-center justify-between">
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="mb-4 flex items-center justify-between">
             <div>
-              <h2 className="text-sm font-semibold text-slate-700">
+              <h2 className="text-base font-semibold text-slate-900">
                 List Lane
               </h2>
-              <p className="text-xs text-slate-500">
-                Source lists
-              </p>
+              <p className="text-xs text-slate-500">Active outreach lists</p>
             </div>
-            <List className="h-4 w-4 text-slate-500" />
+            <ListChecks className="h-5 w-5 text-slate-500" />
           </div>
 
           <div className="space-y-3">
             {visibleListLaneItems.length === 0 && (
               <div className="rounded-2xl border border-dashed border-slate-200 p-3 text-xs text-slate-500">
-                No active list routing right now.
+                No outreach-tagged lists are available right now.
               </div>
             )}
 
@@ -1121,20 +1251,25 @@ function OutreachFocusContent() {
               return (
                 <div
                   key={item.id}
-                  className={`rounded-2xl border p-3 transition ${
+                  className={`rounded-2xl border p-4 transition ${
                     isActive
-                      ? "border-slate-900 bg-slate-100 shadow-md"
-                      : "border-slate-200"
+                      ? "border-slate-900 bg-slate-50 shadow-md"
+                      : "border-slate-200 bg-white"
                   }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-semibold text-slate-900">
-                      {item.title}
-                    </p>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-slate-900">
+                        {item.title}
+                      </p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        {item.summary}
+                      </p>
+                    </div>
 
                     {item.tag ? (
                       <span
-                        className={`rounded-full px-2 py-0.5 text-xs font-semibold ${tagTone(
+                        className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${tagTone(
                           item.tag
                         )}`}
                       >
@@ -1143,11 +1278,11 @@ function OutreachFocusContent() {
                     ) : null}
                   </div>
 
-                  <p className="mt-1 text-xs text-slate-600">
-                    {item.summary}
+                  <p className="mt-3 text-xs text-slate-500">
+                    {item.size || 0} known contacts
                   </p>
 
-                  <div className="mt-3 flex gap-2">
+                  <div className="mt-3 grid grid-cols-[1fr_auto] gap-2">
                     <button
                       onClick={() =>
                         item.listId &&
@@ -1158,14 +1293,14 @@ function OutreachFocusContent() {
                           item.size || 0
                         )
                       }
-                      className="flex-1 rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white hover:bg-slate-800"
+                      className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white hover:bg-slate-800"
                     >
-                      Review
+                      Review List
                     </button>
 
                     <Link
                       href="/dashboard/lists"
-                      className="rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-700 hover:bg-slate-100"
+                      className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100"
                     >
                       Lists
                     </Link>
@@ -1174,126 +1309,292 @@ function OutreachFocusContent() {
               );
             })}
           </div>
+
+          <Link
+            href="/dashboard/lists"
+            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
+          >
+            View all outreach lists
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
         </div>
       </section>
 
-      {/* ACTIVE PANEL */}
-      <section className="rounded-3xl border-2 border-slate-900 bg-white p-6 shadow-lg">
-        <div className="mb-4 flex flex-col gap-2">
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-slate-900">
-              Active Panel
+            <h2 className="text-xl font-semibold text-slate-900">
+              Active Work Panel
             </h2>
-            <p className="text-xs text-slate-500">
-              Execute the selected item
+            <p className="mt-1 text-sm text-slate-500">
+              Work a contact, log the outcome, and move forward.
             </p>
           </div>
-          <p className="text-sm font-medium text-slate-700">
-            Work happens here. Select a contact, follow-up, or list to begin.
-          </p>
+
+          {(activeContact || activeFollowUp || activeList) ? (
+            <button
+              onClick={clearPanels}
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
+            >
+              Close Active Panel
+              <X className="h-3.5 w-3.5" />
+            </button>
+          ) : null}
         </div>
 
         {!activeContact && !activeFollowUp && !activeList ? (
-          <p className="text-sm text-slate-500">
-            
-          </p>
-        ) : null}
-
-        {activeContact ? (
-          <div className="space-y-4">
-            <p className="font-semibold text-slate-900">
-              Working contact: {activeContact.name}
-            </p>
-            <p className="text-sm text-slate-500">
-              {activeContact.phone || "No phone on file"}
-            </p>
-
-            <Link
-              href={`/contacts/${activeContact.id}`}
-              className="inline-flex w-fit items-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
-            >
-              Open Contact Profile
-            </Link>
-
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                onClick={() => setChannel("call")}
-                className={`rounded-xl px-3 py-2 text-sm ${
-                  channel === "call"
-                    ? "bg-slate-900 text-white"
-                    : "border border-slate-200"
-                }`}
-              >
-                Call
-              </button>
-
-              <button
-                onClick={() => setChannel("text")}
-                className={`rounded-xl px-3 py-2 text-sm ${
-                  channel === "text"
-                    ? "bg-slate-900 text-white"
-                    : "border border-slate-200"
-                }`}
-              >
-                Text
-              </button>
-            </div>
-
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Notes..."
-              className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
-            />
-
-            <button
-              onClick={() =>
-                logFocusedOutreach("connected_positive", {
-                  id: activeContact.id,
-                  first_name: activeContact.name,
-                } as any)
-              }
-              className="w-full rounded-xl bg-slate-900 px-4 py-3 text-sm text-white"
-            >
-              Log Positive & Continue
-            </button>
+          <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-5 text-sm text-slate-500">
+            Select a contact, follow-up, or list to begin.
           </div>
         ) : null}
-                {activeFollowUp ? (
-          <div className="space-y-4">
-            <p className="font-semibold text-slate-900">
-              Follow-up in progress: {activeFollowUp.name}
-            </p>
-            <p className="text-sm text-slate-500">
-              {activeFollowUp.note}
-            </p>
 
-            <button
-              onClick={() =>
-                logFocusedOutreach("follow_up_needed", {
-                  id: activeFollowUp.id,
-                  first_name: activeFollowUp.name,
-                } as any)
-              }
-              className="w-full rounded-xl bg-slate-900 px-4 py-3 text-sm text-white"
-            >
-              Log Follow-Up & Continue
-            </button>
+        {(activeContact || activeFollowUp) ? (
+          <div className="space-y-5">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-violet-100 text-sm font-semibold text-violet-700">
+                    {initials(activeContact?.name || activeFollowUp?.name || "OC")}
+                  </div>
+
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-lg font-semibold text-slate-900">
+                        {activeContact?.name || activeFollowUp?.name}
+                      </p>
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-xs font-semibold ${priorityTone(
+                          activeContact?.priority || activeFollowUp?.priority || "medium"
+                        )}`}
+                      >
+                        {priorityLabel(
+                          activeContact?.priority || activeFollowUp?.priority || "medium"
+                        )}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-sm text-slate-500">
+                      {activeContact?.phone ||
+                        activeContact?.email ||
+                        activeFollowUp?.note ||
+                        "Relationship outreach item"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  <Link
+                    href={`/contacts/${activeContact?.id || activeFollowUp?.id}`}
+                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
+                  >
+                    <UserRound className="h-3.5 w-3.5" />
+                    View Profile
+                  </Link>
+
+                  <Link
+                    href="/dashboard/outreach"
+                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
+                  >
+                    <Clock3 className="h-3.5 w-3.5" />
+                    View Activity
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid gap-5 lg:grid-cols-[1.4fr_0.75fr]">
+              <div className="space-y-4">
+                <div className="flex flex-wrap gap-2">
+                  {([
+                    ["call", Phone, "Call"],
+                    ["text", MessageSquare, "Text"],
+                    ["email", Mail, "Email"],
+                    ["note", ListChecks, "Note"],
+                    ["meeting", CalendarDays, "Meeting"],
+                  ] as const).map(([value, Icon, label]) => (
+                    <button
+                      key={value}
+                      onClick={() => {
+                        setActiveAction(value);
+                        setChannel(actionToChannel(value));
+                      }}
+                      className={`inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition ${
+                        activeAction === value
+                          ? "bg-slate-900 text-white"
+                          : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-100"
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" />
+                      {label}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                  <p className="text-sm font-semibold text-slate-900">
+                    Log {activeAction === "text" ? "Text" : activeAction === "email" ? "Email" : activeAction === "meeting" ? "Meeting" : activeAction === "note" ? "Note" : "Call"} Outcome
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    How did this outreach action go?
+                  </p>
+
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+                    <button
+                      onClick={() => logActiveContactOutcome("connected_positive")}
+                      disabled={saving}
+                      className="rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-left text-xs font-semibold text-emerald-800 transition hover:bg-emerald-100 disabled:opacity-50"
+                    >
+                      <CheckCircle2 className="mb-2 h-4 w-4" />
+                      Positive
+                      <span className="mt-1 block font-normal text-emerald-700">
+                        Supporter / interested
+                      </span>
+                    </button>
+
+                    <button
+                      onClick={() => logActiveContactOutcome("follow_up_needed")}
+                      disabled={saving}
+                      className="rounded-2xl border border-sky-200 bg-sky-50 p-3 text-left text-xs font-semibold text-sky-800 transition hover:bg-sky-100 disabled:opacity-50"
+                    >
+                      <CalendarDays className="mb-2 h-4 w-4" />
+                      Follow-Up
+                      <span className="mt-1 block font-normal text-sky-700">
+                        Needs another touch
+                      </span>
+                    </button>
+
+                    <button
+                      onClick={() => logActiveContactOutcome("wrong_time")}
+                      disabled={saving}
+                      className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-left text-xs font-semibold text-amber-800 transition hover:bg-amber-100 disabled:opacity-50"
+                    >
+                      <Clock3 className="mb-2 h-4 w-4" />
+                      Wrong Time
+                      <span className="mt-1 block font-normal text-amber-700">
+                        Try later
+                      </span>
+                    </button>
+
+                    <button
+                      onClick={() => logActiveContactOutcome("no_answer")}
+                      disabled={saving}
+                      className="rounded-2xl border border-slate-200 bg-slate-50 p-3 text-left text-xs font-semibold text-slate-700 transition hover:bg-slate-100 disabled:opacity-50"
+                    >
+                      <Phone className="mb-2 h-4 w-4" />
+                      No Answer
+                      <span className="mt-1 block font-normal text-slate-500">
+                        No response
+                      </span>
+                    </button>
+
+                    <button
+                      onClick={() => logActiveContactOutcome("completed")}
+                      disabled={saving}
+                      className="rounded-2xl border border-violet-200 bg-violet-50 p-3 text-left text-xs font-semibold text-violet-800 transition hover:bg-violet-100 disabled:opacity-50"
+                    >
+                      <CheckCircle2 className="mb-2 h-4 w-4" />
+                      Completed
+                      <span className="mt-1 block font-normal text-violet-700">
+                        Done for now
+                      </span>
+                    </button>
+                  </div>
+
+                  <label className="mt-4 block text-sm font-medium text-slate-900">
+                    Notes
+                  </label>
+                  <textarea
+                    value={notes}
+                    onChange={(event) => setNotes(event.target.value)}
+                    placeholder="Add notes about this interaction..."
+                    className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                    rows={4}
+                  />
+                </div>
+
+                <button
+                  onClick={() => logActiveContactOutcome("completed")}
+                  disabled={saving}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 py-4 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-50"
+                >
+                  {saving ? "Saving..." : "Save Outcome & Continue"}
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <p className="text-sm font-semibold text-slate-900">Context</p>
+
+                <div className="mt-4 space-y-3 text-sm">
+                  <div className="flex justify-between gap-3">
+                    <span className="text-slate-500">List</span>
+                    <span className="font-medium text-slate-900">
+                      {selectedList?.name || "Outreach Focus"}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between gap-3">
+                    <span className="text-slate-500">Owner</span>
+                    <span className="font-medium text-slate-900">
+                      {ownerFilter || "Team"}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between gap-3">
+                    <span className="text-slate-500">Follow-up pressure</span>
+                    <span className="font-medium text-slate-900">
+                      {outreachContextItems.pendingFollowUps}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between gap-3">
+                    <span className="text-slate-500">Positive contacts</span>
+                    <span className="font-medium text-slate-900">
+                      {outreachContextItems.positiveContacts}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between gap-3">
+                    <span className="text-slate-500">Stale contacts</span>
+                    <span className="font-medium text-slate-900">
+                      {outreachContextItems.staleContacts}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between gap-3">
+                    <span className="text-slate-500">Finance-linked</span>
+                    <span className="font-medium text-slate-900">
+                      {outreachContextItems.financeLinkedDemand}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         ) : null}
 
         {activeList ? (
           <div className="space-y-4">
-            <div>
-              <p className="font-semibold text-slate-900">
-                Reviewing list: {activeList.name}
-              </p>
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                  <p className="text-lg font-semibold text-slate-900">
+                    Reviewing list: {activeList.name}
+                  </p>
+                  <p className="mt-1 text-sm text-slate-500">
+                    {activeList.size > 0
+                      ? `${activeList.size} contact${activeList.size === 1 ? "" : "s"} loaded for this outreach list.`
+                      : "Open this list in Outreach to load and review its contacts."}
+                  </p>
+                </div>
 
-              <p className="mt-1 text-sm text-slate-500">
-                {activeList.size > 0
-                  ? `${activeList.size} contact${activeList.size === 1 ? "" : "s"} loaded for this list.`
-                  : "Open this list in Outreach to load and review its contacts."}
-              </p>
+                <span
+                  className={`w-fit rounded-full px-3 py-1 text-xs font-semibold ${tagTone(
+                    activeList.tag
+                  )}`}
+                >
+                  {activeList.tag}
+                </span>
+              </div>
             </div>
 
             <div className="flex flex-wrap gap-2">
@@ -1314,7 +1615,6 @@ function OutreachFocusContent() {
           </div>
         ) : null}
       </section>
-
     </div>
   );
 }

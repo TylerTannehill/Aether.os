@@ -1,14 +1,5 @@
 import { supabase } from "@/lib/supabase";
 
-export type FinanceMetricRow = {
-  id: string;
-  amount?: number | null;
-  kind?: string | null;
-  source?: string | null;
-  status?: string | null;
-  created_at?: string | null;
-};
-
 export type FinanceSnapshot = {
   moneyIn: number;
   moneyOut: number;
@@ -16,13 +7,33 @@ export type FinanceSnapshot = {
   pledges: number;
 };
 
-type FinanceContactMetricRow = {
+export type FinanceTrendPoint = {
+  label: string;
+  moneyIn: number;
+  moneyOut: number;
+  net: number;
+  pledges: number;
+};
+
+type FinanceContactRow = {
   id: string;
-  donation_total?: number | null;
-  fec_total_given?: number | null;
-  pledge_amount?: number | null;
-  jackpot_candidate?: boolean | null;
-  fec_donor_tier?: string | null;
+};
+
+type ContributionRow = {
+  id: string;
+  contact_id?: string | null;
+  amount?: number | string | null;
+  date?: string | null;
+  created_at?: string | null;
+};
+
+type PledgeRow = {
+  id: string;
+  contact_id?: string | null;
+  amount_pledged?: number | string | null;
+  amount_fulfilled?: number | string | null;
+  status?: string | null;
+  next_follow_up?: string | null;
   created_at?: string | null;
 };
 
@@ -54,116 +65,163 @@ function toNumber(value: unknown) {
   return Number.isFinite(num) ? num : 0;
 }
 
-function normalize(value: string | null | undefined) {
-  return (value || "").trim().toLowerCase();
+function normalize(value?: string | null) {
+  return String(value || "").trim().toLowerCase();
 }
 
-export async function getFinanceMetricRows(): Promise<FinanceMetricRow[]> {
+function isConvertedPledge(status?: string | null) {
+  const value = normalize(status);
+  return value === "converted" || value === "fulfilled";
+}
+
+function getDateKey(value?: string | null) {
+  if (!value) return "Undated";
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value.slice(0, 10);
+
+  return parsed.toISOString().slice(0, 10);
+}
+
+function formatTrendLabel(key: string) {
+  if (key === "Undated") return key;
+
+  return new Date(`${key}T00:00:00`).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
+}
+
+async function getFinanceSourceRows(): Promise<{
+  contributions: ContributionRow[];
+  pledges: PledgeRow[];
+}> {
   let organizationId: string;
 
   try {
     organizationId = await getActiveOrganizationId();
   } catch (error) {
-    console.error("Failed to resolve active campaign for finance metrics", error);
-    return [];
+    console.error("Failed to resolve active campaign for finance data", error);
+    return { contributions: [], pledges: [] };
   }
 
-  const { data, error } = await supabase
-    .from("finance_metrics")
-    .select("id, amount, kind, source, status, created_at")
-    .eq("organization_id", organizationId)
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    console.error("Failed to load finance metrics", error);
-    return [];
-  }
-
-  return (data as FinanceMetricRow[]) ?? [];
-}
-
-async function getFinanceContactMetricRows(): Promise<FinanceContactMetricRow[]> {
-  let organizationId: string;
-
-  try {
-    organizationId = await getActiveOrganizationId();
-  } catch (error) {
-    console.error("Failed to resolve active campaign for finance contact metrics", error);
-    return [];
-  }
-
-  const { data, error } = await supabase
+  const { data: contactData, error: contactError } = await supabase
     .from("contacts")
-    .select(
-      "id, donation_total, fec_total_given, pledge_amount, jackpot_candidate, fec_donor_tier, created_at"
-    )
+    .select("id")
     .eq("organization_id", organizationId);
 
-  if (error) {
-    console.error("Failed to load finance contact metrics", error);
-    return [];
+  if (contactError) {
+    console.error("Failed to load finance contacts", contactError);
+    return { contributions: [], pledges: [] };
   }
 
-  return (data as FinanceContactMetricRow[]) ?? [];
+  const contactIds = ((contactData as FinanceContactRow[] | null) ?? [])
+    .map((contact) => contact.id)
+    .filter(Boolean);
+
+  if (contactIds.length === 0) {
+    return { contributions: [], pledges: [] };
+  }
+
+  const [{ data: contributionData, error: contributionError }, { data: pledgeData, error: pledgeError }] =
+    await Promise.all([
+      supabase
+        .from("contributions")
+        .select("id, contact_id, amount, date, created_at")
+        .in("contact_id", contactIds)
+        .order("date", { ascending: true }),
+      supabase
+        .from("pledges")
+        .select("id, contact_id, amount_pledged, amount_fulfilled, status, next_follow_up, created_at")
+        .in("contact_id", contactIds)
+        .order("created_at", { ascending: true }),
+    ]);
+
+  if (contributionError) {
+    console.error("Failed to load contribution records", contributionError);
+  }
+
+  if (pledgeError) {
+    console.error("Failed to load pledge records", pledgeError);
+  }
+
+  return {
+    contributions: (contributionData as ContributionRow[] | null) ?? [],
+    pledges: (pledgeData as PledgeRow[] | null) ?? [],
+  };
 }
 
 export async function getFinanceSnapshot(): Promise<FinanceSnapshot> {
-  const [financeMetricRows, contactMetricRows] = await Promise.all([
-    getFinanceMetricRows(),
-    getFinanceContactMetricRows(),
-  ]);
+  const { contributions, pledges } = await getFinanceSourceRows();
 
-  const metricMoneyIn = financeMetricRows
-    .filter((row) => {
-      const kind = normalize(row.kind);
-      return kind === "money_in" || kind === "donation" || kind === "income";
-    })
-    .reduce((sum, row) => sum + toNumber(row.amount), 0);
+  const moneyIn = contributions.reduce(
+    (sum, contribution) => sum + toNumber(contribution.amount),
+    0
+  );
 
-  const metricMoneyOut = financeMetricRows
-    .filter((row) => {
-      const kind = normalize(row.kind);
-      return kind === "money_out" || kind === "expense" || kind === "spent";
-    })
-    .reduce((sum, row) => sum + toNumber(row.amount), 0);
+  const moneyOut = 0;
 
-  const metricPledges = financeMetricRows
-    .filter((row) => {
-      const kind = normalize(row.kind);
-      const status = normalize(row.status);
-      return (
-        kind === "pledge" ||
-        status === "pledged" ||
-        status === "pending_pledge"
-      );
-    })
-    .reduce((sum, row) => sum + toNumber(row.amount), 0);
-
-  const contactMoneyIn = contactMetricRows.reduce((sum, contact) => {
-    const donationTotal = toNumber(contact.donation_total);
-    const fecTotal = toNumber(contact.fec_total_given);
-
-    return sum + Math.max(donationTotal, fecTotal);
-  }, 0);
-
-  const contactPledges = contactMetricRows.reduce((sum, contact) => {
-    const pledgeAmount = toNumber(contact.pledge_amount);
-    const donationTotal = Math.max(
-      toNumber(contact.donation_total),
-      toNumber(contact.fec_total_given)
-    );
-
-    return sum + Math.max(0, pledgeAmount - donationTotal);
-  }, 0);
-
-  const moneyIn = metricMoneyIn + contactMoneyIn;
-  const moneyOut = metricMoneyOut;
-  const pledges = metricPledges + contactPledges;
+  const openPledges = pledges
+    .filter((pledge) => !isConvertedPledge(pledge.status))
+    .reduce((sum, pledge) => {
+      const amountPledged = toNumber(pledge.amount_pledged);
+      const amountFulfilled = toNumber(pledge.amount_fulfilled);
+      return sum + Math.max(amountPledged - amountFulfilled, 0);
+    }, 0);
 
   return {
     moneyIn,
     moneyOut,
     net: moneyIn - moneyOut,
-    pledges,
+    pledges: openPledges,
   };
+}
+
+export async function getFinanceTrendData(): Promise<FinanceTrendPoint[]> {
+  const { contributions, pledges } = await getFinanceSourceRows();
+  const grouped = new Map<string, FinanceTrendPoint>();
+
+  const ensurePoint = (key: string) => {
+    const existing = grouped.get(key);
+    if (existing) return existing;
+
+    const point: FinanceTrendPoint = {
+      label: key,
+      moneyIn: 0,
+      moneyOut: 0,
+      net: 0,
+      pledges: 0,
+    };
+
+    grouped.set(key, point);
+    return point;
+  };
+
+  for (const contribution of contributions) {
+    const key = getDateKey(contribution.date || contribution.created_at);
+    const point = ensurePoint(key);
+    point.moneyIn += toNumber(contribution.amount);
+    point.net = point.moneyIn - point.moneyOut;
+  }
+
+  for (const pledge of pledges) {
+    if (isConvertedPledge(pledge.status)) continue;
+
+    const amountPledged = toNumber(pledge.amount_pledged);
+    const amountFulfilled = toNumber(pledge.amount_fulfilled);
+    const remainingAmount = Math.max(amountPledged - amountFulfilled, 0);
+
+    const key = getDateKey(pledge.created_at || pledge.next_follow_up);
+    const point = ensurePoint(key);
+    point.pledges += remainingAmount;
+    point.net = point.moneyIn - point.moneyOut;
+  }
+
+  return Array.from(grouped.values())
+    .sort((a, b) => a.label.localeCompare(b.label))
+    .slice(-8)
+    .map((point) => ({
+      ...point,
+      label: formatTrendLabel(point.label),
+    }));
 }

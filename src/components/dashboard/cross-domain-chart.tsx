@@ -16,6 +16,13 @@ interface Props {
     net: number;
     pledges: number;
   };
+  financeHistory?: {
+    label: string;
+    moneyIn: number;
+    moneyOut: number;
+    net: number;
+    pledges: number;
+  }[];
   digital: {
     impressions: number;
     engagement: number;
@@ -63,6 +70,7 @@ const CHART_HEIGHT = CHART_BOTTOM - CHART_TOP;
 
 export default function CrossDomainChart({
   finance,
+  financeHistory = [],
   digital,
   field,
   print,
@@ -96,8 +104,14 @@ export default function CrossDomainChart({
     const labels = TIME_RANGE_LABELS[timeRange];
 
     if (domain === "finance") {
-      const value = finance[financeMetricMap(financeMetric)];
-      return buildSeries(labels, value, timeRange, financeMetric);
+      const metricKey = financeMetricMap(financeMetric);
+
+      return buildFinanceSeries({
+        labels,
+        financeHistory,
+        finance,
+        metricKey,
+      });
     }
 
     if (domain === "digital") {
@@ -127,6 +141,7 @@ export default function CrossDomainChart({
     field,
     print,
     financeMetric,
+    financeHistory,
     digitalMetric,
     fieldMetric,
     printMetric,
@@ -213,6 +228,7 @@ export default function CrossDomainChart({
   }, [
     domain,
     financeMetric,
+    financeHistory,
     digitalMetric,
     fieldMetric,
     printMetric,
@@ -394,20 +410,26 @@ export default function CrossDomainChart({
               <p className="mr-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
                 Time Range
               </p>
-              {(["day", "week", "month", "quarter", "cycle"] as TimeRange[]).map(
-                (item) => (
-                  <button
-                    key={item}
-                    type="button"
-                    onClick={() => setTimeRange(item)}
-                    className={`rounded-full px-3 py-1 text-xs font-medium transition ${
-                      timeRange === item
-                        ? "bg-slate-900 text-white"
-                        : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                    }`}
-                  >
-                    {item.toUpperCase()}
-                  </button>
+              {domain === "finance" ? (
+                <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-700">
+                  LIVE RECORDS
+                </span>
+              ) : (
+                (["day", "week", "month", "quarter", "cycle"] as TimeRange[]).map(
+                  (item) => (
+                    <button
+                      key={item}
+                      type="button"
+                      onClick={() => setTimeRange(item)}
+                      className={`rounded-full px-3 py-1 text-xs font-medium transition ${
+                        timeRange === item
+                          ? "bg-slate-900 text-white"
+                          : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                      }`}
+                    >
+                      {item.toUpperCase()}
+                    </button>
+                  )
                 )
               )}
             </div>
@@ -501,6 +523,52 @@ export default function CrossDomainChart({
       </div>
     </div>
   );
+}
+
+function buildFinanceSeries(input: {
+  labels: string[];
+  financeHistory: NonNullable<Props["financeHistory"]>;
+  finance: Props["finance"];
+  metricKey: keyof Props["finance"];
+}): ChartPoint[] {
+  const targetLength = Math.max(input.labels.length, 4);
+  const currentValue = toFiniteNumber(input.finance[input.metricKey]);
+
+  const realPoints = input.financeHistory
+    .filter((point) => Boolean(String(point.label || "").trim()))
+    .slice(-targetLength)
+    .map((point) => ({
+      label: point.label,
+      value: toFiniteNumber(point[input.metricKey]),
+    }));
+
+  const sourcePoints =
+    realPoints.length > 0
+      ? realPoints
+      : [
+          {
+            label: "Current",
+            value: currentValue,
+          },
+        ];
+
+  const fillerCount = Math.max(targetLength - sourcePoints.length, 0);
+  const fallbackLabels = ["W1", "W2", "W3", "W4", "W5", "W6", "W7", "W8"];
+  const fillerLabels = Array.from({ length: fillerCount }, (_, index) => {
+    return input.labels[index] || fallbackLabels[index] || `P${index + 1}`;
+  });
+
+  const fillerPoints = fillerLabels.map((label) => ({
+    label,
+    value: 0,
+  }));
+
+  return [...fillerPoints, ...sourcePoints].slice(-targetLength);
+}
+
+function toFiniteNumber(value: unknown) {
+  const numberValue = Number(value ?? 0);
+  return Number.isFinite(numberValue) ? numberValue : 0;
 }
 
 function financeMetricMap(metric: FinanceMetric) {

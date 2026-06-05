@@ -37,7 +37,9 @@ import {
 } from "@/lib/data/print";
 import {
   getFinanceSnapshot,
+  getFinanceTrendData,
   type FinanceSnapshot,
+  type FinanceTrendPoint,
 } from "@/lib/data/finance";
 import CrossDomainChart from "@/components/dashboard/cross-domain-chart";
 import { useDashboardOwner } from "./owner-context";
@@ -86,6 +88,7 @@ import {
 } from "@/lib/abe/abe-follow-through";
 import { getOutcomeSignals } from "@/lib/abe/abe-outcomes";
 import { buildAbeOrgLayer } from "@/lib/abe/abe-org-layer";
+import { buildAbeStrategicRead } from "@/lib/abe/abe-strategy";
 import { getOrgContextTheme } from "@/lib/org-context-theme";
 
 function normalizeTaskStatus(status?: string | null) {
@@ -167,6 +170,59 @@ function getActionMode(action: any): "auto" | "manual" | "blocked" {
 type DemoRole = "admin" | "director" | "general_user";
 type DemoDepartment = AbeDepartment;
 type AetherTier = "t1" | "t2" | "t3";
+
+const EARLY_STAGE_DEPARTMENT_WEIGHTS: Record<AbeDepartment, number> = {
+  finance: 45,
+  digital: 20,
+  field: 15,
+  print: 15,
+  outreach: 5,
+};
+
+function getEarlyStageDepartmentWeight(department: AbeDepartment) {
+  return EARLY_STAGE_DEPARTMENT_WEIGHTS[department] ?? 5;
+}
+
+function getFinanceAmountScore(amount: number) {
+  if (amount >= 1000) return 4;
+  if (amount >= 500) return 3;
+  if (amount >= 100) return 2;
+  if (amount > 0) return 1;
+
+  return 0;
+}
+
+function getWeightedStrategicScore(input: {
+  department: AbeDepartment;
+  pressure: number;
+  opportunity: number;
+}) {
+  const weight = getEarlyStageDepartmentWeight(input.department) / 100;
+  const rawScore = input.pressure + input.opportunity;
+
+  // Early-stage Abe is intentionally opinionated: every lane gets a small
+  // baseline so the campaign strategy weight matters even when data is sparse.
+  // This keeps relationship-management noise from overpowering finance during
+  // the first months of a campaign.
+  return (rawScore + 1) * weight;
+}
+
+function getWeightedPressureScore(input: {
+  department: AbeDepartment;
+  pressure: number;
+}) {
+  const weight = getEarlyStageDepartmentWeight(input.department) / 100;
+  return input.pressure * weight;
+}
+
+function getWeightedOpportunityScore(input: {
+  department: AbeDepartment;
+  opportunity: number;
+}) {
+  const weight = getEarlyStageDepartmentWeight(input.department) / 100;
+  return input.opportunity * weight;
+}
+
 
 function getPatternSeverityTone(severity: AbePatternInsight["severity"]) {
   switch (severity) {
@@ -376,18 +432,23 @@ function buildAbeV1Briefing(input: {
     );
   }).length;
 
+  const financePledgeScore = getFinanceAmountScore(
+    input.financeSnapshot.pledges
+  );
+  const financeRevenueScore = getFinanceAmountScore(
+    input.financeSnapshot.moneyIn
+  );
+
   const financePressure =
     Math.max(
       0,
       Math.round(
         input.financeSnapshot.moneyOut > input.financeSnapshot.moneyIn ? 2 : 0
       )
-    ) + Math.max(0, Math.round(input.financeSnapshot.pledges / 1000));
+    ) + financePledgeScore;
 
-  const financeOpportunity = Math.max(
-    0,
-    Math.round(input.financeSnapshot.moneyIn / 1000)
-  );
+  const financeOpportunity =
+    financeRevenueScore + (input.financeSnapshot.pledges > 0 ? 1 : 0);
 
   const fieldPressure = Math.max(0, 100 - input.fieldAverageCompletion);
   const fieldOpportunity = Math.max(
@@ -407,70 +468,76 @@ function buildAbeV1Briefing(input: {
   );
   const printOpportunity = Math.max(0, input.printSnapshot.approvalReady * 10);
 
-  const lanes: {
+  const rawLanes: {
     key: AbeDepartment;
     label: string;
     pressure: number;
     opportunity: number;
+    activity: number;
   }[] = [
     {
       key: "outreach",
       label: "Outreach",
       pressure: outreachPressure,
       opportunity: outreachOpportunity,
+      activity: outreachPressure + outreachOpportunity,
     },
     {
       key: "finance",
       label: "Finance",
       pressure: financePressure,
       opportunity: financeOpportunity,
+      activity:
+        financePressure +
+        financeOpportunity +
+        (input.financeSnapshot.moneyIn > 0 ? 1 : 0) +
+        (input.financeSnapshot.pledges > 0 ? 1 : 0),
     },
     {
       key: "field",
       label: "Field",
       pressure: fieldPressure,
       opportunity: fieldOpportunity,
+      activity: fieldOpportunity,
     },
     {
       key: "digital",
       label: "Digital",
       pressure: digitalPressure,
       opportunity: digitalOpportunity,
+      activity: Math.min(10, Math.round(input.digitalSnapshot.engagement / 5000)),
     },
     {
       key: "print",
       label: "Print",
       pressure: printPressure,
       opportunity: printOpportunity,
+      activity: input.printSnapshot.orders + input.printSnapshot.approvalReady,
     },
   ];
 
-  const strongestLane =
-    [...lanes].sort((a, b) => {
-      const aScore = a.opportunity - a.pressure * 0.35;
-      const bScore = b.opportunity - b.pressure * 0.35;
-      return bScore - aScore;
-    })[0]?.key ?? "digital";
-
-  const weakestLane =
-    [...lanes].sort((a, b) => {
-      const aScore = a.pressure - a.opportunity * 0.2;
-      const bScore = b.pressure - b.opportunity * 0.2;
-      return bScore - aScore;
-    })[0]?.key ?? "outreach";
-
-  const summaryPrimary = getAbePrimaryDepartmentFromSummary({
-    headline: input.intelligenceHeadline,
-    body: input.intelligenceBody,
-    crossDomain: input.intelligenceCrossDomain,
+  const strategicRead = buildAbeStrategicRead({
+    stage: "early",
+    lanes: rawLanes.map((lane) => ({
+      department: lane.key,
+      pressure: lane.pressure,
+      opportunity: lane.opportunity,
+      activity: lane.activity,
+    })),
+    existingCrossDomainSignal: input.intelligenceCrossDomain,
   });
 
-  const primaryLane =
-    input.role === "admin" ? summaryPrimary : input.effectiveDepartment;
+  const lanes = rawLanes;
 
-  const opportunityLane =
-    [...lanes].sort((a, b) => b.opportunity - a.opportunity)[0]?.key ??
-    strongestLane;
+  const strongestLane = strategicRead.opportunityLane;
+  const weakestLane = strategicRead.pressureLane;
+
+  const primaryLane =
+    input.role === "admin"
+      ? strategicRead.primaryLane
+      : input.effectiveDepartment;
+
+  const opportunityLane = strategicRead.opportunityLane;
 
   const totalPressure = lanes.reduce((sum, lane) => sum + lane.pressure, 0);
   const totalOpportunity = lanes.reduce(
@@ -501,7 +568,7 @@ function buildAbeV1Briefing(input: {
 
   if (primaryLane === "outreach") {
     whyNow =
-      "Positive engagement is building faster than follow-up capacity, which makes responsiveness the immediate risk.";
+      "Relationship management is becoming a constraint, but early-stage growth still depends on converting that pressure into finance, digital, field, or print movement.";
   } else if (primaryLane === "finance") {
     whyNow =
       "Available dollars and pending pledges need tighter follow-through before revenue momentum softens.";
@@ -514,6 +581,10 @@ function buildAbeV1Briefing(input: {
   } else if (primaryLane === "print") {
     whyNow =
       "Print readiness can unlock downstream movement, but delivery timing is becoming the constraint.";
+  }
+
+  if (input.role === "admin") {
+    whyNow = strategicRead.body;
   }
 
   const whyNowModifiers: string[] = [];
@@ -590,7 +661,10 @@ function buildAbeV1Briefing(input: {
     whyNow,
     supportText,
     actions: actions.slice(0, input.role === "admin" ? 3 : 2),
-    crossDomainSignal: input.intelligenceCrossDomain || undefined,
+    crossDomainSignal:
+      input.role === "admin"
+        ? strategicRead.crossDomainSignal
+        : input.intelligenceCrossDomain || undefined,
   };
 }
 
@@ -725,6 +799,7 @@ export default function DashboardPage() {
     net: 0,
     pledges: 0,
   });
+  const [financeTrendData, setFinanceTrendData] = useState<FinanceTrendPoint[]>([]);
 
   const [liveUserContext, setLiveUserContext] =
     useState<LiveDashboardUserContext | null>(null);
@@ -829,6 +904,7 @@ export default function DashboardPage() {
         liveFieldSnapshot,
         livePrintSnapshot,
         liveFinanceSnapshot,
+        liveFinanceTrendData,
         contextResponse,
       ] = await Promise.all([
         getDashboardData(),
@@ -836,6 +912,7 @@ export default function DashboardPage() {
         getFieldSnapshot(),
         getPrintSnapshot(),
         getFinanceSnapshot(),
+        getFinanceTrendData(),
         fetch("/api/auth/current-context"),
       ]);
 
@@ -887,6 +964,7 @@ export default function DashboardPage() {
       setFieldSnapshot(liveFieldSnapshot);
       setPrintSnapshot(livePrintSnapshot);
       setFinanceSnapshot(liveFinanceSnapshot);
+      setFinanceTrendData(liveFinanceTrendData);
     } catch (err: any) {
       setMessage(err?.message || "Failed to load dashboard");
     } finally {
@@ -1192,15 +1270,11 @@ export default function DashboardPage() {
   }, [filteredData]);
 
   const financeBundle = useMemo(() => {
-    const missingComplianceRecords = Math.max(
-      0,
-      Math.round(financeSnapshot.pledges / 1000)
-    );
+    const pledgeSignalScore = getFinanceAmountScore(financeSnapshot.pledges);
 
-    const overduePledges = Math.max(
-      0,
-      Math.round(financeSnapshot.pledges / 2500)
-    );
+    const missingComplianceRecords = 0;
+
+    const overduePledges = pledgeSignalScore;
 
     const highValueDonorsPending = (filteredData.contacts ?? []).filter(
       (contact: any) =>
@@ -1384,13 +1458,12 @@ export default function DashboardPage() {
     const financePressure = Math.max(
       0,
       Math.round(financeSnapshot.moneyOut > financeSnapshot.moneyIn ? 3 : 0) +
-        Math.round(financeSnapshot.pledges / 1000)
+        getFinanceAmountScore(financeSnapshot.pledges)
     );
 
-    const financeOpportunity = Math.max(
-      0,
-      Math.round(financeSnapshot.moneyIn / 1000)
-    );
+    const financeOpportunity =
+      getFinanceAmountScore(financeSnapshot.moneyIn) +
+      (financeSnapshot.pledges > 0 ? 1 : 0);
 
     const fieldPressure = Math.max(0, 100 - fieldAverageCompletion);
     const fieldOpportunity = Math.max(
@@ -1790,7 +1863,11 @@ export default function DashboardPage() {
         value: `${followUpLoad}`,
         sub: "Follow-up demand is building inside the outreach lane.",
         route: "/dashboard/outreach",
-        rank: followUpLoad,
+        rank:
+          getWeightedPressureScore({
+            department: "outreach",
+            pressure: followUpLoad,
+          }) * 100,
       });
     }
 
@@ -1801,7 +1878,11 @@ export default function DashboardPage() {
         value: `$${financeSnapshot.pledges.toLocaleString()}`,
         sub: "Pending pledged dollars are still sitting uncollected.",
         route: "/dashboard/finance",
-        rank: Math.round(financeSnapshot.pledges / 1000),
+        rank:
+          getWeightedPressureScore({
+            department: "finance",
+            pressure: getFinanceAmountScore(financeSnapshot.pledges),
+          }) * 100,
       });
     }
 
@@ -1812,7 +1893,11 @@ export default function DashboardPage() {
         value: `${fieldAverageCompletion}%`,
         sub: "Coverage pace needs support inside the field lane.",
         route: "/dashboard/field",
-        rank: 100 - fieldAverageCompletion,
+        rank:
+          getWeightedPressureScore({
+            department: "field",
+            pressure: 100 - fieldAverageCompletion,
+          }) * 100,
       });
     }
 
@@ -1823,7 +1908,11 @@ export default function DashboardPage() {
         value: `${digitalSentimentRatio.positive}% / ${digitalSentimentRatio.negative}%`,
         sub: "Public-facing pressure is sitting in sentiment balance.",
         route: "/dashboard/digital",
-        rank: digitalSentimentRatio.negative,
+        rank:
+          getWeightedPressureScore({
+            department: "digital",
+            pressure: digitalSentimentRatio.negative,
+          }) * 100,
       });
     }
 
@@ -1834,7 +1923,11 @@ export default function DashboardPage() {
         value: `${printSnapshot.orders}`,
         sub: "Delivery timing is the pressure point in print right now.",
         route: "/dashboard/print",
-        rank: printSnapshot.orders * 10,
+        rank:
+          getWeightedPressureScore({
+            department: "print",
+            pressure: printSnapshot.orders,
+          }) * 100,
       });
     }
 
@@ -1845,7 +1938,11 @@ export default function DashboardPage() {
         value: digitalSnapshot.impressions.toLocaleString(),
         sub: "Reach volume is helping expand top-of-funnel opportunity.",
         route: "/dashboard/digital",
-        rank: Math.round(digitalSnapshot.impressions / 5000),
+        rank:
+          getWeightedOpportunityScore({
+            department: "digital",
+            opportunity: Math.round(digitalSnapshot.impressions / 5000),
+          }) * 100,
       },
       {
         type: "opportunity" as const,
@@ -1853,7 +1950,11 @@ export default function DashboardPage() {
         value: fieldSnapshot.conversations.toLocaleString(),
         sub: "Conversation volume shows field still has usable movement.",
         route: "/dashboard/field",
-        rank: Math.round(fieldSnapshot.conversations / 10),
+        rank:
+          getWeightedOpportunityScore({
+            department: "field",
+            opportunity: Math.round(fieldSnapshot.conversations / 10),
+          }) * 100,
       },
       {
         type: "opportunity" as const,
@@ -1861,7 +1962,13 @@ export default function DashboardPage() {
         value: `$${financeSnapshot.moneyIn.toLocaleString()}`,
         sub: "Incoming dollars are still giving finance workable strength.",
         route: "/dashboard/finance",
-        rank: Math.round(financeSnapshot.moneyIn / 1000),
+        rank:
+          getWeightedOpportunityScore({
+            department: "finance",
+            opportunity:
+              getFinanceAmountScore(financeSnapshot.moneyIn) +
+              (financeSnapshot.pledges > 0 ? 1 : 0),
+          }) * 100,
       },
       {
         type: "opportunity" as const,
@@ -1869,7 +1976,11 @@ export default function DashboardPage() {
         value: `${printSnapshot.approvalReady}`,
         sub: "Ready assets can unlock movement in downstream work lanes.",
         route: "/dashboard/print",
-        rank: printSnapshot.approvalReady * 10,
+        rank:
+          getWeightedOpportunityScore({
+            department: "print",
+            opportunity: printSnapshot.approvalReady,
+          }) * 100,
       },
     ];
 
@@ -1963,12 +2074,11 @@ export default function DashboardPage() {
     const financePressure = Math.max(
       0,
       Math.round(financeSnapshot.moneyOut > financeSnapshot.moneyIn ? 3 : 0) +
-        Math.round(financeSnapshot.pledges / 1000)
+        getFinanceAmountScore(financeSnapshot.pledges)
     );
-    const financeOpportunity = Math.max(
-      0,
-      Math.round(financeSnapshot.moneyIn / 1000)
-    );
+    const financeOpportunity =
+      getFinanceAmountScore(financeSnapshot.moneyIn) +
+      (financeSnapshot.pledges > 0 ? 1 : 0);
 
     const fieldPressure = Math.max(0, 100 - fieldAverageCompletion);
     const fieldOpportunity = Math.max(
@@ -2110,7 +2220,9 @@ export default function DashboardPage() {
 
   const abeRoleHeadline = useMemo(() => {
     if (effectiveRole === "admin") {
-      return abeOrgLayer.orgNarrative;
+      return `${departmentLabel(
+        abeBriefing.primaryLane
+      )} is the early-stage priority lane right now.`;
     }
 
     if (effectiveRole === "director") {
@@ -2122,11 +2234,27 @@ export default function DashboardPage() {
     return `Your ${departmentLabel(
       effectiveDepartment
     ).toLowerCase()} work lane is what matters most right now.`;
-  }, [effectiveRole, effectiveDepartment, intelligenceSummary.headline, abeOrgLayer.orgNarrative]);
+  }, [effectiveRole, effectiveDepartment, abeBriefing.primaryLane]);
 
   const abeRoleBody = useMemo(() => {
     if (effectiveRole === "admin") {
-      return intelligenceSummary.body;
+      if (abeBriefing.primaryLane === "finance") {
+        return "Early-stage campaigns run on capacity, and capacity starts with money. Abe is weighting finance first, then digital, field, and print before relationship-management noise.";
+      }
+
+      if (abeBriefing.primaryLane === "digital") {
+        return "Digital is carrying the strongest early-stage signal after finance. Abe is watching whether visibility can create fundraising, volunteer, or voter-contact lift.";
+      }
+
+      if (abeBriefing.primaryLane === "field") {
+        return "Field is surfacing enough operational pressure to override the normal early-stage finance bias. Abe is watching whether ground activity is validating the campaign plan.";
+      }
+
+      if (abeBriefing.primaryLane === "print") {
+        return "Print is becoming a downstream constraint. Abe is treating inventory, approvals, and deployment timing as early-stage capacity risks.";
+      }
+
+      return "Relationship management is active, but Abe is treating outreach as support infrastructure unless it becomes a true campaign-wide constraint.";
     }
 
     if (effectiveRole === "director") {
@@ -2138,11 +2266,11 @@ export default function DashboardPage() {
     return `This view strips away cross-org noise so ${departmentLabel(
       effectiveDepartment
     ).toLowerCase()} execution stays clear.`;
-  }, [effectiveRole, effectiveDepartment, intelligenceSummary.body, abeOrgLayer.orgSupportLine]);
+  }, [effectiveRole, effectiveDepartment, abeBriefing.primaryLane]);
 
   const abeWhyNowText = useMemo(() => {
     if (effectiveRole === "admin") {
-      return `${abeBriefing.whyNow} ${abeOrgLayer.orgNarrative}`;
+      return `${abeBriefing.whyNow} Early Stage weighting is active: finance 45%, digital 20%, field 15%, print 15%, outreach 5%.`;
     }
 
     if (effectiveRole === "director") {
@@ -2154,17 +2282,27 @@ export default function DashboardPage() {
     return `This perspective is scoped to ${departmentLabel(
       effectiveDepartment
     ).toLowerCase()} so the operator can stay focused on the next actions that matter most.`;
-  }, [effectiveRole, effectiveDepartment, abeBriefing.whyNow, abeOrgLayer.orgNarrative]);
+  }, [effectiveRole, effectiveDepartment, abeBriefing.whyNow]);
 
   const abeStickyLine = useMemo(() => {
-    if (effectiveRole === "admin" && abeOrgLayer.crossLaneTension) {
-      return "Right now, campaign coordination matters more than isolated wins.";
-    }
+    if (effectiveRole === "admin") {
+      if (abeBriefing.primaryLane === "finance") {
+        return "Right now, money creates the capacity the rest of the campaign depends on.";
+      }
 
-    if (effectiveRole === "admin" && abeOrgLayer.imbalanceDetected) {
-      return `Right now, ${departmentLabel(
-        abeOrgLayer.orgPressureLeader
-      ).toLowerCase()} is the lane most likely to drag the broader campaign.`;
+      if (abeBriefing.primaryLane === "digital") {
+        return "Right now, visibility matters because it can feed money, volunteers, and voter contact.";
+      }
+
+      if (abeBriefing.primaryLane === "field") {
+        return "Right now, field only overrides finance when ground pressure becomes operationally decisive.";
+      }
+
+      if (abeBriefing.primaryLane === "print") {
+        return "Right now, print only overrides finance when materials become the execution bottleneck.";
+      }
+
+      return "Right now, relationship management should support the campaign engine, not replace it.";
     }
 
     if (abeBriefing.crossDomainSignal) {
@@ -2172,7 +2310,7 @@ export default function DashboardPage() {
     }
 
     if (abeBriefing.primaryLane === "outreach") {
-      return "Right now, follow-through matters more than fresh volume.";
+      return "Right now, relationship management only matters if it converts into usable campaign capacity.";
     }
 
     if (abeBriefing.primaryLane === "finance") {
@@ -2192,7 +2330,7 @@ export default function DashboardPage() {
     }
 
     return "Right now, coordination matters more than expansion.";
-  }, [effectiveRole, abeBriefing.primaryLane, abeBriefing.crossDomainSignal, abeOrgLayer.crossLaneTension, abeOrgLayer.imbalanceDetected, abeOrgLayer.orgPressureLeader]);
+  }, [effectiveRole, abeBriefing.primaryLane, abeBriefing.crossDomainSignal]);
 
   const abeConfidence = useMemo(() => {
     if (
@@ -2497,6 +2635,7 @@ export default function DashboardPage() {
             net: financeSnapshot.net,
             pledges: financeSnapshot.pledges,
           }}
+          financeHistory={financeTrendData}
           digital={{
             impressions: digitalSnapshot.impressions,
             engagement: digitalSnapshot.engagement,

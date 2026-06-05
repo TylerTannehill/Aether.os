@@ -107,6 +107,15 @@ And do not be afraid to kick down a few doors in the process.
 
 — Tyler`;
 
+const ROBBY_TRIGGER = "12345678";
+
+const ROBBY_MESSAGE = `Message received.
+
+From: Robby Patel
+Date: June 4, 2026
+
+Who do we appreciate?`;
+
 const utilityModules: UtilityModule[] = [
   {
     id: "calendar",
@@ -317,6 +326,24 @@ export default function ToolsPage() {
           sender_name: "Founder Message",
           sender_role: "System",
           message: FOUNDER_MESSAGE,
+          created_at: new Date().toISOString(),
+          system: true,
+        },
+      ]);
+
+      return;
+    }
+
+    if (normalizedMessage === ROBBY_TRIGGER) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `robby-${Date.now()}`,
+          org_id: user.org_id,
+          sender_id: "founder",
+          sender_name: "Founder Message",
+          sender_role: "System",
+          message: ROBBY_MESSAGE,
           created_at: new Date().toISOString(),
           system: true,
         },

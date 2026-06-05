@@ -44,14 +44,14 @@ import {
   buildAetherSummaryText,
 } from "@/lib/intelligence/aggregator";
 import {
-  AbeDepartment,
   AbeGlobalMemory,
   AbePatternInsight,
   departmentLabel,
 } from "@/lib/abe/abe-memory";
-import { AbeBriefing } from "@/lib/abe/abe-briefing";
+import type { AbeBriefing } from "@/lib/abe/abe-briefing";
 import { updateAbeMemory } from "@/lib/abe/update-abe-memory";
 import { buildAbePatternInsights } from "@/lib/abe/abe-patterns";
+import { buildAbeStrategicRead } from "@/lib/abe/abe-strategy";
 
 function normalizeTaskStatus(status?: string | null) {
   const value = (status || "").trim().toLowerCase();
@@ -59,9 +59,6 @@ function normalizeTaskStatus(status?: string | null) {
   if (["in_progress", "in progress", "active"].includes(value)) return "in_progress";
   return value || "open";
 }
-
-type DemoRole = "admin" | "director" | "general_user";
-type DemoDepartment = AbeDepartment;
 
 function getPatternSeverityTone(severity: AbePatternInsight["severity"]) {
   switch (severity) {
@@ -75,101 +72,53 @@ function getPatternSeverityTone(severity: AbePatternInsight["severity"]) {
   }
 }
 
-function getAbePrimaryDepartmentFromSummary(input: {
-  headline?: string | null;
-  body?: string | null;
-  crossDomain?: string | null;
-}): AbeDepartment {
-  const text = `${input.headline ?? ""} ${input.body ?? ""} ${input.crossDomain ?? ""}`.toLowerCase();
-  const score = { outreach: 0, finance: 0, field: 0, digital: 0, print: 0 };
-  const applyMatches = (department: AbeDepartment, patterns: string[]) => {
-    patterns.forEach((pattern) => {
-      if (text.includes(pattern)) score[department] += 1;
-    });
-  };
-  applyMatches("outreach", ["outreach", "follow-up", "contact", "engagement", "calls"]);
-  applyMatches("finance", ["finance", "donor", "pledge", "money", "revenue", "cash"]);
-  applyMatches("field", ["field", "doors", "canvass", "conversations", "turf"]);
-  applyMatches("digital", ["digital", "content", "impressions", "engagement", "sentiment", "platform"]);
-  applyMatches("print", ["print", "mailer", "asset", "materials", "inventory", "delivery", "approval"]);
-  const ranked = (Object.entries(score) as [AbeDepartment, number][])
-    .sort((a, b) => b[1] - a[1])
-    .map(([department]) => department);
-  return ranked[0] ?? "outreach";
+function getFinanceAmountScore(amount: number) {
+  if (amount >= 1000) return 4;
+  if (amount >= 500) return 3;
+  if (amount >= 100) return 2;
+  if (amount > 0) return 1;
+
+  return 0;
 }
 
-function buildAbeV1Briefing(input: {
-  role: DemoRole;
-  demoDepartment: DemoDepartment;
+function buildStrategicHealth(input: {
   financeSnapshot: FinanceSnapshot;
-  fieldSnapshot: FieldSnapshot;
-  printSnapshot: PrintSnapshot;
-  digitalSnapshot: DigitalSnapshot;
-  fieldAverageCompletion: number;
-  digitalSentimentNegative: number;
-  filteredTasks: any[];
-  filteredContacts: any[];
-  filteredLogs: any[];
-  intelligenceHeadline?: string | null;
-  intelligenceBody?: string | null;
-  intelligenceCrossDomain?: string | null;
-}): AbeBriefing {
-  const outreachPressure =
-    input.filteredTasks.filter((task: any) => {
-      const title = String(task.title || "").toLowerCase();
-      const status = normalizeTaskStatus(task.status);
-      return status !== "completed" && (title.includes("follow-up") || title.includes("follow up"));
-    }).length +
-    Math.max(0, input.filteredContacts.filter((contact: any) => Boolean(contact.needs_follow_up)).length);
+  pressure: number;
+  opportunity: number;
+}) {
+  if (input.financeSnapshot.moneyOut > input.financeSnapshot.moneyIn) {
+    return "Under financial pressure";
+  }
 
-  const outreachOpportunity = input.filteredLogs.filter((log: any) => {
-    const result = String(log.result || "").toLowerCase();
-    return result.includes("positive") || result.includes("support") || result.includes("interested") || result.includes("pledge");
-  }).length;
+  if (input.opportunity >= input.pressure * 1.35) {
+    return "Momentum building";
+  }
 
-  const financePressure = Math.max(0, Math.round(input.financeSnapshot.pledges / 1000));
-  const financeOpportunity = Math.max(0, Math.round(input.financeSnapshot.moneyIn / 1000));
-  const fieldPressure = Math.max(0, 100 - input.fieldAverageCompletion);
-  const fieldOpportunity = Math.max(0, Math.round(input.fieldSnapshot.conversations / 10));
-  const digitalPressure = input.digitalSentimentNegative;
-  const digitalOpportunity = Math.max(0, Math.round(input.digitalSnapshot.impressions / 5000));
-  const printPressure = Math.max(0, input.printSnapshot.orders * 8 - input.printSnapshot.approvalReady * 3);
-  const printOpportunity = Math.max(0, input.printSnapshot.approvalReady * 10);
+  if (input.pressure > input.opportunity * 1.1) {
+    return "Pressure is rising";
+  }
 
-  const lanes = [
-    { key: "outreach" as AbeDepartment, pressure: outreachPressure, opportunity: outreachOpportunity },
-    { key: "finance" as AbeDepartment, pressure: financePressure, opportunity: financeOpportunity },
-    { key: "field" as AbeDepartment, pressure: fieldPressure, opportunity: fieldOpportunity },
-    { key: "digital" as AbeDepartment, pressure: digitalPressure, opportunity: digitalOpportunity },
-    { key: "print" as AbeDepartment, pressure: printPressure, opportunity: printOpportunity },
-  ];
+  return "Stable overall";
+}
 
-  const strongestLane = [...lanes].sort((a, b) => (b.opportunity - b.pressure * 0.35) - (a.opportunity - a.pressure * 0.35))[0]?.key ?? "digital";
-  const weakestLane = [...lanes].sort((a, b) => (b.pressure - b.opportunity * 0.2) - (a.pressure - a.opportunity * 0.2))[0]?.key ?? "outreach";
-  const summaryPrimary = getAbePrimaryDepartmentFromSummary({
-    headline: input.intelligenceHeadline,
-    body: input.intelligenceBody,
-    crossDomain: input.intelligenceCrossDomain,
-  });
+function buildStrategicStatus(input: {
+  financeSnapshot: FinanceSnapshot;
+  pressure: number;
+  opportunity: number;
+}) {
+  if (input.financeSnapshot.moneyOut > input.financeSnapshot.moneyIn) {
+    return "At risk with financial pressure";
+  }
 
-  return {
-    health: input.financeSnapshot.moneyOut > input.financeSnapshot.moneyIn ? "Under financial pressure" : "Stable overall",
-    strongest: strongestLane,
-    weakest: weakestLane,
-    primaryLane: summaryPrimary,
-    opportunityLane: [...lanes].sort((a, b) => b.opportunity - a.opportunity)[0]?.key ?? strongestLane,
-    campaignStatus: input.intelligenceCrossDomain ? "Stable with active cross-domain pressure" : "Stable overall",
-    whyNow:
-      input.intelligenceCrossDomain ||
-      "Right now, the campaign is not short on movement. It is managing the harder problem of coordination across multiple lanes.",
-    supportText: "Use Explore Abe to understand the deeper campaign logic, the relationships between lanes, and where momentum could either compound or leak.",
-    actions: [
-      `Anchor first in ${departmentLabel(summaryPrimary)} because that lane is shaping the campaign more than the others right now.`,
-      `Protect momentum in ${departmentLabel(strongestLane)} before weaker support lanes start slowing it down.`,
-      `Watch ${departmentLabel(weakestLane)} closely for drag, timing slippage, or missed handoffs.`,
-    ],
-    crossDomainSignal: input.intelligenceCrossDomain || undefined,
-  };
+  if (input.opportunity >= input.pressure * 1.2) {
+    return "Stable with opportunity";
+  }
+
+  if (input.pressure > input.opportunity) {
+    return "Stable, but pressure is rising";
+  }
+
+  return "Stable overall";
 }
 
 export default function ExploreAbePage() {
@@ -179,11 +128,40 @@ export default function ExploreAbePage() {
   const [tasks, setTasks] = useState<DashboardData["tasks"]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
-  const [digitalSnapshot, setDigitalSnapshot] = useState<DigitalSnapshot>({ impressions: 0, engagement: 0, spend: 0, bestPlatform: "No platform data", issue: "No digital issues detected yet." });
-  const [fieldSnapshot, setFieldSnapshot] = useState<FieldSnapshot>({ doors: 0, conversations: 0, ids: 0, strongestCanvasser: "No canvasser data", issue: "No field issues detected yet." });
-  const [printSnapshot, setPrintSnapshot] = useState<PrintSnapshot>({ onHand: 0, orders: 0, approvalReady: 0, pressureItem: "No print inventory data", issue: "No print issues detected yet." });
-  const [financeSnapshot, setFinanceSnapshot] = useState<FinanceSnapshot>({ moneyIn: 0, moneyOut: 0, net: 0, pledges: 0 });
-  const [abeMemory, setAbeMemory] = useState<AbeGlobalMemory>({ recentPrimaryLanes: [], recentPressureLanes: [], recentOpportunityLanes: [], recentCrossDomainSignals: [] });
+  const [digitalSnapshot, setDigitalSnapshot] = useState<DigitalSnapshot>({
+    impressions: 0,
+    engagement: 0,
+    spend: 0,
+    bestPlatform: "No platform data",
+    issue: "No digital issues detected yet.",
+  });
+  const [fieldSnapshot, setFieldSnapshot] = useState<FieldSnapshot>({
+    doors: 0,
+    conversations: 0,
+    ids: 0,
+    strongestCanvasser: "No canvasser data",
+    issue: "No field issues detected yet.",
+  });
+  const [printSnapshot, setPrintSnapshot] = useState<PrintSnapshot>({
+    onHand: 0,
+    orders: 0,
+    approvalReady: 0,
+    pressureItem: "No print inventory data",
+    issue: "No print issues detected yet.",
+  });
+  const [financeSnapshot, setFinanceSnapshot] = useState<FinanceSnapshot>({
+    moneyIn: 0,
+    moneyOut: 0,
+    net: 0,
+    pledges: 0,
+  });
+  const [abeMemory, setAbeMemory] = useState<AbeGlobalMemory>({
+    recentPrimaryLanes: [],
+    recentPressureLanes: [],
+    recentOpportunityLanes: [],
+    recentCrossDomainSignals: [],
+  });
+
   const { ownerFilter } = useDashboardOwner();
 
   useEffect(() => {
@@ -212,10 +190,17 @@ export default function ExploreAbePage() {
         setLoading(false);
       }
     }
+
     loadData();
   }, []);
 
-  const rawData = useMemo<DashboardData>(() => ({ contacts, lists, logs, tasks }), [contacts, lists, logs, tasks]);
+  const rawData = useMemo<DashboardData>(() => ({ contacts, lists, logs, tasks }), [
+    contacts,
+    lists,
+    logs,
+    tasks,
+  ]);
+
   const filteredData = useMemo<DashboardData>(() => {
     const result = filterDashboardDataByOwner(rawData, ownerFilter);
     return {
@@ -253,6 +238,65 @@ export default function ExploreAbePage() {
     return { positive: positiveWeight, negative: negativeWeight };
   }, [digitalSnapshot]);
 
+  const outreachPressure = useMemo(() => {
+    return (
+      (filteredData.tasks ?? []).filter((task: any) => {
+        const title = String(task.title || "").toLowerCase();
+        const status = normalizeTaskStatus(task.status);
+        return status !== "completed" && (title.includes("follow-up") || title.includes("follow up"));
+      }).length +
+      Math.max(
+        0,
+        (filteredData.contacts ?? []).filter((contact: any) => Boolean(contact.needs_follow_up)).length
+      )
+    );
+  }, [filteredData.tasks, filteredData.contacts]);
+
+  const outreachOpportunity = useMemo(() => {
+    return (filteredData.logs ?? []).filter((log: any) => {
+      const result = String(log.result || "").toLowerCase();
+      return (
+        result.includes("positive") ||
+        result.includes("support") ||
+        result.includes("interested") ||
+        result.includes("pledge")
+      );
+    }).length;
+  }, [filteredData.logs]);
+
+  const financePressure = useMemo(() => {
+    const pledgeScore = getFinanceAmountScore(financeSnapshot.pledges);
+    const spendPressure = financeSnapshot.moneyOut > financeSnapshot.moneyIn ? 2 : 0;
+    return Math.max(0, spendPressure + pledgeScore);
+  }, [financeSnapshot.moneyIn, financeSnapshot.moneyOut, financeSnapshot.pledges]);
+
+  const financeOpportunity = useMemo(() => {
+    return (
+      getFinanceAmountScore(financeSnapshot.moneyIn) +
+      (financeSnapshot.pledges > 0 ? 1 : 0)
+    );
+  }, [financeSnapshot.moneyIn, financeSnapshot.pledges]);
+
+  const fieldPressure = useMemo(() => Math.max(0, 100 - fieldAverageCompletion), [fieldAverageCompletion]);
+
+  const fieldOpportunity = useMemo(() => {
+    return Math.max(0, Math.round(fieldSnapshot.conversations / 10));
+  }, [fieldSnapshot.conversations]);
+
+  const digitalPressure = digitalSentimentRatio.negative;
+
+  const digitalOpportunity = useMemo(() => {
+    return Math.max(0, Math.round(digitalSnapshot.impressions / 5000));
+  }, [digitalSnapshot.impressions]);
+
+  const printPressure = useMemo(() => {
+    return Math.max(0, printSnapshot.orders * 8 - printSnapshot.approvalReady * 3);
+  }, [printSnapshot.orders, printSnapshot.approvalReady]);
+
+  const printOpportunity = useMemo(() => {
+    return Math.max(0, printSnapshot.approvalReady * 10);
+  }, [printSnapshot.approvalReady]);
+
   const outreachBundle = useMemo(() => {
     const staleContacts = (filteredData.contacts ?? []).filter((contact: any) => Boolean(contact.is_stale)).length;
     const pendingFollowUps = (filteredData.tasks ?? []).filter((task: any) => {
@@ -260,40 +304,28 @@ export default function ExploreAbePage() {
       const status = normalizeTaskStatus(task.status);
       return status !== "completed" && (title.includes("follow-up") || title.includes("follow up"));
     }).length;
-    const positiveContacts = (filteredData.logs ?? []).filter((log: any) => {
-      const result = String(log.result || "").toLowerCase();
-      return result.includes("positive") || result.includes("support") || result.includes("interested") || result.includes("pledge");
-    }).length;
+    const positiveContacts = outreachOpportunity;
     const uncontactedContacts = Math.max(0, (filteredData.contacts ?? []).length - (filteredData.logs ?? []).length);
     return getOutreachSignals({ staleContacts, pendingFollowUps, positiveContacts, uncontactedContacts });
-  }, [filteredData]);
+  }, [filteredData, outreachOpportunity]);
 
   const financeBundle = useMemo(() => {
-    const missingComplianceRecords =
-      financeSnapshot.pledges > 0
-        ? Math.max(1, Math.round(financeSnapshot.pledges / 1000))
-        : 0;
-
-    const overduePledges =
-      financeSnapshot.pledges > 0
-        ? Math.max(1, Math.round(financeSnapshot.pledges / 2500))
-        : 0;
+    const missingComplianceRecords = 0;
+    const overduePledges = getFinanceAmountScore(financeSnapshot.pledges);
     const highValueDonorsPending = (filteredData.contacts ?? []).filter(
       (contact: any) => Number(contact.donation_total ?? 0) >= 500 || Number(contact.pledge_amount ?? 0) >= 500
     ).length;
-    const cashOnHandPressure =
-      financeSnapshot.moneyIn > 0 || financeSnapshot.moneyOut > 0
-        ? financeSnapshot.moneyOut > financeSnapshot.moneyIn
-          ? 8
-          : 0
-        : 0;
+    const cashOnHandPressure = financeSnapshot.moneyOut > financeSnapshot.moneyIn ? 8 : 4;
     return getFinanceSignals({ missingComplianceRecords, overduePledges, highValueDonorsPending, cashOnHandPressure });
   }, [financeSnapshot, filteredData.contacts]);
 
   const fieldBundle = useMemo(() => {
     const incompleteTurfs = fieldSnapshot.doors > 0 ? Math.max(1, Math.round(fieldSnapshot.doors / 700)) : 0;
     const highPriorityTurfs = fieldSnapshot.ids > 0 ? Math.max(1, Math.round(fieldSnapshot.ids / 80)) : 0;
-    const strongIdRateZones = fieldSnapshot.ids > 0 && fieldSnapshot.conversations > 0 ? Math.max(1, Math.round((fieldSnapshot.ids / fieldSnapshot.conversations) * 4)) : 0;
+    const strongIdRateZones =
+      fieldSnapshot.ids > 0 && fieldSnapshot.conversations > 0
+        ? Math.max(1, Math.round((fieldSnapshot.ids / fieldSnapshot.conversations) * 4))
+        : 0;
     const weakCoverageZones = fieldSnapshot.doors > 0 ? Math.max(1, Math.round(fieldSnapshot.doors / 1200)) : 0;
     return getFieldSignals({ incompleteTurfs, highPriorityTurfs, strongIdRateZones, weakCoverageZones });
   }, [fieldSnapshot]);
@@ -305,17 +337,10 @@ export default function ExploreAbePage() {
       digitalSnapshot.engagement > 0 ||
       digitalSnapshot.spend > 0;
 
-    const fallingCtrPlatforms =
-      hasDigitalData && issueText.includes("issue") ? 1 : 0;
-
+    const fallingCtrPlatforms = hasDigitalData && issueText.includes("issue") ? 1 : 0;
     const strongPerformingPlatforms =
-      hasDigitalData && digitalSnapshot.bestPlatform !== "No platform data"
-        ? 1
-        : 0;
-
-    const negativeSentimentThreads =
-      hasDigitalData && issueText.includes("sentiment") ? 1 : 0;
-
+      hasDigitalData && digitalSnapshot.bestPlatform !== "No platform data" ? 1 : 0;
+    const negativeSentimentThreads = hasDigitalData && issueText.includes("sentiment") ? 1 : 0;
     const contentBacklogCount =
       digitalSnapshot.engagement > 0
         ? Math.max(1, Math.round(digitalSnapshot.engagement / 5000))
@@ -371,28 +396,112 @@ export default function ExploreAbePage() {
 
   const intelligenceSummary = useMemo(() => buildAetherSummaryText(intelligenceSnapshot), [intelligenceSnapshot]);
 
-  const abeBriefing = useMemo(() => {
-    return buildAbeV1Briefing({
-      role: "admin",
-      demoDepartment: "outreach",
-      financeSnapshot,
-      fieldSnapshot,
-      printSnapshot,
-      digitalSnapshot,
-      fieldAverageCompletion,
-      digitalSentimentNegative: digitalSentimentRatio.negative,
-      filteredTasks: filteredData.tasks ?? [],
-      filteredContacts: filteredData.contacts ?? [],
-      filteredLogs: filteredData.logs ?? [],
-      intelligenceHeadline: intelligenceSummary.headline,
-      intelligenceBody: intelligenceSummary.body,
-      intelligenceCrossDomain: intelligenceSummary.crossDomain,
+  const strategicRead = useMemo(() => {
+    return buildAbeStrategicRead({
+      stage: "early",
+      existingCrossDomainSignal: intelligenceSummary.crossDomain,
+      lanes: [
+        {
+          department: "finance",
+          pressure: financePressure,
+          opportunity: financeOpportunity,
+          activity: financeSnapshot.moneyIn > 0 || financeSnapshot.pledges > 0 ? 1 : 0,
+        },
+        {
+          department: "digital",
+          pressure: digitalPressure,
+          opportunity: digitalOpportunity,
+          activity: digitalSnapshot.impressions > 0 || digitalSnapshot.engagement > 0 ? 1 : 0,
+        },
+        {
+          department: "field",
+          pressure: fieldPressure,
+          opportunity: fieldOpportunity,
+          activity: fieldSnapshot.doors > 0 || fieldSnapshot.conversations > 0 ? 1 : 0,
+        },
+        {
+          department: "print",
+          pressure: printPressure,
+          opportunity: printOpportunity,
+          activity: printSnapshot.orders > 0 || printSnapshot.approvalReady > 0 ? 1 : 0,
+        },
+        {
+          department: "outreach",
+          pressure: outreachPressure,
+          opportunity: outreachOpportunity,
+          activity: outreachPressure + outreachOpportunity,
+        },
+      ],
     });
-  }, [financeSnapshot, fieldSnapshot, printSnapshot, digitalSnapshot, fieldAverageCompletion, digitalSentimentRatio.negative, filteredData.tasks, filteredData.contacts, filteredData.logs, intelligenceSummary.headline, intelligenceSummary.body, intelligenceSummary.crossDomain]);
+  }, [
+    intelligenceSummary.crossDomain,
+    financePressure,
+    financeOpportunity,
+    financeSnapshot.moneyIn,
+    financeSnapshot.pledges,
+    digitalPressure,
+    digitalOpportunity,
+    digitalSnapshot.impressions,
+    digitalSnapshot.engagement,
+    fieldPressure,
+    fieldOpportunity,
+    fieldSnapshot.doors,
+    fieldSnapshot.conversations,
+    printPressure,
+    printOpportunity,
+    printSnapshot.orders,
+    printSnapshot.approvalReady,
+    outreachPressure,
+    outreachOpportunity,
+  ]);
+
+  const totalPressure = strategicRead.lanes.reduce((sum, lane) => sum + lane.pressure, 0);
+  const totalOpportunity = strategicRead.lanes.reduce((sum, lane) => sum + lane.opportunity, 0);
+
+  const abeBriefing = useMemo<AbeBriefing>(() => {
+    const health = buildStrategicHealth({
+      financeSnapshot,
+      pressure: totalPressure,
+      opportunity: totalOpportunity,
+    });
+    const campaignStatus = buildStrategicStatus({
+      financeSnapshot,
+      pressure: totalPressure,
+      opportunity: totalOpportunity,
+    });
+
+    const actions = [
+      `Anchor first in ${departmentLabel(strategicRead.primaryLane)} because that is Abe's early-stage strategic center of gravity.`,
+      `Protect the opportunity inside ${departmentLabel(strategicRead.opportunityLane)} and make sure it converts into usable campaign capacity.`,
+      `Watch ${departmentLabel(strategicRead.pressureLane)} for drag, timing slippage, or missed handoffs.`,
+    ];
+
+    return {
+      health,
+      strongest: strategicRead.opportunityLane,
+      weakest: strategicRead.pressureLane,
+      primaryLane: strategicRead.primaryLane,
+      opportunityLane: strategicRead.opportunityLane,
+      campaignStatus,
+      whyNow: strategicRead.stickyLine,
+      supportText:
+        "Use Explore Abe to understand the deeper campaign logic, the relationships between lanes, and where momentum could either compound or leak.",
+      actions,
+      crossDomainSignal: strategicRead.crossDomainSignal,
+    };
+  }, [strategicRead, financeSnapshot, totalPressure, totalOpportunity]);
 
   useEffect(() => {
     setAbeMemory((current) => updateAbeMemory(current, abeBriefing));
-  }, [abeBriefing.health, abeBriefing.campaignStatus, abeBriefing.primaryLane, abeBriefing.strongest, abeBriefing.weakest, abeBriefing.opportunityLane, abeBriefing.crossDomainSignal]);
+  }, [
+    abeBriefing.health,
+    abeBriefing.campaignStatus,
+    abeBriefing.primaryLane,
+    abeBriefing.strongest,
+    abeBriefing.weakest,
+    abeBriefing.opportunityLane,
+    abeBriefing.crossDomainSignal,
+  ]);
 
   const hasLiveSignal = useMemo(() => {
     return (
@@ -471,39 +580,44 @@ export default function ExploreAbePage() {
 
     return [
       {
-        lane: "Outreach",
-        read: `${(filteredData.tasks ?? []).filter((task: any) => {
-          const title = String(task.title || "").toLowerCase();
-          const status = normalizeTaskStatus(task.status);
-          return status !== "completed" && (title.includes("follow-up") || title.includes("follow up"));
-        }).length} active follow-up pressure points are visible in outreach. The lane is moving, but responsiveness and handoff quality will decide whether that movement converts.`,
-      },
-      {
         lane: "Finance",
-        read: `$${financeSnapshot.pledges.toLocaleString()} in pending pledges and a net position of $${financeSnapshot.net.toLocaleString()} define the finance read right now. Finance is not failing, but it is not yet reinforcing the rest of the campaign as strongly as it could.`,
-      },
-      {
-        lane: "Field",
-        read: `${fieldSnapshot.conversations.toLocaleString()} conversations and ${fieldAverageCompletion}% estimated completion show the current field balance between output and pace. Field is carrying visible momentum, but it needs clean support to keep that pace efficient.`,
+        read: `$${financeSnapshot.pledges.toLocaleString()} in pending pledges and a net position of $${financeSnapshot.net.toLocaleString()} define the finance read right now. In Early Stage, finance is the center of gravity because it creates the capacity every other lane depends on.`,
       },
       {
         lane: "Digital",
-        read: `${digitalSnapshot.impressions.toLocaleString()} impressions with a ${digitalSentimentRatio.positive}% / ${digitalSentimentRatio.negative}% sentiment split define the digital context. Digital is expanding visibility, but visibility only matters if the rest of the system is ready to capitalize on it.`,
+        read: `${digitalSnapshot.impressions.toLocaleString()} impressions with a ${digitalSentimentRatio.positive}% / ${digitalSentimentRatio.negative}% sentiment split define the digital context. Digital is the strongest opportunity lane when reach can convert into fundraising, volunteer growth, or voter-contact lift.`,
+      },
+      {
+        lane: "Field",
+        read: `${fieldSnapshot.conversations.toLocaleString()} conversations and ${fieldAverageCompletion}% estimated completion show the current field balance between output and pace. Field matters when ground signal validates the campaign plan or starts creating operational pressure.`,
       },
       {
         lane: "Print",
-        read: `${printSnapshot.approvalReady} ready assets and ${printSnapshot.orders} active order signals make print primarily a timing lane today. Print is less about volume right now and more about whether delivery and approval timing reinforce downstream execution.`,
+        read: `${printSnapshot.approvalReady} ready assets and ${printSnapshot.orders} active order signals make print primarily a timing lane today. Print becomes strategic when materials, approvals, or inventory affect execution capacity.`,
+      },
+      {
+        lane: "Outreach",
+        read: `${outreachPressure} active relationship-management pressure points are visible. Outreach matters as support infrastructure, but in Early Stage it should reinforce finance, digital, field, and print instead of becoming the campaign's center of gravity.`,
       },
     ];
-  }, [hasLiveSignal, filteredData.tasks, financeSnapshot, fieldSnapshot, fieldAverageCompletion, digitalSnapshot, digitalSentimentRatio, printSnapshot]);
+  }, [
+    hasLiveSignal,
+    financeSnapshot,
+    digitalSnapshot,
+    digitalSentimentRatio,
+    fieldSnapshot,
+    fieldAverageCompletion,
+    printSnapshot,
+    outreachPressure,
+  ]);
 
   const deeperRead = useMemo(() => {
     if (!hasLiveSignal) {
       return "Explore Abe is waiting for live campaign signal. Once contacts, tasks, logs, donations, field activity, digital metrics, or print records exist, this read will expand into real cross-lane interpretation.";
     }
 
-    return `${intelligenceSummary.body} Abe’s deeper interpretation is that the campaign is not struggling with a lack of movement — it is managing the harder problem of coordination. The strongest lanes are capable of pulling the weaker ones forward, but only if timing, follow-through, and handoffs stay tight. This is where campaigns usually either compound momentum or leak it.`;
-  }, [hasLiveSignal, intelligenceSummary.body]);
+    return `${strategicRead.body} Abe’s deeper interpretation is that the campaign should not confuse movement with strategic importance. In Early Stage, finance builds capacity, digital expands reach, field validates ground movement, print supports execution, and outreach keeps relationships organized without becoming the main engine.`;
+  }, [hasLiveSignal, strategicRead.body]);
 
   if (loading) {
     return (
@@ -529,7 +643,7 @@ export default function ExploreAbePage() {
                 Deeper campaign intelligence
               </h1>
               <p className="max-w-3xl text-sm text-slate-600 lg:text-base">
-                This expands on Abe’s Brief — same read, deeper interpretation of how the campaign is behaving across lanes. When the campaign is empty, Abe stays quiet instead of inventing motion.
+                This expands on Abe’s Brief — same Early Stage strategic read, deeper interpretation of how the campaign is behaving across lanes. When the campaign is empty, Abe stays quiet instead of inventing motion.
               </p>
             </div>
           </div>
@@ -565,12 +679,12 @@ export default function ExploreAbePage() {
           Strategic Read
         </div>
         <h2 className="mt-3 text-2xl font-semibold text-slate-900">
-          {intelligenceSummary.headline}
+          {hasLiveSignal ? strategicRead.headline : "No live campaign signal is available yet."}
         </h2>
         <p className="mt-3 text-lg font-semibold text-slate-900">
           {hasLiveSignal
-            ? "This is the same read as Abe’s Brief — just widened so you can see the system behind it."
-            : "No live campaign signal is available yet."}
+            ? strategicRead.stickyLine
+            : "Abe will stay quiet until real campaign data exists."}
         </p>
         <p className="mt-3 max-w-4xl text-base leading-7 text-slate-800">
           {deeperRead}
