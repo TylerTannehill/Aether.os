@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createSupabaseAdminClient } from "@supabase/supabase-js";
 
 const EMPTY_MEMORY = {
   recentPrimaryLanes: [],
@@ -8,6 +9,22 @@ const EMPTY_MEMORY = {
   recentOpportunityLanes: [],
   recentCrossDomainSignals: [],
 };
+
+function getAdminClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    return null;
+  }
+
+  return createSupabaseAdminClient(supabaseUrl, serviceRoleKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
+}
 
 async function resolveActiveOrganizationId(
   supabase: Awaited<ReturnType<typeof createClient>>
@@ -23,14 +40,32 @@ async function resolveActiveOrganizationId(
     throw new Error("Not authenticated.");
   }
 
+  const databaseClient = getAdminClient() ?? supabase;
+
+  const { data: appUser, error: appUserError } = await databaseClient
+    .from("users")
+    .select("id, auth_id, is_active")
+    .eq("auth_id", user.id)
+    .maybeSingle();
+
+  if (appUserError) throw appUserError;
+
+  if (!appUser) {
+    throw new Error("Aether user profile not found.");
+  }
+
+  if (appUser.is_active === false) {
+    throw new Error("This user is inactive.");
+  }
+
   let activeOrganizationId =
     cookieStore.get("active_organization_id")?.value;
 
   if (!activeOrganizationId) {
-    const { data: membership, error: membershipError } = await supabase
+    const { data: membership, error: membershipError } = await databaseClient
       .from("organization_members")
       .select("organization_id")
-      .eq("user_id", user.id)
+      .eq("user_id", appUser.id)
       .order("created_at", { ascending: true })
       .limit(1)
       .maybeSingle();
@@ -44,10 +79,10 @@ async function resolveActiveOrganizationId(
     activeOrganizationId = membership.organization_id;
   }
 
-  const { data: membership, error: accessError } = await supabase
+  const { data: membership, error: accessError } = await databaseClient
     .from("organization_members")
     .select("id")
-    .eq("user_id", user.id)
+    .eq("user_id", appUser.id)
     .eq("organization_id", activeOrganizationId)
     .maybeSingle();
 

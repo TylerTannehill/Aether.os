@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createSupabaseAdminClient } from "@supabase/supabase-js";
 
 type AetherTier = "t1" | "t2" | "t3";
 
@@ -50,6 +51,22 @@ function resolveOrganization(
   };
 }
 
+function getAdminClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    return null;
+  }
+
+  return createSupabaseAdminClient(supabaseUrl, serviceRoleKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
+}
+
 export async function GET() {
   try {
     const supabase = await createClient();
@@ -77,9 +94,38 @@ export async function GET() {
       );
     }
 
-    const userId = user.id;
+    // Use the service-role client for context lookup so the dashboard can
+    // resolve the active organization before client-side RLS context exists.
+    const databaseClient = getAdminClient() ?? supabase;
 
-    const { data: membership, error: membershipError } = await supabase
+    const { data: appUser, error: appUserError } = await databaseClient
+      .from("users")
+      .select("id, auth_id, name, role, department, is_active")
+      .eq("auth_id", user.id)
+      .maybeSingle();
+
+    if (appUserError) {
+      return NextResponse.json(
+        { error: appUserError.message },
+        { status: 500 }
+      );
+    }
+
+    if (!appUser) {
+      return NextResponse.json(
+        { error: "Aether user profile not found" },
+        { status: 403 }
+      );
+    }
+
+    if (appUser.is_active === false) {
+      return NextResponse.json(
+        { error: "This user is inactive" },
+        { status: 403 }
+      );
+    }
+
+    const { data: membership, error: membershipError } = await databaseClient
       .from("organization_members")
       .select(
         `
@@ -89,6 +135,7 @@ export async function GET() {
           role,
           department,
           title,
+          profile_status,
           organizations (
             id,
             name,
@@ -98,7 +145,7 @@ export async function GET() {
           )
         `
       )
-      .eq("user_id", userId)
+      .eq("user_id", appUser.id)
       .eq("organization_id", activeOrganizationId)
       .maybeSingle();
 
@@ -119,16 +166,23 @@ export async function GET() {
       );
     }
 
-    const resolvedOrganizationId = String(
-      membership.organization_id
-    );
+    if (
+      membership.profile_status &&
+      String(membership.profile_status).toLowerCase() !== "active"
+    ) {
+      return NextResponse.json(
+        { error: "Your campaign access is not active" },
+        { status: 403 }
+      );
+    }
 
-    const { data: memberRoles, error: rolesError } =
-      await supabase
-        .from("organization_member_roles")
-        .select("department, role_level, is_primary")
-        .eq("organization_member_id", membership.id)
-        .eq("organization_id", resolvedOrganizationId);
+    const resolvedOrganizationId = String(membership.organization_id);
+
+    const { data: memberRoles, error: rolesError } = await databaseClient
+      .from("organization_member_roles")
+      .select("department, role_level, is_primary")
+      .eq("organization_member_id", membership.id)
+      .eq("organization_id", resolvedOrganizationId);
 
     if (rolesError) {
       return NextResponse.json(
@@ -138,19 +192,16 @@ export async function GET() {
     }
 
     const primaryRole =
-      memberRoles?.find((role) => role.is_primary) ??
-      memberRoles?.[0] ??
-      null;
+      memberRoles?.find((role) => role.is_primary) ?? memberRoles?.[0] ?? null;
 
     const resolvedRole =
       normalizeRole(membership.role) ??
       normalizeRole(primaryRole?.role_level) ??
+      normalizeRole(appUser.role) ??
       null;
 
     const resolvedDepartment =
-      membership.department ??
-      primaryRole?.department ??
-      null;
+      membership.department ?? primaryRole?.department ?? appUser.department ?? null;
 
     const organization = resolveOrganization(
       membership.organizations as
@@ -163,7 +214,9 @@ export async function GET() {
     const response = NextResponse.json({
       user: {
         id: user.id,
+        app_user_id: appUser.id,
         email: user.email,
+        name: appUser.name ?? null,
       },
       organization,
       membership: {
@@ -178,23 +231,17 @@ export async function GET() {
       recovered_context: false,
     });
 
-    response.cookies.set(
-      "active_organization_id",
-      resolvedOrganizationId,
-      {
-        path: "/",
-        sameSite: "lax",
-        httpOnly: false,
-      }
-    );
+    response.cookies.set("active_organization_id", resolvedOrganizationId, {
+      path: "/",
+      sameSite: "lax",
+      httpOnly: false,
+    });
 
     return response;
   } catch (err: any) {
     return NextResponse.json(
       {
-        error:
-          err?.message ||
-          "Failed to load current campaign context",
+        error: err?.message || "Failed to load current campaign context",
       },
       { status: 500 }
     );

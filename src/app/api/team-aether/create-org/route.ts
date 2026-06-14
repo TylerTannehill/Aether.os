@@ -42,7 +42,9 @@ export async function POST(request: Request) {
 
     const aetherTier = String(
       body?.aether_tier || "t3"
-    ).trim().toLowerCase();
+    )
+      .trim()
+      .toLowerCase();
 
     if (!name) {
       return NextResponse.json(
@@ -91,6 +93,24 @@ export async function POST(request: Request) {
       );
     }
 
+    const { data: publicUser, error: publicUserError } =
+      await serviceSupabase
+        .from("users")
+        .select("id")
+        .eq("auth_id", user.id)
+        .single();
+
+    if (publicUserError || !publicUser) {
+      return NextResponse.json(
+        {
+          error:
+            publicUserError?.message ||
+            "Unable to locate user profile.",
+        },
+        { status: 500 }
+      );
+    }
+
     const { data: organization, error: organizationError } =
       await serviceSupabase
         .from("organizations")
@@ -118,7 +138,7 @@ export async function POST(request: Request) {
       await serviceSupabase
         .from("organization_members")
         .insert({
-          user_id: user.id,
+          user_id: publicUser.id,
           organization_id: organization.id,
           role: "admin",
           department: "admin",

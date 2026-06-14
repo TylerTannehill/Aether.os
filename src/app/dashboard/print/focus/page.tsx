@@ -312,60 +312,40 @@ export default function PrintFocusModePage() {
 
     async function loadRoleContext() {
       try {
-        const response = await fetch("/api/admin/org-members");
-        const data = await response.json();
+        const contextResponse = await fetch("/api/auth/current-context");
+        const contextData = await contextResponse.json();
 
         if (!mounted) return;
 
-        if (!response.ok) {
+        if (!contextResponse.ok) {
           setHasPrintAccess(false);
           setHasPrintDirector(false);
           return;
         }
 
-        const currentMemberId = data?.currentMember?.id;
-        const roles = Array.isArray(data?.roles) ? data.roles : [];
-
-        try {
-          const contextResponse = await fetch("/api/auth/current-context");
-
-          if (contextResponse.ok) {
-            const contextData = await contextResponse.json();
-
-            setContextMode(
-              contextData?.organization?.context_mode || "default"
-            );
-          }
-        } catch (contextError) {
-          console.error(
-            "Failed to load print focus org context mode:",
-            contextError
-          );
-        }
-
-        const myRoles = roles.filter(
-          (role: any) => role.organization_member_id === currentMemberId
+        setContextMode(
+          contextData?.organization?.context_mode || "default"
         );
 
-        const hasAdmin = myRoles.some(
-          (role: any) =>
-            String(role.department || "").toLowerCase() === "admin" ||
-            String(role.role_level || "").toLowerCase() === "admin" ||
-            String(role.role_level || "").toLowerCase() === "campaign_manager"
+        const role = String(
+          contextData?.membership?.role || ""
+        ).toLowerCase();
+
+        const department = String(
+          contextData?.membership?.department || ""
+        ).toLowerCase();
+
+        const isAdmin = role === "admin";
+        const isDirector = role === "director";
+        const isPrintDepartment = department === "print";
+
+        setHasPrintAccess(
+          isAdmin || isDirector || isPrintDepartment
         );
 
-        const hasPrint = myRoles.some(
-          (role: any) => String(role.department || "").toLowerCase() === "print"
+        setHasPrintDirector(
+          isAdmin || (isDirector && isPrintDepartment)
         );
-
-        const isPrintDirector = myRoles.some(
-          (role: any) =>
-            String(role.department || "").toLowerCase() === "print" &&
-            String(role.role_level || "").toLowerCase() === "director"
-        );
-
-        setHasPrintAccess(hasAdmin || hasPrint);
-        setHasPrintDirector(hasAdmin || isPrintDirector);
       } catch (error) {
         console.error("Failed to load print role context:", error);
 
