@@ -1,5 +1,29 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createSupabaseAdminClient } from "@supabase/supabase-js";
+
+function normalizeCampaign(value: unknown) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "-");
+}
+
+function getAdminClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    return null;
+  }
+
+  return createSupabaseAdminClient(supabaseUrl, serviceRoleKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
+}
 
 export async function POST(request: Request) {
   try {
@@ -15,20 +39,22 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const campaignInput = String(body?.campaign || "").trim();
+    const normalizedCampaign = normalizeCampaign(body?.campaign);
 
-    if (!campaignInput) {
+    if (!normalizedCampaign) {
       return NextResponse.json(
         { error: "Campaign name or code is required" },
         { status: 400 }
       );
     }
 
-    const normalizedCampaign = campaignInput.toLowerCase();
+    // Use the service-role client for campaign/user membership lookup so login
+    // does not depend on RLS visibility before active_organization_id is set.
+    const databaseClient = getAdminClient() ?? supabase;
 
-    const { data: organization, error: organizationError } = await supabase
+    const { data: organization, error: organizationError } = await databaseClient
       .from("organizations")
-      .select("id, name, slug")
+      .select("id, name, slug, context_mode, aether_tier")
       .eq("slug", normalizedCampaign)
       .maybeSingle();
 
@@ -46,10 +72,37 @@ export async function POST(request: Request) {
       );
     }
 
-    const { data: membership, error: membershipError } = await supabase
+    const { data: appUser, error: appUserError } = await databaseClient
+      .from("users")
+      .select("id, auth_id, name, role, department, is_active")
+      .eq("auth_id", user.id)
+      .maybeSingle();
+
+    if (appUserError) {
+      return NextResponse.json(
+        { error: appUserError.message },
+        { status: 500 }
+      );
+    }
+
+    if (!appUser) {
+      return NextResponse.json(
+        { error: "Aether user profile not found" },
+        { status: 403 }
+      );
+    }
+
+    if (appUser.is_active === false) {
+      return NextResponse.json(
+        { error: "This user is inactive" },
+        { status: 403 }
+      );
+    }
+
+    const { data: membership, error: membershipError } = await databaseClient
       .from("organization_members")
-      .select("id, organization_id, role, department, title")
-      .eq("user_id", user.id)
+      .select("id, organization_id, role, department, title, profile_status")
+      .eq("user_id", appUser.id)
       .eq("organization_id", organization.id)
       .maybeSingle();
 
@@ -67,9 +120,20 @@ export async function POST(request: Request) {
       );
     }
 
+    if (
+      membership.profile_status &&
+      String(membership.profile_status).toLowerCase() !== "active"
+    ) {
+      return NextResponse.json(
+        { error: "Your campaign access is not active" },
+        { status: 403 }
+      );
+    }
+
     const response = NextResponse.json({
       organization,
       membership,
+      user: appUser,
     });
 
     response.cookies.set("active_organization_id", organization.id, {
