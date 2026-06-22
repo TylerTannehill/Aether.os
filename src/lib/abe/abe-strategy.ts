@@ -47,18 +47,18 @@ export const ABE_STAGE_WEIGHTS: Record<AbeCampaignStage, AbeDepartmentWeights> =
     outreach: 5,
   },
   mid: {
-    finance: 25,
+    finance: 30,
     digital: 25,
     field: 25,
     print: 15,
-    outreach: 10,
+    outreach: 5,
   },
   late: {
     finance: 5,
     digital: 30,
     field: 30,
-    print: 20,
-    outreach: 15,
+    print: 25,
+    outreach: 10,
   },
 };
 
@@ -129,8 +129,7 @@ function compareByPressure(a: AbeStrategicLane, b: AbeStrategicLane) {
 }
 
 function getRequiredLane(stage: AbeCampaignStage): AbeDepartment {
-  if (stage === "late") return "field";
-  if (stage === "mid") return "digital";
+  if (stage == "late") return "field";
   return "finance";
 }
 
@@ -177,6 +176,38 @@ function buildEarlyStageBody(input: {
   )} is the cleanest opportunity lane, while ${labelDepartment(
     input.pressureLane
   )} needs attention before it becomes drag.`;
+}
+
+
+
+function buildMidStageHeadline(input: {
+  primaryLane: AbeDepartment;
+  opportunityLane: AbeDepartment;
+}) {
+  return `${labelDepartment(input.primaryLane)} is carrying the strongest signal, while ${labelDepartment(input.opportunityLane).toLowerCase()} is creating the clearest opportunity. Abe is balancing growth and execution.`;
+}
+
+function buildMidStageBody(input: {
+  primaryLane: AbeDepartment;
+  opportunityLane: AbeDepartment;
+  pressureLane: AbeDepartment;
+}) {
+  return `Abe is reading the campaign through a mid-stage lens. Capacity still matters, but execution is becoming equally important. ${labelDepartment(input.opportunityLane)} represents the clearest opportunity, while ${labelDepartment(input.pressureLane).toLowerCase()} is the lane most likely to create drag if left unsupported.`;
+}
+
+function buildLateStageHeadline(input: {
+  primaryLane: AbeDepartment;
+  opportunityLane: AbeDepartment;
+}) {
+  return `${labelDepartment(input.primaryLane)} is driving the campaign, while ${labelDepartment(input.opportunityLane).toLowerCase()} offers the best conversion opportunity. Execution is now the center of gravity.`;
+}
+
+function buildLateStageBody(input: {
+  primaryLane: AbeDepartment;
+  opportunityLane: AbeDepartment;
+  pressureLane: AbeDepartment;
+}) {
+  return `Abe is reading the campaign through a late-stage lens. Expansion matters less than conversion. ${labelDepartment(input.opportunityLane)} represents the strongest opportunity, while ${labelDepartment(input.pressureLane).toLowerCase()} is the pressure lane most likely to slow execution.`;
 }
 
 function buildStickyLine(input: {
@@ -281,16 +312,16 @@ export function buildAbeStrategicRead(input: {
   const headline =
     stage === "early"
       ? buildEarlyStageHeadline({ primaryLane, opportunityLane })
-      : `${labelDepartment(primaryLane)} is the strategic priority lane right now.`;
+       : stage === "mid"
+      ? buildMidStageHeadline({ primaryLane, opportunityLane })
+      : buildLateStageHeadline({ primaryLane, opportunityLane });
 
   const body =
     stage === "early"
       ? buildEarlyStageBody({ primaryLane, opportunityLane, pressureLane })
-      : `${labelDepartment(primaryLane)} is carrying the strongest strategic read, while ${labelDepartment(
-          opportunityLane
-        ).toLowerCase()} is the cleanest opportunity lane and ${labelDepartment(
-          pressureLane
-        ).toLowerCase()} is the pressure lane to watch.`;
+       : stage === "mid"
+      ? buildMidStageBody({ primaryLane, opportunityLane, pressureLane })
+      : buildLateStageBody({ primaryLane, opportunityLane, pressureLane });
 
   const stickyLine = buildStickyLine({ stage, primaryLane, opportunityLane });
   const crossDomainSignal = buildCrossDomainSignal({

@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createClient as createSupabaseAdminClient } from "@supabase/supabase-js";
 
 type AetherTier = "t1" | "t2" | "t3";
+type AbeStage = "early" | "mid" | "late";
 
 type OrganizationContext = {
   id: string;
@@ -11,6 +12,7 @@ type OrganizationContext = {
   slug?: string | null;
   context_mode?: string | null;
   aether_tier?: AetherTier | null;
+  abe_stage?: AbeStage | null;
 };
 
 function normalizeRole(role?: string | null) {
@@ -48,6 +50,7 @@ function resolveOrganization(
     slug: organization.slug ?? null,
     context_mode: organization.context_mode ?? "default",
     aether_tier: normalizeAetherTier(organization.aether_tier),
+    abe_stage: organization.abe_stage ?? "early",
   };
 }
 
@@ -141,7 +144,8 @@ export async function GET() {
             name,
             slug,
             context_mode,
-            aether_tier
+            aether_tier,
+            abe_stage
           )
         `
       )

@@ -232,6 +232,90 @@ const ROLE_LEVEL_OPTIONS: { value: OperatingRoleLevel; label: string }[] = [
 ];
 
 type AetherTier = "t1" | "t2" | "t3";
+type AbeCampaignStage = "early" | "mid" | "late";
+
+type AbeStageOption = {
+  value: AbeCampaignStage;
+  label: string;
+  lifecycle: string;
+  personality: string;
+  focus: string;
+  description: string;
+  weights: { label: string; value: number }[];
+};
+
+const ABE_STAGE_OPTIONS: AbeStageOption[] = [
+  {
+    value: "early",
+    label: "Early Stage",
+    lifecycle: "First 60% of campaign",
+    personality: "Builder Abe",
+    focus: "Build capacity",
+    description:
+      "Finance leads because money creates the capacity for every other lane to operate.",
+    weights: [
+      { label: "Finance", value: 45 },
+      { label: "Digital", value: 20 },
+      { label: "Field", value: 15 },
+      { label: "Print", value: 15 },
+      { label: "Outreach", value: 5 },
+    ],
+  },
+  {
+    value: "mid",
+    label: "Mid Stage",
+    lifecycle: "Second 25% of campaign",
+    personality: "Manager Abe",
+    focus: "Balance growth and execution",
+    description:
+      "Finance still matters, but field and digital begin competing for strategic priority.",
+    weights: [
+      { label: "Finance", value: 30 },
+      { label: "Digital", value: 25 },
+      { label: "Field", value: 25 },
+      { label: "Print", value: 15 },
+      { label: "Outreach", value: 5 },
+    ],
+  },
+  {
+    value: "late",
+    label: "Late Stage",
+    lifecycle: "Final 15% of campaign",
+    personality: "General Abe",
+    focus: "Execute and convert",
+    description:
+      "The campaign spends what it built. Field, digital, and print become the center of gravity.",
+    weights: [
+      { label: "Field", value: 30 },
+      { label: "Digital", value: 30 },
+      { label: "Print", value: 25 },
+      { label: "Outreach", value: 10 },
+      { label: "Finance", value: 5 },
+    ],
+  },
+];
+
+function normalizeAbeStage(value?: string | null): AbeCampaignStage {
+  const normalized = String(value || "").trim().toLowerCase();
+
+  if (normalized === "mid") return "mid";
+  if (normalized === "late") return "late";
+
+  return "early";
+}
+
+function getAbeStageOption(stage: AbeCampaignStage) {
+  return (
+    ABE_STAGE_OPTIONS.find((option) => option.value === stage) ||
+    ABE_STAGE_OPTIONS[0]
+  );
+}
+
+function formatAbeStageWeights(stage: AbeStageOption) {
+  return stage.weights
+    .map((weight) => `${weight.label} ${weight.value}`)
+    .join(" • ");
+}
 
 function normalizeAetherTier(value?: string | null): AetherTier {
   const normalized = String(value || "").trim().toLowerCase();
@@ -519,6 +603,8 @@ const [advancedOpen, setAdvancedOpen] = useState(false);
 const [orgMembersLoading, setOrgMembersLoading] = useState(false);
 const [organizationId, setOrganizationId] = useState<string | null>(null);
 const [aetherTier, setAetherTier] = useState<AetherTier>("t3");
+const [abeStage, setAbeStage] = useState<AbeCampaignStage>("early");
+const [savingAbeStage, setSavingAbeStage] = useState(false);
 const [orgMembers, setOrgMembers] = useState<OrgMemberRecord[]>([]);
 const [orgMemberRoles, setOrgMemberRoles] = useState<OrgMemberRole[]>([]);
 const [roleDrafts, setRoleDrafts] = useState<Record<string, RoleDraft>>({});
@@ -538,6 +624,9 @@ async function loadAetherTierContext() {
 
     setAetherTier(
       normalizeAetherTier(data?.organization?.aether_tier)
+    );
+    setAbeStage(
+      normalizeAbeStage(data?.organization?.abe_stage)
     );
   } catch (error) {
     console.error("Failed to load Aether tier context", error);
@@ -713,6 +802,11 @@ async function handleSetPrimaryRole(member: OrgMemberRecord, primaryRole: OrgMem
 }
 
   const { ownerFilter } = useDashboardOwner();
+
+  const currentAbeStageOption = useMemo(
+    () => getAbeStageOption(abeStage),
+    [abeStage]
+  );
 
   useEffect(() => {
     loadData();
@@ -1523,6 +1617,48 @@ async function handleSetPrimaryRole(member: OrgMemberRecord, primaryRole: OrgMem
     }));
   }
 
+  async function handleSetAbeStage(stage: AbeCampaignStage) {
+    if (savingAbeStage || stage === abeStage) return;
+
+    const previousStage = abeStage;
+
+    try {
+      setSavingAbeStage(true);
+      setMessage("");
+      setAbeStage(stage);
+
+      const response = await fetch("/api/admin/abe-stage", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          abe_stage: stage,
+        }),
+      });
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok || data?.success !== true) {
+        setAbeStage(previousStage);
+        setMessage(data?.error || "Failed to update Abe campaign stage.");
+        return;
+      }
+
+      const savedStage = normalizeAbeStage(data?.abe_stage || stage);
+      setAbeStage(savedStage);
+      await loadAetherTierContext();
+
+      setMessage(`Honest Abe campaign stage updated to ${getAbeStageOption(savedStage).label}.`);
+    } catch (err: any) {
+      setAbeStage(previousStage);
+      setMessage(err?.message || "Failed to update Abe campaign stage.");
+    } finally {
+      setSavingAbeStage(false);
+    }
+  }
+
   function handleAutoShiftToSuggestedStrategy() {
     if (!autonomyConfig.allowStrategyAutoShift) {
       setPolicyActionMessage(
@@ -1645,7 +1781,7 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
         </div>
       ) : null}
 
-      <section className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+      <section className="space-y-6">
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div>
@@ -1752,6 +1888,92 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
                 View all {orgMembers.length} members in Manage Team
               </button>
             ) : null}
+          </div>
+        </section>
+
+        <section className="rounded-3xl border border-fuchsia-200 bg-fuchsia-50 p-6 shadow-sm">
+          <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="text-sm font-medium text-fuchsia-800">
+                Honest Abe Campaign Strategy
+              </p>
+              <h2 className="text-2xl font-semibold text-fuchsia-950">
+                Set the campaign lifecycle stage
+              </h2>
+              <p className="mt-2 max-w-3xl text-sm text-fuchsia-800">
+                Tell Abe where this organization is in the campaign timeline so his strategic read weights the right lanes.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-fuchsia-200 bg-white px-4 py-3 text-sm text-fuchsia-900 shadow-sm">
+              <p className="text-xs font-medium uppercase tracking-wide text-fuchsia-600">
+                Current Personality
+              </p>
+              <p className="mt-1 font-semibold">
+                {currentAbeStageOption.personality}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-3">
+            {ABE_STAGE_OPTIONS.map((stage) => {
+              const selected = abeStage === stage.value;
+
+              return (
+                <button
+                  key={stage.value}
+                  type="button"
+                  onClick={() => handleSetAbeStage(stage.value)}
+                  disabled={savingAbeStage}
+                  className={`rounded-2xl border p-5 text-left transition disabled:cursor-not-allowed disabled:opacity-70 ${
+                    selected
+                      ? "border-fuchsia-700 bg-white shadow-sm"
+                      : "border-fuchsia-200 bg-white/70 hover:bg-white"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-base font-semibold text-slate-950">
+                        {stage.label}
+                      </p>
+                      <p className="mt-1 text-xs font-medium uppercase tracking-wide text-fuchsia-700">
+                        {stage.lifecycle}
+                      </p>
+                    </div>
+
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                        selected
+                          ? "bg-fuchsia-900 text-white"
+                          : "border border-fuchsia-200 bg-white text-fuchsia-800"
+                      }`}
+                    >
+                      {selected ? "Selected" : "Set"}
+                    </span>
+                  </div>
+
+                  <div className="mt-4 rounded-2xl border border-fuchsia-100 bg-fuchsia-50/70 p-4">
+                    <p className="text-sm font-semibold text-fuchsia-950">
+                      {stage.personality}
+                    </p>
+                    <p className="mt-1 text-sm font-medium text-slate-800">
+                      {stage.focus}
+                    </p>
+                    <p className="mt-2 text-xs leading-5 text-slate-600">
+                      {stage.description}
+                    </p>
+                  </div>
+
+                  <p className="mt-4 text-xs font-medium leading-5 text-fuchsia-900">
+                    {formatAbeStageWeights(stage)}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="mt-5 rounded-2xl border border-fuchsia-200 bg-white p-4 text-sm text-fuchsia-900">
+            <span className="font-semibold">Timeline model:</span> Early Stage = first 60%, Mid Stage = second 25%, Late Stage = final 15%.
           </div>
         </section>
 
