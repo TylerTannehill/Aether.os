@@ -837,6 +837,7 @@ export default function PrintDashboardPage() {
     useState<DemoDepartment>("print");
   const [contextMode, setContextMode] = useState("default");
   const [aetherTier, setAetherTier] = useState<AetherTier>("t3");
+  const [isDemoOrg, setIsDemoOrg] = useState(false);
   const [abeMemory, setAbeMemory] = useState<AbeGlobalMemory>({
     recentPrimaryLanes: [],
     recentPressureLanes: [],
@@ -860,6 +861,7 @@ export default function PrintDashboardPage() {
         setAetherTier(
           normalizeAetherTier(data?.organization?.aether_tier)
         );
+        setIsDemoOrg(data?.isDemoOrg === true);
       } catch (error) {
         console.error("Failed to load org context", error);
       }
@@ -1626,7 +1628,7 @@ export default function PrintDashboardPage() {
         </div>
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      {isDemoOrg && (<section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="grid gap-5 lg:grid-cols-[1fr_1fr]">
           <div className="space-y-3">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
@@ -1680,7 +1682,7 @@ export default function PrintDashboardPage() {
           This print surface narrows around who is using Aether and how much of
           the material lane they should see.
         </div>
-      </section>
+      </section>)}
 
       {showDepartmentAbe ? (
       <section className="rounded-3xl border border-fuchsia-200 bg-fuchsia-50 p-6 shadow-sm">

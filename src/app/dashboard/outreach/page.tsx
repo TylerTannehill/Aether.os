@@ -335,6 +335,7 @@ function OutreachPageContent() {
   const [demoDepartment, setDemoDepartment] =
     useState<DemoDepartment>("outreach");
   const [contextMode, setContextMode] = useState("default");
+  const [isDemoOrg, setIsDemoOrg] = useState(false);
   const [aetherTier, setAetherTier] = useState<AetherTier>("t3");
   const [abeMemory, setAbeMemory] = useState<AbeGlobalMemory>({
     recentPrimaryLanes: [],
@@ -367,6 +368,7 @@ function OutreachPageContent() {
         setAetherTier(
           normalizeAetherTier(data?.organization?.aether_tier)
         );
+        setIsDemoOrg(data?.isDemoOrg === true);
       } catch (error) {
         console.error("Failed to load org context", error);
       }
@@ -1356,7 +1358,7 @@ function OutreachPageContent() {
         </div>
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 text-slate-950 shadow-sm">
+      {isDemoOrg && (<section className="rounded-3xl border border-slate-200 bg-white p-6 text-slate-950 shadow-sm">
             <div className="grid gap-5 lg:grid-cols-[1fr_1fr]">
               <div className="space-y-3">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
@@ -1412,7 +1414,7 @@ function OutreachPageContent() {
               This outreach surface narrows around who is using Aether and how
               much of the engagement lane they should see.
             </div>
-          </section>
+          </section>)}
 
           {showDepartmentAbe ? (
           <section className="rounded-3xl border border-violet-200 bg-violet-50 p-6 shadow-sm">

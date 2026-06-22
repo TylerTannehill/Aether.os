@@ -211,6 +211,8 @@ export async function GET() {
         | undefined
     );
 
+    const isDemoOrg = organization?.slug === "aether-demo-campaign";
+
     const response = NextResponse.json({
       user: {
         id: user.id,
@@ -228,6 +230,10 @@ export async function GET() {
         title: membership.title,
       },
       roles: memberRoles || [],
+      isDemoOrg,
+      capabilities: {
+        showDemoControls: isDemoOrg,
+      },
       recovered_context: false,
     });
 

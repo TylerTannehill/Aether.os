@@ -78,6 +78,8 @@ export async function getCurrentUserContext() {
     ? membership?.organizations?.[0] ?? null
     : membership?.organizations ?? null;
 
+  const isDemoOrg = organization?.slug === "aether-demo-campaign";
+
   return {
     user,
     organization,
@@ -85,5 +87,9 @@ export async function getCurrentUserContext() {
     role: membership?.role ?? null,
     department: membership?.department ?? null,
     title: membership?.title ?? null,
+    isDemoOrg,
+    capabilities: {
+      showDemoControls: isDemoOrg,
+    },
   };
 }

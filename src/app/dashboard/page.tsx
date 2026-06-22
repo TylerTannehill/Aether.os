@@ -804,6 +804,7 @@ export default function DashboardPage() {
   const [liveUserContext, setLiveUserContext] =
     useState<LiveDashboardUserContext | null>(null);
   const [userContextLoading, setUserContextLoading] = useState(true);
+  const [isDemoOrg, setIsDemoOrg] = useState(false);
 
   const [demoRole, setDemoRole] = useState<DemoRole>("admin");
   const [demoDepartment, setDemoDepartment] =
@@ -926,6 +927,7 @@ export default function DashboardPage() {
 
       const user = contextResult?.user;
       const organization = contextResult?.organization;
+      setIsDemoOrg(contextResult?.isDemoOrg === true);
       const membership = contextResult?.membership;
 
       let nextUserContext: LiveDashboardUserContext | null = null;
@@ -2464,7 +2466,7 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              <div className="space-y-3">
+              {isDemoOrg && <div className="space-y-3">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                   Demo department perspective
                 </p>
@@ -2485,7 +2487,7 @@ export default function DashboardPage() {
                     </button>
                   ))}
                 </div>
-              </div>
+              </div>}
             </div>
 
             <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">

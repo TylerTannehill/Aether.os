@@ -140,6 +140,7 @@ type FinanceTimeframe = "today" | "week" | "month" | "quarter" | "cycle";
 
 type FinanceChartPoint = {
   label: string;
+  dateKey: string;
   money_in: number;
   money_out: number;
   net: number;
@@ -386,6 +387,7 @@ function buildFinanceChartData(contactRows: FinanceContactRow[]): FinanceChartPo
         grouped.get(key) ??
         {
           label: key,
+          dateKey: key,
           money_in: 0,
           money_out: 0,
           net: 0,
@@ -405,6 +407,7 @@ function buildFinanceChartData(contactRows: FinanceContactRow[]): FinanceChartPo
         grouped.get(key) ??
         {
           label: key,
+          dateKey: key,
           money_in: 0,
           money_out: 0,
           net: 0,
@@ -418,18 +421,7 @@ function buildFinanceChartData(contactRows: FinanceContactRow[]): FinanceChartPo
   }
 
   return Array.from(grouped.values())
-    .sort((a, b) => a.label.localeCompare(b.label))
-    .slice(-8)
-    .map((point) => ({
-      ...point,
-      label:
-        point.label === "Undated"
-          ? point.label
-          : new Date(`${point.label}T00:00:00`).toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-            }),
-    }));
+    .sort((a, b) => a.dateKey.localeCompare(b.dateKey));
 }
 
 function buildFinanceMetrics(input: {
@@ -607,10 +599,68 @@ function canShowDepartmentAbe(tier: AetherTier) {
   return tier === "t3";
 }
 
+function formatChartPointLabel(dateKey: string) {
+  if (dateKey === "Undated") return dateKey;
+
+  const parsed = new Date(`${dateKey}T00:00:00`);
+  if (Number.isNaN(parsed.getTime())) return dateKey;
+
+  return parsed.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
+}
+
+function getTimeframeStartDate(timeframe: FinanceTimeframe) {
+  const now = new Date();
+  const start = new Date(now);
+
+  start.setHours(0, 0, 0, 0);
+
+  if (timeframe === "today") {
+    return start;
+  }
+
+  if (timeframe === "week") {
+    start.setDate(start.getDate() - 6);
+    return start;
+  }
+
+  if (timeframe === "month") {
+    start.setDate(start.getDate() - 29);
+    return start;
+  }
+
+  if (timeframe === "quarter") {
+    start.setDate(start.getDate() - 89);
+    return start;
+  }
+
+  return null;
+}
+
 function getChartDataForTimeframe(
+  points: FinanceChartPoint[],
   timeframe: FinanceTimeframe
 ): FinanceChartPoint[] {
-  return [];
+  const startDate = getTimeframeStartDate(timeframe);
+
+  const filtered =
+    timeframe === "cycle" || !startDate
+      ? points
+      : points.filter((point) => {
+          if (point.dateKey === "Undated") return false;
+
+          const pointDate = new Date(`${point.dateKey}T00:00:00`);
+          if (Number.isNaN(pointDate.getTime())) return false;
+
+          return pointDate >= startDate;
+        });
+
+  return filtered.slice(-8).map((point) => ({
+    ...point,
+    label: formatChartPointLabel(point.dateKey),
+  }));
 }
 
 function applyWhyNowGovernor(base: string, modifiers: string[]) {
@@ -760,6 +810,7 @@ export default function FinanceDashboardPage() {
 
   const [financeTargets, setFinanceTargets] = useState<any[]>([]);
   const [financeLoading, setFinanceLoading] = useState(true);
+  const [isDemoOrg, setIsDemoOrg] = useState(false);
 
   const [contactRows, setContactRows] = useState<FinanceContactRow[]>([]);
   const [workflowItems, setWorkflowItems] = useState<FinanceWorkflowItem[]>([]);
@@ -772,6 +823,7 @@ export default function FinanceDashboardPage() {
 
   const [financeFocusMode, setFinanceFocusMode] = useState(false);
   const [selectedFinanceContactId, setSelectedFinanceContactId] = useState("");
+  const [selectedPledgeId, setSelectedPledgeId] = useState("");
   const [loopAmount, setLoopAmount] = useState("");
   const [loopMethod, setLoopMethod] = useState<"online" | "check" | "cash">(
     "check"
@@ -792,6 +844,7 @@ export default function FinanceDashboardPage() {
         setContextMode(
           data?.organization?.context_mode || "default"
         );
+        setIsDemoOrg(data?.isDemoOrg === true);
 
         setAetherTier(
           normalizeAetherTier(data?.organization?.aether_tier)
@@ -915,8 +968,11 @@ export default function FinanceDashboardPage() {
   }, []);
 
   const chartData = useMemo(() => {
-    return buildFinanceChartData(contactRows);
-  }, [contactRows]);
+    return getChartDataForTimeframe(
+      buildFinanceChartData(contactRows),
+      chartTimeframe
+    );
+  }, [contactRows, chartTimeframe]);
 
   const totalMoneyIn = useMemo(
     () => contactRows.reduce(
@@ -1065,6 +1121,26 @@ export default function FinanceDashboardPage() {
       null
     );
   }, [contactRows, selectedFinanceContactId]);
+
+  const selectedContactOpenPledges = useMemo(() => {
+    return (
+      selectedContact?.pledges.filter((pledge) => pledge.status !== "converted") ??
+      []
+    );
+  }, [selectedContact]);
+
+  useEffect(() => {
+    if (selectedContactOpenPledges.length === 0) {
+      setSelectedPledgeId("");
+      return;
+    }
+
+    setSelectedPledgeId((current) =>
+      selectedContactOpenPledges.some((pledge) => pledge.id === current)
+        ? current
+        : selectedContactOpenPledges[0].id
+    );
+  }, [selectedContactOpenPledges]);
 
   const pledgeQueue = useMemo(() => {
     return contactRows
@@ -1404,6 +1480,7 @@ export default function FinanceDashboardPage() {
     if (!selectedContact || !loopAmount) return;
 
     const amount = Number(loopAmount);
+    const pledgeIdToConvert = selectedPledgeId;
 
     setContactRows((prev) =>
       prev.map((contact) => {
@@ -1425,7 +1502,7 @@ export default function FinanceDashboardPage() {
             },
           ],
           pledges: contact.pledges.map((pledge) =>
-            pledge.status === "pledged"
+            pledge.id === pledgeIdToConvert && pledge.status !== "converted"
               ? {
                   ...pledge,
                   status: "converted",
@@ -1441,6 +1518,7 @@ export default function FinanceDashboardPage() {
     setLoopEmployer("");
     setLoopOccupation("");
     setLoopMessage("");
+    setSelectedPledgeId("");
   };
 
   return (
@@ -1496,7 +1574,7 @@ export default function FinanceDashboardPage() {
         </div>
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      {isDemoOrg && (<section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="grid gap-5 lg:grid-cols-[1fr_1fr]">
           <div className="space-y-3">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
@@ -1550,7 +1628,7 @@ export default function FinanceDashboardPage() {
           This finance surface narrows around who is using Aether and how much
           of the lane they should see.
         </div>
-      </section>
+      </section>)}
 
       {showDepartmentAbe ? (
       <section className="rounded-3xl border border-violet-200 bg-violet-50 p-6 shadow-sm">
@@ -1997,6 +2075,32 @@ export default function FinanceDashboardPage() {
           </div>
 
           <div className="space-y-4">
+            {selectedContactOpenPledges.length > 0 ? (
+              <div className="space-y-2">
+                <label className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                  Pledge to convert
+                </label>
+                <select
+                  value={selectedPledgeId}
+                  onChange={(e) => setSelectedPledgeId(e.target.value)}
+                  className="w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm"
+                >
+                  {selectedContactOpenPledges.map((pledge) => (
+                    <option key={pledge.id} value={pledge.id}>
+                      {currency.format(pledge.amount)} · {pledge.status}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-slate-500">
+                  Only the selected pledge will be marked converted when this entry is saved.
+                </p>
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600">
+                This contact has no open pledges. Saving will add a contribution without converting a pledge.
+              </div>
+            )}
+
             <input
               value={loopAmount}
               onChange={(e) => setLoopAmount(e.target.value)}
