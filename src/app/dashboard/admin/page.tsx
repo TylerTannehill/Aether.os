@@ -199,6 +199,8 @@ type OrgMemberRole = {
 type OrgMemberRecord = {
   id: string;
   user_id?: string | null;
+  auth_id?: string | null;
+  name?: string | null;
   email?: string | null;
   role?: string | null;
   department?: string | null;
@@ -256,8 +258,10 @@ function formatRoleText(value?: string | null) {
 
 function getMemberDisplayName(member: OrgMemberRecord) {
   return (
+    member.name ||
     member.email ||
     member.title ||
+    member.auth_id ||
     member.user_id ||
     `Member ${member.id.slice(0, 6)}`
   );

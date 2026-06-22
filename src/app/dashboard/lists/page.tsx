@@ -627,7 +627,7 @@ function DashboardListsPageContent() {
                       </div>
                     </td>
                     <td className="px-4 py-4 text-slate-600">
-                      {list.default_owner_name || "Unassigned"}
+                      {list.default_owner_name || "Assigned Owner"}
                     </td>
                     <td className="px-4 py-4 text-slate-600">
                       {formatCreatedAt(list.created_at)}

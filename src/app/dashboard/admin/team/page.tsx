@@ -19,6 +19,8 @@ type AetherTier = "t1" | "t2" | "t3";
 type OrgMemberRecord = {
   id: string;
   user_id?: string | null;
+  auth_id?: string | null;
+  name?: string | null;
   email?: string | null;
   role?: string | null;
   department?: string | null;
@@ -89,10 +91,10 @@ function formatRoleText(value?: string | null) {
 
 function getMemberDisplayName(member: OrgMemberRecord) {
   return (
+    member.name ||
     member.email ||
     member.title ||
-    member.user_id ||
-    `Member ${member.id.slice(0, 6)}`
+    "Unknown User"
   );
 }
 
@@ -211,6 +213,7 @@ export default function TeamManagementPage() {
 
     return members.filter((member) => {
       const haystack = [
+        member.name,
         member.email,
         member.title,
         member.user_id,

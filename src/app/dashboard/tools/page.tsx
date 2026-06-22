@@ -288,7 +288,11 @@ export default function ToolsPage() {
       setOrganizationName(organization?.name || "Active campaign");
 
       const nextUser: CurrentUser = {
-        name: membership.title || membership.role || "User",
+        name:
+          String((data as any)?.user?.name || "").trim() ||
+          membership.title ||
+          membership.role ||
+          "User",
         role: membership.role || "User",
         org_id: membership.organization_id,
         id: membership.id,

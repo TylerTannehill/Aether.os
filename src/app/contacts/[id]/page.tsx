@@ -894,6 +894,7 @@ export default function ContactDetailPage() {
   const [fieldIntelExpanded, setFieldIntelExpanded] = useState(false);
   const [printIntelExpanded, setPrintIntelExpanded] = useState(false);
   const [aetherTier, setAetherTier] = useState<AetherTier>("t3");
+  const [currentUserName, setCurrentUserName] = useState("Aether User");
   const [editingContact, setEditingContact] = useState(false);
   const [editForm, setEditForm] = useState<any>({});
 
@@ -926,6 +927,10 @@ export default function ContactDetailPage() {
 
         setAetherTier(
           normalizeAetherTier(data?.organization?.aether_tier)
+        );
+
+        setCurrentUserName(
+          String(data?.user?.name || "").trim() || "Aether User"
         );
       } catch (error) {
         console.error("Failed to load Aether tier context", error);
@@ -1229,7 +1234,7 @@ async function addToList() {
         contact_id: contactId,
         organization_id: contact.organization_id ?? null,
         author_id: user?.id ?? null,
-        author_name: user?.email ?? "Aether User",
+        author_name: currentUserName,
         note: trimmedNote,
       };
 

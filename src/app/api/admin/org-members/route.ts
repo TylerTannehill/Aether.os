@@ -31,6 +31,26 @@ function getAdminClient() {
   });
 }
 
+type AppUserRecord = {
+  id: string;
+  auth_id: string | null;
+  name: string | null;
+  role: string | null;
+  department: string | null;
+  is_active: boolean | null;
+};
+
+type OrgMemberRecord = {
+  id: string;
+  user_id: string | null;
+  role: string | null;
+  department: string | null;
+  title: string | null;
+  profile_status: string | null;
+  organization_id: string | null;
+  created_at: string | null;
+};
+
 export async function GET() {
   try {
     const supabase = await createClient();
@@ -135,7 +155,68 @@ export async function GET() {
       );
     }
 
-    const memberIds = (members || []).map((member) => member.id);
+    const typedMembers = (members || []) as OrgMemberRecord[];
+    const memberIds = typedMembers.map((member) => member.id);
+    const appUserIds = typedMembers
+      .map((member) => member.user_id)
+      .filter(Boolean) as string[];
+
+    const { data: memberUsers, error: memberUsersError } =
+      appUserIds.length > 0
+        ? await databaseClient
+            .from("users")
+            .select("id, auth_id, name, role, department, is_active")
+            .in("id", appUserIds)
+        : { data: [], error: null };
+
+    if (memberUsersError) {
+      return NextResponse.json(
+        { error: memberUsersError.message },
+        { status: 500 }
+      );
+    }
+
+    const usersById = new Map<string, AppUserRecord>();
+
+    ((memberUsers || []) as AppUserRecord[]).forEach((memberUser) => {
+      usersById.set(memberUser.id, memberUser);
+    });
+
+    const authIds = ((memberUsers || []) as AppUserRecord[])
+      .map((memberUser) => memberUser.auth_id)
+      .filter(Boolean) as string[];
+
+    const emailByAuthId = new Map<string, string>();
+
+    if (authIds.length > 0 && "auth" in databaseClient) {
+      const { data: authUsersData } =
+        await databaseClient.auth.admin.listUsers();
+
+      (authUsersData?.users || []).forEach((authUser) => {
+        if (authUser.id && authUser.email && authIds.includes(authUser.id)) {
+          emailByAuthId.set(authUser.id, authUser.email);
+        }
+      });
+    }
+
+    const enrichedMembers = typedMembers.map((member) => {
+      const memberUser = member.user_id
+        ? usersById.get(member.user_id)
+        : null;
+
+      const authId = memberUser?.auth_id ?? null;
+      const email = authId ? emailByAuthId.get(authId) ?? null : null;
+
+      return {
+        ...member,
+        name: memberUser?.name ?? null,
+        email,
+        auth_id: authId,
+        user_role: memberUser?.role ?? null,
+        user_department: memberUser?.department ?? null,
+        is_active: memberUser?.is_active ?? null,
+      };
+    });
 
     const { data: roles, error: rolesError } =
       memberIds.length > 0
@@ -175,6 +256,9 @@ export async function GET() {
 
     const resolvedCurrentMember = {
       ...currentMember,
+      name: appUser.name ?? null,
+      auth_id: appUser.auth_id ?? null,
+      email: appUser.auth_id ? emailByAuthId.get(appUser.auth_id) ?? null : null,
       role:
         normalizeRole(currentMember.role) ??
         normalizeRole(primaryRole?.role_level) ??
@@ -190,7 +274,7 @@ export async function GET() {
     return NextResponse.json({
       organizationId: activeOrganizationId,
       currentMember: resolvedCurrentMember,
-      members: members || [],
+      members: enrichedMembers,
       roles: roles || [],
     });
   } catch (err: any) {

@@ -102,6 +102,8 @@ type OrgMemberRole = {
 type OrgMemberRecord = {
   id: string;
   user_id?: string;
+  auth_id?: string | null;
+  name?: string | null;
   role?: string | null;
   department?: string | null;
   title?: string | null;

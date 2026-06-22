@@ -289,7 +289,7 @@ function buildNextActionPlan(
   };
 }
 
-async function getActiveOrganizationId() {
+async function getActiveOrganizationContext() {
   try {
     const response = await fetch("/api/auth/current-context", {
       credentials: "include",
@@ -299,11 +299,17 @@ async function getActiveOrganizationId() {
 
     const payload = await response.json();
 
-    return (
-      payload?.organization?.id ||
-      payload?.membership?.organization_id ||
-      null
-    );
+    return {
+      organizationId:
+        payload?.organization?.id ||
+        payload?.membership?.organization_id ||
+        null,
+      operatorName:
+        String(payload?.user?.name || "").trim() ||
+        String(payload?.membership?.title || "").trim() ||
+        String(payload?.user?.email || "").trim() ||
+        "Finance Team",
+    };
   } catch (error) {
     console.error("Failed to resolve finance focus org:", error);
     return null;
@@ -320,6 +326,7 @@ export default function FinanceFocusModePage() {
   const [hasFinanceDirector, setHasFinanceDirector] = useState(false);
   const [hasFinanceUser, setHasFinanceUser] = useState(false);
   const [contextMode, setContextMode] = useState("default");
+  const [operatorName, setOperatorName] = useState("Finance Team");
 
   const [callSessionStarted, setCallSessionStarted] = useState(false);
   const [callIndex, setCallIndex] = useState(0);
@@ -368,7 +375,12 @@ export default function FinanceFocusModePage() {
     try {
       setLoadingTargets(true);
 
-      const organizationId = await getActiveOrganizationId();
+      const activeContext = await getActiveOrganizationContext();
+      const organizationId = activeContext?.organizationId ?? null;
+
+      if (activeContext?.operatorName) {
+        setOperatorName(activeContext.operatorName);
+      }
 
       let contactsQuery = supabase
         .from("contacts")
@@ -959,7 +971,7 @@ export default function FinanceFocusModePage() {
           result: mappedResult,
           contactName: activeCallTarget.contactName,
           listName: "Finance Call Session",
-          ownerName: "Finance Team",
+          ownerName: operatorName,
         });
       } catch (error) {
         console.error("Finance call session sync failed:", error);

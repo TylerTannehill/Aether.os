@@ -346,7 +346,7 @@ export default function FieldFocusModePage() {
         id: item.id,
         title: item.title,
         summary: item.summary,
-        owner: "Avery",
+        owner: "Assigned Operator",
         completion: 39,
         region: "Chicago",
         linkedListId: item.linkedListId,
@@ -356,7 +356,7 @@ export default function FieldFocusModePage() {
         id: item.id,
         title: item.title,
         summary: item.summary,
-        owner: "Jordan",
+        owner: "Assigned Operator",
         completion: 58,
         region: "Naperville",
         linkedListId: item.linkedListId,
@@ -873,7 +873,7 @@ export default function FieldFocusModePage() {
                             Operator
                           </p>
                           <p className="mt-1 text-sm text-slate-600">
-                            {item.id === "focus-2" ? "Tyler" : "Top Canvasser + New Volunteer"}
+                            {"Assigned Operator"}
                           </p>
                         </div>
 

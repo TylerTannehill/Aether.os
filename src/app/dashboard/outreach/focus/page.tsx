@@ -804,7 +804,7 @@ function OutreachFocusContent() {
         listName:
           lists.find((list) => list.id === selectedListId)?.name ||
           "Outreach Focus",
-        ownerName: contact.owner_name || "Outreach Team",
+        ownerName: contact.owner_name || fullName(contact),
       });
 
       setNotes("");

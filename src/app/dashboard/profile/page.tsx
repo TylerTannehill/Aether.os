@@ -326,7 +326,9 @@ export default function DashboardProfilePage() {
           console.error("Failed to load profile role badges:", roleError);
         }
 
-        const displayName = getDisplayNameFromUser(user);
+        const displayName =
+          String(user?.name || "").trim() ||
+          getDisplayNameFromUser(user);
 
         const organizationName =
           organization?.name ||
