@@ -49,9 +49,9 @@ import {
   AbeGlobalMemory,
   departmentLabel,
 } from "@/lib/abe/abe-memory";
-import { AbeBriefing } from "@/lib/abe/abe-briefing";
+import { AbeBriefing, buildCampaignBriefing } from "@/lib/abe/abe-briefing";
 import { updateAbeMemory } from "@/lib/abe/update-abe-memory";
-import { buildAbeStrategicRead } from "@/lib/abe/abe-strategy";
+import type { AbeCampaignStage } from "@/lib/abe/abe-strategy";
 
 function normalizeTaskStatus(status?: string | null) {
   const value = (status || "").trim().toLowerCase();
@@ -74,6 +74,15 @@ function getFinanceAmountScore(amount: number) {
   if (amount > 0) return 1;
 
   return 0;
+}
+
+function normalizeAbeCampaignStage(value?: string | null): AbeCampaignStage {
+  const normalized = String(value || "").trim().toLowerCase();
+
+  if (normalized === "mid") return "mid";
+  if (normalized === "late") return "late";
+
+  return "early";
 }
 
 function getTone(status: string) {
@@ -180,6 +189,7 @@ export default function AbeBriefPage() {
     net: 0,
     pledges: 0,
   });
+  const [campaignStage, setCampaignStage] = useState<AbeCampaignStage>("early");
   const [, setAbeMemory] = useState<AbeGlobalMemory>({
     recentPrimaryLanes: [],
     recentPressureLanes: [],
@@ -195,14 +205,26 @@ export default function AbeBriefPage() {
         setLoading(true);
         setMessage("");
 
-        const [data, liveDigital, liveField, livePrint, liveFinance] =
-          await Promise.all([
-            getDashboardData(),
-            getDigitalSnapshot(),
-            getFieldSnapshot(),
-            getPrintSnapshot(),
-            getFinanceSnapshot(),
-          ]);
+        const [
+          data,
+          liveDigital,
+          liveField,
+          livePrint,
+          liveFinance,
+          contextResponse,
+        ] = await Promise.all([
+          getDashboardData(),
+          getDigitalSnapshot(),
+          getFieldSnapshot(),
+          getPrintSnapshot(),
+          getFinanceSnapshot(),
+          fetch("/api/auth/current-context"),
+        ]);
+
+        const contextResult = await contextResponse.json().catch(() => null);
+        const nextCampaignStage = normalizeAbeCampaignStage(
+          contextResult?.organization?.abe_stage
+        );
 
         setContacts(data.contacts ?? []);
         setLists(data.lists ?? []);
@@ -212,6 +234,7 @@ export default function AbeBriefPage() {
         setFieldSnapshot(liveField);
         setPrintSnapshot(livePrint);
         setFinanceSnapshot(liveFinance);
+        setCampaignStage(nextCampaignStage);
       } catch (err: any) {
         setMessage(err?.message || "Failed to load Abe brief");
       } finally {
@@ -529,64 +552,41 @@ export default function AbeBriefPage() {
     return buildAetherSummaryText(intelligenceSnapshot);
   }, [intelligenceSnapshot]);
 
-  const strategicRead = useMemo(() => {
-    return buildAbeStrategicRead({
-      stage: "early",
-      existingCrossDomainSignal: intelligenceSummary.crossDomain,
-      lanes: [
-        {
-          department: "finance",
-          pressure: laneMetrics.financePressure,
-          opportunity: laneMetrics.financeOpportunity,
-          activity:
-            getFinanceAmountScore(financeSnapshot.moneyIn) +
-            getFinanceAmountScore(financeSnapshot.pledges) +
-            laneMetrics.highValueDonorsPending,
-        },
-        {
-          department: "digital",
-          pressure: laneMetrics.digitalPressure,
-          opportunity: laneMetrics.digitalOpportunity,
-          activity: Math.round(digitalSnapshot.impressions / 5000),
-        },
-        {
-          department: "field",
-          pressure: laneMetrics.fieldPressure,
-          opportunity: laneMetrics.fieldOpportunity,
-          activity: Math.round(
-            (fieldSnapshot.doors + fieldSnapshot.conversations + fieldSnapshot.ids) /
-              100
-          ),
-        },
-        {
-          department: "print",
-          pressure: laneMetrics.printPressure,
-          opportunity: laneMetrics.printOpportunity,
-          activity: printSnapshot.orders + printSnapshot.approvalReady,
-        },
-        {
-          department: "outreach",
-          pressure: laneMetrics.outreachPressure,
-          opportunity: laneMetrics.outreachOpportunity,
-          activity:
-            laneMetrics.pendingFollowUps +
-            laneMetrics.positiveContacts +
-            laneMetrics.staleContacts,
-        },
-      ],
+  const campaignBriefing = useMemo(() => {
+    return buildCampaignBriefing({
+      role: "admin",
+      effectiveDepartment: "outreach",
+      campaignStage,
+      financeSnapshot,
+      fieldSnapshot,
+      printSnapshot,
+      digitalSnapshot,
+      fieldAverageCompletion,
+      digitalSentimentNegative: digitalSentimentRatio.negative,
+      filteredTasks: filteredData.tasks ?? [],
+      filteredContacts: filteredData.contacts ?? [],
+      filteredLogs: filteredData.logs ?? [],
+      intelligenceHeadline: intelligenceSummary.headline,
+      intelligenceBody: intelligenceSummary.body,
+      intelligenceCrossDomain: intelligenceSummary.crossDomain,
     });
   }, [
+    campaignStage,
+    financeSnapshot,
+    fieldSnapshot,
+    printSnapshot,
+    digitalSnapshot,
+    fieldAverageCompletion,
+    digitalSentimentRatio.negative,
+    filteredData.tasks,
+    filteredData.contacts,
+    filteredData.logs,
+    intelligenceSummary.headline,
+    intelligenceSummary.body,
     intelligenceSummary.crossDomain,
-    laneMetrics,
-    financeSnapshot.moneyIn,
-    financeSnapshot.pledges,
-    digitalSnapshot.impressions,
-    fieldSnapshot.doors,
-    fieldSnapshot.conversations,
-    fieldSnapshot.ids,
-    printSnapshot.orders,
-    printSnapshot.approvalReady,
   ]);
+
+  const strategicRead = campaignBriefing;
 
   const hasLiveSignal = useMemo(() => {
     return (
@@ -625,61 +625,8 @@ export default function AbeBriefPage() {
   ]);
 
   const abeBriefing = useMemo<AbeBriefing>(() => {
-    const totalPressure = strategicRead.lanes.reduce(
-      (sum, lane) => sum + lane.pressure,
-      0
-    );
-    const totalOpportunity = strategicRead.lanes.reduce(
-      (sum, lane) => sum + lane.opportunity,
-      0
-    );
-
-    let health = "Stable overall";
-    if (financeSnapshot.moneyOut > financeSnapshot.moneyIn) {
-      health = "Under financial pressure";
-    } else if (totalOpportunity >= totalPressure * 1.35) {
-      health = "Momentum building";
-    } else if (totalPressure > totalOpportunity * 1.1) {
-      health = "Pressure is rising";
-    }
-
-    let campaignStatus = "Stable overall";
-    if (financeSnapshot.moneyOut > financeSnapshot.moneyIn) {
-      campaignStatus = "At risk with financial pressure";
-    } else if (totalOpportunity >= totalPressure * 1.2) {
-      campaignStatus = "Stable with opportunity";
-    } else if (totalPressure > totalOpportunity) {
-      campaignStatus = "Stable, but pressure is rising";
-    }
-
-    return {
-      health,
-      strongest: strategicRead.opportunityLane,
-      weakest: strategicRead.pressureLane,
-      primaryLane: strategicRead.primaryLane,
-      opportunityLane: strategicRead.opportunityLane,
-      campaignStatus,
-      whyNow: strategicRead.stickyLine,
-      supportText:
-        "Open the priority lane after this brief to review the supporting analytics and move into execution with the right early-stage context.",
-      actions: buildBriefActions({
-        primaryLane: strategicRead.primaryLane,
-        opportunityLane: strategicRead.opportunityLane,
-        pressureLane: strategicRead.pressureLane,
-        financeSnapshot,
-        fieldAverageCompletion,
-        digitalSentimentNegative: digitalSentimentRatio.negative,
-        printSnapshot,
-      }),
-      crossDomainSignal: strategicRead.crossDomainSignal,
-    };
-  }, [
-    strategicRead,
-    financeSnapshot,
-    fieldAverageCompletion,
-    digitalSentimentRatio.negative,
-    printSnapshot,
-  ]);
+    return campaignBriefing;
+  }, [campaignBriefing]);
 
   useEffect(() => {
     setAbeMemory((current) => updateAbeMemory(current, abeBriefing));
@@ -716,7 +663,7 @@ export default function AbeBriefPage() {
     if (!hasLiveSignal) {
       return [
         "Abe is waiting for live campaign signal before making a strategic read.",
-        "Once contacts, tasks, logs, donations, field activity, digital metrics, or print records exist, the brief will focus on the strongest early-stage signal.",
+        "Once contacts, tasks, logs, donations, field activity, digital metrics, or print records exist, the brief will focus on the strongest campaign-stage signal.",
       ];
     }
 
@@ -729,7 +676,7 @@ export default function AbeBriefPage() {
       )} is carrying the strongest opportunity signal. ${departmentLabel(
         strategicRead.pressureLane
       )} is the lane most likely to create drag if it is left unmanaged.`,
-      "This is not a signal to slow down. It is a signal to make sure early-stage activity compounds into capacity instead of splintering into disconnected departmental motion.",
+      "This is not a signal to slow down. It is a signal to make sure campaign activity compounds into usable capacity instead of splintering into disconnected departmental motion.",
       "The job today is simple: protect what is working, relieve what is building pressure, and make sure visibility, relationships, and operations feed the campaign engine.",
     ];
   }, [hasLiveSignal, strategicRead]);
@@ -938,7 +885,7 @@ export default function AbeBriefPage() {
             {departmentLabel(abeBriefing.opportunityLane)}
           </p>
           <p className="mt-2 text-sm text-emerald-900/90">
-            This lane has the cleanest early-stage opportunity signal. Protect it so momentum turns into capacity instead of noise.
+            This lane has the cleanest campaign-stage opportunity signal. Protect it so momentum turns into capacity instead of noise.
           </p>
         </div>
 

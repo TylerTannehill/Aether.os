@@ -49,9 +49,10 @@ import {
   departmentLabel,
 } from "@/lib/abe/abe-memory";
 import type { AbeBriefing } from "@/lib/abe/abe-briefing";
+import { buildCampaignBriefing } from "@/lib/abe/abe-briefing";
 import { updateAbeMemory } from "@/lib/abe/update-abe-memory";
 import { buildAbePatternInsights } from "@/lib/abe/abe-patterns";
-import { buildAbeStrategicRead } from "@/lib/abe/abe-strategy";
+import { buildAbeStrategicRead, type AbeCampaignStage } from "@/lib/abe/abe-strategy";
 
 function normalizeTaskStatus(status?: string | null) {
   const value = (status || "").trim().toLowerCase();
@@ -79,6 +80,15 @@ function getFinanceAmountScore(amount: number) {
   if (amount > 0) return 1;
 
   return 0;
+}
+
+function normalizeAbeCampaignStage(value?: string | null): AbeCampaignStage {
+  const normalized = String(value || "").trim().toLowerCase();
+
+  if (normalized === "mid") return "mid";
+  if (normalized === "late") return "late";
+
+  return "early";
 }
 
 function buildStrategicHealth(input: {
@@ -155,6 +165,7 @@ export default function ExploreAbePage() {
     net: 0,
     pledges: 0,
   });
+  const [campaignStage, setCampaignStage] = useState<AbeCampaignStage>("early");
   const [abeMemory, setAbeMemory] = useState<AbeGlobalMemory>({
     recentPrimaryLanes: [],
     recentPressureLanes: [],
@@ -169,13 +180,26 @@ export default function ExploreAbePage() {
       try {
         setLoading(true);
         setMessage("");
-        const [data, liveDigital, liveField, livePrint, liveFinance] = await Promise.all([
+        const [
+          data,
+          liveDigital,
+          liveField,
+          livePrint,
+          liveFinance,
+          contextResponse,
+        ] = await Promise.all([
           getDashboardData(),
           getDigitalSnapshot(),
           getFieldSnapshot(),
           getPrintSnapshot(),
           getFinanceSnapshot(),
+          fetch("/api/auth/current-context"),
         ]);
+
+        const contextResult = await contextResponse.json().catch(() => null);
+        const nextCampaignStage = normalizeAbeCampaignStage(
+          contextResult?.organization?.abe_stage
+        );
         setContacts(data.contacts ?? []);
         setLists(data.lists ?? []);
         setLogs(data.logs ?? []);
@@ -184,6 +208,7 @@ export default function ExploreAbePage() {
         setFieldSnapshot(liveField);
         setPrintSnapshot(livePrint);
         setFinanceSnapshot(liveFinance);
+        setCampaignStage(nextCampaignStage);
       } catch (err: any) {
         setMessage(err?.message || "Failed to load Explore Abe");
       } finally {
@@ -398,7 +423,7 @@ export default function ExploreAbePage() {
 
   const strategicRead = useMemo(() => {
     return buildAbeStrategicRead({
-      stage: "early",
+      stage: campaignStage,
       existingCrossDomainSignal: intelligenceSummary.crossDomain,
       lanes: [
         {
@@ -434,6 +459,7 @@ export default function ExploreAbePage() {
       ],
     });
   }, [
+    campaignStage,
     intelligenceSummary.crossDomain,
     financePressure,
     financeOpportunity,
@@ -458,6 +484,40 @@ export default function ExploreAbePage() {
   const totalPressure = strategicRead.lanes.reduce((sum, lane) => sum + lane.pressure, 0);
   const totalOpportunity = strategicRead.lanes.reduce((sum, lane) => sum + lane.opportunity, 0);
 
+  const campaignBriefing = useMemo(() => {
+    return buildCampaignBriefing({
+      role: "admin",
+      effectiveDepartment: "outreach",
+      campaignStage,
+      financeSnapshot,
+      fieldSnapshot,
+      printSnapshot,
+      digitalSnapshot,
+      fieldAverageCompletion,
+      digitalSentimentNegative: digitalSentimentRatio.negative,
+      filteredTasks: filteredData.tasks ?? [],
+      filteredContacts: filteredData.contacts ?? [],
+      filteredLogs: filteredData.logs ?? [],
+      intelligenceHeadline: intelligenceSummary.headline,
+      intelligenceBody: intelligenceSummary.body,
+      intelligenceCrossDomain: intelligenceSummary.crossDomain,
+    });
+  }, [
+    campaignStage,
+    financeSnapshot,
+    fieldSnapshot,
+    printSnapshot,
+    digitalSnapshot,
+    fieldAverageCompletion,
+    digitalSentimentRatio.negative,
+    filteredData.tasks,
+    filteredData.contacts,
+    filteredData.logs,
+    intelligenceSummary.headline,
+    intelligenceSummary.body,
+    intelligenceSummary.crossDomain,
+  ]);
+
   const abeBriefing = useMemo<AbeBriefing>(() => {
     const health = buildStrategicHealth({
       financeSnapshot,
@@ -471,7 +531,7 @@ export default function ExploreAbePage() {
     });
 
     const actions = [
-      `Anchor first in ${departmentLabel(strategicRead.primaryLane)} because that is Abe's early-stage strategic center of gravity.`,
+      `Anchor first in ${departmentLabel(strategicRead.primaryLane)} because that is Abe's current campaign-stage strategic center of gravity.`,
       `Protect the opportunity inside ${departmentLabel(strategicRead.opportunityLane)} and make sure it converts into usable campaign capacity.`,
       `Watch ${departmentLabel(strategicRead.pressureLane)} for drag, timing slippage, or missed handoffs.`,
     ];
@@ -485,11 +545,18 @@ export default function ExploreAbePage() {
       campaignStatus,
       whyNow: strategicRead.stickyLine,
       supportText:
+        campaignBriefing.supportText ||
         "Use Explore Abe to understand the deeper campaign logic, the relationships between lanes, and where momentum could either compound or leak.",
-      actions,
-      crossDomainSignal: strategicRead.crossDomainSignal,
+      actions: campaignBriefing.actions?.length ? campaignBriefing.actions : actions,
+      crossDomainSignal: campaignBriefing.crossDomainSignal || strategicRead.crossDomainSignal,
     };
-  }, [strategicRead, financeSnapshot, totalPressure, totalOpportunity]);
+  }, [
+    strategicRead,
+    financeSnapshot,
+    totalPressure,
+    totalOpportunity,
+    campaignBriefing,
+  ]);
 
   useEffect(() => {
     setAbeMemory((current) => updateAbeMemory(current, abeBriefing));
@@ -581,7 +648,7 @@ export default function ExploreAbePage() {
     return [
       {
         lane: "Finance",
-        read: `$${financeSnapshot.pledges.toLocaleString()} in pending pledges and a net position of $${financeSnapshot.net.toLocaleString()} define the finance read right now. In Early Stage, finance is the center of gravity because it creates the capacity every other lane depends on.`,
+        read: `$${financeSnapshot.pledges.toLocaleString()} in pending pledges and a net position of $${financeSnapshot.net.toLocaleString()} define the finance read right now. Finance remains the capacity lane: it creates the room every other department needs to execute the campaign-stage strategy.`,
       },
       {
         lane: "Digital",
@@ -597,7 +664,7 @@ export default function ExploreAbePage() {
       },
       {
         lane: "Outreach",
-        read: `${outreachPressure} active relationship-management pressure points are visible. Outreach matters as support infrastructure, but in Early Stage it should reinforce finance, digital, field, and print instead of becoming the campaign's center of gravity.`,
+        read: `${outreachPressure} active relationship-management pressure points are visible. Outreach matters as support infrastructure: it should reinforce finance, digital, field, and print instead of becoming detached relationship-management noise.`,
       },
     ];
   }, [
@@ -616,7 +683,7 @@ export default function ExploreAbePage() {
       return "Explore Abe is waiting for live campaign signal. Once contacts, tasks, logs, donations, field activity, digital metrics, or print records exist, this read will expand into real cross-lane interpretation.";
     }
 
-    return `${strategicRead.body} Abe’s deeper interpretation is that the campaign should not confuse movement with strategic importance. In Early Stage, finance builds capacity, digital expands reach, field validates ground movement, print supports execution, and outreach keeps relationships organized without becoming the main engine.`;
+    return `${strategicRead.body} Abe’s deeper interpretation is that the campaign should not confuse movement with strategic importance. Abe's current campaign-stage read shapes how finance, digital, field, print, and outreach should reinforce each other without confusing movement for strategic importance.`;
   }, [hasLiveSignal, strategicRead.body]);
 
   if (loading) {
@@ -643,7 +710,7 @@ export default function ExploreAbePage() {
                 Deeper campaign intelligence
               </h1>
               <p className="max-w-3xl text-sm text-slate-600 lg:text-base">
-                This expands on Abe’s Brief — same Early Stage strategic read, deeper interpretation of how the campaign is behaving across lanes. When the campaign is empty, Abe stays quiet instead of inventing motion.
+                This expands on Abe’s Brief — same campaign-stage strategic read, deeper interpretation of how the campaign is behaving across lanes. When the campaign is empty, Abe stays quiet instead of inventing motion.
               </p>
             </div>
           </div>
@@ -679,11 +746,11 @@ export default function ExploreAbePage() {
           Strategic Read
         </div>
         <h2 className="mt-3 text-2xl font-semibold text-slate-900">
-          {hasLiveSignal ? strategicRead.headline : "No live campaign signal is available yet."}
+          {hasLiveSignal ? campaignBriefing.headline : "No live campaign signal is available yet."}
         </h2>
         <p className="mt-3 text-lg font-semibold text-slate-900">
           {hasLiveSignal
-            ? strategicRead.stickyLine
+            ? campaignBriefing.stickyLine
             : "Abe will stay quiet until real campaign data exists."}
         </p>
         <p className="mt-3 max-w-4xl text-base leading-7 text-slate-800">
