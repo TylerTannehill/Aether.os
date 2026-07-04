@@ -15,7 +15,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </div>
 
       <div className="lg:pl-[280px]">
-        <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-slate-200 bg-white/90 px-4 backdrop-blur lg:px-8">
+        <header className="sticky top-0 z-40 flex h-20 items-center border-b border-slate-200 bg-white/95 px-4 lg:px-8">
           <div className="flex items-center gap-3 lg:hidden">
             <button
               type="button"
@@ -33,19 +33,16 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           </div>
 
-          <div className="hidden lg:block">
-            <p className="text-sm text-slate-500">Welcome back</p>
-            <h1 className="text-lg font-semibold tracking-tight text-slate-950">
-              Campaign Operations Dashboard
-            </h1>
-          </div>
-
-          <div className="text-sm font-medium text-slate-500">
-            Build fast. Ship clean.
+          <div className="hidden flex-1 justify-center lg:flex">
+            <p
+              className="select-none text-lg font-black uppercase tracking-[0.45em] text-slate-700"
+            >
+              CLARITY. FOCUS. EXECUTION.
+            </p>
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-7xl p-4 lg:p-8">
+        <main className="mx-auto w-full max-w-[1800px] p-4 lg:p-8">
           {children}
         </main>
       </div>

@@ -160,6 +160,53 @@ function canAccessDigital(tier: AetherTier) {
   return tier !== "t1";
 }
 
+function getTierBadgeClasses(tier: AetherTier) {
+  if (tier === "t1") {
+    return {
+      shell:
+        "border border-slate-400/55 bg-slate-900/35 text-slate-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]",
+      wings: "hidden",
+      label: "text-slate-300",
+    };
+  }
+
+  if (tier === "t2") {
+    return {
+      shell:
+        "border border-slate-300/65 bg-gradient-to-b from-slate-500/25 via-slate-900/55 to-slate-950/70 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_8px_18px_rgba(2,6,23,0.25)]",
+      wings: "hidden",
+      label: "text-slate-200",
+    };
+  }
+
+  return {
+    shell:
+      "border border-slate-200/70 bg-gradient-to-b from-slate-400/30 via-slate-900/70 to-slate-950 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.26),0_10px_24px_rgba(2,6,23,0.32)]",
+    wings: "hidden",
+    label: "text-white",
+  };
+}
+
+function TierBadge({ tier }: { tier: AetherTier }) {
+  const badge = getTierBadgeClasses(tier);
+
+  return (
+    <div className="mt-3 flex flex-col items-center">
+      <div className="mt-2 flex items-center justify-center">
+        <div
+          className={cn(
+            "relative rounded-md px-2.5 py-0.5 text-xs font-bold uppercase tracking-[0.08em] min-w-[40px] text-center",
+            badge.shell
+          )}
+        >
+          <div className="pointer-events-none absolute inset-x-3 top-1 h-px bg-white/25" />
+          {tier.toUpperCase()}
+        </div>
+              </div>
+    </div>
+  );
+}
+
 export function DashboardSidebar() {
   const pathname = usePathname();
 
@@ -324,10 +371,10 @@ export function DashboardSidebar() {
   const theme = getOrgContextTheme(contextMode);
 
   return (
-    <aside className="flex h-screen w-full max-w-[280px] flex-col border-r border-slate-200 bg-white">
+    <aside className="flex h-screen w-full max-w-[280px] flex-col overflow-hidden border-r border-slate-800/70 bg-slate-950 text-white">
       <div
         className={cn(
-          "border-b border-slate-200 bg-gradient-to-br px-6 py-6 text-white",
+          "border-b border-white/10 bg-gradient-to-br px-6 py-8 text-white shadow-[inset_0_-1px_0_rgba(255,255,255,0.08)]",
           theme.sidebarGradient
         )}
       >
@@ -338,28 +385,26 @@ export function DashboardSidebar() {
               alt="Aether.os logo"
               width={180}
               height={120}
-              className="h-auto w-[170px] object-contain"
+              className="h-auto w-[175px] object-contain"
               priority
             />
 
-            <p className="mt-3 text-center text-sm text-slate-300">
-              Campaign command center
+            <p className="mt-2 text-center text-sm font-medium text-slate-100">
+              Political Operating System
             </p>
 
-            <div className="mt-4 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/90">
-              {aetherTier.toUpperCase()}
-            </div>
+            <TierBadge tier={aetherTier} />
           </div>
         </Link>
       </div>
 
-      <div className="flex-1 px-4 py-5">
-        <div className="mb-3 px-3 text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
-          Navigation
+      <div className="min-h-0 flex-1 overflow-y-auto bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 px-4 py-5">
+        <div className="mb-4 px-3 text-xs font-bold uppercase tracking-[0.26em] text-slate-400">
+          Operations
         </div>
 
         {roleError ? (
-          <div className="mb-3 rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+          <div className="mb-3 rounded-2xl border border-amber-300/30 bg-amber-300/10 px-3 py-2 text-xs text-amber-100">
             Role context unavailable. Showing core navigation.
           </div>
         ) : null}
@@ -379,8 +424,8 @@ export function DashboardSidebar() {
                   className={cn(
                     "flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-all duration-200",
                     isActive
-                      ? "bg-slate-950 text-white shadow-sm"
-                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
+                      ? "bg-black/55 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_8px_18px_rgba(2,6,23,0.28)]"
+                      : "text-slate-300 hover:bg-white/8 hover:text-white"
                   )}
                 >
                   <Icon className="h-4 w-4" />
@@ -392,11 +437,11 @@ export function DashboardSidebar() {
         </nav>
       </div>
 
-      <div className="border-t border-slate-200 p-4">
+      <div className="shrink-0 border-t border-white/10 bg-slate-950 px-4 pt-4 pb-5">
         <button
           type="button"
           onClick={handleLogout}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
+          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-black/60 px-4 py-3 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition hover:bg-black/80"
         >
           <LogOut className="h-4 w-4" />
           Logout
