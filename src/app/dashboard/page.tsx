@@ -2586,7 +2586,7 @@ export default function DashboardPage() {
       </section>
 
       <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        {canAccessAdmin ? (
+        {canAccessAdmin && isDemoOrg ? (
           <>
             <div className="grid gap-5 lg:grid-cols-[1fr_1fr]">
               <div className="space-y-3">

@@ -286,8 +286,7 @@ function OutreachPageContent() {
     setSelectedListName(match?.name || "Selected List");
     setDefaultTaskOwner(match?.default_owner_name || "");
 
-    loadListContacts(selectedListId);
-    loadLogs(selectedListId);
+    loadSelectedListData(selectedListId);
   }, [selectedListId, lists, preferredListId]);
 
   useEffect(() => {
@@ -330,12 +329,11 @@ function OutreachPageContent() {
 
       const allLists = await getOutreachLists();
 
-      let allContacts: Contact[] = [];
+      const contactSets = await Promise.all(
+        allLists.map((list) => getListContacts(list.id))
+      );
 
-      for (const list of allLists) {
-        const listContacts = await getListContacts(list.id);
-        allContacts = [...allContacts, ...listContacts];
-      }
+      const allContacts = contactSets.flat();
 
       const uniqueContacts = Array.from(
         new Map(allContacts.map((contact) => [contact.id, contact])).values()
@@ -366,13 +364,19 @@ function OutreachPageContent() {
       setContactsLoading(false);
     }
   }
-    async function loadListContacts(listId: string) {
+    async function loadSelectedListData(listId: string) {
     try {
       setContactsLoading(true);
+      setLogsLoading(true);
       setMessage("");
 
-      const mappedContacts = await getListContacts(listId);
+      const [mappedContacts, loadedLogs] = await Promise.all([
+        getListContacts(listId),
+        getOutreachLogs(listId),
+      ]);
+
       setContacts(mappedContacts);
+      setLogs(loadedLogs);
 
       if (
         preselectedContactId &&
@@ -392,24 +396,12 @@ function OutreachPageContent() {
       }
     } catch (err: any) {
       setMessage(
-        `Error loading outreach contacts: ${err?.message || "Unknown error"}`
+        `Error loading selected outreach list: ${err?.message || "Unknown error"}`
       );
       setContacts([]);
-    } finally {
-      setContactsLoading(false);
-    }
-  }
-
-  async function loadLogs(listId: string) {
-    try {
-      setLogsLoading(true);
-
-      const data = await getOutreachLogs(listId);
-      setLogs(data);
-    } catch (err: any) {
-      setMessage(`Error loading outreach logs: ${err?.message || "Unknown error"}`);
       setLogs([]);
     } finally {
+      setContactsLoading(false);
       setLogsLoading(false);
     }
   }
@@ -1110,6 +1102,16 @@ function OutreachPageContent() {
 
   const orgTheme = getOrgContextTheme(contextMode);
 
+  if (loading || contactsLoading || logsLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <p className="text-slate-600">Preparing outreach operations...</p>
+        </div>
+      </div>
+    );
+  }
+
   async function handleLog() {
     if (!selectedContactId) {
       setMessage("Select a contact first.");
@@ -1153,7 +1155,8 @@ function OutreachPageContent() {
       setResult("");
 
       if (selectedListId) {
-        await loadLogs(selectedListId);
+        const refreshedLogs = await getOutreachLogs(selectedListId);
+        setLogs(refreshedLogs);
       } else {
         setLogs((current) => [
           {

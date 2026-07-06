@@ -441,7 +441,7 @@ export function DashboardSidebar() {
         <button
           type="button"
           onClick={handleLogout}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-black/60 px-4 py-3 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition hover:bg-black/80"
+          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-black/60 px-4 py-3 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition hover:bg-black/80"
         >
           <LogOut className="h-4 w-4" />
           Logout

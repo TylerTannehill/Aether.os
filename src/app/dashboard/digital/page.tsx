@@ -907,6 +907,16 @@ export default function DigitalDashboardPage() {
 
   const orgTheme = getOrgContextTheme(contextMode);
 
+  if (digitalLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <p className="text-slate-600">Connecting digital intelligence...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <section
