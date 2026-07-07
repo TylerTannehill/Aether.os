@@ -3,6 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { Suspense, useMemo, useState } from "react";
 import Link from "next/link";
+import { Upload } from "lucide-react";
 import { autoMapFields } from "@/lib/ingestion/mapping";
 import { parseCSV } from "@/lib/ingestion/parser";
 import { transformToContacts, transformToFecRecords } from "@/lib/ingestion/activate";
@@ -493,7 +494,30 @@ function IngestPageContent() {
             </p>
           </div>
 
-          <input type="file" accept=".csv" onChange={handleFile} />
+          <label className="group flex cursor-pointer flex-col items-center justify-center rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center transition hover:border-slate-400 hover:bg-slate-100">
+            <input
+              type="file"
+              accept=".csv"
+              onChange={handleFile}
+              className="sr-only"
+            />
+
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-sm transition group-hover:bg-slate-800">
+              <Upload className="h-5 w-5" />
+            </div>
+
+            <p className="mt-4 text-sm font-semibold text-slate-900">
+              {source === "fec"
+                ? "Click here to upload FEC CSV"
+                : "Click here to upload contact CSV"}
+            </p>
+
+            <p className="mt-1 text-xs text-slate-500">
+              {source === "fec"
+                ? "Select a .csv file containing donor contribution records."
+                : "Select a .csv file containing voter, donor, volunteer, or outreach contacts."}
+            </p>
+          </label>
         </div>
       </div>
 
@@ -625,7 +649,7 @@ function IngestPageContent() {
                       <Link
                         key={item.name}
                         href={`/dashboard/lists?name=${encodeURIComponent(item.name)}`}
-                        className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm transition hover:bg-slate-100"
+                        className="flex cursor-pointer items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm transition hover:bg-slate-100"
                       >
                         <span className="font-medium text-slate-800">
                           {item.name}
@@ -643,21 +667,21 @@ function IngestPageContent() {
             <div className="flex flex-wrap gap-3">
               <Link
                 href={primaryActionHref}
-                className="inline-flex items-center gap-2 rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-emerald-700"
+                className="inline-flex cursor-pointer items-center gap-2 rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-emerald-700"
               >
                 {primaryActionLabel}
               </Link>
 
               <Link
                 href="/dashboard/contacts"
-                className="inline-flex items-center gap-2 rounded-2xl border border-emerald-200 bg-white px-4 py-3 text-sm font-medium text-emerald-900 transition hover:bg-emerald-100"
+                className="inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-emerald-200 bg-white px-4 py-3 text-sm font-medium text-emerald-900 transition hover:bg-emerald-100"
               >
                 View Contacts
               </Link>
 
               <Link
                 href="/dashboard/lists"
-                className="inline-flex items-center gap-2 rounded-2xl border border-emerald-200 bg-white px-4 py-3 text-sm font-medium text-emerald-900 transition hover:bg-emerald-100"
+                className="inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-emerald-200 bg-white px-4 py-3 text-sm font-medium text-emerald-900 transition hover:bg-emerald-100"
               >
                 Review Lists
               </Link>
@@ -871,7 +895,7 @@ function IngestPageContent() {
                   </label>
 
                   <select
-                    className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                    className="mt-2 w-full cursor-pointer rounded-xl border border-slate-200 px-3 py-2 text-sm"
                     value={operationalType}
                     onChange={(e) =>
                       setOperationalType(e.target.value as OperationalRoutingType)
@@ -923,7 +947,7 @@ function IngestPageContent() {
                           key={tag}
                           type="button"
                           onClick={() => toggleRoutingTag(tag)}
-                          className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                          className={`cursor-pointer rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
                             selected
                               ? "border-sky-600 bg-sky-600 text-white"
                               : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
@@ -966,7 +990,7 @@ function IngestPageContent() {
           <div className="flex justify-end">
             <button
               onClick={handleImport}
-              className="rounded-2xl bg-slate-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
+              className="cursor-pointer rounded-2xl bg-slate-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
             >
               {source === "fec" ? "Import FEC Records" : "Import Data"}
             </button>
