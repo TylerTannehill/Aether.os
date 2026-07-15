@@ -28,14 +28,45 @@ function getAdminClient() {
 export async function POST(request: Request) {
   try {
     const supabase = await createClient();
+    const adminClient = getAdminClient();
 
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
+    const authorizationHeader = request.headers.get("authorization");
+    const bearerToken = authorizationHeader?.startsWith("Bearer ")
+      ? authorizationHeader.slice(7).trim()
+      : null;
 
-    if (userError || !user) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    let authenticatedUser = null;
+
+    if (bearerToken) {
+      const authClient = adminClient ?? supabase;
+
+      const {
+        data: { user },
+        error: tokenUserError,
+      } = await authClient.auth.getUser(bearerToken);
+
+      if (tokenUserError || !user) {
+        return NextResponse.json(
+          { error: "Invalid or expired authentication token" },
+          { status: 401 }
+        );
+      }
+
+      authenticatedUser = user;
+    } else {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        return NextResponse.json(
+          { error: "Not authenticated" },
+          { status: 401 }
+        );
+      }
+
+      authenticatedUser = user;
     }
 
     const body = await request.json();
@@ -50,7 +81,7 @@ export async function POST(request: Request) {
 
     // Use the service-role client for campaign/user membership lookup so login
     // does not depend on RLS visibility before active_organization_id is set.
-    const databaseClient = getAdminClient() ?? supabase;
+    const databaseClient = adminClient ?? supabase;
 
     const { data: organization, error: organizationError } = await databaseClient
       .from("organizations")
@@ -75,7 +106,7 @@ export async function POST(request: Request) {
     const { data: appUser, error: appUserError } = await databaseClient
       .from("users")
       .select("id, auth_id, name, role, department, is_active")
-      .eq("auth_id", user.id)
+      .eq("auth_id", authenticatedUser.id)
       .maybeSingle();
 
     if (appUserError) {
@@ -136,12 +167,16 @@ export async function POST(request: Request) {
       user: appUser,
     });
 
-    response.cookies.set("active_organization_id", organization.id, {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      path: "/",
-    });
+    // Desktop uses the active organization cookie.
+    // Mobile receives the organization context in the JSON response.
+    if (!bearerToken) {
+      response.cookies.set("active_organization_id", organization.id, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+      });
+    }
 
     return response;
   } catch (err: any) {
