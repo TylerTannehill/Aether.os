@@ -6,6 +6,25 @@ export async function middleware(request: NextRequest) {
     request,
   })
 
+  const pathname = request.nextUrl.pathname
+
+  const publicRoutes = ['/', '/login', '/terms', '/privacy', '/update-password']
+
+  const publicApiRoutes = ['/api/auth/select-campaign']
+
+  const isPublicRoute = publicRoutes.includes(pathname)
+
+  const isPublicApiRoute = publicApiRoutes.includes(pathname)
+
+  const isPublicAsset =
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/favicon.ico') ||
+    pathname.match(/\.(.*)$/)
+
+  if (isPublicAsset || isPublicApiRoute) {
+    return response
+  }
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -26,21 +45,6 @@ export async function middleware(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-
-  const pathname = request.nextUrl.pathname
-
-  const publicRoutes = ['/', '/login', '/terms', '/privacy', '/update-password']
-
-  const isPublicRoute = publicRoutes.includes(pathname)
-
-  const isPublicAsset =
-    pathname.startsWith('/_next') ||
-    pathname.startsWith('/favicon.ico') ||
-    pathname.match(/\.(.*)$/)
-
-  if (isPublicAsset) {
-    return response
-  }
 
   if (!user && !isPublicRoute) {
     const url = request.nextUrl.clone()
