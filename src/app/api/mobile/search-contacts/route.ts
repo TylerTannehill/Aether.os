@@ -66,10 +66,20 @@ export async function POST(request: Request) {
       );
     }
 
+    const organizationId = request.headers.get("x-organization-id");
+
+    if (!organizationId) {
+      return NextResponse.json(
+        { error: "Active organization is required." },
+        { status: 400 }
+      );
+    }
+
     const { data: membership, error: membershipError } = await databaseClient
       .from("organization_members")
       .select("organization_id")
       .eq("user_id", appUser.id)
+      .eq("organization_id", organizationId)
       .maybeSingle();
 
     if (membershipError) {
