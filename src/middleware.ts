@@ -10,11 +10,12 @@ export async function middleware(request: NextRequest) {
 
   const publicRoutes = ['/', '/login', '/terms', '/privacy', '/update-password']
 
-  const publicApiRoutes = ['/api/auth/select-campaign']
+  const isPublicApiRoute =
+    pathname === '/api/auth/select-campaign' ||
+    pathname.startsWith('/api/mobile/')
 
   const isPublicRoute = publicRoutes.includes(pathname)
 
-  const isPublicApiRoute = publicApiRoutes.includes(pathname)
 
   const isPublicAsset =
     pathname.startsWith('/_next') ||
