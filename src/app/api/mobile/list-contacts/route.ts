@@ -149,7 +149,11 @@ export async function POST(request: Request) {
           id,
           first_name,
           last_name,
-          phone
+          phone,
+          address,
+          city,
+          state,
+          zip
         )
       `)
       .eq("list_id", listId)
