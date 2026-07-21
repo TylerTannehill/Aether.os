@@ -88,7 +88,7 @@ const tiers = [
 ];
 
 export default function HomePage() {
-  const launchDate = new Date("2026-08-01T00:00:00").getTime();
+  const launchDate = new Date("2026-09-01T00:00:00-05:00").getTime();
 
   const calculateTimeLeft = () => {
     const now = new Date().getTime();
@@ -170,7 +170,7 @@ export default function HomePage() {
 
             <div className="mt-2 inline-flex flex-col rounded-[1.75rem] border border-violet-400/20 bg-white/[0.03] px-6 py-5 shadow-xl shadow-black/20 backdrop-blur-xl">
               <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-violet-300">
-                Launch Countdown • August 1st 2026
+                Launch Countdown • September 1st 2026
               </div>
 
               <div className="mt-4 flex items-center gap-3">
@@ -368,7 +368,7 @@ export default function HomePage() {
 
                 <div className="mt-8 rounded-2xl border border-violet-400/20 bg-violet-500/5 p-5">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-violet-300">
-                    90-Day Launch Special • Ends 10/4/2026
+                    90-Day Launch Special • Ends 11/30/2026
                   </p>
 
                   <div className="mt-3 flex items-end gap-3">

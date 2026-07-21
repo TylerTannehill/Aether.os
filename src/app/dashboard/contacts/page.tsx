@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import {
   ArrowRight,
-  RefreshCw,
+  Plus,
   Save,
   Search,
   SlidersHorizontal,
@@ -576,7 +576,7 @@ export default function DashboardContactsPage() {
           <div className="grid grid-cols-3 gap-3">
             <Link
               href="/dashboard/outreach"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/30 bg-white/5 px-4 py-3 text-sm font-semibold !text-white transition hover:bg-white/10"
             >
               <ArrowRight className="h-4 w-4" />
               Back to Outreach
@@ -584,21 +584,19 @@ export default function DashboardContactsPage() {
 
             <Link
               href="/dashboard/lists"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/30 bg-white/5 px-4 py-3 text-sm font-semibold !text-white transition hover:bg-white/10"
             >
               <Users className="h-4 w-4" />
               View Lists
             </Link>
 
-            <div className="hidden" aria-hidden="true">
-              <button
-                onClick={loadContactsPageData}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
-              >
-                <RefreshCw className="h-4 w-4" />
-                Refresh
-              </button>
-            </div>
+            <Link
+              href="/dashboard/contacts/new"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/30 bg-white/5 px-4 py-3 text-sm font-semibold !text-white transition hover:bg-white/10"
+            >
+              <Plus className="h-4 w-4" />
+              Add Contact
+            </Link>
           </div>
         </div>
       </section>

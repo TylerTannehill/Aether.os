@@ -39,6 +39,33 @@ export async function getContacts(): Promise<Contact[]> {
   return (data as Contact[]) ?? [];
 }
 
+export async function createContact({
+  first_name,
+  last_name,
+  phone,
+}: {
+  first_name: string;
+  last_name: string;
+  phone: string;
+}) {
+  const organizationId = await getActiveOrganizationId();
+
+  const { data, error } = await supabase
+    .from("contacts")
+    .insert({
+      organization_id: organizationId,
+      first_name: first_name.trim(),
+      last_name: last_name.trim(),
+      phone: phone.trim(),
+    })
+    .select("id")
+    .single();
+
+  if (error) throw error;
+
+  return data;
+}
+
 export async function updateContactOwner(
   contactId: string,
   ownerName?: string | null
