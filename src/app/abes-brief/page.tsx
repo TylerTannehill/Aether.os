@@ -243,7 +243,7 @@ export default function AbesBriefPage() {
 
             <div className="mt-10 overflow-hidden rounded-[2rem] border border-white/10 bg-white shadow-2xl">
               <img
-                src="/analytics.png"
+                src="/campaign-dashboard.png"
                 alt="Aether Campaign Analytics Dashboard"
                 className="w-full"
               />
