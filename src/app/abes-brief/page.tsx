@@ -212,6 +212,44 @@ export default function AbesBriefPage() {
             </div>
           </section>
 
+          <section className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-8 shadow-xl lg:p-10">
+            <div className="max-w-3xl">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-violet-200">
+                Campaign Analytics
+              </p>
+
+              <h2 className="mt-4 text-4xl font-black leading-tight tracking-tight text-white">
+                Every department tells part of the story.
+              </h2>
+
+              <div className="mt-6 space-y-4 text-sm leading-7 text-slate-300">
+                <p>
+                  Fundraising. Field activity. Digital engagement. Print readiness.
+                  Volunteer progress.
+                </p>
+
+                <p>
+                  Individually, they're metrics. Together, they become operational
+                  intelligence.
+                </p>
+
+                <p>
+                  Honest Abe reads those signals, identifies emerging pressure,
+                  and helps campaign leadership understand where attention
+                  should be focused next.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-10 overflow-hidden rounded-[2rem] border border-white/10 bg-white shadow-2xl">
+              <img
+                src="/analytics.png"
+                alt="Aether Campaign Analytics Dashboard"
+                className="w-full"
+              />
+            </div>
+          </section>
+
           <section className="rounded-[2rem] border border-violet-400/20 bg-gradient-to-br from-[#130b2f] via-[#0d1730] to-[#07111f] p-8 shadow-2xl lg:p-12">
             <div className="mx-auto max-w-4xl text-center">
               <div className="inline-flex items-center gap-2 rounded-full border border-violet-300/20 bg-violet-300/10 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-violet-200">

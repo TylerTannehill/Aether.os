@@ -9,6 +9,7 @@ import {
   Building2,
   CheckCircle2,
   Shield,
+  Smartphone,
   Users,
 } from "lucide-react";
 
@@ -129,7 +130,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#07111F] text-white">
+    <main id="top" className="relative min-h-screen overflow-hidden bg-[#07111F] text-white">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute left-[-160px] top-[-160px] h-[520px] w-[520px] rounded-full bg-violet-700/20 blur-3xl" />
         <div className="absolute bottom-[-180px] right-[-160px] h-[560px] w-[560px] rounded-full bg-blue-600/20 blur-3xl" />
@@ -156,13 +157,28 @@ export default function HomePage() {
             />
           </Link>
 
-          <Link
-            href="/login"
-            className="inline-flex items-center gap-3 rounded-2xl border border-violet-400/70 bg-violet-700/20 px-7 py-4 text-sm font-black uppercase tracking-[0.08em] text-white shadow-xl shadow-violet-950/30 transition hover:bg-violet-600/30"
-          >
-            <span>Enter Aether</span>
-            <ArrowRight className="h-4 w-4" />
-          </Link>
+          <div className="flex flex-col items-center gap-3">
+            <Link
+              href="/login"
+              className="inline-flex items-center gap-3 rounded-2xl border border-violet-400/70 bg-violet-700/20 px-7 py-4 text-sm font-black uppercase tracking-[0.08em] text-white shadow-xl shadow-violet-950/30 transition hover:bg-violet-600/30"
+            >
+              <span>Enter Aether</span>
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+
+            <button
+              type="button"
+              disabled
+              className="inline-flex w-[250px] items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4 text-xs font-black uppercase tracking-[0.05em] text-slate-500 opacity-80 cursor-not-allowed"
+            >
+              <Smartphone className="h-4 w-4" />
+              <span>Download Aether Mobile</span>
+            </button>
+
+            <p className="max-w-[300px] text-center text-[11px] leading-5 text-slate-300">
+              Built for Finance &amp; Field teams.
+            </p>
+          </div>
         </header>
 
         <section className="grid flex-1 gap-14 py-10 lg:grid-cols-[0.92fr_1fr] lg:items-start lg:py-8">
@@ -258,19 +274,33 @@ export default function HomePage() {
                   </p>
                 </div>
 
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-4">
                   <Link
                     href="/abes-brief"
-                    className="rounded-2xl border border-amber-300 bg-amber-100 px-5 py-3 text-center text-sm font-semibold text-amber-800 transition hover:bg-amber-200"
+                    className="w-[180px] rounded-2xl border border-amber-300 bg-amber-100 px-5 py-3 text-center text-sm font-semibold text-amber-800 transition hover:bg-amber-200"
                   >
                     Abe&apos;s Brief
                   </Link>
 
                   <Link
                     href="/explore-abe"
-                    className="rounded-2xl border border-violet-200 bg-white px-5 py-3 text-center text-sm font-semibold text-violet-800 transition hover:bg-violet-50"
+                    className="w-[180px] rounded-2xl border border-violet-200 bg-white px-5 py-3 text-center text-sm font-semibold text-violet-800 transition hover:bg-violet-50"
                   >
                     Explore Abe
+                  </Link>
+
+                  <Link
+                    href="/public-team-aether"
+                    className="w-[180px] rounded-2xl border border-violet-200 bg-white px-5 py-3 text-center text-sm font-semibold text-violet-800 transition hover:bg-violet-50"
+                  >
+                    Team Aether
+                  </Link>
+
+                  <Link
+                    href="/public-faq"
+                    className="w-[180px] rounded-2xl border border-violet-200 bg-white px-5 py-3 text-center text-sm font-semibold text-violet-800 transition hover:bg-violet-50"
+                  >
+                    FAQ
                   </Link>
                 </div>
               </div>
@@ -402,6 +432,68 @@ export default function HomePage() {
             ))}
           </div>
         </section>
+
+        <section className="pb-24">
+          <div className="min-h-[360px] rounded-[2.25rem] border border-dashed border-white/15 bg-white/[0.02] px-8 py-16 text-center shadow-xl shadow-black/10 backdrop-blur-xl lg:px-16 lg:py-24">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-300">
+              Founding Campaign Stories
+            </p>
+
+            <h2 className="mx-auto mt-6 max-w-4xl text-4xl font-semibold tracking-tight text-white lg:text-6xl">
+              Your campaign could be one of our first testimonials.
+            </h2>
+
+            <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-slate-300">
+              We would rather leave this space open than fill it with generic
+              quotes or pretend Aether has stories it has not earned yet. Every
+              testimonial published here will come from a real campaign using
+              the platform.
+            </p>
+          </div>
+        </section>
+
+        <footer className="border-t border-white/10 py-16">
+          <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
+            <div>
+              <h3 className="text-lg font-bold text-white">Explore</h3>
+              <div className="mt-5 flex flex-col gap-3 text-sm text-slate-300">
+                <Link href="/#top">Landing Page</Link>
+                <Link href="/explore-abe">Explore Abe</Link>
+                <span className="text-slate-500">Download Mobile (Coming Soon)</span>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-bold text-white">Product</h3>
+              <div className="mt-5 flex flex-col gap-3 text-sm text-slate-300">
+                <Link href="/abes-brief">Abe's Brief</Link>
+                <Link href="/public-faq">FAQ</Link>
+                <Link href="/login">Login</Link>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-bold text-white">Explore Team Aether</h3>
+              <div className="mt-5 flex flex-col gap-3 text-sm text-slate-300">
+                <Link href="/public-team-aether">About Team Aether</Link>
+                <span className="text-slate-500">Contact (Coming Soon)</span>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-bold text-white">Legal Hub</h3>
+              <div className="mt-5 flex flex-col gap-3 text-sm text-slate-300">
+                <Link href="/privacy">Privacy Policy</Link>
+                <Link href="/terms">Terms of Service</Link>
+                <Link href="/security">Security</Link>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-16 border-t border-white/10 pt-8 text-center text-sm text-slate-500">
+            © 2026 Aether Systems LLC. All rights reserved.
+          </div>
+        </footer>
       </div>
     </main>
   );

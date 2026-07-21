@@ -16,6 +16,9 @@ export async function middleware(request: NextRequest) {
     '/update-password',
     '/abes-brief',
     '/explore-abe',
+    '/security',
+    '/public-faq',
+    '/public-team-aether',
   ]
 
   const isPublicApiRoute =
