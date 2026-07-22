@@ -428,6 +428,14 @@ export default function HomePage() {
                   <CheckCircle2 className="h-4 w-4 text-emerald-400" />
                   Unified infrastructure
                 </div>
+
+                <Link
+                  href={`/public-sales#${tier.title.toLowerCase()}`}
+                  className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-violet-300/40 bg-white/[0.03] px-5 py-4 text-sm font-black uppercase tracking-[0.08em] text-violet-200 transition hover:border-violet-300/70 hover:bg-violet-500/10 hover:text-white"
+                >
+                  Learn More
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
               </div>
             ))}
           </div>

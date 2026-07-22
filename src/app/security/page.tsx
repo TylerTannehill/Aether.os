@@ -1,4 +1,3 @@
-
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -44,7 +43,7 @@ export default function SecurityPage() {
         <div className="relative mx-auto flex max-w-7xl flex-col gap-8">
           <Link
             href="/"
-            className="inline-flex w-fit items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-sm font-semibold text-slate-100 transition hover:bg-white/10"
+            className="inline-flex w-fit items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-violet-400/40 hover:bg-white/10"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Landing Page

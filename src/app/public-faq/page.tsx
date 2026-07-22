@@ -8,6 +8,7 @@ const faqs = [
   ["Who is Aether built for?","Aether is designed for political campaigns of every size—from local municipal races to statewide organizations. Whether your campaign has a handful of volunteers or a full professional staff, Aether scales to support your operation."],
   ["What makes Aether different?","Most campaign software focuses on one department. Aether focuses on how every department works together, helping campaign leadership understand operational pressure before it becomes operational failure."],
   ["What is Honest Abe?","Honest Abe is Aether's strategic intelligence layer. It analyzes activity across every department, identifies meaningful operational trends, and provides recommendations. Campaign leadership always remains in control."],
+  ["Is Honest Abe AI?","Not exactly. Honest Abe is Aether's strategy engine, purpose-built to interpret the operational reality of political campaigns. Rather than generating strategy from scratch like a chatbot, Abe follows campaign-specific logic to identify operational pressure, competing priorities, execution risks, and opportunities for better coordination. Campaigns can tailor Abe's perspective based on where they are in the election cycle, and AI simply helps communicate those insights in a more natural way. In short: AI helps Abe explain. Aether tells Abe what matters."],
   ["Does Aether use AI to make campaign decisions?","No. Campaign decisions always belong to campaign leadership. Honest Abe provides observations and recommendations, but people remain responsible for every decision."],
   ["What departments does Aether support?","Finance, Field, Outreach, Digital, and Print—all operating from the same contacts, lists, dashboards, analytics, and operational intelligence."],
   ["Is campaign data shared between organizations?","No. Every campaign operates inside its own isolated organization. Campaign information is never shared with another campaign using Aether."],
@@ -23,6 +24,13 @@ export default function PublicFAQPage() {
   return (
     <main className="min-h-screen bg-[#07111F] text-white">
       <div className="mx-auto max-w-5xl px-6 py-20">
+        <Link
+          href="/"
+          className="mb-8 inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-violet-400/40 hover:bg-white/10"
+        >
+          <span>←</span>
+          <span>Back to Landing Page</span>
+        </Link>
         <div className="text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-violet-400/30 bg-violet-500/10 px-4 py-2 text-sm text-violet-300">
             <HelpCircle className="h-4 w-4"/> Frequently Asked Questions

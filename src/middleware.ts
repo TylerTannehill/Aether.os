@@ -19,6 +19,7 @@ export async function middleware(request: NextRequest) {
     '/security',
     '/public-faq',
     '/public-team-aether',
+    '/public-sales',
   ]
 
   const isPublicApiRoute =
