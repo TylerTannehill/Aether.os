@@ -20,6 +20,7 @@ export async function middleware(request: NextRequest) {
     '/public-faq',
     '/public-team-aether',
     '/public-sales',
+    '/aether-academy',
   ]
 
   const isPublicApiRoute =

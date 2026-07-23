@@ -468,6 +468,7 @@ export default function HomePage() {
                 <Link href="/#top">Landing Page</Link>
                 <Link href="/explore-abe">Explore Abe</Link>
                 <span className="text-slate-500">Download Mobile (Coming Soon)</span>
+                <Link href="/aether-academy">Aether Academy</Link>
               </div>
             </div>
 
@@ -475,6 +476,7 @@ export default function HomePage() {
               <h3 className="text-lg font-bold text-white">Product</h3>
               <div className="mt-5 flex flex-col gap-3 text-sm text-slate-300">
                 <Link href="/abes-brief">Abe's Brief</Link>
+                <Link href="/public-sales">Pricing</Link>
                 <Link href="/public-faq">FAQ</Link>
                 <Link href="/login">Login</Link>
               </div>
