@@ -95,10 +95,10 @@ const academySections = [
 
 const academyTabs = [
   { label: "Learning Library", status: "active" },
-  { label: "Training Videos", status: "soon" },
-  { label: "Articles", status: "post-launch" },
-  { label: "Blog", status: "post-launch" },
-  { label: "Patch Notes", status: "soon" },
+  { label: "Training Videos", status: "active", href: "/aether-academy/training-videos" },
+  { label: "Articles", status: "active", href: "/aether-academy/articles" },
+  { label: "Blog", status: "active", href: "/aether-academy/blog" },
+  { label: "Patch Notes", status: "active", href: "/aether-academy/patch-notes" },
 ];
 
 export default function AetherAcademyPage() {
@@ -149,6 +149,13 @@ export default function AetherAcademyPage() {
             </a>
 
             <Link
+              href="/login"
+              className="inline-flex items-center justify-center rounded-xl border border-violet-400/40 bg-violet-400/10 px-7 py-3.5 font-semibold text-violet-300 transition hover:-translate-y-0.5 hover:border-violet-300"
+            >
+              Enter Aether →
+            </Link>
+
+            <Link
               href="/"
               className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-white/5 px-7 py-3.5 font-semibold text-white transition hover:-translate-y-0.5 hover:border-violet-400/40 hover:bg-white/10"
             >
@@ -171,7 +178,15 @@ export default function AetherAcademyPage() {
                     ? "Coming Soon"
                     : null;
 
-              return (
+              return tab.href ? (
+                <Link
+                  key={tab.label}
+                  href={tab.href}
+                  className="min-w-max rounded-xl border border-violet-400/40 bg-violet-400/10 px-4 py-3 text-violet-300 shadow-[0_10px_30px_rgba(139,92,246,0.08)] transition hover:-translate-y-0.5 hover:border-violet-300"
+                >
+                  <div className="text-sm font-bold">{tab.label}</div>
+                </Link>
+              ) : (
                 <div
                   key={tab.label}
                   className={[
@@ -294,6 +309,8 @@ export default function AetherAcademyPage() {
                   <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                     Official Guide
                   </span>
+
+                  <Link href={`/aether-academy/training-videos#${id}`} className="rounded-full border border-violet-400/20 bg-violet-400/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-violet-300 transition hover:border-violet-300">Training Video →</Link>
                 </div>
 
                 <h2 className="mt-5 max-w-3xl text-3xl font-black tracking-tight text-white sm:text-4xl">

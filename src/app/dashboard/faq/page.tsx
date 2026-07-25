@@ -507,6 +507,15 @@ export default function FAQPage() {
               to coordinate execution, interpret organizational pressure, and
               move work forward across interconnected lanes.
             </p>
+
+            <div className="mt-8 flex flex-wrap gap-4">
+              <a
+                href="/aether-academy"
+                className="inline-flex items-center justify-center rounded-xl border border-violet-400/40 bg-violet-400/10 px-6 py-3 font-semibold text-violet-300 transition hover:-translate-y-0.5 hover:border-violet-300"
+              >
+                Explore Aether Academy →
+              </a>
+            </div>
           </div>
 
           <div className="grid gap-3 rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur sm:grid-cols-3 lg:min-w-[420px]">
@@ -533,7 +542,7 @@ export default function FAQPage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-6 py-8 sm:px-8 lg:px-12">
-        <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
+        <div className="grid gap-6 lg:grid-cols-[340px_1fr]">
           <aside className="lg:sticky lg:top-6 lg:self-start">
             <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
               <label className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">

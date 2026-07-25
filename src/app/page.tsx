@@ -297,6 +297,13 @@ export default function HomePage() {
                   </Link>
 
                   <Link
+                    href="/aether-academy"
+                    className="w-[180px] rounded-2xl border border-violet-200 bg-white px-5 py-3 text-center text-sm font-semibold text-violet-800 transition hover:bg-violet-50"
+                  >
+                    Aether Academy
+                  </Link>
+
+                  <Link
                     href="/public-faq"
                     className="w-[180px] rounded-2xl border border-violet-200 bg-white px-5 py-3 text-center text-sm font-semibold text-violet-800 transition hover:bg-violet-50"
                   >
