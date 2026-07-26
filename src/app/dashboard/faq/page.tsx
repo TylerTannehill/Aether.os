@@ -515,6 +515,13 @@ export default function FAQPage() {
               >
                 Explore Aether Academy →
               </a>
+
+              <a
+                href="/support"
+                className="inline-flex items-center justify-center rounded-xl border border-blue-400/40 bg-blue-400/10 px-6 py-3 font-semibold text-blue-300 transition hover:-translate-y-0.5 hover:border-blue-300"
+              >
+                Support →
+              </a>
             </div>
           </div>
 

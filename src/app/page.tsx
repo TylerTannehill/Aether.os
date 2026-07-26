@@ -493,7 +493,7 @@ export default function HomePage() {
               <h3 className="text-lg font-bold text-white">Explore Team Aether</h3>
               <div className="mt-5 flex flex-col gap-3 text-sm text-slate-300">
                 <Link href="/public-team-aether">About Team Aether</Link>
-                <span className="text-slate-500">Contact (Coming Soon)</span>
+                <Link href="/support">Support</Link>
               </div>
             </div>
 

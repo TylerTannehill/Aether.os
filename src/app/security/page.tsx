@@ -1,3 +1,6 @@
+"use client";
+
+import { useState, type ChangeEvent, type FormEvent } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -32,6 +35,36 @@ const roles = [
 ];
 
 export default function SecurityPage() {
+  const [form,setForm]=useState({name:"",email:"",organization:"",phone:"",message:""});
+  const [sending,setSending]=useState(false);
+  const [submitted,setSubmitted]=useState(false);
+  const [error,setError]=useState("");
+
+  function handleChange(e: ChangeEvent<HTMLInputElement|HTMLTextAreaElement>) {
+    const {name,value}=e.target;
+    setForm(f=>({...f,[name]:value}));
+  }
+
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setSending(true);
+    setError("");
+    try{
+      const res=await fetch("/api/contact",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({type:"security",...form})
+      });
+      const data=await res.json();
+      if(!res.ok||!data.success) throw new Error();
+      setSubmitted(true);
+    }catch{
+      setError("Unable to send your report. Please try again.");
+    }finally{
+      setSending(false);
+    }
+  }
+
   return (
     <main className="min-h-screen overflow-hidden bg-[#07111f] text-white">
       <section className="relative px-6 py-8 lg:px-10">
@@ -151,18 +184,32 @@ export default function SecurityPage() {
             </p>
           </section>
 
-          <section className="rounded-[2rem] border border-white/10 bg-[#111827] p-10 text-center">
-            <h2 className="text-4xl font-black">Questions About Security?</h2>
-            <p className="mt-5 text-slate-300">
-              We're happy to answer them.
+          <section className="rounded-[2rem] border border-white/10 bg-[#111827] p-8 lg:p-10">
+            <h2 className="text-4xl font-black">Report a Security Concern</h2>
+            <p className="mt-5 max-w-3xl text-slate-300">
+              If you've identified a security concern or believe you've found a vulnerability, please let us know. Team Aether reviews every report.
             </p>
 
-            <button
-              disabled
-              className="mt-8 rounded-2xl border border-white/20 bg-white/5 px-6 py-4 font-bold text-slate-400"
-            >
-              Contact Team Aether (Coming Soon)
-            </button>
+            {submitted ? (
+              <div className="mt-8 rounded-2xl border border-green-500/30 bg-green-500/10 p-5 text-green-200">
+                <h3 className="font-bold">Security Report Received</h3>
+                <p className="mt-2">Thank you. Team Aether will be in touch.</p>
+              </div>
+            ) : (
+            <form onSubmit={handleSubmit} className="mt-8 grid gap-4 md:grid-cols-2">
+              <input required name="name" value={form.name} onChange={handleChange} placeholder="Name *" className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3"/>
+              <input required type="email" name="email" value={form.email} onChange={handleChange} placeholder="Email *" className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3"/>
+              <input name="organization" value={form.organization} onChange={handleChange} placeholder="Organization" className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3"/>
+              <input name="phone" value={form.phone} onChange={handleChange} placeholder="Phone" className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3"/>
+              <textarea name="message" value={form.message} onChange={handleChange} placeholder="Message" rows={5} className="md:col-span-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3"/>
+              {error && <p className="md:col-span-2 text-red-300">{error}</p>}
+              <div className="md:col-span-2">
+                <button type="submit" disabled={sending} className="cursor-pointer rounded-2xl bg-white px-6 py-4 font-bold text-slate-900 disabled:cursor-not-allowed disabled:opacity-60">
+                  {sending?"Sending...":"Submit Security Report"}
+                </button>
+                <p className="mt-3 text-xs text-slate-400">* Required fields</p>
+              </div>
+            </form>)}
           </section>
         </div>
       </section>

@@ -1,7 +1,40 @@
 // Public Team Aether Page
 "use client";
+import { useState, type ChangeEvent, type FormEvent } from "react";
 import Link from "next/link";
-export default function PublicTeamAetherPage(){return (<main className="relative min-h-screen overflow-hidden bg-[#07111F] text-white">
+
+export default function PublicTeamAetherPage(){
+  const [form,setForm]=useState({name:"",email:"",organization:"",phone:"",message:""});
+  const [sending,setSending]=useState(false);
+  const [submitted,setSubmitted]=useState(false);
+  const [error,setError]=useState("");
+
+  function handleChange(e: ChangeEvent<HTMLInputElement|HTMLTextAreaElement>){
+    const {name,value}=e.target;
+    setForm(f=>({...f,[name]:value}));
+  }
+
+  async function handleSubmit(e: FormEvent<HTMLFormElement>){
+    e.preventDefault();
+    setSending(true);
+    setError("");
+    try{
+      const res=await fetch("/api/contact",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({type:"contact",...form})
+      });
+      const data=await res.json();
+      if(!res.ok||!data.success) throw new Error();
+      setSubmitted(true);
+    }catch{
+      setError("Unable to send your request. Please try again.");
+    }finally{
+      setSending(false);
+    }
+  }
+return (
+<main className="relative min-h-screen overflow-hidden bg-[#07111F] text-white">
 <div className="absolute inset-0">
 <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(139,92,246,0.16),transparent_45%)]"></div>
 <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(59,130,246,0.10),transparent_40%)]"></div>
@@ -94,11 +127,49 @@ export default function PublicTeamAetherPage(){return (<main className="relative
   </div>
 </div>
 
+
 <div className="rounded-3xl bg-white/5 p-10 text-center">
 <h2 className="text-3xl font-bold">Thanks for taking the time to get to know us.</h2>
 <p className="mt-4 text-slate-300">We hope we get the chance to get to know you, too.</p>
 <p className="mt-4 text-slate-400">Whether you're running for city council, managing a statewide campaign, or simply curious about what we're building, we'd love to have a conversation.</p>
-<Link href="/explore-abe" className="mt-8 inline-block rounded-xl bg-violet-600 px-6 py-3 font-bold">Request a Demo</Link>
+<div className="mt-12 mb-8 flex justify-center">
+<Link href="/explore-abe" className="rounded-xl bg-violet-600 px-6 py-3 font-bold">Request a Demo</Link>
+</div>
+
+
+<div id="contact-team-aether" className="rounded-[32px] border border-white/10 bg-white/5 backdrop-blur-sm p-10">
+  <div className="mb-3 text-xs uppercase tracking-[0.35em] text-violet-300">Contact</div>
+  <h2 className="text-4xl font-black">Contact Team Aether</h2>
+  <p className="mt-5 max-w-3xl text-slate-300 leading-8">
+    Have a general question, partnership inquiry, media request, or simply want to learn more about Aether?
+  </p>
+  <p className="mt-3 text-slate-300">
+    We'd love to hear from you.
+  </p>
+
+  {submitted ? (
+    <div className="mt-8 rounded-2xl border border-green-500/30 bg-green-500/10 p-5 text-green-200">
+      <h3 className="font-bold">Message Received</h3>
+      <p className="mt-2">Thank you. Team Aether will be in touch.</p>
+    </div>
+  ) : (
+    <form onSubmit={handleSubmit} className="mt-8 grid gap-4 md:grid-cols-2">
+      <input required name="name" value={form.name} onChange={handleChange} placeholder="Name *" className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3"/>
+      <input required type="email" name="email" value={form.email} onChange={handleChange} placeholder="Email *" className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3"/>
+      <input name="organization" value={form.organization} onChange={handleChange} placeholder="Organization" className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3"/>
+      <input name="phone" value={form.phone} onChange={handleChange} placeholder="Phone" className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3"/>
+      <textarea name="message" value={form.message} onChange={handleChange} rows={5} placeholder="Message" className="md:col-span-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3"/>
+      {error && <p className="md:col-span-2 text-red-300">{error}</p>}
+      <div className="md:col-span-2">
+        <button type="submit" disabled={sending} className="rounded-xl bg-violet-600 px-6 py-3 font-bold disabled:opacity-60">
+          {sending ? "Sending..." : "Send Message"}
+        </button>
+        <p className="mt-3 text-xs text-slate-400">* Required fields</p>
+      </div>
+    </form>
+  )}
+</div>
+
 </div>
 
 </section></div></main>)}

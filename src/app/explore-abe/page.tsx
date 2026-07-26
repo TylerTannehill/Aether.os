@@ -1,7 +1,69 @@
+"use client";
+
+import { useState, type ChangeEvent, type FormEvent } from "react";
 import Link from "next/link";
 import { ArrowLeft, Mail, Sparkles } from "lucide-react";
 
 export default function ExploreAbePage() {
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    organization: "",
+    phone: "",
+    message: "",
+  });
+
+  const [sending, setSending] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState("");
+
+  function handleChange(
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) {
+    const { name, value } = event.target;
+
+    setForm((currentForm) => ({
+      ...currentForm,
+      [name]: value,
+    }));
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSending(true);
+    setError("");
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          type: "demo",
+          name: form.name,
+          email: form.email,
+          organization: form.organization,
+          phone: form.phone,
+          message: form.message,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error ?? "Unable to submit demo request.");
+      }
+
+      setSubmitted(true);
+    } catch (submitError) {
+      console.error("Demo request error:", submitError);
+      setError("Unable to send your request. Please try again.");
+    } finally {
+      setSending(false);
+    }
+  }
+
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-8 text-white lg:px-10">
       <div className="mx-auto flex max-w-5xl flex-col gap-8">
@@ -26,21 +88,12 @@ export default function ExploreAbePage() {
               </h1>
 
               <p className="mt-6 max-w-2xl text-base leading-8 text-slate-300 lg:text-lg">
-                Demo scheduling is currently being finalized. Leave your
-                information here for now, and we&apos;ll use this page as the
-                holding point for campaign teams interested in seeing Aether in
-                action.
+                Thank you for your interest in Aether. Tell us a little about
+                your campaign and what you're hoping to accomplish. Team Aether
+                will reach out as demo scheduling becomes available, and we're
+                looking forward to showing you how Aether can help simplify your
+                campaign operations.
               </p>
-
-              <div className="mt-8 rounded-3xl border border-amber-300/30 bg-amber-300/10 p-5 text-amber-100">
-                <p className="text-sm font-semibold uppercase tracking-[0.16em]">
-                  Coming Soon
-                </p>
-                <p className="mt-2 text-sm leading-6 text-amber-50/90">
-                  The live demo request flow will be connected once the Aether
-                  Systems email and scheduling setup are ready.
-                </p>
-              </div>
             </div>
 
             <div className="border-t border-white/10 bg-white/[0.03] p-8 lg:border-l lg:border-t-0 lg:p-10">
@@ -50,67 +103,124 @@ export default function ExploreAbePage() {
                     <Mail className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="text-lg font-bold">Demo Interest</p>
+                    <p className="text-lg font-bold">Request an Aether Demo</p>
                     <p className="text-sm text-slate-500">
-                      Temporary contact placeholder
+                      Tell us a little about your campaign.
                     </p>
                   </div>
                 </div>
 
-                <form className="mt-6 space-y-4">
-                  <div>
-                    <label className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                      Name
-                    </label>
-                    <input
-                      disabled
-                      placeholder="Coming soon"
-                      className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500 outline-none"
-                    />
+                {submitted ? (
+                  <div className="mt-6 rounded-2xl border border-green-200 bg-green-50 p-5 text-green-800">
+                    <h2 className="font-bold">Demo Request Received</h2>
+                    <p className="mt-2 text-sm">
+                      Thank you. Team Aether will be in touch.
+                    </p>
                   </div>
+                ) : (
+                  <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+                    <div>
+                      <label
+                        htmlFor="name"
+                        className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500"
+                      >
+                        Name *
+                      </label>
+                      <input
+                        id="name"
+                        name="name"
+                        type="text"
+                        required
+                        value={form.name}
+                        onChange={handleChange}
+                        className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-violet-500"
+                      />
+                    </div>
 
-                  <div>
-                    <label className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                      Email
-                    </label>
-                    <input
-                      disabled
-                      placeholder="Email capture coming soon"
-                      className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500 outline-none"
-                    />
-                  </div>
+                    <div>
+                      <label
+                        htmlFor="email"
+                        className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500"
+                      >
+                        Email *
+                      </label>
+                      <input
+                        id="email"
+                        name="email"
+                        type="email"
+                        required
+                        value={form.email}
+                        onChange={handleChange}
+                        className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-violet-500"
+                      />
+                    </div>
 
-                  <div>
-                    <label className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                      Campaign / Organization
-                    </label>
-                    <input
-                      disabled
-                      placeholder="Coming soon"
-                      className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500 outline-none"
-                    />
-                  </div>
+                    <div>
+                      <label
+                        htmlFor="organization"
+                        className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500"
+                      >
+                        Campaign / Organization
+                      </label>
+                      <input
+                        id="organization"
+                        name="organization"
+                        type="text"
+                        value={form.organization}
+                        onChange={handleChange}
+                        className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-violet-500"
+                      />
+                    </div>
 
-                  <div>
-                    <label className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                      Message
-                    </label>
-                    <textarea
-                      disabled
-                      placeholder="Tell us what you're trying to run."
-                      rows={4}
-                      className="mt-2 w-full resize-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500 outline-none"
-                    />
-                  </div>
+                    <div>
+                      <label
+                        htmlFor="phone"
+                        className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500"
+                      >
+                        Phone
+                      </label>
+                      <input
+                        id="phone"
+                        name="phone"
+                        type="tel"
+                        value={form.phone}
+                        onChange={handleChange}
+                        className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-violet-500"
+                      />
+                    </div>
 
-                  <button
-                    type="button"
-                    disabled
-                    className="w-full rounded-2xl bg-slate-950 px-5 py-4 text-sm font-bold text-white opacity-70"
-                  >
-                    Demo Requests Coming Soon
-                  </button>
-                </form>
+                    <div>
+                      <label
+                        htmlFor="message"
+                        className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500"
+                      >
+                        Message
+                      </label>
+                      <textarea
+                        id="message"
+                        name="message"
+                        rows={4}
+                        value={form.message}
+                        onChange={handleChange}
+                        className="mt-2 w-full resize-none rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-violet-500"
+                      />
+                    </div>
+
+                    {error ? (
+                      <p className="text-sm font-medium text-red-600">{error}</p>
+                    ) : null}
+
+                    <button
+                      type="submit"
+                      disabled={sending}
+                      className="w-full rounded-2xl bg-slate-950 px-5 py-4 text-sm font-bold text-white transition hover:bg-slate-800 cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {sending ? "Sending..." : "Request Demo"}
+                    </button>
+
+                    <p className="text-xs text-slate-500">* Required fields</p>
+                  </form>
+                )}
               </div>
             </div>
           </div>

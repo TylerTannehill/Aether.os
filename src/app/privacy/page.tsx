@@ -69,6 +69,16 @@ export default function PrivacyPage() {
               </p>
             </section>
           </div>
+
+          <div className="mt-12 flex justify-center">
+            <Link
+              href="/public-team-aether#contact-team-aether"
+              className="rounded-xl bg-violet-600 px-6 py-3 font-bold text-white transition hover:bg-violet-500"
+            >
+              Contact Team Aether
+            </Link>
+          </div>
+
         </div>
       </div>
     </div>

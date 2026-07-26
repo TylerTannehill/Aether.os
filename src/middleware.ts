@@ -20,6 +20,7 @@ export async function middleware(request: NextRequest) {
     '/public-faq',
     '/public-team-aether',
     '/public-sales',
+    '/support',
 
     // Academy
     '/aether-academy',
@@ -30,6 +31,7 @@ export async function middleware(request: NextRequest) {
   ]
 
   const isPublicApiRoute =
+    pathname === '/api/contact' ||
     pathname === '/api/auth/select-campaign' ||
     pathname.startsWith('/api/mobile/')
 
