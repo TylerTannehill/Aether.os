@@ -99,6 +99,10 @@ export const metadata: Metadata = {
     },
   },
 
+  alternates: {
+    canonical: "/",
+  },
+
   category: "Technology",
 };
 
