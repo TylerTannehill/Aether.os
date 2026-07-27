@@ -102,6 +102,42 @@ export const metadata: Metadata = {
   category: "Technology",
 };
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://aetheros.pro/#organization",
+      name: "Aether Systems LLC",
+      alternateName: "Team Aether",
+      url: "https://aetheros.pro",
+      logo: "https://aetheros.pro/aether-logo-full.png",
+      description:
+        "Aether Systems LLC develops Aether, the Campaign Operating System built by campaign people for campaign people.",
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://aetheros.pro/#software",
+      name: "Aether",
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "Web Browser",
+      url: "https://aetheros.pro",
+      publisher: {
+        "@id": "https://aetheros.pro/#organization",
+      },
+      description:
+        "Aether is a Campaign Operating System that helps campaign teams manage finance, field, outreach, digital, print, contacts, lists, analytics, and execution from a single platform.",
+      subjectOf: {
+        "@type": "WebPage",
+        name: "Aether Academy",
+        url: "https://aetheros.pro/aether-academy",
+        description:
+          "The official learning center and documentation library for Aether, providing training videos, articles, product updates, and educational resources about the Campaign Operating System.",
+      },
+    },
+  ],
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -109,7 +145,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(jsonLd),
+          }}
+        />
+        {children}
+      </body>
     </html>
   );
 }
