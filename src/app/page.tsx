@@ -485,6 +485,7 @@ export default function HomePage() {
                 <Link href="/abes-brief">Abe's Brief</Link>
                 <Link href="/public-sales">Pricing</Link>
                 <Link href="/public-faq">FAQ</Link>
+                <Link href="/aether-academy/comprehensive-guide">Documentation</Link>
                 <Link href="/login">Login</Link>
               </div>
             </div>
