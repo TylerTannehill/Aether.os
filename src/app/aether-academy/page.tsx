@@ -7,6 +7,7 @@ const libraryGroups = [
     eyebrow: "Start here",
     links: [
       ["welcome-to-aether", "Welcome to Aether!"],
+      ["documentation-scope", "Documentation Scope"],
       ["what-is-aether", "What is Aether?"],
       ["campaign-os", "What is a Campaign Operating System?"],
       ["design-philosophy", "Design Philosophy"],
@@ -231,6 +232,23 @@ export default function AetherAcademyPage() {
             </p>
           </div>
         </div>
+      </section>
+
+
+      {/* Documentation Scope */}
+      <section className="mx-auto max-w-7xl px-6 pt-10">
+        <article id="documentation-scope" className="scroll-mt-32 relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.045] to-white/[0.02] p-8 shadow-xl shadow-black/10 sm:p-10">
+          <div className="relative max-w-4xl space-y-6 text-slate-300">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="rounded-full border border-violet-400/20 bg-violet-400/[0.08] px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-violet-300">Getting Started</span>
+              <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Official Guide</span>
+            </div>
+            <h2 className="text-3xl font-black tracking-tight text-white sm:text-4xl">Documentation Scope</h2>
+            <p className="text-lg leading-8">Aether Academy serves as the official public reference for the Aether Campaign Operating System. It explains the platform's architecture, workflows, operational philosophy, and intended behavior while intentionally omitting proprietary implementation details that help differentiate and protect the platform.</p>
+            <p className="leading-8">Certain implementation details—including proprietary scoring models, prioritization logic, internal decision engines, and security architecture—are intentionally omitted. Those systems represent intellectual property and continue to evolve alongside the platform.</p>
+            <p className="leading-8">As Aether grows, Aether Academy will continue expanding with new features, workflows, and best practices, ensuring campaigns always have access to the most current public information about the platform.</p>
+          </div>
+        </article>
       </section>
 
       {/* Learning Library */}
@@ -1094,7 +1112,7 @@ export default function AetherAcademyPage() {
 
                     <div>
                       <h3 className="text-2xl font-bold text-white">Built with Purpose</h3>
-                      <p className="mt-3 leading-8">Not every integration belongs inside a Campaign Operating System. Every integration is designed to reduce duplicate work, improve visibility, enrich campaign data, and help departments coordinate more effectively.</p>
+                      <p className="mt-3 leading-8">Not every integration belongs inside a Campaign Operating System. Every integration is selected because it helps campaigns reduce duplicate work, improve visibility, enrich campaign data, or strengthen operational awareness. Our roadmap includes fundraising platforms such as ActBlue and WinRed, productivity tools like Google Workspace, campaign website integrations, and analytics from platforms including Meta, X, TikTok, and YouTube. Wherever practical, Aether leverages open APIs so campaigns can continue using the tools they already trust while working from one connected operational picture.</p>
                     </div>
 
                     <div>
@@ -1106,6 +1124,7 @@ export default function AetherAcademyPage() {
                       <h3 className="text-2xl font-bold text-white">Clarity. Focus. Execution.</h3>
                       <p className="mt-4 leading-8">The best campaign software doesn't exist in isolation. It works alongside the tools campaigns already depend on. Connect what matters. Reduce unnecessary work. Keep information flowing. Help every department operate from the same shared understanding of the campaign.</p>
                       <p className="mt-3 leading-8">Because great software isn't measured by how many integrations it has. It's measured by how effectively those integrations help campaigns execute.</p>
+                    <h3 className="text-2xl font-bold text-white">Built Around Connected Campaigns</h3><p className="mt-3 leading-8">Aether is designed to work alongside the tools campaigns already rely on, reducing duplicate work while creating one shared operational picture.</p><h3 className="text-2xl font-bold text-white">Growing Ecosystem</h3><p className="mt-3 leading-8">As additional public APIs and partnerships become available, integrations will continue expanding across fundraising, communications, analytics, cloud collaboration, and campaign operations.</p>
                     </div>
                   </div>
                 ) : id === "organizations" ? (
@@ -1218,7 +1237,7 @@ export default function AetherAcademyPage() {
                     <div className="rounded-2xl border border-violet-400/20 bg-violet-400/5 p-6">
                       <h3 className="text-2xl font-bold text-white">Protecting Your Campaign</h3>
                       <p className="mt-4 leading-8">Every campaign deserves confidence that its information is being handled responsibly.</p>
-                      <p className="mt-3 leading-8">From user authentication and role-based access to secure cloud infrastructure, Aether is designed to help protect campaign data while ensuring authorized team members can access the information they need to do their jobs.</p>
+                      <p className="mt-3 leading-8">From encrypted connections and protected data storage to organization-level access controls, Aether is designed to help protect campaign information while ensuring authorized team members can access the information they need to do their jobs. Campaign data remains isolated within its own organization, and Organization Administrators control who can join the campaign, what roles they hold, and what information they can access. Data is encrypted both in transit and at rest, helping protect information throughout its lifecycle.</p>
                       <p className="mt-3 leading-8">As the platform continues to evolve, so will our security practices.</p>
                       <p className="mt-3 leading-8">Protecting campaign data will always remain one of our highest priorities.</p>
                     </div>
@@ -1250,6 +1269,10 @@ export default function AetherAcademyPage() {
                       <p className="mt-3 leading-8">Respect your trust.</p>
                       <p className="mt-3 leading-8">Continue improving.</p>
                       <p className="mt-3 leading-8">Because a Campaign Operating System should provide confidence as well as capability.</p>
+                    <h3 className="text-2xl font-bold text-white">Security Philosophy</h3>
+                      <p className="mt-3 leading-8">Campaign data should only be accessible to authorized users. Aether uses authenticated access, role-based permissions, encrypted communications, protected stored data, organization isolation, audit history, and ongoing platform maintenance to help safeguard campaign information.</p>
+                      <h3 className="text-2xl font-bold text-white">Responsible Disclosure</h3>
+                      <p className="mt-3 leading-8">If you believe you have identified a security issue, Team Aether encourages responsible disclosure so the issue can be investigated and addressed appropriately.</p>
                     </div>
                   </div>
 
