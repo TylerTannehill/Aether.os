@@ -61,6 +61,11 @@ export const metadata: Metadata = {
     telephone: false,
   },
 
+  icons: {
+    icon: "/icon.png",
+    apple: "/apple-touch-icon.png",
+  },
+
   openGraph: {
     title: "Aether | Campaign Operating System",
     description:
