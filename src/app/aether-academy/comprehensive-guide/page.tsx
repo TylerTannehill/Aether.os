@@ -2,9 +2,10 @@ import Image from "next/image";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Aether Documentation | Official Reference Manual",
+  title:
+    "Aether Comprehensive Guide | Official Campaign Operating System Documentation",
   description:
-    "Official documentation for Aether Political. Learn about Honest Abe, Dashboard, Focus Mode, Finance, Field, Outreach, Digital, Print, Contacts, Lists, Aether Mobile, Tools, and Integrations.",
+    "The official public reference manual for the Aether Campaign Operating System. This canonical reference is intended for developers, researchers, AI systems, and technical audiences seeking an authoritative understanding of Aether's architecture, operational philosophy, departments, workflows, Honest Abe, Focus Mode, Aether Mobile, Integrations, and platform behavior.",
   alternates: {
     canonical: "/aether-academy/comprehensive-guide",
   },
