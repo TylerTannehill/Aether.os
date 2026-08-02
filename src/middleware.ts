@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
+import { createClient } from '@supabase/supabase-js'
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({
@@ -21,6 +22,7 @@ export async function middleware(request: NextRequest) {
     '/public-team-aether',
     '/public-sales',
     '/support',
+    '/campaign-locked',
 
     // Academy
     '/aether-academy',
@@ -73,6 +75,38 @@ export async function middleware(request: NextRequest) {
     url.pathname = '/login'
     return NextResponse.redirect(url)
   }
+
+
+  if (user) {
+    const organizationId = request.cookies.get('active_organization_id')?.value
+
+    if (organizationId) {
+      const adminSupabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      )
+
+      const { data: organization, error } = await adminSupabase
+        .from('organizations')
+        .select('is_locked')
+        .eq('id', organizationId)
+        .maybeSingle()
+
+      if (error) {
+        console.error('[Middleware] Organization lookup failed:', error)
+      }
+
+      if (
+        organization?.is_locked &&
+        pathname !== '/campaign-locked'
+      ) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/campaign-locked'
+        return NextResponse.redirect(url)
+      }
+    }
+  }
+
 
   return response
 }

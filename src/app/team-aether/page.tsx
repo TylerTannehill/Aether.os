@@ -10,6 +10,9 @@ import {
   CheckCircle2,
   ClipboardList,
   LogOut,
+  LayoutDashboard,
+  BarChart3,
+  Headset,
 } from "lucide-react";
 
 type PoliticalMode = "default" | "democrat" | "republican";
@@ -115,8 +118,8 @@ export default function TeamAetherPage() {
     <main className="min-h-screen bg-slate-100 p-4 text-slate-950 lg:p-8">
       <div className="mx-auto max-w-6xl space-y-8">
         {/* HERO */}
-        <section className="overflow-hidden rounded-[2rem] border border-slate-200 bg-slate-950 p-6 text-white shadow-sm lg:p-8">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+        <section className="overflow-hidden rounded-[2rem] border border-slate-200 bg-slate-950 p-8 text-white shadow-sm lg:p-10">
+          <div className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
             <div>
               <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-200">
                 <ShieldCheck className="h-3.5 w-3.5" />
@@ -133,27 +136,78 @@ export default function TeamAetherPage() {
               </p>
             </div>
 
-            <div className="flex flex-col items-start gap-3 lg:items-end">
-              <div className="rounded-3xl border border-white/10 bg-white/10 p-4 text-sm text-slate-200">
-                Internal provisioning workspace
+            <div className="grid gap-6 lg:grid-cols-[170px_1fr]">
+              <div className="flex flex-col items-start gap-3 pt-6">
+                <a
+                  href="/team-aether/sales-help"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/15"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  Sales Help
+                </a>
+
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/15"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Logout
+                </button>
               </div>
 
-              <a
-                href="/team-aether/sales-help"
-                className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/15"
-              >
-                <Sparkles className="h-4 w-4" />
-                Sales Help
-              </a>
+              <div className="border-t border-white/10 pt-6">
+                <div className="flex flex-wrap gap-3">
+                  <a
+                    href="/team-aether/dashboard"
+                    className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/15"
+                  >
+                    <LayoutDashboard className="h-4 w-4" />
+                    Dashboard
+                  </a>
 
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/15"
-              >
-                <LogOut className="h-4 w-4" />
-                Logout
-              </button>
+                  <a
+                    href="/team-aether/organizations"
+                    className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/15"
+                  >
+                    <Building2 className="h-4 w-4" />
+                    Organizations
+                  </a>
+
+                  <a
+                    href="/team-aether"
+                    aria-current="page"
+                    className="inline-flex items-center gap-2 rounded-2xl border border-white bg-white/10 px-4 py-2.5 text-sm font-semibold text-white"
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    Provisioning
+                  </a>
+
+                  <a
+                    href="/team-aether/sales-pipeline"
+                    className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/15"
+                  >
+                    <BarChart3 className="h-4 w-4" />
+                    Sales Pipeline
+                  </a>
+
+                  <a
+                    href="/team-aether/email-templates"
+                    className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/15"
+                  >
+                    <Mail className="h-4 w-4" />
+                    Email Templates
+                  </a>
+
+                  <a
+                    href="/team-aether/support-portal"
+                    className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/15"
+                  >
+                    <Headset className="h-4 w-4" />
+                    Support
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -227,7 +281,7 @@ export default function TeamAetherPage() {
               </div>
 
               <a
-                href="/dashboard/team-aether/sales-talking-points"
+                href="/team-aether/sales-help"
                 className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
               >
                 Sales Talking Points
