@@ -77,7 +77,7 @@ export async function middleware(request: NextRequest) {
   }
 
 
-  if (user) {
+  if (user && !isPublicRoute) {
     const organizationId = request.cookies.get('active_organization_id')?.value
 
     if (organizationId) {
