@@ -12,7 +12,6 @@ import {
   FolderKanban,
   CalendarDays,
   Mail,
-  Loader2,
   CheckCircle2,
   MapPinned,
   Settings2,
@@ -80,7 +79,6 @@ const DIGITAL_INTEGRATIONS: IntegrationCard[] = [
     category: "Digital Team",
     description:
       "Track ads, reach, engagement, and campaign momentum from Meta.",
-    endpoint: "/api/integrations/meta/sync",
     icon: RadioTower,
     status: "ready_to_configure",
     setupNote:
@@ -95,7 +93,6 @@ const DIGITAL_INTEGRATIONS: IntegrationCard[] = [
     category: "Digital Team",
     description:
       "Monitor engagement, replies, and narrative movement from X.",
-    endpoint: "/api/integrations/x/sync",
     icon: MessageSquareMore,
     status: "ready_to_configure",
     setupNote:
@@ -110,7 +107,6 @@ const DIGITAL_INTEGRATIONS: IntegrationCard[] = [
     category: "Digital Team",
     description:
       "Bring TikTok performance and audience momentum into Aether.",
-    endpoint: "/api/integrations/tiktok/sync",
     icon: BarChart3,
     status: "ready_to_configure",
     setupNote:
@@ -125,7 +121,6 @@ const DIGITAL_INTEGRATIONS: IntegrationCard[] = [
     category: "Digital Team",
     description:
       "Track video performance, watch activity, and long-form messaging.",
-    endpoint: "/api/integrations/youtube/sync",
     icon: BarChart3,
     status: "ready_to_configure",
     setupNote:
@@ -140,7 +135,6 @@ const DIGITAL_INTEGRATIONS: IntegrationCard[] = [
     category: "Digital Team",
     description:
       "Monitor website traffic, signups, and supporter activity.",
-    endpoint: "/api/integrations/website/sync",
     icon: Workflow,
     status: "ready_to_configure",
     setupNote:
@@ -158,7 +152,6 @@ const FINANCE_INTEGRATIONS: IntegrationCard[] = [
     category: "Finance Team",
     description:
       "Bring donor activity and fundraising performance into Aether.",
-    endpoint: "/api/integrations/actblue/sync",
     icon: Wallet,
     status: "ready_to_configure",
     setupNote:
@@ -173,7 +166,6 @@ const FINANCE_INTEGRATIONS: IntegrationCard[] = [
     category: "Finance Team",
     description:
       "Track online fundraising activity and donor momentum.",
-    endpoint: "/api/integrations/winred/sync",
     icon: Wallet,
     status: "ready_to_configure",
     setupNote:
@@ -340,19 +332,13 @@ function IntegrationSection({
   title,
   description,
   integrations,
-  syncingId,
-  syncResults,
   configuredIntegrations,
-  onRunSync,
   onOpenConnection,
 }: {
   title: string;
   description: string;
   integrations: IntegrationCard[];
-  syncingId: string | null;
-  syncResults: Record<string, string>;
   configuredIntegrations: Record<string, boolean>;
-  onRunSync: (integration: IntegrationCard) => void;
   onOpenConnection: (integration: IntegrationCard) => void;
 }) {
   return (
@@ -376,8 +362,6 @@ function IntegrationSection({
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {integrations.map((integration: IntegrationCard) => {
-          const syncing = syncingId === integration.id;
-          const result = syncResults[integration.id];
           const configured =
             integration.id === "gmail" ||
             integration.id === "calendar" ||
@@ -432,11 +416,7 @@ function IntegrationSection({
                   <Clock3 className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
 
                   <p className="text-xs leading-5 text-slate-500">
-                    {result
-                      ? "Last update: just now"
-                      : configured
-                      ? "Last update: connected"
-                      : "Last update: not connected yet"}
+                    {configured ? "Last update: connected" : "Last update: not connected yet"}
                   </p>
                 </div>
               </div>
@@ -480,26 +460,6 @@ function IntegrationSection({
                     </>
                   )}
                 </button>
-
-                {integration.endpoint ? (
-                  <button
-                    onClick={() => onRunSync(integration)}
-                    disabled={!configured || Boolean(syncingId)}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {syncing ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Syncing...
-                      </>
-                    ) : (
-                      <>
-                        <BarChart3 className="h-4 w-4" />
-                        Sync Now
-                      </>
-                    )}
-                  </button>
-                ) : null}
               </div>
             </div>
           );
@@ -589,6 +549,8 @@ function ConnectionPanel({
                 ? `${integration.name} is connected for this campaign.`
                 : integration.id === "google"
                 ? "You\'ll be redirected to Google to securely connect Gmail, Google Calendar, and Google Drive."
+                : integration.id === "youtube"
+                ? "You\'ll be redirected to Google to securely connect the campaign\'s YouTube channel and analytics."
                 : "Add the account details your campaign uses for this tool. Once saved, this integration will show as connected."}
             </p>
           </div>
@@ -672,6 +634,27 @@ function ConnectionPanel({
                 </div>
               </div>
             </>
+          ) : integration.id === "youtube" ? (
+            <>
+              <div className="rounded-3xl border border-slate-200 bg-white p-5">
+                <p className="text-sm font-semibold text-slate-900">YouTube Analytics</p>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  Connect the campaign&apos;s YouTube channel so Aether can read channel and analytics performance through the YouTube APIs.
+                </p>
+              </div>
+
+              <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
+                <div className="flex items-start gap-3">
+                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
+                  <div>
+                    <p className="text-sm font-semibold text-emerald-950">Secure Google OAuth</p>
+                    <p className="mt-1 text-sm leading-6 text-emerald-800/80">
+                      You&apos;ll be redirected to Google to approve YouTube access. Aether never asks for your Google password.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </>
           ) : (
             <>
               <div>
@@ -727,11 +710,23 @@ function ConnectionPanel({
             ) : (
               <button
                 type="button"
-                onClick={integration.id === "google" ? () => window.location.assign("/api/integrations/google/connect") : onSave}
+                onClick={
+                  integration.id === "google"
+                    ? () => window.location.assign("/api/integrations/google/connect")
+                    : integration.id === "youtube"
+                    ? () => window.location.assign("/api/integrations/youtube/connect")
+                    : onSave
+                }
                 disabled={saving}
                 className="flex-1 rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {integration.id === "google" ? "Connect with Google" : (saving ? "Saving..." : "Save & Connect")}
+                {integration.id === "google"
+                  ? "Connect with Google"
+                  : integration.id === "youtube"
+                  ? "Connect with YouTube"
+                  : saving
+                  ? "Saving..."
+                  : "Save & Connect"}
               </button>
             )}
           </div>
@@ -752,9 +747,6 @@ export default function IntegrationsPage() {
   const [savingConnection, setSavingConnection] = useState(false);
   const [disconnectingId, setDisconnectingId] = useState<string | null>(null);
   const [connectionSaveError, setConnectionSaveError] = useState("");
-
-  const [syncingId, setSyncingId] = useState<string | null>(null);
-  const [syncResults, setSyncResults] = useState<Record<string, string>>({});
   const [configuredIntegrations, setConfiguredIntegrations] = useState<
     Record<string, boolean>
   >({});
@@ -861,35 +853,6 @@ export default function IntegrationsPage() {
     };
   }, []);
 
-  async function runTestSync(integration: IntegrationCard) {
-    if (!integration.endpoint) return;
-
-    try {
-      setSyncingId(integration.id);
-
-      const response = await fetch(integration.endpoint, {
-        method: "POST",
-      });
-
-      const result = await response.json();
-
-      setSyncResults((current) => ({
-        ...current,
-        [integration.id]:
-          result?.success
-            ? `${integration.name} synced ${result.imported} records.`
-            : result?.error || `${integration.name} sync failed.`,
-      }));
-    } catch {
-      setSyncResults((current) => ({
-        ...current,
-        [integration.id]: `${integration.name} sync failed.`,
-      }));
-    } finally {
-      setSyncingId(null);
-    }
-  }
-
   async function saveCurrentConnection() {
     if (!activeIntegration || !activeOrganizationId) return;
 
@@ -927,12 +890,6 @@ export default function IntegrationsPage() {
       setConfiguredIntegrations((current) => ({
         ...current,
         [activeIntegration.id]: true,
-      }));
-
-      setSyncResults((current) => ({
-        ...current,
-        [activeIntegration.id]:
-          `${activeIntegration.name} connected for this campaign.`,
       }));
 
       setActiveIntegration(null);
@@ -984,12 +941,6 @@ export default function IntegrationsPage() {
         delete next[providerId];
         return next;
       });
-
-      setSyncResults((current) => ({
-        ...current,
-        [providerId]:
-          result?.message || `${providerName} disconnected successfully.`,
-      }));
 
       setActiveIntegration(null);
     } catch (error: any) {
@@ -1125,10 +1076,7 @@ export default function IntegrationsPage() {
           title="Digital"
           description="Connect the channels your digital team uses to track reach, content, engagement, and momentum."
           integrations={DIGITAL_INTEGRATIONS}
-          syncingId={syncingId}
-          syncResults={syncResults}
           configuredIntegrations={configuredIntegrations}
-          onRunSync={runTestSync}
           onOpenConnection={openConnection}
         />
 
@@ -1136,10 +1084,7 @@ export default function IntegrationsPage() {
           title="Finance"
           description="Connect fundraising tools so donor activity and contribution movement can support finance work."
           integrations={visibleFinanceIntegrations}
-          syncingId={syncingId}
-          syncResults={syncResults}
           configuredIntegrations={configuredIntegrations}
-          onRunSync={runTestSync}
           onOpenConnection={openConnection}
         />
 
@@ -1175,10 +1120,7 @@ export default function IntegrationsPage() {
           title="Utilities"
           description="Connect the workspace tools your campaign uses to coordinate email, schedules, and shared files."
           integrations={UTILITY_INTEGRATIONS}
-          syncingId={syncingId}
-          syncResults={syncResults}
           configuredIntegrations={configuredIntegrations}
-          onRunSync={runTestSync}
           onOpenConnection={openConnection}
         />
       </div>

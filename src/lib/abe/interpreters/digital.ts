@@ -11,7 +11,7 @@ type DemoRole = "admin" | "director" | "general_user";
 
 type DemoDepartment = "outreach" | "finance" | "field" | "digital" | "print";
 
-type PlatformKey = "meta" | "instagram" | "x" | "tiktok" | "unknown";
+type PlatformKey = "meta" | "instagram" | "x" | "tiktok" | "youtube" | "unknown";
 
 type PlatformMetric = {
   key: PlatformKey;

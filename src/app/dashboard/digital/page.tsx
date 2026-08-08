@@ -35,7 +35,7 @@ import {
   getDepartmentHealthState,
 } from "@/lib/intelligence/dashboard-tones";
 
-type PlatformKey = "meta" | "instagram" | "x" | "tiktok" | "unknown";
+type PlatformKey = "meta" | "instagram" | "x" | "tiktok" | "youtube" | "unknown";
 type TrendView = "impressions" | "engagement" | "spend" | "sentiment";
 
 type PlatformMetric = {
@@ -123,6 +123,7 @@ function platformKeyFromValue(value?: string | null): PlatformKey {
   if (normalized === "instagram" || normalized === "ig") return "instagram";
   if (normalized === "x" || normalized === "twitter") return "x";
   if (normalized === "tiktok" || normalized === "tik tok") return "tiktok";
+  if (normalized === "youtube" || normalized === "you tube") return "youtube";
 
   return "unknown";
 }
@@ -132,6 +133,7 @@ function platformLabelFromKey(key: PlatformKey, fallback?: string | null) {
   if (key === "instagram") return "Instagram";
   if (key === "x") return "X";
   if (key === "tiktok") return "TikTok";
+  if (key === "youtube") return "YouTube";
 
   return fallback?.trim() || "Unknown";
 }
@@ -355,6 +357,8 @@ function platformTone(platform: PlatformKey) {
       return "bg-slate-100 text-slate-700 border border-slate-200";
     case "tiktok":
       return "bg-emerald-100 text-emerald-700 border border-emerald-200";
+    case "youtube":
+      return "bg-red-100 text-red-700 border border-red-200";
     default:
       return "bg-slate-100 text-slate-700 border border-slate-200";
   }

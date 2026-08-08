@@ -72,11 +72,15 @@ export async function POST() {
       );
     }
 
+    const endDate = new Date();
+    const startDate = new Date(endDate);
+    startDate.setUTCDate(startDate.getUTCDate() - 28);
+
     const youtubePayload = await provider.fetchAnalytics(
       connection,
       {
-        startDate: new Date().toISOString(),
-        endDate: new Date().toISOString(),
+        startDate: startDate.toISOString().slice(0, 10),
+        endDate: endDate.toISOString().slice(0, 10),
       }
     );
 
@@ -84,6 +88,30 @@ export async function POST() {
       youtubePayload,
       activeOrganizationId
     );
+
+    const startDateString = startDate.toISOString().slice(0, 10);
+    const endDateString = endDate.toISOString().slice(0, 10);
+
+    const { error: deleteError } = await supabase
+      .from("analytics_events")
+      .delete()
+      .eq("organization_id", activeOrganizationId)
+      .eq("source", "youtube_api")
+      .eq("platform", "youtube")
+      .gte("metric_date", startDateString)
+      .lte("metric_date", endDateString);
+
+    if (deleteError) {
+      console.error("YouTube sync cleanup failed", deleteError);
+
+      return NextResponse.json(
+        {
+          success: false,
+          error: deleteError.message,
+        },
+        { status: 500 }
+      );
+    }
 
     const { data, error } = await supabase
       .from("analytics_events")
