@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { createClient } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase/admin";
+import { getGoogleAccessToken } from "@/lib/integrations/google/get-google-access-token";
 
 async function getActiveOrganizationId() {
   const cookieStore = await cookies();
@@ -16,8 +17,22 @@ async function getActiveOrganizationId() {
 
 export async function GET() {
   try {
-    const supabase = await createClient();
+    const supabase = supabaseAdmin;
     const organizationId = await getActiveOrganizationId();
+
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    console.log("[STATUS] Auth User:", user?.id ?? null);
+    console.log("[STATUS] User Error:", userError);
+    console.log("[STATUS] Active Organization:", organizationId);
+
+    // Ensure the Google access token is valid (refreshes automatically if needed).
+    await getGoogleAccessToken(organizationId);
+
+
 
     const { data, error } = await supabase
       .from("organization_integrations")

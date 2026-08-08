@@ -3,6 +3,8 @@ import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 
 import { normalizeAnalyticsEvents } from "@/lib/analytics/normalize-analytics-events";
+import { getProvider } from "@/lib/integrations/registry";
+import { getConnection } from "@/lib/integrations/connection-store";
 
 export async function POST() {
   try {
@@ -53,51 +55,27 @@ export async function POST() {
       );
     }
 
-    const tiktokPayload = [
-      {
-        source: "tiktok_api",
-        department: "digital",
+    const provider = getProvider("tiktok");
 
-        platform: "TikTok",
-        campaign_name: "Momentum Growth",
-        asset_name: "Town Hall Vertical Clip",
+    const connection = await getConnection(
+      activeOrganizationId,
+      "tiktok"
+    );
 
-        metric_date: new Date().toISOString(),
+    if (!connection) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "TikTok is not connected for this campaign.",
+        },
+        { status: 400 }
+      );
+    }
 
-        impressions: 812000,
-        engagements: 98100,
-        clicks: 11040,
-        spend: 620.22,
-
-        sentiment_positive: 74,
-        sentiment_negative: 8,
-        sentiment_neutral: 18,
-
-        notes: "Momentum spike from organic resharing.",
-      },
-
-      {
-        source: "tiktok_api",
-        department: "digital",
-
-        platform: "TikTok",
-        campaign_name: "Youth Outreach",
-        asset_name: "Campus Walkthrough",
-
-        metric_date: new Date().toISOString(),
-
-        impressions: 433200,
-        engagements: 55220,
-        clicks: 7122,
-        spend: 320.14,
-
-        sentiment_positive: 79,
-        sentiment_negative: 6,
-        sentiment_neutral: 15,
-
-        notes: "High Gen Z engagement activity.",
-      },
-    ];
+    const tiktokPayload = await provider.fetchAnalytics(connection, {
+      startDate: new Date().toISOString(),
+      endDate: new Date().toISOString(),
+    });
 
     const rows = normalizeAnalyticsEvents(
       tiktokPayload,

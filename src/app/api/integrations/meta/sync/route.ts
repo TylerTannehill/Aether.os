@@ -3,6 +3,8 @@ import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 
 import { normalizeAnalyticsEvents } from "@/lib/analytics/normalize-analytics-events";
+import { getProvider } from "@/lib/integrations/registry";
+import { getConnection } from "@/lib/integrations/connection-store";
 
 export async function POST() {
   try {
@@ -53,57 +55,30 @@ export async function POST() {
       );
     }
 
-    /**
-     * TEMPORARY MOCK META PAYLOAD
-     *
-     * Replace later with real Meta API response.
-     */
+    const provider = getProvider("meta");
 
-    const metaPayload = [
+    const connection = await getConnection(
+      activeOrganizationId,
+      "meta"
+    );
+
+    if (!connection) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Meta is not connected for this campaign.",
+        },
+        { status: 400 }
+      );
+    }
+
+    const metaPayload = await provider.fetchAnalytics(
+      connection,
       {
-        source: "meta_api",
-        department: "digital",
-
-        platform: "Meta",
-        campaign_name: "Meta Awareness Campaign",
-        asset_name: "Veterans Video Ad",
-
-        metric_date: new Date().toISOString(),
-
-        impressions: 248000,
-        engagements: 14320,
-        clicks: 3988,
-        spend: 4210.42,
-
-        sentiment_positive: 68,
-        sentiment_negative: 17,
-        sentiment_neutral: 15,
-
-        notes: "Initial Meta integration sync.",
-      },
-
-      {
-        source: "meta_api",
-        department: "digital",
-
-        platform: "Instagram",
-        campaign_name: "Instagram Engagement Push",
-        asset_name: "Town Hall Reel",
-
-        metric_date: new Date().toISOString(),
-
-        impressions: 112400,
-        engagements: 22110,
-        clicks: 2940,
-        spend: 1280.55,
-
-        sentiment_positive: 81,
-        sentiment_negative: 9,
-        sentiment_neutral: 10,
-
-        notes: "Initial Instagram sync payload.",
-      },
-    ];
+        startDate: new Date().toISOString(),
+        endDate: new Date().toISOString(),
+      }
+    );
 
     const rows = normalizeAnalyticsEvents(
       metaPayload,

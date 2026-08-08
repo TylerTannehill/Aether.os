@@ -3,6 +3,8 @@ import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 
 import { normalizeAnalyticsEvents } from "@/lib/analytics/normalize-analytics-events";
+import { getProvider } from "@/lib/integrations/registry";
+import { getConnection } from "@/lib/integrations/connection-store";
 
 export async function POST() {
   try {
@@ -53,51 +55,30 @@ export async function POST() {
       );
     }
 
-    const xPayload = [
+    const provider = getProvider("x");
+
+    const connection = await getConnection(
+      activeOrganizationId,
+      "x"
+    );
+
+    if (!connection) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "X is not connected for this campaign.",
+        },
+        { status: 400 }
+      );
+    }
+
+    const xPayload = await provider.fetchAnalytics(
+      connection,
       {
-        source: "x_api",
-        department: "digital",
-
-        platform: "X",
-        campaign_name: "Narrative Pressure Monitoring",
-        asset_name: "Debate Clip",
-
-        metric_date: new Date().toISOString(),
-
-        impressions: 418000,
-        engagements: 29880,
-        clicks: 7420,
-        spend: 0,
-
-        sentiment_positive: 41,
-        sentiment_negative: 44,
-        sentiment_neutral: 15,
-
-        notes: "High narrative conflict around debate clip.",
-      },
-
-      {
-        source: "x_api",
-        department: "digital",
-
-        platform: "X",
-        campaign_name: "Rapid Response Push",
-        asset_name: "Crime Policy Thread",
-
-        metric_date: new Date().toISOString(),
-
-        impressions: 202400,
-        engagements: 18220,
-        clicks: 3310,
-        spend: 0,
-
-        sentiment_positive: 56,
-        sentiment_negative: 21,
-        sentiment_neutral: 23,
-
-        notes: "Strong supporter amplification behavior.",
-      },
-    ];
+        startDate: new Date().toISOString(),
+        endDate: new Date().toISOString(),
+      }
+    );
 
     const rows = normalizeAnalyticsEvents(
       xPayload,

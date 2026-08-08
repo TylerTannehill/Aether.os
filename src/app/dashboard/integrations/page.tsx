@@ -23,6 +23,10 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { getOrgContextTheme } from "@/lib/org-context-theme";
+import {
+  getConnection,
+  saveConnection,
+} from "@/lib/integrations/connection-store";
 
 type IntegrationStatus =
   | "not_connected"
@@ -225,6 +229,23 @@ const UTILITY_INTEGRATIONS: IntegrationCard[] = [
   },
 ];
 
+const ALL_INTEGRATIONS: IntegrationCard[] = [
+  ...DIGITAL_INTEGRATIONS,
+  ...FINANCE_INTEGRATIONS,
+  ...UTILITY_INTEGRATIONS,
+];
+
+const SOCIAL_PROVIDER_IDS = new Set([
+  "meta",
+  "x",
+  "tiktok",
+  "youtube",
+  "google",
+  "gmail",
+  "calendar",
+  "drive",
+]);
+
 function statusLabel(status: IntegrationStatus) {
   switch (status) {
     case "connected":
@@ -357,7 +378,12 @@ function IntegrationSection({
         {integrations.map((integration: IntegrationCard) => {
           const syncing = syncingId === integration.id;
           const result = syncResults[integration.id];
-          const configured = Boolean(configuredIntegrations[integration.id]);
+          const configured =
+            integration.id === "gmail" ||
+            integration.id === "calendar" ||
+            integration.id === "drive"
+              ? Boolean(configuredIntegrations["google"])
+              : Boolean(configuredIntegrations[integration.id]);
 
           const effectiveStatus: IntegrationStatus = configured
             ? "connected"
@@ -418,7 +444,24 @@ function IntegrationSection({
               <div className="mt-5 grid gap-2">
                 <button
                   type="button"
-                  onClick={() => onOpenConnection(integration)}
+                  onClick={() =>
+                    onOpenConnection(
+                      integration.id === "gmail" ||
+                      integration.id === "calendar" ||
+                      integration.id === "drive"
+                        ? {
+                            ...integration,
+                            id: "google",
+                            name: "Google",
+                            description:
+                              "Connect your Google account to enable Gmail, Google Calendar, and Google Drive.",
+                            credentialHint: "Google Account",
+                            logoText: "G",
+                            logoSubtext: "Google",
+                          }
+                        : integration
+                    )
+                  }
                   className={`inline-flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
                     configured
                       ? "border border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
@@ -468,18 +511,30 @@ function IntegrationSection({
 
 function ConnectionPanel({
   integration,
+  connected,
+  canDisconnect,
   credentials,
   setCredentials,
   onClose,
   onSave,
+  onDisconnect,
+  saving,
+  disconnecting,
+  actionError,
 }: {
   integration: IntegrationCard;
+  connected: boolean;
+  canDisconnect: boolean;
   credentials: Record<string, CredentialState>;
   setCredentials: React.Dispatch<
     React.SetStateAction<Record<string, CredentialState>>
   >;
   onClose: () => void;
   onSave: () => void;
+  onDisconnect: () => void;
+  saving: boolean;
+  disconnecting: boolean;
+  actionError: string;
 }) {
   const currentCredentials = credentials[integration.id] || {
     accountName: "",
@@ -524,16 +579,39 @@ function ConnectionPanel({
 
           <div className="mt-6">
             <h3 className="text-3xl font-semibold tracking-tight text-slate-950">
-              Connect {integration.name}
+              {connected
+                ? `${integration.name} Connection`
+                : `Connect ${integration.name}`}
             </h3>
 
             <p className="mt-2 text-sm leading-6 text-slate-600">
-              Add the account details your campaign uses for this tool. Once
-              saved, this integration will show as connected.
+              {connected
+                ? `${integration.name} is connected for this campaign.`
+                : integration.id === "google"
+                ? "You\'ll be redirected to Google to securely connect Gmail, Google Calendar, and Google Drive."
+                : "Add the account details your campaign uses for this tool. Once saved, this integration will show as connected."}
             </p>
           </div>
 
-          <ConnectionProgress />
+          {connected ? (
+            <div className="mt-8 rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
+              <div className="flex items-start gap-3">
+                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700" />
+
+                <div>
+                  <p className="text-sm font-semibold text-emerald-950">
+                    Connected
+                  </p>
+
+                  <p className="mt-1 text-sm leading-6 text-emerald-800">
+                    This provider is available for analytics sync.
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <ConnectionProgress />
+          )}
         </div>
 
         <div className="flex-1 space-y-5 p-6">
@@ -547,91 +625,115 @@ function ConnectionPanel({
             </p>
           </div>
 
-          <div>
-            <label className="mb-2 block text-sm font-semibold text-slate-700">
-              Account Email / Username
-            </label>
-
-            <input
-              value={currentCredentials.accountName}
-              onChange={(event) =>
-                updateField("accountName", event.target.value)
-              }
-              placeholder="campaign@example.com"
-              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400"
-            />
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm font-semibold text-slate-700">
-              Access Key / Token
-            </label>
-
-            <input
-              type="password"
-              value={currentCredentials.accessToken}
-              onChange={(event) =>
-                updateField("accessToken", event.target.value)
-              }
-              placeholder="Paste access token"
-              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400"
-            />
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm font-semibold text-slate-700">
-              Account ID
-              <span className="ml-1 font-normal text-slate-400">
-                optional
-              </span>
-            </label>
-
-            <input
-              value={currentCredentials.accountId}
-              onChange={(event) =>
-                updateField("accountId", event.target.value)
-              }
-              placeholder="Enter account ID"
-              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400"
-            />
-          </div>
-
-          <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
-            <div className="flex items-start gap-3">
-              <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
-
-              <div>
-                <p className="text-sm font-semibold text-emerald-950">
-                  Secure connection
+          {connected ? (
+            <>
+              <div className="rounded-3xl border border-slate-200 bg-white p-5">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                  Provider
                 </p>
-
-                <p className="mt-1 text-sm leading-6 text-emerald-800/80">
-                  Your campaign controls which accounts are connected. This
-                  screen is designed for credentials now and can be wired into
-                  provider OAuth when the live permission flow is ready.
+                <p className="mt-2 text-lg font-semibold text-slate-950">
+                  {integration.name}
+                </p>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  Connection status is stored for the active campaign.
                 </p>
               </div>
-            </div>
-          </div>
+
+              <div className="rounded-3xl border border-blue-200 bg-blue-50 p-5">
+                <div className="flex items-start gap-3">
+                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-blue-700" />
+                  <div>
+                    <p className="text-sm font-semibold text-blue-950">Credentials protected</p>
+                    <p className="mt-1 text-sm leading-6 text-blue-800/80">
+                      Saved tokens are never displayed in Aether.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </>
+          ) : integration.id === "google" ? (
+            <>
+              <div className="rounded-3xl border border-slate-200 bg-white p-5">
+                <p className="text-sm font-semibold text-slate-900">Google Workspace</p>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  One secure Google connection enables Gmail, Google Calendar, and Google Drive.
+                </p>
+              </div>
+
+              <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
+                <div className="flex items-start gap-3">
+                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
+                  <div>
+                    <p className="text-sm font-semibold text-emerald-950">Secure OAuth</p>
+                    <p className="mt-1 text-sm leading-6 text-emerald-800/80">
+                      You'll be redirected to Google to approve access. Aether never asks for your Google password.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-slate-700">Account Email / Username</label>
+                <input value={currentCredentials.accountName} onChange={(e)=>updateField("accountName",e.target.value)} placeholder="campaign@example.com" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400"/>
+              </div>
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-slate-700">Access Key / Token</label>
+                <input type="password" value={currentCredentials.accessToken} onChange={(e)=>updateField("accessToken",e.target.value)} placeholder="Paste access token" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400"/>
+              </div>
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-slate-700">Account ID <span className="ml-1 font-normal text-slate-400">optional</span></label>
+                <input value={currentCredentials.accountId} onChange={(e)=>updateField("accountId",e.target.value)} placeholder="Enter account ID" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400"/>
+              </div>
+            </>
+          )}
         </div>
+
+        {actionError ? (
+          <div className="mx-6 mb-0 rounded-2xl border border-rose-200 bg-rose-50 p-4">
+            <p className="text-sm font-semibold text-rose-900">
+              Connection action failed
+            </p>
+
+            <p className="mt-1 text-sm text-rose-800">
+              {actionError}
+            </p>
+          </div>
+        ) : null}
 
         <div className="border-t border-slate-200 bg-white p-6">
           <div className="flex gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+              disabled={saving || disconnecting}
+              className="flex-1 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Cancel
+              {connected ? "Close" : "Cancel"}
             </button>
 
-            <button
-              type="button"
-              onClick={onSave}
-              className="flex-1 rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-800"
-            >
-              Save & Connect
-            </button>
+            {connected ? (
+              canDisconnect ? (
+                <button
+                  type="button"
+                  onClick={onDisconnect}
+                  disabled={disconnecting}
+                  className="flex-1 rounded-2xl bg-rose-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {disconnecting ? "Disconnecting..." : "Disconnect"}
+                </button>
+              ) : null
+            ) : (
+              <button
+                type="button"
+                onClick={integration.id === "google" ? () => window.location.assign("/api/integrations/google/connect") : onSave}
+                disabled={saving}
+                className="flex-1 rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {integration.id === "google" ? "Connect with Google" : (saving ? "Saving..." : "Save & Connect")}
+              </button>
+            )}
           </div>
         </div>
       </aside>
@@ -642,6 +744,14 @@ function ConnectionPanel({
 export default function IntegrationsPage() {
   const [contextMode, setContextMode] = useState("default");
   const [aetherTier, setAetherTier] = useState<AetherTier>("t3");
+
+  const [activeOrganizationId, setActiveOrganizationId] = useState<string | null>(
+    null
+  );
+  const [loadingConnections, setLoadingConnections] = useState(true);
+  const [savingConnection, setSavingConnection] = useState(false);
+  const [disconnectingId, setDisconnectingId] = useState<string | null>(null);
+  const [connectionSaveError, setConnectionSaveError] = useState("");
 
   const [syncingId, setSyncingId] = useState<string | null>(null);
   const [syncResults, setSyncResults] = useState<Record<string, string>>({});
@@ -657,25 +767,98 @@ export default function IntegrationsPage() {
   >({});
 
   useEffect(() => {
-    async function loadOrgContext() {
-      try {
-        const response = await fetch("/api/auth/current-context");
+    let cancelled = false;
 
-        if (!response.ok) return;
+    async function loadPageData() {
+      try {
+        setLoadingConnections(true);
+
+        const response = await fetch("/api/auth/current-context", {
+          credentials: "include",
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          throw new Error("Unable to load campaign context.");
+        }
 
         const data = await response.json();
 
-        setContextMode(data?.organization?.context_mode || "default");
+        const organizationId =
+          data?.organization?.id ||
+          data?.membership?.organization_id ||
+          null;
 
+        if (!organizationId) {
+          throw new Error("No active campaign selected.");
+        }
+
+        if (cancelled) return;
+
+        setActiveOrganizationId(String(organizationId));
+        setContextMode(data?.organization?.context_mode || "default");
         setAetherTier(
           normalizeAetherTier(data?.organization?.aether_tier)
         );
+
+        const connectionMap: Record<string, boolean> = {};
+
+        const providers = [
+          "google",
+          "meta",
+          "x",
+          "tiktok",
+          "youtube",
+          "actblue",
+          "winred",
+        ] as const;
+
+        await Promise.all(
+          providers.map(async (provider) => {
+            try {
+              const connection = await getConnection(
+                String(organizationId),
+                provider
+              );
+
+              connectionMap[provider] =
+                Boolean(connection?.status === "connected");
+
+            } catch (error) {
+              console.error(`[Integrations] Failed loading ${provider}`, error);
+              connectionMap[provider] = false;
+            }
+          })
+        );
+
+        connectionMap.gmail = connectionMap.google;
+        connectionMap.calendar = connectionMap.google;
+        connectionMap.drive = connectionMap.google;
+        connectionMap.website = false;
+
+        if (cancelled) return;
+
+        console.log("[Aether] Configured Integrations:", connectionMap);
+
+        setConfiguredIntegrations(connectionMap);
       } catch (error) {
-        console.error("Failed to load org context", error);
+        console.error("Failed to load integrations page", error);
+
+        if (!cancelled) {
+          setConfiguredIntegrations({});
+        }
+      } finally {
+        if (!cancelled) {
+          setLoadingConnections(false);
+        }
       }
     }
 
-    loadOrgContext();
+    loadPageData();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   async function runTestSync(integration: IntegrationCard) {
@@ -695,7 +878,7 @@ export default function IntegrationsPage() {
         [integration.id]:
           result?.success
             ? `${integration.name} synced ${result.imported} records.`
-            : `${integration.name} sync failed.`,
+            : result?.error || `${integration.name} sync failed.`,
       }));
     } catch {
       setSyncResults((current) => ({
@@ -707,21 +890,122 @@ export default function IntegrationsPage() {
     }
   }
 
-  function saveConnection() {
-    if (!activeIntegration) return;
+  async function saveCurrentConnection() {
+    if (!activeIntegration || !activeOrganizationId) return;
 
-    setConfiguredIntegrations((current) => ({
-      ...current,
-      [activeIntegration.id]: true,
-    }));
+    const currentCredentials = credentials[activeIntegration.id] || {
+      accountName: "",
+      accessToken: "",
+      accountId: "",
+    };
 
-    setSyncResults((current) => ({
-      ...current,
-      [activeIntegration.id]:
-        `${activeIntegration.name} connected for this campaign.`,
-    }));
+    if (!currentCredentials.accessToken.trim()) {
+      setConnectionSaveError(
+        "An access key or token is required before this connection can be saved."
+      );
+      return;
+    }
 
-    setActiveIntegration(null);
+    try {
+      setSavingConnection(true);
+      setConnectionSaveError("");
+
+      await saveConnection({
+        organizationId: activeOrganizationId,
+        provider: activeIntegration.id,
+        providerAccountEmail:
+          currentCredentials.accountName.trim() || null,
+        accessToken: currentCredentials.accessToken.trim(),
+        status: "connected",
+        metadata: currentCredentials.accountId.trim()
+          ? {
+              provider_account_id: currentCredentials.accountId.trim(),
+            }
+          : {},
+      });
+
+      setConfiguredIntegrations((current) => ({
+        ...current,
+        [activeIntegration.id]: true,
+      }));
+
+      setSyncResults((current) => ({
+        ...current,
+        [activeIntegration.id]:
+          `${activeIntegration.name} connected for this campaign.`,
+      }));
+
+      setActiveIntegration(null);
+    } catch (error: any) {
+      console.error("Failed to save integration connection", error);
+
+      setConnectionSaveError(
+        error?.message || "The connection could not be saved."
+      );
+    } finally {
+      setSavingConnection(false);
+    }
+  }
+
+  async function disconnectCurrentConnection() {
+    if (!activeIntegration || !activeOrganizationId) return;
+
+    const providerId = activeIntegration.id;
+    const providerName = activeIntegration.name;
+
+    try {
+      setDisconnectingId(providerId);
+      setConnectionSaveError("");
+
+      const response = await fetch(
+        `/api/integrations/${providerId}/disconnect?organizationId=${encodeURIComponent(
+          activeOrganizationId
+        )}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      const result = await response.json().catch(() => null);
+
+      if (!response.ok || !result?.success) {
+        throw new Error(
+          result?.message || `Unable to disconnect ${providerName}.`
+        );
+      }
+
+      setConfiguredIntegrations((current) => ({
+        ...current,
+        [providerId]: false,
+      }));
+
+      setCredentials((current) => {
+        const next = { ...current };
+        delete next[providerId];
+        return next;
+      });
+
+      setSyncResults((current) => ({
+        ...current,
+        [providerId]:
+          result?.message || `${providerName} disconnected successfully.`,
+      }));
+
+      setActiveIntegration(null);
+    } catch (error: any) {
+      console.error(`Failed to disconnect ${providerName}`, error);
+
+      setConnectionSaveError(
+        error?.message || `Unable to disconnect ${providerName}.`
+      );
+    } finally {
+      setDisconnectingId(null);
+    }
+  }
+
+  function openConnection(integration: IntegrationCard) {
+    setConnectionSaveError("");
+    setActiveIntegration(integration);
   }
 
   const orgTheme = getOrgContextTheme(contextMode);
@@ -780,7 +1064,9 @@ export default function IntegrationsPage() {
 
               <div className="flex flex-wrap gap-2">
                 <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold text-slate-100">
-                  {configuredCount} / {totalVisibleIntegrations} connected
+                  {loadingConnections
+                    ? "Loading connections..."
+                    : `${configuredCount} / ${totalVisibleIntegrations} connected`}
                 </span>
 
                 <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold text-slate-100">
@@ -843,7 +1129,7 @@ export default function IntegrationsPage() {
           syncResults={syncResults}
           configuredIntegrations={configuredIntegrations}
           onRunSync={runTestSync}
-          onOpenConnection={setActiveIntegration}
+          onOpenConnection={openConnection}
         />
 
         <IntegrationSection
@@ -854,7 +1140,7 @@ export default function IntegrationsPage() {
           syncResults={syncResults}
           configuredIntegrations={configuredIntegrations}
           onRunSync={runTestSync}
-          onOpenConnection={setActiveIntegration}
+          onOpenConnection={openConnection}
         />
 
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -893,17 +1179,36 @@ export default function IntegrationsPage() {
           syncResults={syncResults}
           configuredIntegrations={configuredIntegrations}
           onRunSync={runTestSync}
-          onOpenConnection={setActiveIntegration}
+          onOpenConnection={openConnection}
         />
       </div>
 
       {activeIntegration ? (
         <ConnectionPanel
           integration={activeIntegration}
+          connected={Boolean(
+            configuredIntegrations[
+              activeIntegration.id === "gmail" ||
+              activeIntegration.id === "calendar" ||
+              activeIntegration.id === "drive"
+                ? "google"
+                : activeIntegration.id
+            ]
+          )}
+          canDisconnect={SOCIAL_PROVIDER_IDS.has(
+            activeIntegration.id
+          )}
           credentials={credentials}
           setCredentials={setCredentials}
-          onClose={() => setActiveIntegration(null)}
-          onSave={saveConnection}
+          onClose={() => {
+            setConnectionSaveError("");
+            setActiveIntegration(null);
+          }}
+          onSave={saveCurrentConnection}
+          onDisconnect={disconnectCurrentConnection}
+          saving={savingConnection}
+          disconnecting={disconnectingId === activeIntegration.id}
+          actionError={connectionSaveError}
         />
       ) : null}
     </>

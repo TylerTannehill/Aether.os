@@ -3,6 +3,8 @@ import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 
 import { normalizeAnalyticsEvents } from "@/lib/analytics/normalize-analytics-events";
+import { getProvider } from "@/lib/integrations/registry";
+import { getConnection } from "@/lib/integrations/connection-store";
 
 export async function POST() {
   try {
@@ -53,51 +55,30 @@ export async function POST() {
       );
     }
 
-    const youtubePayload = [
+    const provider = getProvider("youtube");
+
+    const connection = await getConnection(
+      activeOrganizationId,
+      "youtube"
+    );
+
+    if (!connection) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "YouTube is not connected for this campaign.",
+        },
+        { status: 400 }
+      );
+    }
+
+    const youtubePayload = await provider.fetchAnalytics(
+      connection,
       {
-        source: "youtube_api",
-        department: "digital",
-
-        platform: "YouTube",
-        campaign_name: "Longform Narrative",
-        asset_name: "Veterans Policy Interview",
-
-        metric_date: new Date().toISOString(),
-
-        impressions: 621000,
-        engagements: 44210,
-        clicks: 8420,
-        spend: 1400.75,
-
-        sentiment_positive: 72,
-        sentiment_negative: 11,
-        sentiment_neutral: 17,
-
-        notes: "Strong long-form retention performance.",
-      },
-
-      {
-        source: "youtube_api",
-        department: "digital",
-
-        platform: "YouTube",
-        campaign_name: "Issue Explainer",
-        asset_name: "Property Tax Breakdown",
-
-        metric_date: new Date().toISOString(),
-
-        impressions: 182300,
-        engagements: 22100,
-        clicks: 3100,
-        spend: 810.42,
-
-        sentiment_positive: 66,
-        sentiment_negative: 13,
-        sentiment_neutral: 21,
-
-        notes: "High watch completion percentage.",
-      },
-    ];
+        startDate: new Date().toISOString(),
+        endDate: new Date().toISOString(),
+      }
+    );
 
     const rows = normalizeAnalyticsEvents(
       youtubePayload,

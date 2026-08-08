@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { createClient } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 
 const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
 const GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v2/userinfo";
@@ -90,7 +90,7 @@ export async function GET(request: Request) {
 
     const userInfo = await userInfoResponse.json();
 
-    const supabase = await createClient();
+    const supabase = supabaseAdmin;
 
     const { data: existingIntegration } = await supabase
       .from("organization_integrations")
@@ -103,6 +103,12 @@ export async function GET(request: Request) {
       ? new Date(Date.now() + Number(tokenPayload.expires_in) * 1000)
           .toISOString()
       : null;
+
+    console.log("[GOOGLE CALLBACK] Organization:", organizationId);
+    console.log("[GOOGLE CALLBACK] Google Email:", userInfo?.email);
+
+    console.log("[GOOGLE CALLBACK] Access token length:", tokenPayload.access_token?.length);
+    console.log("[GOOGLE CALLBACK] Refresh token present:", !!tokenPayload.refresh_token);
 
     const { error: upsertError } = await supabase
       .from("organization_integrations")
@@ -132,6 +138,19 @@ export async function GET(request: Request) {
           onConflict: "organization_id,provider",
         }
       );
+
+
+    const { data: verify } = await supabase
+      .from("organization_integrations")
+      .select("access_token")
+      .eq("organization_id", organizationId)
+      .eq("provider", "google")
+      .single();
+
+    console.log(
+      "[GOOGLE CALLBACK] Saved token length:",
+      verify?.access_token?.length
+    );
 
     if (upsertError) {
       return NextResponse.redirect(

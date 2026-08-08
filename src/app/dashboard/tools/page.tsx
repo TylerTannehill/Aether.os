@@ -8,7 +8,7 @@ import {
   ArrowRight,
   CalendarDays,
   ChevronDown,
-  CheckCircle2,
+  ChevronRight,
   FolderKanban,
   Mail,
   MessageSquare,
@@ -239,6 +239,30 @@ export default function ToolsPage() {
   const [contextMode, setContextMode] = useState("default");
   const [organizationName, setOrganizationName] = useState("Active campaign");
   const [canAccessIntegrations, setCanAccessIntegrations] = useState(false);
+const [gmailMessages, setGmailMessages] = useState<any[]>([]);
+const [gmailLoading, setGmailLoading] = useState(false);
+const [selectedGmailMessage, setSelectedGmailMessage] = useState<any | null>(null);
+const [loadingSelectedMessage, setLoadingSelectedMessage] = useState(false);
+const [composeTo, setComposeTo] = useState("");
+const [composeSubject, setComposeSubject] = useState("");
+const [composeBody, setComposeBody] = useState("");
+const [sendingEmail, setSendingEmail] = useState(false);
+const [gmailSearch, setGmailSearch] = useState("");
+const [googleCalendars, setGoogleCalendars] = useState<any[]>([]);
+const [calendarLoading, setCalendarLoading] = useState(false);
+const [calendarError, setCalendarError] = useState<string | null>(null);
+const [calendarEvents, setCalendarEvents] = useState<any[]>([]);
+const [calendarEventsLoading, setCalendarEventsLoading] = useState(false);
+const [calendarEventsError, setCalendarEventsError] = useState<string | null>(null);
+const [driveFiles, setDriveFiles] = useState<any[]>([]);
+const [driveLoading, setDriveLoading] = useState(false);
+const [driveError, setDriveError] = useState<string | null>(null);
+const [driveFolderStack, setDriveFolderStack] = useState<any[]>([]);
+
+const [googleConnection, setGoogleConnection] = useState<{
+    connected: boolean;
+    email: string | null;
+  } | null>(null);
   const [openModules, setOpenModules] = useState<Record<UtilityModuleId, boolean>>({
     calendar: false,
     drive: false,
@@ -306,12 +330,288 @@ export default function ToolsPage() {
       );
 
       await loadMessages(nextUser.org_id);
+      let googleConnected = false;
+
+      try {
+        const googleResponse = await fetch("/api/integrations/google/status", {
+          cache: "no-store",
+        });
+        const googleData = await googleResponse.json();
+
+        googleConnected = googleResponse.ok && Boolean(googleData?.connected);
+
+        setGoogleConnection({
+          connected: googleConnected,
+          email: googleConnected
+            ? googleData?.integration?.provider_account_email ?? null
+            : null,
+        });
+      } catch (error) {
+        console.error("Failed to load Google connection:", error);
+        setGoogleConnection({
+          connected: false,
+          email: null,
+        });
+      }
+
+      if (!googleConnected) {
+        setGoogleCalendars([]);
+        setCalendarError(null);
+        setCalendarLoading(false);
+        setCalendarEvents([]);
+        setCalendarEventsError(null);
+        setCalendarEventsLoading(false);
+        setDriveFiles([]);
+        setDriveFolderStack([]);
+        setDriveError(null);
+        setDriveLoading(false);
+        setGmailMessages([]);
+        setGmailLoading(false);
+        setSelectedGmailMessage(null);
+      } else {
+        try {
+          setCalendarLoading(true);
+          setCalendarError(null);
+          const calendarResponse = await fetch(
+            `/api/integrations/google/calendar/calendars?organizationId=${encodeURIComponent(nextUser.org_id)}`,
+            { cache: "no-store" }
+          );
+          const calendarData = await calendarResponse.json();
+
+          if (!calendarResponse.ok) {
+            throw new Error(calendarData?.error || "Failed to load Google calendars.");
+          }
+
+          setGoogleCalendars(calendarData?.calendars ?? []);
+        } catch (error: any) {
+          console.error("Failed to load Google calendars:", error);
+          setCalendarError(error?.message || "Failed to load Google calendars.");
+          setGoogleCalendars([]);
+        } finally {
+          setCalendarLoading(false);
+        }
+
+        try {
+          setCalendarEventsLoading(true);
+          setCalendarEventsError(null);
+          const eventsResponse = await fetch(
+            `/api/integrations/google/calendar/events?organizationId=${encodeURIComponent(nextUser.org_id)}`,
+            { cache: "no-store" }
+          );
+          const eventsData = await eventsResponse.json();
+
+          if (!eventsResponse.ok) {
+            throw new Error(eventsData?.error || "Failed to load Google Calendar events.");
+          }
+
+          setCalendarEvents(eventsData?.events ?? []);
+        } catch (error: any) {
+          console.error("Failed to load Google Calendar events:", error);
+          setCalendarEventsError(error?.message || "Failed to load Google Calendar events.");
+          setCalendarEvents([]);
+        } finally {
+          setCalendarEventsLoading(false);
+        }
+
+        try {
+          setDriveLoading(true);
+          setDriveError(null);
+
+          const driveResponse = await fetch(
+            `/api/integrations/google/drive/files?organizationId=${encodeURIComponent(nextUser.org_id)}`,
+            { cache: "no-store" }
+          );
+          const driveData = await driveResponse.json();
+
+          if (!driveResponse.ok) {
+            throw new Error(driveData?.error || "Failed to load Google Drive files.");
+          }
+
+          setDriveFiles(driveData?.files ?? []);
+        } catch (error: any) {
+          console.error("Failed to load Google Drive files:", error);
+          setDriveError(error?.message || "Failed to load Google Drive files.");
+          setDriveFiles([]);
+        } finally {
+          setDriveLoading(false);
+        }
+
+        try {
+          setGmailLoading(true);
+          const gmailResponse = await fetch(
+            "/api/integrations/google/gmail/messages",
+            { cache: "no-store" }
+          );
+          const gmailData = await gmailResponse.json();
+
+          if (!gmailResponse.ok) {
+            throw new Error(gmailData?.error || "Failed to load Gmail.");
+          }
+
+          setGmailMessages(gmailData?.messages ?? []);
+        } catch (error) {
+          console.error("Failed to load Gmail preview:", error);
+          setGmailMessages([]);
+        } finally {
+          setGmailLoading(false);
+        }
+      }
+
     } catch (error) {
       console.error("Failed to load tools context:", error);
     } finally {
       setLoading(false);
     }
   }
+
+
+  async function loadDriveFolder(folderId?: string, folder?: any) {
+    if (!user) return;
+    try {
+      setDriveLoading(true);
+      setDriveError(null);
+      const params = new URLSearchParams({ organizationId: user.org_id });
+      if (folderId) params.set("folderId", folderId);
+      const response = await fetch(`/api/integrations/google/drive/files?${params.toString()}`, { cache: "no-store" });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data?.error || "Failed to load Google Drive folder.");
+      setDriveFiles(data?.files ?? []);
+      if (folder) setDriveFolderStack((current) => [...current, folder]);
+      else if (!folderId) setDriveFolderStack([]);
+    } catch (error: any) {
+      console.error("Failed to load Google Drive folder:", error);
+      setDriveError(error?.message || "Failed to load Google Drive folder.");
+    } finally {
+      setDriveLoading(false);
+    }
+  }
+
+  async function goToDriveBreadcrumb(index: number) {
+    if (!user) return;
+    const nextStack = index < 0 ? [] : driveFolderStack.slice(0, index + 1);
+    const folderId = nextStack.length ? nextStack[nextStack.length - 1].id : undefined;
+    try {
+      setDriveLoading(true);
+      setDriveError(null);
+      const params = new URLSearchParams({ organizationId: user.org_id });
+      if (folderId) params.set("folderId", folderId);
+      const response = await fetch(`/api/integrations/google/drive/files?${params.toString()}`, { cache: "no-store" });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data?.error || "Failed to load Google Drive folder.");
+      setDriveFiles(data?.files ?? []);
+      setDriveFolderStack(nextStack);
+    } catch (error: any) {
+      setDriveError(error?.message || "Failed to load Google Drive folder.");
+    } finally {
+      setDriveLoading(false);
+    }
+  }
+
+  async function openDriveFile(file: any) {
+    if (!file?.isFolder) return;
+    await loadDriveFolder(file.id, file);
+  }
+
+  async function openGmailMessage(messageId: string) {
+    if (!user) return;
+    try {
+      setLoadingSelectedMessage(true);
+      const response = await fetch(`/api/integrations/google/gmail/message?organizationId=${user.org_id}&id=${messageId}`, { cache: "no-store" });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Failed to load message.");
+      setSelectedGmailMessage(data.message);
+      const from = data.message?.from || "";
+      const match = from.match(/<([^>]+)>/);
+      setComposeTo(match ? match[1] : from);
+      setComposeSubject(data.message?.subject?.startsWith("Re:") ? data.message.subject : `Re: ${data.message?.subject || ""}`);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to load Gmail message.");
+    } finally {
+      setLoadingSelectedMessage(false);
+    }
+  }
+
+
+
+async function searchGmail() {
+  if (!user) return;
+  try {
+    setGmailLoading(true);
+    const response = await fetch("/api/integrations/google/gmail/search",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        organizationId:user.org_id,
+        query:gmailSearch,
+      }),
+    });
+    const data=await response.json();
+    if(!response.ok) throw new Error(data.error||"Search failed.");
+    setGmailMessages(data.messages ?? []);
+  } catch(err){
+    console.error(err);
+    alert("Failed to search Gmail.");
+  } finally{
+    setGmailLoading(false);
+  }
+}
+
+
+async function gmailAction(action:string){
+  if(!user||!selectedGmailMessage) return;
+  try{
+    const response=await fetch("/api/integrations/google/gmail/update",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        organizationId:user.org_id,
+        messageId:selectedGmailMessage.id,
+        action,
+      }),
+    });
+    const data=await response.json();
+    if(!response.ok) throw new Error(data.error||"Action failed.");
+    await loadToolsContext();
+    if(action==="archive"||action==="trash"){
+      setSelectedGmailMessage(null);
+    }else{
+      await openGmailMessage(selectedGmailMessage.id);
+    }
+  }catch(err:any){
+    alert(err.message||"Failed Gmail action.");
+  }
+}
+
+async function sendGmailMessage() {
+  if (!user) return;
+  try {
+    setSendingEmail(true);
+
+    const response = await fetch("/api/integrations/google/gmail/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        organizationId: user.org_id,
+        to: composeTo,
+        subject: composeSubject,
+        body: composeBody,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) throw new Error(data.error || "Failed to send email.");
+
+    alert("Email sent.");
+    setComposeBody("");
+    await loadToolsContext();
+  } catch (err:any) {
+    alert(err.message || "Failed to send email.");
+  } finally {
+    setSendingEmail(false);
+  }
+}
 
   async function sendMessage() {
     if (!input.trim() || !user) return;
@@ -700,7 +1000,11 @@ export default function ToolsPage() {
 
                 <div className="flex items-center gap-3">
                   <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600">
-                    {module.status}
+                    {googleConnection === null
+                        ? "Checking"
+                        : googleConnection.connected
+                          ? "Connected"
+                          : "Not connected"}
                   </span>
 
                   <ChevronDown
@@ -713,32 +1017,484 @@ export default function ToolsPage() {
 
               {isOpen ? (
                 <div className="border-t border-slate-200 bg-slate-50 px-5 py-5">
-                  <div className="grid gap-4 md:grid-cols-3">
-                    {module.items.map((item) => (
-                      <div
-                        key={`${module.id}-${item.label}`}
-                        className="rounded-2xl border border-slate-200 bg-white p-4"
-                      >
-                        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                          {item.label}
-                        </p>
-
-                        <p className="mt-2 text-lg font-semibold text-slate-950">
-                          {item.value}
-                        </p>
-
-                        <p className="mt-2 text-sm leading-6 text-slate-600">
-                          {item.helper}
-                        </p>
+                  {!googleConnection?.connected ? (
+                    <div className="rounded-2xl border border-slate-200 bg-white p-5">
+                      <div className="font-semibold text-slate-900">
+                        Google Workspace is not connected
                       </div>
-                    ))}
-                  </div>
+                      <p className="mt-1 text-sm leading-6 text-slate-600">
+                        Connect the campaign Google account from the Integrations Hub to use {module.title}.
+                      </p>
+                      {canAccessIntegrations ? (
+                        <Link
+                          href="/dashboard/integrations"
+                          className="mt-4 inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                        >
+                          Open Integrations Hub
+                          <ArrowRight className="h-4 w-4" />
+                        </Link>
+                      ) : null}
+                    </div>
+                  ) : module.id === "calendar" ? (
+                    <div className="space-y-4">
+                      <div className="grid gap-4 md:grid-cols-3">
+                        <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                          <div className="text-xs uppercase tracking-[0.14em] text-slate-500">Connected</div>
+                          <div className="mt-2 font-semibold break-all">
+                            {googleConnection?.email || "Google account"}
+                          </div>
+                        </div>
 
-                  <div className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-white p-4 text-sm leading-6 text-slate-600">
-                    Google connection controls will live here once we wire the
-                    selected utility. For now, this module defines the campaign
-                    workspace shape without pretending the live connector exists.
-                  </div>
+                        <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                          <div className="text-xs uppercase tracking-[0.14em] text-slate-500">Calendars</div>
+                          <div className="mt-2 text-2xl font-bold">{googleCalendars.length}</div>
+                        </div>
+
+                        <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                          <div className="text-xs uppercase tracking-[0.14em] text-slate-500">Access</div>
+                          <div className="mt-2 font-semibold">Read enabled</div>
+                        </div>
+                      </div>
+
+                      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+                        <div className="flex items-center justify-between gap-3 border-b border-slate-200 px-5 py-4">
+                          <div>
+                            <h4 className="font-semibold text-slate-950">Google Calendars</h4>
+                            <p className="mt-1 text-sm text-slate-500">
+                              Calendars available to the connected campaign account.
+                            </p>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => loadToolsContext()}
+                            className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                          >
+                            Refresh
+                          </button>
+                        </div>
+
+                        {calendarLoading ? (
+                          <div className="p-5 text-sm text-slate-500">Syncing Google Calendar...</div>
+                        ) : calendarError ? (
+                          <div className="p-5 text-sm text-red-600">{calendarError}</div>
+                        ) : googleCalendars.length === 0 ? (
+                          <div className="p-5 text-sm text-slate-500">
+                            No Google calendars were returned for this account.
+                          </div>
+                        ) : (
+                          <div className="divide-y divide-slate-100">
+                            {googleCalendars.map((calendar: any) => (
+                              <div
+                                key={calendar.id}
+                                className="flex items-center justify-between gap-4 px-5 py-4"
+                              >
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <span
+                                      className="h-2.5 w-2.5 shrink-0 rounded-full border border-slate-300"
+                                      style={
+                                        calendar.backgroundColor
+                                          ? { backgroundColor: calendar.backgroundColor }
+                                          : undefined
+                                      }
+                                    />
+                                    <div className="truncate font-semibold text-slate-900">
+                                      {calendar.name || calendar.id}
+                                    </div>
+                                    {calendar.primary ? (
+                                      <span className="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-600">
+                                        Primary
+                                      </span>
+                                    ) : null}
+                                  </div>
+
+                                  <div className="mt-1 text-sm text-slate-500">
+                                    {calendar.timeZone || "Calendar timezone unavailable"}
+                                  </div>
+
+                                  {calendar.description ? (
+                                    <div className="mt-1 text-sm text-slate-600">
+                                      {calendar.description}
+                                    </div>
+                                  ) : null}
+                                </div>
+
+                                <div className="shrink-0 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600">
+                                  {calendar.accessRole || "Available"}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+                        <div className="flex items-center justify-between gap-3 border-b border-slate-200 px-5 py-4">
+                          <div>
+                            <h4 className="font-semibold text-slate-950">Upcoming Events</h4>
+                            <p className="mt-1 text-sm text-slate-500">
+                              Upcoming campaign events from the connected Google Calendar.
+                            </p>
+                          </div>
+                          <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600">
+                            {calendarEvents.length} loaded
+                          </div>
+                        </div>
+
+                        {calendarEventsLoading ? (
+                          <div className="p-5 text-sm text-slate-500">Syncing calendar events...</div>
+                        ) : calendarEventsError ? (
+                          <div className="p-5 text-sm text-red-600">{calendarEventsError}</div>
+                        ) : calendarEvents.length === 0 ? (
+                          <div className="p-5 text-sm text-slate-500">
+                            No upcoming events were returned for this calendar.
+                          </div>
+                        ) : (
+                          <div className="divide-y divide-slate-100">
+                            {calendarEvents.map((event: any) => {
+                              const startValue =
+                                event.start?.dateTime ||
+                                event.start?.date ||
+                                event.startDateTime ||
+                                event.startTime ||
+                                event.start;
+                              const endValue =
+                                event.end?.dateTime ||
+                                event.end?.date ||
+                                event.endDateTime ||
+                                event.endTime ||
+                                event.end;
+                              const startDate = startValue ? new Date(startValue) : null;
+                              const endDate = endValue ? new Date(endValue) : null;
+                              const attendees = Array.isArray(event.attendees) ? event.attendees : [];
+                              const meetingLink =
+                                event.hangoutLink ||
+                                event.meetLink ||
+                                event.conferenceData?.entryPoints?.find(
+                                  (entry: any) => entry.entryPointType === "video"
+                                )?.uri;
+
+                              return (
+                                <div key={event.id} className="px-5 py-4">
+                                  <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                                    <div className="min-w-0">
+                                      <div className="font-semibold text-slate-900">
+                                        {event.summary || event.title || "Untitled event"}
+                                      </div>
+                                      <div className="mt-1 text-sm text-slate-600">
+                                        {startDate && !Number.isNaN(startDate.getTime())
+                                          ? startDate.toLocaleString()
+                                          : "Start time unavailable"}
+                                        {endDate && !Number.isNaN(endDate.getTime())
+                                          ? ` — ${endDate.toLocaleString()}`
+                                          : ""}
+                                      </div>
+                                      {event.location ? (
+                                        <div className="mt-1 text-sm text-slate-500">{event.location}</div>
+                                      ) : null}
+                                      {event.description ? (
+                                        <div className="mt-2 line-clamp-2 text-sm leading-6 text-slate-600">
+                                          {event.description}
+                                        </div>
+                                      ) : null}
+                                      {attendees.length > 0 ? (
+                                        <div className="mt-2 text-xs text-slate-500">
+                                          {attendees.length} attendee{attendees.length === 1 ? "" : "s"}
+                                        </div>
+                                      ) : null}
+                                    </div>
+
+                                    <div className="flex shrink-0 flex-wrap gap-2">
+                                      {meetingLink ? (
+                                        <a
+                                          href={meetingLink}
+                                          target="_blank"
+                                          rel="noreferrer"
+                                          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
+                                        >
+                                          Open Meet
+                                        </a>
+                                      ) : null}
+                                      {event.htmlLink ? (
+                                        <a
+                                          href={event.htmlLink}
+                                          target="_blank"
+                                          rel="noreferrer"
+                                          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
+                                        >
+                                          Open in Google
+                                        </a>
+                                      ) : null}
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+
+                    </div>
+                  ) : module.id === "drive" ? (
+                    <div className="space-y-4">
+                      <div className="grid gap-4 md:grid-cols-3">
+                        <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                          <div className="text-xs uppercase tracking-[0.14em] text-slate-500">Connected</div>
+                          <div className="mt-2 font-semibold break-all">
+                            {googleConnection?.email || "Google account"}
+                          </div>
+                        </div>
+
+                        <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                          <div className="text-xs uppercase tracking-[0.14em] text-slate-500">Root Items</div>
+                          <div className="mt-2 text-2xl font-bold">{driveFiles.length}</div>
+                        </div>
+
+                        <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                          <div className="text-xs uppercase tracking-[0.14em] text-slate-500">Access</div>
+                          <div className="mt-2 font-semibold">Read only</div>
+                        </div>
+                      </div>
+
+                      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+                        <div className="flex items-center justify-between gap-3 border-b border-slate-200 px-5 py-4">
+                          <div>
+                            <h4 className="font-semibold text-slate-950">Google Drive</h4>
+                            <p className="mt-1 text-sm text-slate-500">
+                              Campaign files and folders available from the connected Drive.
+                            </p>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => loadToolsContext()}
+                            className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                          >
+                            Refresh
+                          </button>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 px-5 py-3 text-sm">
+                          <button type="button" onClick={() => goToDriveBreadcrumb(-1)} className="font-semibold text-slate-700 hover:text-slate-950">Drive</button>
+                          {driveFolderStack.map((folder: any, index: number) => (
+                            <div key={folder.id} className="flex items-center gap-2">
+                              <ChevronRight className="h-4 w-4 text-slate-400" />
+                              <button type="button" onClick={() => goToDriveBreadcrumb(index)} className="font-medium text-slate-600 hover:text-slate-950">{folder.name}</button>
+                            </div>
+                          ))}
+                        </div>
+
+                        {driveLoading ? (
+                          <div className="p-5 text-sm text-slate-500">Syncing Google Drive...</div>
+                        ) : driveError ? (
+                          <div className="p-5 text-sm text-red-600">{driveError}</div>
+                        ) : driveFiles.length === 0 ? (
+                          <div className="p-5 text-sm text-slate-500">
+                            No files or folders were returned from the Drive root.
+                          </div>
+                        ) : (
+                          <div className="divide-y divide-slate-100">
+                            {driveFiles.map((file: any) => (
+                              <div
+                                key={file.id}
+                                className="flex flex-col gap-3 px-5 py-4 md:flex-row md:items-center md:justify-between"
+                              >
+                                <div className="flex min-w-0 items-start gap-3">
+                                  <div className="mt-0.5 rounded-xl border border-slate-200 bg-slate-50 p-2">
+                                    <FolderKanban className="h-4 w-4 text-slate-500" />
+                                  </div>
+
+                                  <div className="min-w-0">
+                                    <button
+                                      type="button"
+                                      onClick={() => openDriveFile(file)}
+                                      className="block max-w-full truncate text-left font-semibold text-slate-900 hover:underline"
+                                    >
+                                      {file.name || "Untitled"}
+                                    </button>
+                                    <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-500">
+                                      <span>{file.isFolder ? "Folder" : file.mimeType || "File"}</span>
+                                      {file.modifiedTime ? (
+                                        <span>
+                                          Modified {new Date(file.modifiedTime).toLocaleString()}
+                                        </span>
+                                      ) : null}
+                                      {file.owners?.[0]?.name ? (
+                                        <span>{file.owners[0].name}</span>
+                                      ) : null}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="flex shrink-0 items-center gap-2">
+                                  {file.isFolder ? (
+                                    <button
+                                      type="button"
+                                      onClick={() => openDriveFile(file)}
+                                      className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
+                                    >
+                                      Browse
+                                    </button>
+                                  ) : null}
+                                  {file.shared ? (
+                                    <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-600">
+                                      Shared
+                                    </span>
+                                  ) : null}
+
+                                  {file.webViewLink ? (
+                                    <a
+                                      href={file.webViewLink}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
+                                    >
+                                      Open in Google
+                                    </a>
+                                  ) : null}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                    </div>
+                  ) : module.id === "gmail" ? (
+                    <div className="space-y-4">
+                      <div className="grid gap-4 md:grid-cols-4">
+                        <div className="rounded-2xl border border-slate-200 bg-white p-4"><div className="text-xs uppercase tracking-[0.14em] text-slate-500">Connected</div><div className="mt-2 font-semibold break-all">{googleConnection?.email}</div></div>
+                        <div className="rounded-2xl border border-slate-200 bg-white p-4"><div className="text-xs uppercase tracking-[0.14em] text-slate-500">Unread</div><div className="mt-2 text-2xl font-bold">{gmailMessages.filter((m:any)=>m.unread).length}</div></div>
+                        <div className="rounded-2xl border border-slate-200 bg-white p-4"><div className="text-xs uppercase tracking-[0.14em] text-slate-500">Loaded</div><div className="mt-2 text-2xl font-bold">{gmailMessages.length}</div></div>
+                        <div className="rounded-2xl border border-slate-200 bg-white p-4"><div className="text-xs uppercase tracking-[0.14em] text-slate-500">Last Sync</div><div className="mt-2 font-semibold">Just now</div></div>
+                      </div>
+                      <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
+<div className="flex items-center gap-3 border-b border-slate-200 p-4">
+<input
+className="flex-1 rounded-xl border border-slate-200 px-3 py-2"
+placeholder="Search Gmail (from:, subject:, is:unread...)"
+value={gmailSearch}
+onChange={(e)=>setGmailSearch(e.target.value)}
+onKeyDown={(e)=>{if(e.key==="Enter") searchGmail();}}
+/>
+<button
+type="button"
+onClick={searchGmail}
+className="rounded-xl bg-slate-900 px-4 py-2 text-sm text-white"
+>
+Search
+</button>
+<button
+type="button"
+onClick={loadToolsContext}
+className="rounded-xl border border-slate-200 px-4 py-2 text-sm"
+>
+Reset
+</button>
+</div>
+                        <div className="max-h-[420px] overflow-y-auto">
+                          {gmailLoading ? <div className="p-5 text-sm text-slate-500">Syncing Gmail...</div> : gmailMessages.slice(0,25).map((m:any)=>(
+                            <button
+                              key={m.id}
+                              type="button"
+                              onClick={() => openGmailMessage(m.id)}
+                              className="group w-full border-b border-slate-100 p-4 text-left transition hover:bg-slate-50 last:border-b-0"
+                            >
+                              <div className="flex justify-between gap-3">
+                                <div className="font-semibold">{m.from}</div>
+                                <div className="text-xs text-slate-500">{m.date}</div>
+                              </div>
+
+                              <div className="mt-1 font-medium">{m.subject}</div>
+
+                              <div className="mt-1 flex items-center justify-between gap-3">
+                                <div className="text-sm text-slate-600">{m.snippet}</div>
+                                <ChevronRight className="h-4 w-4 text-slate-400 transition group-hover:translate-x-1 group-hover:text-slate-700" />
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {(loadingSelectedMessage || selectedGmailMessage) && (
+                        <div className="rounded-2xl border border-slate-200 bg-white p-5">
+                          {loadingSelectedMessage ? (
+                            <div className="text-sm text-slate-500">Loading message...</div>
+                          ) : (
+                            <>
+                              <div className="text-xl font-semibold">{selectedGmailMessage?.subject}</div>
+                              <div className="mt-4 flex flex-wrap gap-2">
+<button className="rounded-lg border px-3 py-1 text-sm">Reply</button>
+<button onClick={()=>gmailAction("markRead")} className="rounded-lg border px-3 py-1 text-sm hover:bg-slate-100">Mark Read</button>
+<button onClick={()=>gmailAction("archive")} className="rounded-lg border px-3 py-1 text-sm hover:bg-slate-100">Archive</button>
+<button onClick={()=>gmailAction("star")} className="rounded-lg border px-3 py-1 text-sm hover:bg-slate-100">Star</button>
+<button onClick={()=>gmailAction("trash")} className="rounded-lg border px-3 py-1 text-sm hover:bg-red-50">Trash</button>
+</div>
+<div className="mt-2 text-sm text-slate-500">
+                                <div><strong>From:</strong> {selectedGmailMessage?.from}</div>
+                                <div><strong>To:</strong> {selectedGmailMessage?.to}</div>
+                                <div><strong>Date:</strong> {selectedGmailMessage?.date}</div>
+                              </div>
+                              <div className="mt-6 whitespace-pre-wrap text-sm leading-7 text-slate-700">
+                                {selectedGmailMessage?.body || selectedGmailMessage?.snippet}
+                              </div>
+                            </>
+                          )}
+                        </div>
+
+  )}
+
+  <div className="rounded-2xl border border-slate-200 bg-white p-5">
+    <h4 className="text-lg font-semibold text-slate-900">Reply / New Email</h4>
+
+    <input
+      className="mt-4 w-full rounded-xl border border-slate-200 px-3 py-2"
+      placeholder="To"
+      value={composeTo}
+      onChange={(e)=>setComposeTo(e.target.value)}
+    />
+
+    <input
+      className="mt-3 w-full rounded-xl border border-slate-200 px-3 py-2"
+      placeholder="Subject"
+      value={composeSubject}
+      onChange={(e)=>setComposeSubject(e.target.value)}
+    />
+
+    <textarea
+      className="mt-3 min-h-[180px] w-full rounded-xl border border-slate-200 px-3 py-2"
+      placeholder="Write your email..."
+      value={composeBody}
+      onChange={(e)=>setComposeBody(e.target.value)}
+    />
+
+    <button
+      type="button"
+      onClick={sendGmailMessage}
+      disabled={sendingEmail}
+      className="mt-4 inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-white disabled:opacity-50"
+    >
+      <Send className="h-4 w-4" />
+      {sendingEmail ? "Sending..." : "Send Email"}
+    </button>
+  </div>
+</div>
+                  ) : (
+                    <>
+                      <div className="grid gap-4 md:grid-cols-3">
+                        {module.items.map((item) => (
+                          <div key={`${module.id}-${item.label}`} className="rounded-2xl border border-slate-200 bg-white p-4">
+                            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">{item.label}</p>
+                            <p className="mt-2 text-lg font-semibold text-slate-950">{item.value}</p>
+                            <p className="mt-2 text-sm leading-6 text-slate-600">{item.helper}</p>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-white p-4 text-sm leading-6 text-slate-600">
+                        {googleConnection?.connected ? (<><div className="font-semibold text-slate-900">Connected Account</div><div className="mt-1">{googleConnection.email}</div></>) : <>Google Workspace has not been connected for this campaign.</>}
+                      </div>
+                    </>
+                  )}
                 </div>
               ) : null}
             </div>
@@ -747,33 +1503,23 @@ export default function ToolsPage() {
       </section>
 
       <section className="rounded-3xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
-        <div className="flex flex-col gap-3 text-sm text-slate-600 md:flex-row md:items-center md:justify-between">
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="inline-flex items-center gap-2">
-              <MessageSquare className="h-4 w-4 text-slate-400" />
-              {messages.length} coordination messages
-            </span>
+        <div className="flex flex-wrap items-center gap-3 text-sm text-slate-600">
+          <span className="inline-flex items-center gap-2">
+            <MessageSquare className="h-4 w-4 text-slate-400" />
+            {messages.length} coordination messages
+          </span>
 
-            <span className="inline-flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-slate-400" />
-              {utilityModules.length} utility modules staged
-            </span>
+          <span className="inline-flex items-center gap-2">
+            <PlugZap className="h-4 w-4 text-slate-400" />
+            {googleConnection?.connected
+              ? "3 Google Workspace utilities connected"
+              : "Google Workspace not connected"}
+          </span>
 
-            <span className={`inline-flex items-center gap-2 ${orgTheme.accentText}`}>
-              <Wrench className="h-4 w-4" />
-              {canAccessIntegrations ? "Infrastructure access enabled" : "Tools only"}
-            </span>
-          </div>
-
-          {canAccessIntegrations ? (
-            <Link
-              href="/dashboard/integrations"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-slate-700 transition hover:text-slate-950"
-            >
-              Integrations hub
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          ) : null}
+          <span className={`inline-flex items-center gap-2 ${orgTheme.accentText}`}>
+            <Wrench className="h-4 w-4" />
+            {canAccessIntegrations ? "Infrastructure access enabled" : "Tools workspace"}
+          </span>
         </div>
       </section>
     </div>
