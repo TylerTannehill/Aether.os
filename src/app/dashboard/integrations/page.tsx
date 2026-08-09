@@ -551,6 +551,8 @@ function ConnectionPanel({
                 ? "You\'ll be redirected to Google to securely connect Gmail, Google Calendar, and Google Drive."
                 : integration.id === "youtube"
                 ? "You\'ll be redirected to Google to securely connect the campaign\'s YouTube channel and analytics."
+                : integration.id === "x"
+                ? "You\'ll be redirected to X to securely connect the campaign\'s X account and analytics."
                 : "Add the account details your campaign uses for this tool. Once saved, this integration will show as connected."}
             </p>
           </div>
@@ -655,6 +657,27 @@ function ConnectionPanel({
                 </div>
               </div>
             </>
+          ) : integration.id === "x" ? (
+            <>
+              <div className="rounded-3xl border border-slate-200 bg-white p-5">
+                <p className="text-sm font-semibold text-slate-900">X Analytics</p>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  Connect the campaign&apos;s X account so Aether can read profile, post, and engagement performance through the X API.
+                </p>
+              </div>
+
+              <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
+                <div className="flex items-start gap-3">
+                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
+                  <div>
+                    <p className="text-sm font-semibold text-emerald-950">Secure X OAuth</p>
+                    <p className="mt-1 text-sm leading-6 text-emerald-800/80">
+                      You&apos;ll be redirected to X to approve read-only access. Aether never asks for your X password.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </>
           ) : (
             <>
               <div>
@@ -715,6 +738,8 @@ function ConnectionPanel({
                     ? () => window.location.assign("/api/integrations/google/connect")
                     : integration.id === "youtube"
                     ? () => window.location.assign("/api/integrations/youtube/connect")
+                    : integration.id === "x"
+                    ? () => window.location.assign("/api/integrations/x/connect")
                     : onSave
                 }
                 disabled={saving}
@@ -724,6 +749,8 @@ function ConnectionPanel({
                   ? "Connect with Google"
                   : integration.id === "youtube"
                   ? "Connect with YouTube"
+                  : integration.id === "x"
+                  ? "Connect with X"
                   : saving
                   ? "Saving..."
                   : "Save & Connect"}

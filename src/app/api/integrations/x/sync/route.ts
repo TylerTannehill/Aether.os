@@ -62,7 +62,11 @@ export async function POST() {
       "x"
     );
 
-    if (!connection) {
+    if (
+      !connection ||
+      connection.status !== "connected" ||
+      !connection.access_token
+    ) {
       return NextResponse.json(
         {
           success: false,
@@ -72,11 +76,15 @@ export async function POST() {
       );
     }
 
+    const endDate = new Date();
+    const startDate = new Date(endDate);
+    startDate.setUTCDate(startDate.getUTCDate() - 30);
+
     const xPayload = await provider.fetchAnalytics(
       connection,
       {
-        startDate: new Date().toISOString(),
-        endDate: new Date().toISOString(),
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
       }
     );
 
@@ -84,6 +92,80 @@ export async function POST() {
       xPayload,
       activeOrganizationId
     );
+
+    const startDateString = startDate.toISOString().slice(0, 10);
+    const endDateString = endDate.toISOString().slice(0, 10);
+
+    const { error: deleteError } = await supabase
+      .from("analytics_events")
+      .delete()
+      .eq("organization_id", activeOrganizationId)
+      .eq("source", "x")
+      .eq("platform", "x")
+      .gte("metric_date", startDateString)
+      .lte("metric_date", endDateString);
+
+    if (deleteError) {
+      console.error("X sync cleanup failed", deleteError);
+
+      return NextResponse.json(
+        {
+          success: false,
+          error: deleteError.message,
+        },
+        { status: 500 }
+      );
+    }
+
+    if (rows.length === 0) {
+      const zeroRow = {
+        organization_id: activeOrganizationId,
+        campaign_name: "Aether Systems",
+        department: "digital",
+        source: "x",
+        platform: "x",
+        metric_date: endDateString,
+        asset_name: null,
+        impressions: 0,
+        engagements: 0,
+        clicks: 0,
+        spend: 0,
+        sentiment_positive: 0,
+        sentiment_negative: 0,
+        sentiment_neutral: 0,
+        notes: "X API: connected account returned no posts in the current sync window.",
+        raw_payload: {
+          provider: "x",
+          empty_sync: true,
+          start_date: startDateString,
+          end_date: endDateString,
+        },
+      };
+
+      const { data: zeroData, error: zeroError } = await supabase
+        .from("analytics_events")
+        .insert([zeroRow])
+        .select("id");
+
+      if (zeroError) {
+        console.error("X zero-row insert failed", zeroError);
+
+        return NextResponse.json(
+          {
+            success: false,
+            error: zeroError.message,
+          },
+          { status: 500 }
+        );
+      }
+
+      return NextResponse.json({
+        success: true,
+        source: "x",
+        imported: zeroData?.length ?? 1,
+        rows: [zeroRow],
+      });
+    }
 
     const { data, error } = await supabase
       .from("analytics_events")
