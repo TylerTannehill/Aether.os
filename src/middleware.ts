@@ -36,6 +36,7 @@ export async function middleware(request: NextRequest) {
   const isPublicApiRoute =
     pathname === '/api/contact' ||
     pathname === '/api/auth/select-campaign' ||
+    pathname === '/api/integrations/website/track' ||
     pathname.startsWith('/api/mobile/')
 
   const isPublicRoute = publicRoutes.includes(pathname)
