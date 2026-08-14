@@ -183,16 +183,15 @@ export async function POST(request: NextRequest) {
     }
 
     /*
-     * IMPORTANT:
-     * The browser tracker must use a PUBLIC tracker identifier, not the
-     * secret aether_web_* API credential.
+     * The browser tracker uses the public tracker identifier stored in the
+     * Website integration metadata. The private aether_web_* API credential
+     * is never exposed to browser-side code.
      *
-     * The connect route will be updated next to create/store this public
-     * tracker identifier on the Website connection. Until that field exists,
-     * this endpoint intentionally cannot authenticate browser events.
+     * Website connections are stored in organization_integrations through
+     * the shared integration connection store.
      */
     const { data: connection, error: connectionError } = await admin
-      .from("integration_connections")
+      .from("organization_integrations")
       .select("*")
       .eq("provider", PROVIDER)
       .eq("status", "connected")
