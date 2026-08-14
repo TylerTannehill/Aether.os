@@ -162,6 +162,11 @@ export default function RootLayout({
           }}
         />
         {children}
+        <script
+          src="https://aetheros.pro/aether-tracker.js"
+          data-aether-tracker="aether_track_fed5b8d67525f56133e2742c4419998a"
+          defer
+        />
       </body>
     </html>
   );

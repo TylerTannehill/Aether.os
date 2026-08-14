@@ -19,6 +19,7 @@ import {
   AlertCircle,
   X,
   ShieldCheck,
+  Copy,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { getOrgContextTheme } from "@/lib/org-context-theme";
@@ -232,6 +233,7 @@ const SOCIAL_PROVIDER_IDS = new Set([
   "x",
   "tiktok",
   "youtube",
+  "website",
   "google",
   "gmail",
   "calendar",
@@ -481,6 +483,9 @@ function ConnectionPanel({
   saving,
   disconnecting,
   actionError,
+  websiteApiKey,
+  websiteEndpoint,
+  websiteTrackerId,
 }: {
   integration: IntegrationCard;
   connected: boolean;
@@ -495,6 +500,9 @@ function ConnectionPanel({
   saving: boolean;
   disconnecting: boolean;
   actionError: string;
+  websiteApiKey: string;
+  websiteEndpoint: string;
+  websiteTrackerId: string;
 }) {
   const currentCredentials = credentials[integration.id] || {
     accountName: "",
@@ -589,7 +597,129 @@ function ConnectionPanel({
             </p>
           </div>
 
-          {connected ? (
+          {integration.id === "website" && connected && websiteTrackerId ? (
+            <>
+              <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700" />
+                  <div>
+                    <p className="text-sm font-semibold text-emerald-950">
+                      Campaign Website tracker ready
+                    </p>
+                    <p className="mt-1 text-sm leading-6 text-emerald-800/80">
+                      Copy the installation code below and add it once to the campaign website. Aether will begin tracking page views, clicks, and form submissions automatically.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-3xl border border-slate-200 bg-white p-5">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                      Installation Code
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-slate-600">
+                      Paste this before the closing &lt;/body&gt; tag on the campaign website.
+                    </p>
+                  </div>
+                </div>
+
+                <pre className="mt-4 overflow-x-auto whitespace-pre-wrap break-all rounded-2xl border border-slate-200 bg-slate-950 p-4 text-xs leading-6 text-slate-100">
+                  {`<script src="https://aetheros.pro/aether-tracker.js" data-aether-tracker="${websiteTrackerId}" defer></script>`}
+                </pre>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    navigator.clipboard.writeText(
+                      `<script src="https://aetheros.pro/aether-tracker.js" data-aether-tracker="${websiteTrackerId}" defer></script>`
+                    )
+                  }
+                  className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+                >
+                  <Copy className="h-4 w-4" />
+                  Copy Installation Code
+                </button>
+              </div>
+
+              <div className="rounded-3xl border border-blue-200 bg-blue-50 p-5">
+                <div className="flex items-start gap-3">
+                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-blue-700" />
+                  <div>
+                    <p className="text-sm font-semibold text-blue-950">
+                      Safe for the campaign website
+                    </p>
+                    <p className="mt-1 text-sm leading-6 text-blue-800/80">
+                      This installation code uses the campaign&apos;s public tracker ID. It does not expose the private Website API key.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {websiteApiKey ? (
+                <details className="rounded-3xl border border-slate-200 bg-white p-5">
+                  <summary className="cursor-pointer text-sm font-semibold text-slate-900">
+                    Advanced API access
+                  </summary>
+                  <p className="mt-3 text-sm leading-6 text-slate-600">
+                    Only use this private API key for a server-side or custom integration. Never place it in browser code.
+                  </p>
+
+                  <div className="mt-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                      Private API Key
+                    </p>
+                    <div className="mt-2 flex gap-2">
+                      <input
+                        readOnly
+                        value={websiteApiKey}
+                        className="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 font-mono text-xs text-slate-900 outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => navigator.clipboard.writeText(websiteApiKey)}
+                        className="inline-flex shrink-0 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                      >
+                        <Copy className="h-4 w-4" />
+                        Copy
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="mt-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                      Ingest Endpoint
+                    </p>
+                    <div className="mt-2 flex gap-2">
+                      <input
+                        readOnly
+                        value={websiteEndpoint}
+                        className="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 font-mono text-xs text-slate-900 outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => navigator.clipboard.writeText(websiteEndpoint)}
+                        className="inline-flex shrink-0 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                      >
+                        <Copy className="h-4 w-4" />
+                        Copy
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                    <p className="text-sm font-semibold text-amber-950">
+                      Save the private key now if you need custom API access.
+                    </p>
+                    <p className="mt-1 text-sm leading-6 text-amber-800/80">
+                      Aether will not display the full private API key again after this panel is closed.
+                    </p>
+                  </div>
+                </details>
+              ) : null}
+            </>
+          ) : connected ? (
             <>
               <div className="rounded-3xl border border-slate-200 bg-white p-5">
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
@@ -678,6 +808,26 @@ function ConnectionPanel({
                 </div>
               </div>
             </>
+          ) : integration.id === "website" ? (
+            <>
+              <div className="rounded-3xl border border-slate-200 bg-white p-5">
+                <p className="text-sm font-semibold text-slate-900">Campaign Website API</p>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  Aether creates a campaign-specific website tracker. Copy one installation snippet into the campaign website and Aether will handle analytics automatically.
+                </p>
+              </div>
+              <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
+                <div className="flex items-start gap-3">
+                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
+                  <div>
+                    <p className="text-sm font-semibold text-emerald-950">One-copy installation</p>
+                    <p className="mt-1 text-sm leading-6 text-emerald-800/80">
+                      No third-party login is required. Aether generates a public tracker ID for the website and keeps the private API credential protected.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </>
           ) : (
             <>
               <div>
@@ -716,10 +866,10 @@ function ConnectionPanel({
               disabled={saving || disconnecting}
               className="flex-1 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {connected ? "Close" : "Cancel"}
+              {integration.id === "website" && connected && websiteTrackerId ? "Done" : connected ? "Close" : "Cancel"}
             </button>
 
-            {connected ? (
+            {integration.id === "website" && connected && websiteTrackerId ? null : connected ? (
               canDisconnect ? (
                 <button
                   type="button"
@@ -751,6 +901,10 @@ function ConnectionPanel({
                   ? "Connect with YouTube"
                   : integration.id === "x"
                   ? "Connect with X"
+                  : integration.id === "website"
+                  ? saving
+                    ? "Creating API Key..."
+                    : "Create Website Tracker"
                   : saving
                   ? "Saving..."
                   : "Save & Connect"}
@@ -774,6 +928,9 @@ export default function IntegrationsPage() {
   const [savingConnection, setSavingConnection] = useState(false);
   const [disconnectingId, setDisconnectingId] = useState<string | null>(null);
   const [connectionSaveError, setConnectionSaveError] = useState("");
+  const [websiteApiKey, setWebsiteApiKey] = useState("");
+  const [websiteEndpoint, setWebsiteEndpoint] = useState("");
+  const [websiteTrackerId, setWebsiteTrackerId] = useState("");
   const [configuredIntegrations, setConfiguredIntegrations] = useState<
     Record<string, boolean>
   >({});
@@ -828,6 +985,7 @@ export default function IntegrationsPage() {
           "x",
           "tiktok",
           "youtube",
+          "website",
           "actblue",
           "winred",
         ] as const;
@@ -843,6 +1001,23 @@ export default function IntegrationsPage() {
               connectionMap[provider] =
                 Boolean(connection?.status === "connected");
 
+              if (provider === "website" && connection?.status === "connected") {
+                const metadata =
+                  connection?.metadata &&
+                  typeof connection.metadata === "object" &&
+                  !Array.isArray(connection.metadata)
+                    ? connection.metadata
+                    : {};
+
+                const existingTrackerId = String(
+                  metadata?.tracker_id || metadata?.trackerId || ""
+                ).trim();
+
+                if (existingTrackerId && !cancelled) {
+                  setWebsiteTrackerId(existingTrackerId);
+                }
+              }
+
             } catch (error) {
               console.error(`[Integrations] Failed loading ${provider}`, error);
               connectionMap[provider] = false;
@@ -853,7 +1028,6 @@ export default function IntegrationsPage() {
         connectionMap.gmail = connectionMap.google;
         connectionMap.calendar = connectionMap.google;
         connectionMap.drive = connectionMap.google;
-        connectionMap.website = false;
 
         if (cancelled) return;
 
@@ -882,6 +1056,49 @@ export default function IntegrationsPage() {
 
   async function saveCurrentConnection() {
     if (!activeIntegration || !activeOrganizationId) return;
+
+    if (activeIntegration.id === "website") {
+      try {
+        setSavingConnection(true);
+        setConnectionSaveError("");
+
+        const response = await fetch("/api/integrations/website/connect", {
+          method: "POST",
+          credentials: "include",
+          cache: "no-store",
+        });
+
+        const result = await response.json().catch(() => null);
+
+        if (!response.ok || !result?.success) {
+          throw new Error(
+            result?.error || "The Campaign Website API connection could not be created."
+          );
+        }
+
+        setConfiguredIntegrations((current) => ({
+          ...current,
+          website: true,
+        }));
+
+        setWebsiteApiKey(String(result.apiKey || ""));
+        setWebsiteTrackerId(String(result.trackerId || ""));
+        const returnedEndpoint = String(result.endpoint || "/api/integrations/website/ingest");
+        setWebsiteEndpoint(
+          returnedEndpoint.startsWith("http")
+            ? returnedEndpoint
+            : `${window.location.origin}${returnedEndpoint}`
+        );
+      } catch (error: any) {
+        console.error("Failed to create Campaign Website API connection", error);
+        setConnectionSaveError(
+          error?.message || "The Campaign Website API connection could not be created."
+        );
+      } finally {
+        setSavingConnection(false);
+      }
+      return;
+    }
 
     const currentCredentials = credentials[activeIntegration.id] || {
       accountName: "",
@@ -946,7 +1163,8 @@ export default function IntegrationsPage() {
           activeOrganizationId
         )}`,
         {
-          method: "DELETE",
+          method: providerId === "website" ? "POST" : "DELETE",
+          credentials: "include",
         }
       );
 
@@ -969,6 +1187,12 @@ export default function IntegrationsPage() {
         return next;
       });
 
+      if (providerId === "website") {
+        setWebsiteApiKey("");
+        setWebsiteEndpoint("");
+        setWebsiteTrackerId("");
+      }
+
       setActiveIntegration(null);
     } catch (error: any) {
       console.error(`Failed to disconnect ${providerName}`, error);
@@ -983,6 +1207,8 @@ export default function IntegrationsPage() {
 
   function openConnection(integration: IntegrationCard) {
     setConnectionSaveError("");
+    setWebsiteApiKey("");
+    setWebsiteEndpoint("");
     setActiveIntegration(integration);
   }
 
@@ -1171,6 +1397,8 @@ export default function IntegrationsPage() {
           setCredentials={setCredentials}
           onClose={() => {
             setConnectionSaveError("");
+            setWebsiteApiKey("");
+            setWebsiteEndpoint("");
             setActiveIntegration(null);
           }}
           onSave={saveCurrentConnection}
@@ -1178,6 +1406,9 @@ export default function IntegrationsPage() {
           saving={savingConnection}
           disconnecting={disconnectingId === activeIntegration.id}
           actionError={connectionSaveError}
+          websiteApiKey={websiteApiKey}
+          websiteEndpoint={websiteEndpoint}
+          websiteTrackerId={websiteTrackerId}
         />
       ) : null}
     </>
