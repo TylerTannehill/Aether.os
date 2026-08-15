@@ -1,20 +1,29 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 
-import { disconnect, getConnection } from "@/lib/integrations/connection-store";
+import {
+  disconnect,
+  getConnection,
+} from "@/lib/integrations/connection-store";
 
-async function getOrganizationId(request: NextRequest) {
-  const organizationId = request.nextUrl.searchParams.get("organizationId");
-
-  if (!organizationId) {
-    throw new Error("organizationId is required.");
-  }
-
-  return organizationId;
-}
-
-export async function DELETE(request: NextRequest) {
+export async function DELETE() {
   try {
-    const organizationId = await getOrganizationId(request);
+    const cookieStore = await cookies();
+    const organizationId =
+      cookieStore.get("active_organization_id")?.value?.trim();
+
+    if (!organizationId) {
+      return NextResponse.json(
+        {
+          success: false,
+          provider: "meta",
+          stage: "disconnect",
+          disconnected: false,
+          message: "No active campaign selected.",
+        },
+        { status: 400 }
+      );
+    }
 
     const connection = await getConnection(organizationId, "meta");
 
@@ -25,12 +34,9 @@ export async function DELETE(request: NextRequest) {
           provider: "meta",
           stage: "disconnect",
           disconnected: false,
-          version: 1,
-          message: "Meta is not connected.",
+          message: "Meta is not connected for this campaign.",
         },
-        {
-          status: 400,
-        }
+        { status: 400 }
       );
     }
 
@@ -41,11 +47,10 @@ export async function DELETE(request: NextRequest) {
       provider: "meta",
       stage: "disconnect",
       disconnected: true,
-      version: 1,
       message: "Meta disconnected successfully.",
     });
   } catch (error: any) {
-    console.error("Meta disconnect failed:", error);
+    console.error("[META DISCONNECT] Failed", error);
 
     return NextResponse.json(
       {
@@ -53,12 +58,9 @@ export async function DELETE(request: NextRequest) {
         provider: "meta",
         stage: "disconnect",
         disconnected: false,
-        version: 1,
         message: error?.message || "Unable to disconnect Meta.",
       },
-      {
-        status: 500,
-      }
+      { status: 500 }
     );
   }
 }

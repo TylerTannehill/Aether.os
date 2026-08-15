@@ -89,6 +89,20 @@ const DIGITAL_INTEGRATIONS: IntegrationCard[] = [
     logoSubtext: "Meta",
   },
   {
+    id: "instagram",
+    name: "Instagram",
+    category: "Digital Team",
+    description:
+      "Track Instagram reach, engagement, content performance, and audience momentum.",
+    icon: BarChart3,
+    status: "ready_to_configure",
+    setupNote:
+      "Connect Meta to bring Instagram performance and audience activity into Aether.",
+    credentialHint: "Instagram Business account",
+    logoText: "◎",
+    logoSubtext: "Instagram",
+  },
+  {
     id: "x",
     name: "X",
     category: "Digital Team",
@@ -369,6 +383,8 @@ function IntegrationSection({
             integration.id === "calendar" ||
             integration.id === "drive"
               ? Boolean(configuredIntegrations["google"])
+              : integration.id === "instagram"
+              ? Boolean(configuredIntegrations["meta"])
               : Boolean(configuredIntegrations[integration.id]);
 
           const effectiveStatus: IntegrationStatus = configured
@@ -440,6 +456,17 @@ function IntegrationSection({
                             credentialHint: "Google Account",
                             logoText: "G",
                             logoSubtext: "Google",
+                          }
+                        : integration.id === "instagram"
+                        ? {
+                            ...integration,
+                            id: "meta",
+                            name: "Meta",
+                            description:
+                              "Connect Meta once to enable Facebook and Instagram analytics in Aether.",
+                            credentialHint: "Meta Business account",
+                            logoText: "∞",
+                            logoSubtext: "Meta",
                           }
                         : integration
                     )
@@ -557,6 +584,8 @@ function ConnectionPanel({
                 ? `${integration.name} is connected for this campaign.`
                 : integration.id === "google"
                 ? "You\'ll be redirected to Google to securely connect Gmail, Google Calendar, and Google Drive."
+                : integration.id === "meta"
+                ? "You\'ll be redirected to Meta to securely connect the campaign\'s Facebook and Instagram analytics."
                 : integration.id === "youtube"
                 ? "You\'ll be redirected to Google to securely connect the campaign\'s YouTube channel and analytics."
                 : integration.id === "x"
@@ -766,6 +795,27 @@ function ConnectionPanel({
                 </div>
               </div>
             </>
+          ) : integration.id === "meta" ? (
+            <>
+              <div className="rounded-3xl border border-slate-200 bg-white p-5">
+                <p className="text-sm font-semibold text-slate-900">Meta Analytics</p>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  Connect the campaign&apos;s Meta Business account so Aether can read Facebook and Instagram advertising and performance analytics.
+                </p>
+              </div>
+
+              <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
+                <div className="flex items-start gap-3">
+                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
+                  <div>
+                    <p className="text-sm font-semibold text-emerald-950">Secure Meta OAuth</p>
+                    <p className="mt-1 text-sm leading-6 text-emerald-800/80">
+                      You&apos;ll be redirected to Meta to approve access. Aether never asks for your Meta password.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </>
           ) : integration.id === "youtube" ? (
             <>
               <div className="rounded-3xl border border-slate-200 bg-white p-5">
@@ -886,6 +936,8 @@ function ConnectionPanel({
                 onClick={
                   integration.id === "google"
                     ? () => window.location.assign("/api/integrations/google/connect")
+                    : integration.id === "meta"
+                    ? () => window.location.assign("/api/integrations/meta/connect")
                     : integration.id === "youtube"
                     ? () => window.location.assign("/api/integrations/youtube/connect")
                     : integration.id === "x"
@@ -897,6 +949,8 @@ function ConnectionPanel({
               >
                 {integration.id === "google"
                   ? "Connect with Google"
+                  : integration.id === "meta"
+                  ? "Connect with Meta"
                   : integration.id === "youtube"
                   ? "Connect with YouTube"
                   : integration.id === "x"
@@ -1028,6 +1082,7 @@ export default function IntegrationsPage() {
         connectionMap.gmail = connectionMap.google;
         connectionMap.calendar = connectionMap.google;
         connectionMap.drive = connectionMap.google;
+        connectionMap.instagram = connectionMap.meta;
 
         if (cancelled) return;
 
@@ -1387,6 +1442,8 @@ export default function IntegrationsPage() {
               activeIntegration.id === "calendar" ||
               activeIntegration.id === "drive"
                 ? "google"
+                : activeIntegration.id === "instagram"
+                ? "meta"
                 : activeIntegration.id
             ]
           )}

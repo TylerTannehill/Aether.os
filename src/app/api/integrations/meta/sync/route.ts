@@ -72,11 +72,25 @@ export async function POST() {
       );
     }
 
+    if (connection.status !== "connected" || !connection.access_token) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Meta is not connected for this campaign.",
+        },
+        { status: 400 }
+      );
+    }
+
+    const endDate = new Date();
+    const startDate = new Date(endDate);
+    startDate.setUTCDate(startDate.getUTCDate() - 30);
+
     const metaPayload = await provider.fetchAnalytics(
       connection,
       {
-        startDate: new Date().toISOString(),
-        endDate: new Date().toISOString(),
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
       }
     );
 
@@ -84,6 +98,16 @@ export async function POST() {
       metaPayload,
       activeOrganizationId
     );
+
+    if (rows.length === 0) {
+      return NextResponse.json({
+        success: true,
+        source: "meta",
+        imported: 0,
+        rows: [],
+        message: "Meta sync completed. No analytics were returned for the last 30 days.",
+      });
+    }
 
     const { data, error } = await supabase
       .from("analytics_events")
