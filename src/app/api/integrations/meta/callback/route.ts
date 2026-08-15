@@ -21,7 +21,7 @@ export async function GET(request: Request) {
 
     if (oauthError) {
       return NextResponse.redirect(
-        `${appUrl}/integrations?meta=error&reason=${encodeURIComponent(
+        `${appUrl}/dashboard/tools?meta=error&reason=${encodeURIComponent(
           oauthErrorDescription || oauthError
         )}`
       );
@@ -29,7 +29,7 @@ export async function GET(request: Request) {
 
     if (!code || !state) {
       return NextResponse.redirect(
-        `${appUrl}/integrations?meta=error&reason=missing_code_or_state`
+        `${appUrl}/dashboard/tools?meta=error&reason=missing_code_or_state`
       );
     }
 
@@ -39,13 +39,13 @@ export async function GET(request: Request) {
 
     if (!expectedState || expectedState !== state) {
       return NextResponse.redirect(
-        `${appUrl}/integrations?meta=error&reason=invalid_state`
+        `${appUrl}/dashboard/tools?meta=error&reason=invalid_state`
       );
     }
 
     if (!organizationId) {
       return NextResponse.redirect(
-        `${appUrl}/integrations?meta=error&reason=missing_org`
+        `${appUrl}/dashboard/tools?meta=error&reason=missing_org`
       );
     }
 
@@ -55,7 +55,7 @@ export async function GET(request: Request) {
 
     if (!appId || !appSecret || !redirectUri) {
       return NextResponse.redirect(
-        `${appUrl}/integrations?meta=error&reason=missing_meta_env`
+        `${appUrl}/dashboard/tools?meta=error&reason=missing_meta_env`
       );
     }
 
@@ -82,7 +82,7 @@ export async function GET(request: Request) {
       console.error("[META CALLBACK] Token exchange failed", tokenPayload);
 
       return NextResponse.redirect(
-        `${appUrl}/integrations?meta=error&reason=${encodeURIComponent(
+        `${appUrl}/dashboard/tools?meta=error&reason=${encodeURIComponent(
           String(reason)
         )}`
       );
@@ -108,7 +108,7 @@ export async function GET(request: Request) {
       console.error("[META CALLBACK] Account lookup failed", mePayload);
 
       return NextResponse.redirect(
-        `${appUrl}/integrations?meta=error&reason=${encodeURIComponent(
+        `${appUrl}/dashboard/tools?meta=error&reason=${encodeURIComponent(
           String(reason)
         )}`
       );
@@ -154,7 +154,7 @@ export async function GET(request: Request) {
       console.error("[META CALLBACK] Connection save failed", upsertError);
 
       return NextResponse.redirect(
-        `${appUrl}/integrations?meta=error&reason=${encodeURIComponent(
+        `${appUrl}/dashboard/tools?meta=error&reason=${encodeURIComponent(
           upsertError.message
         )}`
       );
@@ -168,7 +168,7 @@ export async function GET(request: Request) {
     });
 
     const response = NextResponse.redirect(
-      `${appUrl}/integrations?meta=connected`
+      `${appUrl}/dashboard/tools?meta=connected`
     );
 
     response.cookies.delete("meta_oauth_state");
@@ -179,7 +179,7 @@ export async function GET(request: Request) {
     console.error("[META CALLBACK] Failed", error);
 
     return NextResponse.redirect(
-      `${appUrl}/integrations?meta=error&reason=${encodeURIComponent(
+      `${appUrl}/dashboard/tools?meta=error&reason=${encodeURIComponent(
         error?.message || "meta_callback_failed"
       )}`
     );
