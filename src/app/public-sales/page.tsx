@@ -564,6 +564,41 @@ export default function PublicSalesPage() {
           </div>
         </section>
 
+        <section className="mt-10 rounded-[2.5rem] border border-violet-400/20 bg-gradient-to-r from-violet-500/10 via-white/[0.04] to-blue-500/10 p-8 shadow-2xl backdrop-blur-xl lg:p-12">
+          <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
+            <div className="max-w-4xl">
+              <p className="text-xs font-black uppercase tracking-[0.22em] text-violet-200">
+                Between Campaigns
+              </p>
+              <h2 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">
+                Keep the campaign history you already built.
+              </h2>
+              <p className="mt-5 text-lg leading-8 text-slate-300">
+                When your Aether subscription ends, you can keep your campaign&apos;s
+                data safely stored with Team Aether for $5 per month. Your contacts,
+                lists, workflows, reporting, and campaign history can remain in place
+                until you&apos;re ready for the next campaign.
+              </p>
+              <p className="mt-4 text-sm leading-7 text-slate-400">
+                Campaigns may also use Aether&apos;s Full Data Export before the
+                post-subscription retention period expires if they prefer to take
+                their complete campaign-owned operational data with them.
+              </p>
+            </div>
+
+            <div className="rounded-[2rem] border border-violet-300/30 bg-[#07111F]/55 px-8 py-7 text-center">
+              <div className="text-4xl font-black tracking-tight text-white">$5/month</div>
+              <div className="mt-2 text-xs font-black uppercase tracking-[0.16em] text-violet-200">
+                Secure Data Storage
+              </div>
+              <div className="mt-4 flex items-center justify-center gap-2 text-sm font-semibold text-slate-300">
+                <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                Full Data Export available
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section className="my-20 rounded-[2.5rem] border border-violet-300/20 bg-gradient-to-br from-violet-500/15 via-white/[0.04] to-blue-500/10 p-8 text-center shadow-2xl lg:p-14">
           <Sparkles className="mx-auto h-10 w-10 text-violet-300" />
           <h2 className="mt-6 text-4xl font-black tracking-tight sm:text-5xl">

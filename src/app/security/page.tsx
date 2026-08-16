@@ -173,6 +173,46 @@ export default function SecurityPage() {
             </div>
           </section>
 
+          <section className="grid gap-6 lg:grid-cols-2">
+            <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-8">
+              <KeyRound className="h-10 w-10 text-violet-300" />
+              <h2 className="mt-5 text-3xl font-black">Connected Integrations</h2>
+              <p className="mt-4 leading-8 text-slate-300">
+                When a campaign connects a third-party service to Aether, Aether
+                accesses only the information and capabilities authorized through
+                that provider connection and uses that access to provide the
+                integration features requested by the campaign.
+              </p>
+              <p className="mt-4 leading-8 text-slate-300">
+                Connected services remain subject to the permissions, security
+                practices, and policies of their respective providers. Campaign
+                leadership controls which supported integrations are connected to
+                its Aether organization.
+              </p>
+            </div>
+
+            <div className="rounded-[2rem] border border-violet-300/20 bg-[#efe7ff] p-8 text-[#32106b]">
+              <Database className="h-10 w-10" />
+              <h2 className="mt-5 text-3xl font-black">Your Data. Your Exit.</h2>
+              <p className="mt-4 leading-8">
+                Your campaign data remains your data. Aether provides an easy-to-use
+                Full Data Export from inside the platform so campaign leadership can
+                retain a copy of campaign-owned operational data.
+              </p>
+              <p className="mt-4 leading-8">
+                Following cancellation or completion of yearly usage, Aether may
+                retain campaign data for up to 60 days. We recommend exporting your
+                full data set before that grace period expires.
+              </p>
+              <p className="mt-4 leading-8">
+                Campaigns that want to preserve their Aether data between campaign
+                cycles may keep their data stored in Aether for $5 per month until
+                the next campaign rather than allowing the post-subscription
+                retention period to expire.
+              </p>
+            </div>
+          </section>
+
           <section className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-8 lg:p-10">
             <CheckCircle2 className="h-10 w-10 text-violet-300" />
             <h2 className="mt-5 text-4xl font-black">Built on Transparency</h2>

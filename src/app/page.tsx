@@ -462,6 +462,32 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
               </div>
             ))}
           </div>
+
+          <div className="mt-8 rounded-[2rem] border border-violet-400/20 bg-gradient-to-r from-violet-500/10 via-white/[0.03] to-blue-500/10 px-8 py-8 shadow-xl shadow-black/10 backdrop-blur-xl lg:flex lg:items-center lg:justify-between lg:gap-10 lg:px-10">
+            <div className="max-w-4xl">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-300">
+                Between Campaigns
+              </p>
+              <h3 className="mt-3 text-2xl font-bold text-white lg:text-3xl">
+                Your campaign may end. Your data doesn&apos;t have to.
+              </h3>
+              <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-300">
+                When your Aether subscription ends, you can keep your campaign&apos;s data
+                safely stored with Team Aether for $5/month. When it&apos;s time for the next
+                campaign, your operational history is ready to come with you.
+              </p>
+            </div>
+
+            <div className="mt-6 shrink-0 rounded-2xl border border-violet-300/30 bg-violet-500/10 px-6 py-5 text-center lg:mt-0">
+              <div className="text-3xl font-black tracking-tight text-white">$5/month</div>
+              <div className="mt-2 text-xs font-semibold uppercase tracking-[0.14em] text-violet-200">
+                Secure Data Storage
+              </div>
+              <div className="mt-2 text-xs text-slate-400">
+                Full Data Export available
+              </div>
+            </div>
+          </div>
         </section>
 
         <section className="pb-24">

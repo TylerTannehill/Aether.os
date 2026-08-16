@@ -807,6 +807,12 @@ export default function AetherComprehensiveGuidePage() {
                     </div>
 
                     <div>
+                      <h3 className="text-2xl font-bold text-white">Full Data Export</h3>
+                      <p className="mt-4 leading-8">Your campaign data is your campaign data. Campaign leadership can use the Full Data Export option in Tools to download a copy of campaign-owned operational data from Aether.</p>
+                      <p className="mt-3 leading-8">We recommend keeping an up-to-date export as part of your campaign's normal data practices and completing a final export before your post-subscription retention period expires.</p>
+                    </div>
+
+                    <div>
                       <h3 className="text-2xl font-bold text-white">Built to Grow</h3>
                       <p className="mt-3 leading-8">The Tools section will continue evolving alongside Aether. As campaigns identify new opportunities to improve communication and collaboration, additional capabilities may be introduced to further simplify day-to-day campaign operations.</p>
                       <p className="mt-3 leading-8">Our goal isn't to integrate every productivity platform on the market. It's to provide the tools campaigns use every day in a way that's simple, reliable, and keeps teams working together.</p>
@@ -864,9 +870,21 @@ export default function AetherComprehensiveGuidePage() {
                     </div>
 
                     <div>
-                      <h3 className="text-2xl font-bold text-white">A Note About Field</h3>
-                      <p className="mt-4 leading-8">Field integrations are intentionally not part of the initial launch roadmap. Field operations are one of the most critical components of any campaign, and we want to approach those integrations with the same level of care applied throughout the rest of Aether.</p>
-                      <p className="mt-3 leading-8">Our immediate priority is establishing Aether as the operational center through fundraising, digital, and productivity integrations. Once that foundation is in place, expanding field integrations becomes one of our highest priorities after launch. And if we're able to get there sooner, we absolutely will.</p>
+                      <h3 className="text-2xl font-bold text-white">Supported Integrations</h3>
+                      <p className="mt-4 leading-8">Aether is designed to connect the services campaigns already rely on while bringing their information into one shared operational picture. Supported and planned connections across the platform include Meta, Instagram, TikTok, YouTube, campaign websites, Google Drive, Google Calendar, Gmail, ActBlue, WinRed, and Google Routes.</p>
+                      <p className="mt-3 leading-8">Integration availability can depend on third-party platform access, API permissions, and provider requirements. Aether will continue expanding supported connections as those services and campaign needs evolve.</p>
+                    </div>
+
+                    <div>
+                      <h3 className="text-2xl font-bold text-white">Supporting Field Operations</h3>
+                      <p className="mt-3 leading-8">Aether already supports field work through its shared contact data, lists, mobile execution workflows, dispositions, running notes, and Google Routes integration. These capabilities help campaign teams move from planning to real-world execution while keeping activity connected to the rest of the campaign.</p>
+                      <p className="mt-3 leading-8">Field technology is a broad ecosystem, and we don't consider that work finished. We will continue bringing additional supporting integrations to life where they meaningfully reduce duplicate work, improve field execution, or strengthen the campaign's shared operational picture.</p>
+                    </div>
+
+                    <div>
+                      <h3 className="text-2xl font-bold text-white">How Connected Services Access Data</h3>
+                      <p className="mt-4 leading-8">When campaign leadership connects a supported third-party service, Aether accesses only the information and capabilities authorized through that provider connection and uses that access to provide the integration features requested by the campaign.</p>
+                      <p className="mt-3 leading-8">Each connected service remains subject to the permissions, security practices, and policies of its provider. Campaign leadership controls which supported integrations are connected to the organization.</p>
                     </div>
 
                     <div>
@@ -1007,6 +1025,13 @@ export default function AetherComprehensiveGuidePage() {
                       <p className="mt-3 leading-8">It’s also about making sure the right people have access to the right information.</p>
                       <p className="mt-3 leading-8">Aether’s role and permission system helps campaigns organize access based on responsibility, allowing team members to focus on their work while reducing unnecessary exposure to information outside their role.</p>
                       <p className="mt-3 leading-8">Strong organization is an important part of strong security.</p>
+                    </div>
+
+                    <div>
+                      <h3 className="text-2xl font-bold text-white">Your Data Remains Yours</h3>
+                      <p className="mt-3 leading-8">Aether exists to help campaigns organize, understand, and execute—not to claim ownership of the information entrusted to the platform. Campaign leadership can use Full Data Export in Tools to retain a copy of campaign-owned operational data.</p>
+                      <p className="mt-3 leading-8">Following cancellation or completion of yearly usage, Aether may retain campaign data for up to 60 days. Campaigns should export their full data set before that grace period expires.</p>
+                      <p className="mt-3 leading-8">Campaigns that want to preserve their Aether data between campaign cycles may keep their data stored in Aether for $5 per month until the next campaign rather than allowing the post-subscription retention period to expire.</p>
                     </div>
 
                     <div>
