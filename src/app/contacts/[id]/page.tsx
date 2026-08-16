@@ -62,6 +62,10 @@ type List = {
   id: string;
   name: string;
   type?: ContactListTag | null;
+  disposition?: string | null;
+  status?: string | null;
+  list_notes?: string | null;
+  completed_at?: string | null;
 };
 
 type ContactListMembership = {
@@ -957,7 +961,7 @@ export default function ContactDetailPage() {
 
     const { data: membershipData, error: membershipError } = await supabase
       .from("list_contacts")
-      .select("list_id, lists(id, name, type)")
+      .select("list_id, disposition, status, notes, completed_at, lists(id, name, type)")
       .eq("contact_id", contactId);
 
     const { data: logData, error: logError } = await supabase
@@ -1028,7 +1032,15 @@ export default function ContactDetailPage() {
       const mappedLists = ((membershipData ?? []) as any[]).flatMap((row) => {
         const linked = Array.isArray(row.lists) ? row.lists[0] : row.lists;
         return linked
-          ? [{ id: linked.id, name: linked.name, type: linked.type }]
+          ? [{
+                id: linked.id,
+                name: linked.name,
+                type: linked.type,
+                disposition: row.disposition ?? null,
+                status: row.status ?? null,
+                list_notes: row.notes ?? null,
+                completed_at: row.completed_at ?? null,
+              }]
           : [];
       });
 
@@ -2879,17 +2891,36 @@ const availableLists = lists.filter(
                   key={list.id}
                   className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-3"
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex min-w-0 items-start gap-2">
                     <span
-                      className={`rounded-full px-2 py-0.5 text-xs font-semibold ${listTagClasses(
+                      className={`mt-0.5 rounded-full px-2 py-0.5 text-xs font-semibold ${listTagClasses(
                         list.tag,
                       )}`}
                     >
                       {list.tag}
                     </span>
-                    <span className="text-sm font-medium text-slate-900">
-                      {list.name}
-                    </span>
+                    <div className="min-w-0">
+                      <span className="text-sm font-medium text-slate-900">
+                        {list.name}
+                      </span>
+                      {(list.disposition || list.completed_at || list.list_notes) && (
+                        <div className="mt-1 space-y-1 text-xs text-slate-500">
+                          <div className="flex flex-wrap items-center gap-2">
+                            {list.disposition && (
+                              <span className="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 font-medium text-slate-700">
+                                {list.disposition}
+                              </span>
+                            )}
+                            {list.completed_at && (
+                              <span>Completed {formatDateTime(list.completed_at)}</span>
+                            )}
+                          </div>
+                          {list.list_notes && (
+                            <p className="text-slate-600">{list.list_notes}</p>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <button

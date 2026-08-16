@@ -89,6 +89,22 @@ const tiers = [
 ];
 
 export default function HomePage() {
+  const aiPrompt = `I'm considering running for office and I found a SaaS called...
+URL: aetheros.pro 
+URL: aetheros.pro/aether-academy/comprehensive-guide
+
+Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all of the public pages and give me your feedback.`;
+
+  const openAiWithCopiedPrompt = async (url: string) => {
+    try {
+      await navigator.clipboard.writeText(aiPrompt);
+    } catch {
+      // The AI platform still opens if clipboard access is unavailable.
+    }
+
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
   const launchDate = new Date("2026-09-01T00:00:00-05:00").getTime();
 
   const calculateTimeLeft = () => {
@@ -463,6 +479,88 @@ export default function HomePage() {
               quotes or pretend Aether has stories it has not earned yet. Every
               testimonial published here will come from a real campaign using
               the platform.
+            </p>
+          </div>
+        </section>
+
+        <section className="pb-24">
+          <div className="rounded-[2.25rem] border border-violet-400/20 bg-gradient-to-br from-violet-500/10 via-white/[0.03] to-blue-500/10 px-8 py-14 text-center shadow-xl shadow-black/10 backdrop-blur-xl lg:px-16 lg:py-20">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-300">
+              Independent Perspective
+            </p>
+
+            <h2 className="mx-auto mt-5 max-w-4xl text-4xl font-semibold tracking-tight text-white lg:text-6xl">
+              Ask your favorite AI about us.
+            </h2>
+
+            <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-slate-300">
+              Don&apos;t take our word for it. Ask ChatGPT to explore Aether&apos;s
+              public site and comprehensive guide, then give you its feedback.
+            </p>
+
+            <div className="mx-auto mt-10 grid max-w-5xl gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <a
+                href="https://chatgpt.com/?q=I%27m%20considering%20running%20for%20office%20and%20I%20found%20a%20SaaS%20called...%0AURL%3A%20aetheros.pro%20%0AURL%3A%20aetheros.pro/aether-academy/comprehensive-guide%0A%0APlease%20take%20a%20deep%20dive%20on%20aetheros.pro/aether-academy/comprehensive-guide%20%26%20all%20of%20the%20public%20pages%20and%20give%20me%20your%20feedback."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-w-[260px] items-center justify-center gap-3 rounded-2xl border border-violet-300/60 bg-gradient-to-b from-violet-500 to-violet-800 px-8 py-5 text-base font-black uppercase tracking-[0.08em] text-white shadow-2xl shadow-violet-950/40 transition hover:from-violet-400 hover:to-violet-700"
+              >
+                Ask ChatGPT
+                <ArrowRight className="h-5 w-5" />
+              </a>
+
+              <button
+                type="button"
+                onClick={() => openAiWithCopiedPrompt("https://gemini.google.com/app")}
+                className="inline-flex min-w-[260px] items-center justify-center gap-3 rounded-2xl border border-white/20 bg-white/[0.06] px-8 py-5 text-base font-black uppercase tracking-[0.08em] text-white shadow-xl shadow-black/20 transition hover:bg-white/[0.10]"
+              >
+                Ask Gemini
+                <ArrowRight className="h-5 w-5" />
+              </button>
+
+              <a
+                href="https://claude.ai/new?q=I%27m%20considering%20running%20for%20office%20and%20I%20found%20a%20SaaS%20called...%0AURL%3A%20aetheros.pro%20%0AURL%3A%20aetheros.pro/aether-academy/comprehensive-guide%0A%0APlease%20take%20a%20deep%20dive%20on%20aetheros.pro/aether-academy/comprehensive-guide%20%26%20all%20of%20the%20public%20pages%20and%20give%20me%20your%20feedback."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-w-[260px] items-center justify-center gap-3 rounded-2xl border border-white/20 bg-white/[0.06] px-8 py-5 text-base font-black uppercase tracking-[0.08em] text-white shadow-xl shadow-black/20 transition hover:bg-white/[0.10]"
+              >
+                Ask Claude
+                <ArrowRight className="h-5 w-5" />
+              </a>
+
+              <a
+                href="https://grok.com/?q=I%27m%20considering%20running%20for%20office%20and%20I%20found%20a%20SaaS%20called...%0AURL%3A%20aetheros.pro%20%0AURL%3A%20aetheros.pro/aether-academy/comprehensive-guide%0A%0APlease%20take%20a%20deep%20dive%20on%20aetheros.pro/aether-academy/comprehensive-guide%20%26%20all%20of%20the%20public%20pages%20and%20give%20me%20your%20feedback."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-w-[260px] items-center justify-center gap-3 rounded-2xl border border-white/20 bg-white/[0.06] px-8 py-5 text-base font-black uppercase tracking-[0.08em] text-white shadow-xl shadow-black/20 transition hover:bg-white/[0.10]"
+              >
+                Ask Grok
+                <ArrowRight className="h-5 w-5" />
+              </a>
+
+              <a
+                href="https://www.perplexity.ai/search?q=I%27m%20considering%20running%20for%20office%20and%20I%20found%20a%20SaaS%20called...%0AURL%3A%20aetheros.pro%20%0AURL%3A%20aetheros.pro/aether-academy/comprehensive-guide%0A%0APlease%20take%20a%20deep%20dive%20on%20aetheros.pro/aether-academy/comprehensive-guide%20%26%20all%20of%20the%20public%20pages%20and%20give%20me%20your%20feedback."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-w-[260px] items-center justify-center gap-3 rounded-2xl border border-white/20 bg-white/[0.06] px-8 py-5 text-base font-black uppercase tracking-[0.08em] text-white shadow-xl shadow-black/20 transition hover:bg-white/[0.10]"
+              >
+                Ask Perplexity
+                <ArrowRight className="h-5 w-5" />
+              </a>
+
+              <a
+                href="https://copilot.microsoft.com/?q=I%27m%20considering%20running%20for%20office%20and%20I%20found%20a%20SaaS%20called...%0AURL%3A%20aetheros.pro%20%0AURL%3A%20aetheros.pro/aether-academy/comprehensive-guide%0A%0APlease%20take%20a%20deep%20dive%20on%20aetheros.pro/aether-academy/comprehensive-guide%20%26%20all%20of%20the%20public%20pages%20and%20give%20me%20your%20feedback."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-w-[260px] items-center justify-center gap-3 rounded-2xl border border-white/20 bg-white/[0.06] px-8 py-5 text-base font-black uppercase tracking-[0.08em] text-white shadow-xl shadow-black/20 transition hover:bg-white/[0.10]"
+              >
+                Ask Copilot
+                <ArrowRight className="h-5 w-5" />
+              </a>
+            </div>
+
+            <p className="mt-4 text-xs text-slate-400">
+              Gemini copies the same prompt automatically — paste it into the new Gemini window.
             </p>
           </div>
         </section>

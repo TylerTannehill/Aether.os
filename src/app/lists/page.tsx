@@ -8,6 +8,8 @@ type List = {
   id: string
   name: string
   created_at?: string | null
+  totalContacts: number
+  workedContacts: number
 }
 
 export default function ListsPage() {
@@ -28,7 +30,34 @@ export default function ListsPage() {
       .order('created_at', { ascending: false })
 
     if (!error) {
-      setLists(data || [])
+      const listRows = data || []
+
+      const listsWithProgress = await Promise.all(
+        listRows.map(async (list) => {
+          const { data: contactRows, error: contactError } = await supabase
+            .from('list_contacts')
+            .select('disposition, notes, status, completed_at')
+            .eq('list_id', list.id)
+
+          const assignments = contactError ? [] : contactRows || []
+          const workedContacts = assignments.filter((assignment) => {
+            return Boolean(
+              assignment.disposition ||
+                assignment.notes ||
+                assignment.status === 'completed' ||
+                assignment.completed_at
+            )
+          }).length
+
+          return {
+            ...list,
+            totalContacts: assignments.length,
+            workedContacts,
+          }
+        })
+      )
+
+      setLists(listsWithProgress)
     }
 
     setLoading(false)
@@ -82,6 +111,7 @@ export default function ListsPage() {
               <thead>
                 <tr>
                   <th>Name</th>
+                  <th>Progress</th>
                   <th>Created</th>
                   <th>Actions</th>
                 </tr>
@@ -90,16 +120,49 @@ export default function ListsPage() {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={3}>Loading lists...</td>
+                    <td colSpan={4}>Loading lists...</td>
                   </tr>
                 ) : lists.length === 0 ? (
                   <tr>
-                    <td colSpan={3}>No lists yet</td>
+                    <td colSpan={4}>No lists yet</td>
                   </tr>
                 ) : (
                   lists.map((list) => (
                     <tr key={list.id}>
                       <td>{list.name}</td>
+                      <td>
+                        <div style={{ minWidth: 150 }}>
+                          <div style={{ marginBottom: 6, fontWeight: 600 }}>
+                            {list.workedContacts} / {list.totalContacts}
+                            {' · '}
+                            {list.totalContacts > 0
+                              ? Math.round((list.workedContacts / list.totalContacts) * 100)
+                              : 0}%
+                          </div>
+                          <div
+                            style={{
+                              height: 8,
+                              borderRadius: 999,
+                              background: '#e2e8f0',
+                              overflow: 'hidden',
+                            }}
+                          >
+                            <div
+                              style={{
+                                height: '100%',
+                                width: `${
+                                  list.totalContacts > 0
+                                    ? Math.round(
+                                        (list.workedContacts / list.totalContacts) * 100
+                                      )
+                                    : 0
+                                }%`,
+                                background: '#7c3aed',
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </td>
                       <td>
                         {list.created_at
                           ? new Date(list.created_at).toLocaleString()

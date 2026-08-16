@@ -13,6 +13,7 @@ import {
 } from "@/lib/data/lists";
 import { CampaignList, Contact } from "@/lib/data/types";
 import { formatCreatedAt, fullName } from "@/lib/data/utils";
+import { supabase } from "@/lib/supabase";
 
 export default function DashboardListDetailPage() {
   const params = useParams();
@@ -20,6 +21,7 @@ export default function DashboardListDetailPage() {
 
   const [list, setList] = useState<CampaignList | null>(null);
   const [assignedContacts, setAssignedContacts] = useState<Contact[]>([]);
+  const [workedContacts, setWorkedContacts] = useState(0);
   const [allContacts, setAllContacts] = useState<Contact[]>([]);
   const [selectedContactId, setSelectedContactId] = useState("");
   const [search, setSearch] = useState("");
@@ -43,6 +45,25 @@ export default function DashboardListDetailPage() {
       setList(data.list);
       setAssignedContacts(data.assignedContacts);
       setAllContacts(data.allContacts);
+
+      const { data: progressRows, error: progressError } = await supabase
+        .from("list_contacts")
+        .select("disposition, notes, status, completed_at")
+        .eq("list_id", listId);
+
+      if (!progressError) {
+        const worked = (progressRows || []).filter((assignment) =>
+          Boolean(
+            assignment.disposition ||
+              assignment.notes ||
+              assignment.status === "completed" ||
+              assignment.completed_at
+          )
+        ).length;
+        setWorkedContacts(worked);
+      } else {
+        setWorkedContacts(0);
+      }
       setDefaultOwnerName(data.list?.default_owner_name || "");
     } catch (err: any) {
       setMessage(err?.message || "Error loading list detail.");
@@ -225,11 +246,27 @@ export default function DashboardListDetailPage() {
         </div>
 
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <p className="text-sm font-medium text-slate-500">Available to Add</p>
+          <p className="text-sm font-medium text-slate-500">List Progress</p>
           <p className="mt-3 text-4xl font-semibold tracking-tight text-slate-900">
-            {availableContacts.length}
+            {assignedContacts.length > 0
+              ? Math.round((workedContacts / assignedContacts.length) * 100)
+              : 0}%
           </p>
-          <p className="mt-2 text-sm text-slate-500">Not yet assigned</p>
+          <p className="mt-2 text-sm text-slate-500">
+            {workedContacts} of {assignedContacts.length} contacts worked
+          </p>
+          <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-200">
+            <div
+              className="h-full rounded-full bg-violet-600 transition-all"
+              style={{
+                width: `${
+                  assignedContacts.length > 0
+                    ? Math.round((workedContacts / assignedContacts.length) * 100)
+                    : 0
+                }%`,
+              }}
+            />
+          </div>
         </div>
 
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">

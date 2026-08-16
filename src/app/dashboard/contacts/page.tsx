@@ -239,6 +239,7 @@ export default function DashboardContactsPage() {
   const [search, setSearch] = useState("");
   const [cityFilter, setCityFilter] = useState("");
   const [stateFilter, setStateFilter] = useState("");
+  const [zipFilter, setZipFilter] = useState("");
   const [partyFilter, setPartyFilter] = useState<PartyFilter>("any");
   const [givingRange, setGivingRange] = useState<GivingRange>("any");
   const [fecStatusFilter, setFecStatusFilter] = useState<FecStatusFilter>("any");
@@ -401,6 +402,7 @@ export default function DashboardContactsPage() {
     setSearch("");
     setCityFilter("");
     setStateFilter("");
+    setZipFilter("");
     setPartyFilter("any");
     setGivingRange("any");
     setFecStatusFilter("any");
@@ -446,6 +448,18 @@ export default function DashboardContactsPage() {
         String(contact.state || "").toLowerCase() !== stateFilter.toLowerCase()
       )
         return;
+      if (
+        zipFilter &&
+        String(
+          (contact as any).zip ||
+            (contact as any).zip_code ||
+            (contact as any).postal_code ||
+            ""
+        )
+          .toLowerCase()
+          .trim() !== zipFilter.toLowerCase().trim()
+      )
+        return;
       if (!matchesParty(contact, partyFilter)) return;
       if (!matchesGivingRange(contact, givingRange)) return;
       if (!matchesFecStatus(contact, fecStatusFilter)) return;
@@ -460,6 +474,7 @@ export default function DashboardContactsPage() {
     search,
     cityFilter,
     stateFilter,
+    zipFilter,
     partyFilter,
     givingRange,
     fecStatusFilter,
@@ -531,13 +546,14 @@ export default function DashboardContactsPage() {
     if (search.trim()) filters.push({ label: `Search: ${search.trim()}`, onClear: () => setSearch("") });
     if (cityFilter.trim()) filters.push({ label: `City: ${cityFilter.trim()}`, onClear: () => setCityFilter("") });
     if (stateFilter.trim()) filters.push({ label: `State: ${stateFilter.trim()}`, onClear: () => setStateFilter("") });
+    if (zipFilter.trim()) filters.push({ label: `ZIP: ${zipFilter.trim()}`, onClear: () => setZipFilter("") });
     if (partyFilter !== "any") filters.push({ label: `Party: ${partyFilter}`, onClear: () => setPartyFilter("any") });
     if (givingRange !== "any") filters.push({ label: `Giving: ${givingRange}`, onClear: () => setGivingRange("any") });
     if (fecStatusFilter !== "any") filters.push({ label: `FEC: ${fecStatusFilter}`, onClear: () => setFecStatusFilter("any") });
     if (donorTierFilter !== "any") filters.push({ label: `Donor: ${donorTierFilter}`, onClear: () => setDonorTierFilter("any") });
 
     return filters;
-  }, [search, cityFilter, stateFilter, partyFilter, givingRange, fecStatusFilter, donorTierFilter]);
+  }, [search, cityFilter, stateFilter, zipFilter, partyFilter, givingRange, fecStatusFilter, donorTierFilter]);
 
   if (loading) {
     return (
@@ -696,7 +712,7 @@ export default function DashboardContactsPage() {
               Search + Location
             </p>
 
-            <div className="grid gap-3 md:grid-cols-3">
+            <div className="grid gap-3 md:grid-cols-4">
               <div className="relative md:col-span-1">
                 <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <input
@@ -718,6 +734,14 @@ export default function DashboardContactsPage() {
                 value={stateFilter}
                 onChange={(e) => setStateFilter(e.target.value)}
                 placeholder="State"
+                className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm"
+              />
+
+              <input
+                value={zipFilter}
+                onChange={(e) => setZipFilter(e.target.value)}
+                placeholder="ZIP Code"
+                inputMode="numeric"
                 className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm"
               />
             </div>
