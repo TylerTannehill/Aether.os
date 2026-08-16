@@ -5,6 +5,22 @@ import { useEffect, useMemo, useState } from "react";
 export default function TeamAetherDashboardPage() {
     const [finance, setFinance] = useState<any[]>([]);
     const [expanded, setExpanded] = useState(false);
+    const [integrationModalOpen, setIntegrationModalOpen] = useState(false);
+    const [websiteConnected, setWebsiteConnected] = useState(false);
+    const [websiteBusy, setWebsiteBusy] = useState(false);
+    const [websiteMessage, setWebsiteMessage] = useState("");
+    const [metaConnected, setMetaConnected] = useState(false);
+    const [metaBusy, setMetaBusy] = useState(false);
+    const [metaMessage, setMetaMessage] = useState("");
+    const [xConnected, setXConnected] = useState(false);
+    const [xBusy, setXBusy] = useState(false);
+    const [xMessage, setXMessage] = useState("");
+    const [tiktokConnected, setTikTokConnected] = useState(false);
+    const [tiktokBusy, setTikTokBusy] = useState(false);
+    const [tiktokMessage, setTikTokMessage] = useState("");
+    const [youtubeConnected, setYouTubeConnected] = useState(false);
+    const [youtubeBusy, setYouTubeBusy] = useState(false);
+    const [youtubeMessage, setYouTubeMessage] = useState("");
     const [newRow, setNewRow] = useState({ name: "", due_date: "", amount: "" });
     const [orgStats, setOrgStats] = useState({
         organizations: 0,
@@ -55,6 +71,195 @@ export default function TeamAetherDashboardPage() {
         setFinance(Array.isArray(d) ? d : []);
     }
 
+    async function loadWebsiteStatus() {
+        try {
+            const r = await fetch("/api/integrations/website/status", {
+                method: "GET",
+                cache: "no-store",
+            });
+            const d = await r.json();
+            setWebsiteConnected(Boolean(r.ok && d?.success && d?.connected));
+        } catch {
+            setWebsiteConnected(false);
+        }
+    }
+
+    async function connectWebsite() {
+        setWebsiteBusy(true);
+        setWebsiteMessage("");
+        try {
+            const r = await fetch("/api/integrations/website/connect", { method: "POST" });
+            const d = await r.json();
+            if (!r.ok || !d?.success) {
+                throw new Error(d?.error || "Website connection failed.");
+            }
+            setWebsiteConnected(true);
+            setWebsiteMessage("Website connected.");
+        } catch (error:any) {
+            setWebsiteMessage(error?.message || "Website connection failed.");
+        } finally {
+            setWebsiteBusy(false);
+        }
+    }
+
+    async function disconnectWebsite() {
+        setWebsiteBusy(true);
+        setWebsiteMessage("");
+        try {
+            const r = await fetch("/api/integrations/website/disconnect", { method: "POST" });
+            const d = await r.json();
+            if (!r.ok || !d?.success) {
+                throw new Error(d?.error || "Website disconnect failed.");
+            }
+            setWebsiteConnected(false);
+            setWebsiteMessage("Website disconnected.");
+        } catch (error:any) {
+            setWebsiteMessage(error?.message || "Website disconnect failed.");
+        } finally {
+            setWebsiteBusy(false);
+        }
+    }
+
+    async function loadMetaStatus() {
+        try {
+            const r = await fetch("/api/integrations/meta/status", {
+                method: "GET",
+                cache: "no-store",
+            });
+            const d = await r.json();
+            setMetaConnected(Boolean(r.ok && d?.success && d?.connected));
+        } catch {
+            setMetaConnected(false);
+        }
+    }
+
+    function connectMeta() {
+        window.location.href = "/api/integrations/meta/connect?returnTo=team-aether";
+    }
+
+    async function disconnectMeta() {
+        setMetaBusy(true);
+        setMetaMessage("");
+        try {
+            const r = await fetch("/api/integrations/meta/disconnect", { method: "DELETE" });
+            const d = await r.json();
+            if (!r.ok || !d?.success) {
+                throw new Error(d?.message || d?.error || "Meta disconnect failed.");
+            }
+            setMetaConnected(false);
+            setMetaMessage("Meta disconnected.");
+        } catch (error:any) {
+            setMetaMessage(error?.message || "Meta disconnect failed.");
+        } finally {
+            setMetaBusy(false);
+        }
+    }
+
+    async function loadXStatus() {
+        try {
+            const r = await fetch("/api/integrations/x/status", {
+                method: "GET",
+                cache: "no-store",
+            });
+            const d = await r.json();
+            setXConnected(Boolean(r.ok && d?.success && d?.connected));
+        } catch {
+            setXConnected(false);
+        }
+    }
+
+    function connectX() {
+        window.location.href = "/api/integrations/x/connect?returnTo=team-aether";
+    }
+
+    async function disconnectX() {
+        setXBusy(true);
+        setXMessage("");
+        try {
+            const r = await fetch("/api/integrations/x/disconnect", { method: "DELETE" });
+            const d = await r.json();
+            if (!r.ok || !d?.success) {
+                throw new Error(d?.message || d?.error || "X disconnect failed.");
+            }
+            setXConnected(false);
+            setXMessage("X disconnected.");
+        } catch (error:any) {
+            setXMessage(error?.message || "X disconnect failed.");
+        } finally {
+            setXBusy(false);
+        }
+    }
+
+    async function loadTikTokStatus() {
+        try {
+            const r = await fetch("/api/integrations/tiktok/status", {
+                method: "GET",
+                cache: "no-store",
+            });
+            const d = await r.json();
+            setTikTokConnected(Boolean(r.ok && d?.success && d?.connected));
+        } catch {
+            setTikTokConnected(false);
+        }
+    }
+
+    function connectTikTok() {
+        window.location.href = "/api/integrations/tiktok/connect";
+    }
+
+    async function disconnectTikTok() {
+        setTikTokBusy(true);
+        setTikTokMessage("");
+        try {
+            const r = await fetch("/api/integrations/tiktok/disconnect", { method: "DELETE" });
+            const d = await r.json();
+            if (!r.ok || !d?.success) {
+                throw new Error(d?.message || d?.error || "TikTok disconnect failed.");
+            }
+            setTikTokConnected(false);
+            setTikTokMessage("TikTok disconnected.");
+        } catch (error:any) {
+            setTikTokMessage(error?.message || "TikTok disconnect failed.");
+        } finally {
+            setTikTokBusy(false);
+        }
+    }
+
+    async function loadYouTubeStatus() {
+        try {
+            const r = await fetch("/api/integrations/youtube/status", {
+                method: "GET",
+                cache: "no-store",
+            });
+            const d = await r.json();
+            setYouTubeConnected(Boolean(r.ok && d?.success && d?.connected));
+        } catch {
+            setYouTubeConnected(false);
+        }
+    }
+
+    function connectYouTube() {
+        window.location.href = "/api/integrations/youtube/connect?returnTo=team-aether";
+    }
+
+    async function disconnectYouTube() {
+        setYouTubeBusy(true);
+        setYouTubeMessage("");
+        try {
+            const r = await fetch("/api/integrations/youtube/disconnect", { method: "DELETE" });
+            const d = await r.json();
+            if (!r.ok || !d?.success) {
+                throw new Error(d?.message || d?.error || "YouTube disconnect failed.");
+            }
+            setYouTubeConnected(false);
+            setYouTubeMessage("YouTube disconnected.");
+        } catch (error:any) {
+            setYouTubeMessage(error?.message || "YouTube disconnect failed.");
+        } finally {
+            setYouTubeBusy(false);
+        }
+    }
+
     async function addRow() {
         if (!newRow.name.trim()) return;
         await fetch("/api/team-aether/finance", {
@@ -92,6 +297,11 @@ export default function TeamAetherDashboardPage() {
         loadFinance().catch(()=>setFinance([]));
         loadOrganizationStats().catch(()=>{});
         loadSalesStats().catch(()=>{});
+        loadWebsiteStatus().catch(()=>setWebsiteConnected(false));
+        loadMetaStatus().catch(()=>setMetaConnected(false));
+        loadXStatus().catch(()=>setXConnected(false));
+        loadTikTokStatus().catch(()=>setTikTokConnected(false));
+        loadYouTubeStatus().catch(()=>setYouTubeConnected(false));
     }, []);
 
     const total = useMemo(
@@ -242,7 +452,7 @@ export default function TeamAetherDashboardPage() {
                     <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-2xl font-semibold">Socials</h2>
-                            <button className="rounded-lg bg-purple-600 hover:bg-purple-500 px-4 py-2 font-medium">
+                            <button onClick={() => setIntegrationModalOpen(true)} className="rounded-lg bg-purple-600 hover:bg-purple-500 px-4 py-2 font-medium">
                                 Connect
                             </button>
                         </div>
@@ -258,7 +468,23 @@ export default function TeamAetherDashboardPage() {
                                 <div key={title} className="border-b border-slate-800 pb-4 last:border-0">
                                     <div className="flex justify-between mb-2">
                                         <span className="font-semibold">{title}</span>
-                                        <span className="text-slate-500">Not Connected</span>
+                                        <span className={
+                                            (title === "Website" && websiteConnected) ||
+                                            (title === "Meta" && metaConnected) ||
+                                            (title === "X" && xConnected) ||
+                                            (title === "TikTok" && tiktokConnected) ||
+                                            (title === "YouTube" && youtubeConnected)
+                                                ? "text-emerald-400"
+                                                : "text-slate-500"
+                                        }>
+                                            {(title === "Website" && websiteConnected) ||
+                                            (title === "Meta" && metaConnected) ||
+                                            (title === "X" && xConnected) ||
+                                            (title === "TikTok" && tiktokConnected) ||
+                                            (title === "YouTube" && youtubeConnected)
+                                                ? "Connected"
+                                                : "Not Connected"}
+                                        </span>
                                     </div>
                                     <div className="space-y-1 text-sm text-slate-300">
                                         <div className="flex justify-between"><span>{a}</span><span>0</span></div>
@@ -273,6 +499,71 @@ export default function TeamAetherDashboardPage() {
                 </div>
 
             </div>
+
+            {integrationModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={() => setIntegrationModalOpen(false)}>
+                    <div className="w-full max-w-lg rounded-3xl border border-slate-700 bg-slate-900 p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-start justify-between gap-4">
+                            <div>
+                                <div className="text-xs font-bold uppercase tracking-wider text-purple-400">Team Aether</div>
+                                <h2 className="mt-2 text-2xl font-semibold">Manage Social Connections</h2>
+                                <p className="mt-2 text-sm text-slate-400">Connect the data sources used by the Team Aether Socials dashboard.</p>
+                            </div>
+                            <button onClick={() => setIntegrationModalOpen(false)} className="rounded-lg border border-slate-700 px-3 py-2 text-slate-400 hover:bg-slate-800 hover:text-white" aria-label="Close integrations">✕</button>
+                        </div>
+
+                        <div className="mt-6 space-y-3">
+                            {["Website", "Meta", "X", "TikTok", "YouTube"].map((integration) => {
+                                const isWebsite = integration === "Website";
+                                const isMeta = integration === "Meta";
+                                const isX = integration === "X";
+                                const isTikTok = integration === "TikTok";
+                                const isYouTube = integration === "YouTube";
+                                const connected = isWebsite ? websiteConnected : isMeta ? metaConnected : isX ? xConnected : isTikTok ? tiktokConnected : isYouTube ? youtubeConnected : false;
+                                const busy = isWebsite ? websiteBusy : isMeta ? metaBusy : isX ? xBusy : isTikTok ? tiktokBusy : isYouTube ? youtubeBusy : false;
+                                const connectAction = isWebsite ? connectWebsite : isMeta ? connectMeta : isX ? connectX : isTikTok ? connectTikTok : isYouTube ? connectYouTube : undefined;
+                                const disconnectAction = isWebsite ? disconnectWebsite : isMeta ? disconnectMeta : isX ? disconnectX : isTikTok ? disconnectTikTok : isYouTube ? disconnectYouTube : undefined;
+
+                                return (
+                                    <div key={integration} className="flex items-center justify-between gap-4 rounded-2xl border border-slate-800 bg-slate-950/60 px-4 py-4">
+                                        <div>
+                                            <div className="font-semibold text-white">{integration}</div>
+                                            <div className={`mt-1 text-xs ${connected ? "text-emerald-400" : "text-slate-500"}`}>
+                                                {connected ? "Connected" : "Not connected"}
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={connectAction}
+                                                disabled={(isWebsite || isMeta || isX || isTikTok || isYouTube) && (busy || connected)}
+                                                className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-500 disabled:cursor-not-allowed disabled:opacity-40"
+                                            >
+                                                {busy ? "Working..." : "Connect"}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={disconnectAction}
+                                                disabled={(isWebsite || isMeta || isX || isTikTok || isYouTube) && (busy || !connected)}
+                                                className="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                                            >
+                                                Disconnect
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {(websiteMessage || metaMessage || xMessage || tiktokMessage || youtubeMessage) && (
+                            <div className="mt-4 rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-300">
+                                {youtubeMessage || tiktokMessage || xMessage || metaMessage || websiteMessage}
+                            </div>
+                        )}
+                        <div className="mt-6 text-xs text-slate-500">Website, Meta, X, TikTok, and YouTube dashboard connection actions are wired. TikTok OAuth remains unavailable until provider configuration is completed.</div>
+                    </div>
+                </div>
+            )}
         </main>
     );
 }

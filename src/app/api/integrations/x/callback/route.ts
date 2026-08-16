@@ -13,8 +13,14 @@ export async function GET(request: Request) {
     process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ||
     requestUrl.origin;
 
+  let oauthReturnTo = "/dashboard/integrations";
+
   try {
     const cookieStore = await cookies();
+    oauthReturnTo =
+      cookieStore.get("x_oauth_return_to")?.value === "/team-aether/dashboard"
+        ? "/team-aether/dashboard"
+        : "/dashboard/integrations";
 
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -40,7 +46,7 @@ export async function GET(request: Request) {
 
     if (userError || !user) {
       return NextResponse.redirect(
-        `${appUrl}/dashboard/integrations?x=error&reason=not_authenticated`
+        `${appUrl}${oauthReturnTo}?x=error&reason=not_authenticated`
       );
     }
 
@@ -50,7 +56,7 @@ export async function GET(request: Request) {
 
     if (oauthError) {
       return NextResponse.redirect(
-        `${appUrl}/dashboard/integrations?x=error&reason=${encodeURIComponent(
+        `${appUrl}${oauthReturnTo}?x=error&reason=${encodeURIComponent(
           oauthErrorDescription || oauthError
         )}`
       );
@@ -70,25 +76,25 @@ export async function GET(request: Request) {
 
     if (!code) {
       return NextResponse.redirect(
-        `${appUrl}/dashboard/integrations?x=error&reason=missing_code`
+        `${appUrl}${oauthReturnTo}?x=error&reason=missing_code`
       );
     }
 
     if (!returnedState || !expectedState || returnedState !== expectedState) {
       return NextResponse.redirect(
-        `${appUrl}/dashboard/integrations?x=error&reason=invalid_state`
+        `${appUrl}${oauthReturnTo}?x=error&reason=invalid_state`
       );
     }
 
     if (!codeVerifier) {
       return NextResponse.redirect(
-        `${appUrl}/dashboard/integrations?x=error&reason=missing_code_verifier`
+        `${appUrl}${oauthReturnTo}?x=error&reason=missing_code_verifier`
       );
     }
 
     if (!organizationId) {
       return NextResponse.redirect(
-        `${appUrl}/dashboard/integrations?x=error&reason=missing_organization`
+        `${appUrl}${oauthReturnTo}?x=error&reason=missing_organization`
       );
     }
 
@@ -97,7 +103,7 @@ export async function GET(request: Request) {
 
     if (!clientId || !clientSecret) {
       return NextResponse.redirect(
-        `${appUrl}/dashboard/integrations?x=error&reason=missing_x_env`
+        `${appUrl}${oauthReturnTo}?x=error&reason=missing_x_env`
       );
     }
 
@@ -128,7 +134,7 @@ export async function GET(request: Request) {
       console.error("X token exchange failed:", tokenPayload);
 
       return NextResponse.redirect(
-        `${appUrl}/dashboard/integrations?x=error&reason=${encodeURIComponent(
+        `${appUrl}${oauthReturnTo}?x=error&reason=${encodeURIComponent(
           tokenPayload?.error_description ||
             tokenPayload?.error ||
             "token_exchange_failed"
@@ -152,7 +158,7 @@ export async function GET(request: Request) {
       console.error("X user lookup failed:", mePayload);
 
       return NextResponse.redirect(
-        `${appUrl}/dashboard/integrations?x=error&reason=${encodeURIComponent(
+        `${appUrl}${oauthReturnTo}?x=error&reason=${encodeURIComponent(
           mePayload?.detail ||
             mePayload?.title ||
             "x_user_lookup_failed"
@@ -188,15 +194,16 @@ export async function GET(request: Request) {
     cookieStore.delete("x_oauth_state");
     cookieStore.delete("x_oauth_code_verifier");
     cookieStore.delete("x_oauth_organization_id");
+    cookieStore.delete("x_oauth_return_to");
 
     return NextResponse.redirect(
-      `${appUrl}/dashboard/integrations?x=connected`
+      `${appUrl}${oauthReturnTo}?x=connected`
     );
   } catch (error: any) {
     console.error("X callback failed:", error);
 
     return NextResponse.redirect(
-      `${appUrl}/dashboard/integrations?x=error&reason=${encodeURIComponent(
+      `${appUrl}${oauthReturnTo}?x=error&reason=${encodeURIComponent(
         error?.message || "x_callback_failed"
       )}`
     );

@@ -1,20 +1,27 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 
 import { disconnect, getConnection } from "@/lib/integrations/connection-store";
 
-async function getOrganizationId(request: NextRequest) {
-  const organizationId = request.nextUrl.searchParams.get("organizationId");
-
-  if (!organizationId) {
-    throw new Error("organizationId is required.");
-  }
-
-  return organizationId;
-}
-
-export async function DELETE(request: NextRequest) {
+export async function DELETE() {
   try {
-    const organizationId = await getOrganizationId(request);
+    const cookieStore = await cookies();
+    const organizationId =
+      cookieStore.get("active_organization_id")?.value ?? null;
+
+    if (!organizationId) {
+      return NextResponse.json(
+        {
+          success: false,
+          provider: "youtube",
+          stage: "disconnect",
+          disconnected: false,
+          version: 1,
+          message: "No active organization selected.",
+        },
+        { status: 400 }
+      );
+    }
 
     const connection = await getConnection(organizationId, "youtube");
 

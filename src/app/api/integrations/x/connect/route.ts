@@ -85,6 +85,12 @@ export async function GET(request: Request) {
       process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ||
       requestUrl.origin;
 
+    const requestedReturnTo = requestUrl.searchParams.get("returnTo");
+    const oauthReturnTo =
+      requestedReturnTo === "team-aether"
+        ? "/team-aether/dashboard"
+        : "/dashboard/integrations";
+
     const redirectUri = `${appUrl}/api/integrations/x/callback`;
 
     const state = base64UrlEncode(randomBytes(32));
@@ -112,6 +118,14 @@ export async function GET(request: Request) {
     });
 
     cookieStore.set("x_oauth_organization_id", activeOrganizationId, {
+      httpOnly: true,
+      secure,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 10 * 60,
+    });
+
+    cookieStore.set("x_oauth_return_to", oauthReturnTo, {
       httpOnly: true,
       secure,
       sameSite: "lax",

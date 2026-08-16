@@ -25,8 +25,15 @@ export async function GET(request: Request) {
     }
 
     const clientId = process.env.GOOGLE_CLIENT_ID;
+    const requestUrl = new URL(request.url);
     const appUrl =
-      process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin;
+      process.env.NEXT_PUBLIC_APP_URL || requestUrl.origin;
+
+    const requestedReturnTo = requestUrl.searchParams.get("returnTo");
+    const oauthReturnTo =
+      requestedReturnTo === "team-aether"
+        ? "/team-aether/dashboard"
+        : "/dashboard/tools";
 
     if (!clientId) {
       return NextResponse.json(
@@ -58,6 +65,14 @@ export async function GET(request: Request) {
     });
 
     response.cookies.set("youtube_oauth_org_id", activeOrganizationId, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: 60 * 10,
+    });
+
+    response.cookies.set("youtube_oauth_return_to", oauthReturnTo, {
       httpOnly: true,
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",

@@ -3,10 +3,25 @@ import { NextResponse } from "next/server";
 
 import { getConnection } from "@/lib/integrations/connection-store";
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createSupabaseAdminClient } from "@supabase/supabase-js";
 
 export const runtime = "nodejs";
 
 const PROVIDER = "website";
+
+function getAdminClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !serviceRoleKey) return null;
+
+  return createSupabaseAdminClient(supabaseUrl, serviceRoleKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
+}
 
 export async function GET() {
   try {
@@ -43,11 +58,42 @@ export async function GET() {
       );
     }
 
-    const { data: membership, error: membershipError } = await supabase
+    const databaseClient = getAdminClient() ?? supabase;
+
+    const { data: appUser, error: appUserError } = await databaseClient
+      .from("users")
+      .select("id, auth_id, is_active")
+      .eq("auth_id", user.id)
+      .maybeSingle();
+
+    if (appUserError) {
+      console.error("Website status Aether user lookup failed", appUserError);
+      return NextResponse.json(
+        {
+          success: false,
+          connected: false,
+          error: appUserError.message,
+        },
+        { status: 500 }
+      );
+    }
+
+    if (!appUser || appUser.is_active === false) {
+      return NextResponse.json(
+        {
+          success: false,
+          connected: false,
+          error: "Aether user profile is not active.",
+        },
+        { status: 403 }
+      );
+    }
+
+    const { data: membership, error: membershipError } = await databaseClient
       .from("organization_members")
-      .select("organization_id")
+      .select("organization_id, profile_status")
       .eq("organization_id", organizationId)
-      .eq("user_id", user.id)
+      .eq("user_id", appUser.id)
       .maybeSingle();
 
     if (membershipError) {
@@ -69,6 +115,20 @@ export async function GET() {
           success: false,
           connected: false,
           error: "You do not have access to this organization.",
+        },
+        { status: 403 }
+      );
+    }
+
+    if (
+      membership.profile_status &&
+      String(membership.profile_status).toLowerCase() !== "active"
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          connected: false,
+          error: "Your campaign access is not active.",
         },
         { status: 403 }
       );

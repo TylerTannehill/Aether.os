@@ -16,6 +16,13 @@ export async function GET(request: Request) {
     const activeOrganizationId =
       cookieStore.get("active_organization_id")?.value;
 
+    const requestUrl = new URL(request.url);
+    const requestedReturnTo = requestUrl.searchParams.get("returnTo");
+    const oauthReturnTo =
+      requestedReturnTo === "team-aether"
+        ? "/team-aether/dashboard"
+        : "/dashboard/tools";
+
     if (!activeOrganizationId) {
       return NextResponse.json(
         {
@@ -60,6 +67,14 @@ export async function GET(request: Request) {
     });
 
     response.cookies.set("meta_oauth_org_id", activeOrganizationId, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: 60 * 10,
+    });
+
+    response.cookies.set("meta_oauth_return_to", oauthReturnTo, {
       httpOnly: true,
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",

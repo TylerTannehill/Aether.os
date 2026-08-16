@@ -10,6 +10,7 @@ const YOUTUBE_CHANNELS_URL =
 export async function GET(request: Request) {
   const appUrl =
     process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin;
+  let oauthReturnTo = "/dashboard/tools";
 
   try {
     const requestUrl = new URL(request.url);
@@ -19,7 +20,7 @@ export async function GET(request: Request) {
 
     if (oauthError) {
       return NextResponse.redirect(
-        `${appUrl}/dashboard/tools?youtube=error&reason=${encodeURIComponent(
+        `${appUrl}${oauthReturnTo}?youtube=error&reason=${encodeURIComponent(
           oauthError
         )}`
       );
@@ -27,23 +28,27 @@ export async function GET(request: Request) {
 
     if (!code || !state) {
       return NextResponse.redirect(
-        `${appUrl}/dashboard/tools?youtube=error&reason=missing_code_or_state`
+        `${appUrl}${oauthReturnTo}?youtube=error&reason=missing_code_or_state`
       );
     }
 
     const cookieStore = await cookies();
     const expectedState = cookieStore.get("youtube_oauth_state")?.value;
     const organizationId = cookieStore.get("youtube_oauth_org_id")?.value;
+    oauthReturnTo =
+      cookieStore.get("youtube_oauth_return_to")?.value === "/team-aether/dashboard"
+        ? "/team-aether/dashboard"
+        : "/dashboard/tools";
 
     if (!expectedState || expectedState !== state) {
       return NextResponse.redirect(
-        `${appUrl}/dashboard/tools?youtube=error&reason=invalid_state`
+        `${appUrl}${oauthReturnTo}?youtube=error&reason=invalid_state`
       );
     }
 
     if (!organizationId) {
       return NextResponse.redirect(
-        `${appUrl}/dashboard/tools?youtube=error&reason=missing_org`
+        `${appUrl}${oauthReturnTo}?youtube=error&reason=missing_org`
       );
     }
 
@@ -52,7 +57,7 @@ export async function GET(request: Request) {
 
     if (!clientId || !clientSecret) {
       return NextResponse.redirect(
-        `${appUrl}/dashboard/tools?youtube=error&reason=missing_google_env`
+        `${appUrl}${oauthReturnTo}?youtube=error&reason=missing_google_env`
       );
     }
 
@@ -76,7 +81,7 @@ export async function GET(request: Request) {
 
     if (!tokenResponse.ok) {
       return NextResponse.redirect(
-        `${appUrl}/dashboard/tools?youtube=error&reason=${encodeURIComponent(
+        `${appUrl}${oauthReturnTo}?youtube=error&reason=${encodeURIComponent(
           tokenPayload?.error_description ||
             tokenPayload?.error ||
             "token_exchange_failed"
@@ -102,7 +107,7 @@ export async function GET(request: Request) {
 
     if (!channelResponse.ok) {
       return NextResponse.redirect(
-        `${appUrl}/dashboard/tools?youtube=error&reason=${encodeURIComponent(
+        `${appUrl}${oauthReturnTo}?youtube=error&reason=${encodeURIComponent(
           channelPayload?.error?.message || "youtube_channel_lookup_failed"
         )}`
       );
@@ -112,7 +117,7 @@ export async function GET(request: Request) {
 
     if (!channel?.id) {
       return NextResponse.redirect(
-        `${appUrl}/dashboard/tools?youtube=error&reason=no_youtube_channel`
+        `${appUrl}${oauthReturnTo}?youtube=error&reason=no_youtube_channel`
       );
     }
 
@@ -165,23 +170,24 @@ export async function GET(request: Request) {
 
     if (upsertError) {
       return NextResponse.redirect(
-        `${appUrl}/dashboard/tools?youtube=error&reason=${encodeURIComponent(
+        `${appUrl}${oauthReturnTo}?youtube=error&reason=${encodeURIComponent(
           upsertError.message
         )}`
       );
     }
 
     const response = NextResponse.redirect(
-      `${appUrl}/dashboard/tools?youtube=connected`
+      `${appUrl}${oauthReturnTo}?youtube=connected`
     );
 
     response.cookies.delete("youtube_oauth_state");
     response.cookies.delete("youtube_oauth_org_id");
+    response.cookies.delete("youtube_oauth_return_to");
 
     return response;
   } catch (error: any) {
     return NextResponse.redirect(
-      `${appUrl}/dashboard/tools?youtube=error&reason=${encodeURIComponent(
+      `${appUrl}${oauthReturnTo}?youtube=error&reason=${encodeURIComponent(
         error?.message || "youtube_callback_failed"
       )}`
     );

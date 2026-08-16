@@ -36,6 +36,11 @@ export async function GET(request: Request) {
     const cookieStore = await cookies();
     const expectedState = cookieStore.get("meta_oauth_state")?.value;
     const organizationId = cookieStore.get("meta_oauth_org_id")?.value;
+    const storedReturnTo = cookieStore.get("meta_oauth_return_to")?.value;
+    const returnTo =
+      storedReturnTo === "/team-aether/dashboard"
+        ? "/team-aether/dashboard"
+        : "/dashboard/tools";
 
     if (!expectedState || expectedState !== state) {
       return NextResponse.redirect(
@@ -168,11 +173,12 @@ export async function GET(request: Request) {
     });
 
     const response = NextResponse.redirect(
-      `${appUrl}/dashboard/tools?meta=connected`
+      `${appUrl}${returnTo}?meta=connected`
     );
 
     response.cookies.delete("meta_oauth_state");
     response.cookies.delete("meta_oauth_org_id");
+    response.cookies.delete("meta_oauth_return_to");
 
     return response;
   } catch (error: any) {
