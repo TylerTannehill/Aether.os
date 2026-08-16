@@ -9,6 +9,7 @@ import {
   CalendarDays,
   ChevronDown,
   ChevronRight,
+  Download,
   FolderKanban,
   Mail,
   MessageSquare,
@@ -1501,6 +1502,38 @@ Reset
           );
         })}
       </section>
+
+      {canAccessIntegrations ? (
+        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-start gap-4">
+              <div className={`rounded-2xl border p-3 ${orgTheme.accentBorder} ${orgTheme.accentSoftBg}`}>
+                <Download className={`h-5 w-5 ${orgTheme.accentText}`} />
+              </div>
+
+              <div>
+                <div className={`text-xs font-semibold uppercase tracking-[0.16em] ${orgTheme.accentText}`}>
+                  Campaign Data
+                </div>
+                <h2 className="mt-1 text-xl font-semibold text-slate-950">
+                  Full Data Export
+                </h2>
+                <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-600">
+                  Download the active campaign&apos;s Aether-owned operational data in one export file. Integration secrets and internal Aether infrastructure are excluded.
+                </p>
+              </div>
+            </div>
+
+            <a
+              href="/api/export"
+              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold !text-white transition hover:bg-slate-800"
+            >
+              <Download className="h-4 w-4" />
+              Download Full Export
+            </a>
+          </div>
+        </section>
+      ) : null}
 
       <section className="rounded-3xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
         <div className="flex flex-wrap items-center gap-3 text-sm text-slate-600">
