@@ -248,6 +248,7 @@ const SOCIAL_PROVIDER_IDS = new Set([
   "tiktok",
   "youtube",
   "website",
+  "winred",
   "google",
   "gmail",
   "calendar",
@@ -513,6 +514,7 @@ function ConnectionPanel({
   websiteApiKey,
   websiteEndpoint,
   websiteTrackerId,
+  winredWebhookUrl,
 }: {
   integration: IntegrationCard;
   connected: boolean;
@@ -530,6 +532,7 @@ function ConnectionPanel({
   websiteApiKey: string;
   websiteEndpoint: string;
   websiteTrackerId: string;
+  winredWebhookUrl: string;
 }) {
   const currentCredentials = credentials[integration.id] || {
     accountName: "",
@@ -590,6 +593,8 @@ function ConnectionPanel({
                 ? "You\'ll be redirected to Google to securely connect the campaign\'s YouTube channel and analytics."
                 : integration.id === "x"
                 ? "You\'ll be redirected to X to securely connect the campaign\'s X account and analytics."
+                : integration.id === "winred"
+                ? "Aether will create a campaign-specific WinRed webhook URL. Add that URL to WinRed so new donor activity can flow directly into Aether Contacts."
                 : "Add the account details your campaign uses for this tool. Once saved, this integration will show as connected."}
             </p>
           </div>
@@ -748,6 +753,62 @@ function ConnectionPanel({
                 </details>
               ) : null}
             </>
+          ) : integration.id === "winred" && connected ? (
+            <>
+              <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700" />
+                  <div>
+                    <p className="text-sm font-semibold text-emerald-950">
+                      WinRed webhook ready
+                    </p>
+                    <p className="mt-1 text-sm leading-6 text-emerald-800/80">
+                      WinRed donor activity can flow into this campaign&apos;s Aether Contacts through the campaign-specific webhook below.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {winredWebhookUrl ? (
+                <div className="rounded-3xl border border-slate-200 bg-white p-5">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                    WinRed Webhook URL
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                    Copy this URL into the campaign&apos;s WinRed webhook configuration.
+                  </p>
+                  <div className="mt-4 flex gap-2">
+                    <input
+                      readOnly
+                      value={winredWebhookUrl}
+                      className="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 font-mono text-xs text-slate-900 outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => navigator.clipboard.writeText(winredWebhookUrl)}
+                      className="inline-flex shrink-0 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                    >
+                      <Copy className="h-4 w-4" />
+                      Copy
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-3xl border border-blue-200 bg-blue-50 p-5">
+                  <div className="flex items-start gap-3">
+                    <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-blue-700" />
+                    <div>
+                      <p className="text-sm font-semibold text-blue-950">
+                        Webhook credential protected
+                      </p>
+                      <p className="mt-1 text-sm leading-6 text-blue-800/80">
+                        The connection is active. For security, Aether does not redisplay a previously generated webhook token after the page is reloaded.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
           ) : connected ? (
             <>
               <div className="rounded-3xl border border-slate-200 bg-white p-5">
@@ -858,6 +919,26 @@ function ConnectionPanel({
                 </div>
               </div>
             </>
+          ) : integration.id === "winred" ? (
+            <>
+              <div className="rounded-3xl border border-slate-200 bg-white p-5">
+                <p className="text-sm font-semibold text-slate-900">WinRed Donor Webhook</p>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  Aether creates a secure webhook URL for this campaign. Add it to WinRed once, and incoming donor activity will be processed through Aether&apos;s Contacts ingestion engine.
+                </p>
+              </div>
+              <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
+                <div className="flex items-start gap-3">
+                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
+                  <div>
+                    <p className="text-sm font-semibold text-emerald-950">No WinRed password required</p>
+                    <p className="mt-1 text-sm leading-6 text-emerald-800/80">
+                      Aether generates the campaign-specific webhook credential. You only need to copy the URL into WinRed.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </>
           ) : integration.id === "website" ? (
             <>
               <div className="rounded-3xl border border-slate-200 bg-white p-5">
@@ -916,7 +997,13 @@ function ConnectionPanel({
               disabled={saving || disconnecting}
               className="flex-1 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {integration.id === "website" && connected && websiteTrackerId ? "Done" : connected ? "Close" : "Cancel"}
+              {integration.id === "website" && connected && websiteTrackerId
+                ? "Done"
+                : integration.id === "winred" && connected && winredWebhookUrl
+                ? "Done"
+                : connected
+                ? "Close"
+                : "Cancel"}
             </button>
 
             {integration.id === "website" && connected && websiteTrackerId ? null : connected ? (
@@ -959,6 +1046,10 @@ function ConnectionPanel({
                   ? saving
                     ? "Creating API Key..."
                     : "Create Website Tracker"
+                  : integration.id === "winred"
+                  ? saving
+                    ? "Creating Webhook..."
+                    : "Create WinRed Webhook"
                   : saving
                   ? "Saving..."
                   : "Save & Connect"}
@@ -985,6 +1076,7 @@ export default function IntegrationsPage() {
   const [websiteApiKey, setWebsiteApiKey] = useState("");
   const [websiteEndpoint, setWebsiteEndpoint] = useState("");
   const [websiteTrackerId, setWebsiteTrackerId] = useState("");
+  const [winredWebhookUrl, setWinredWebhookUrl] = useState("");
   const [configuredIntegrations, setConfiguredIntegrations] = useState<
     Record<string, boolean>
   >({});
@@ -1155,6 +1247,42 @@ export default function IntegrationsPage() {
       return;
     }
 
+    if (activeIntegration.id === "winred") {
+      try {
+        setSavingConnection(true);
+        setConnectionSaveError("");
+
+        const response = await fetch("/api/integrations/winred/connect", {
+          method: "POST",
+          credentials: "include",
+          cache: "no-store",
+        });
+
+        const result = await response.json().catch(() => null);
+
+        if (!response.ok || !result?.success) {
+          throw new Error(
+            result?.error || "The WinRed webhook connection could not be created."
+          );
+        }
+
+        setConfiguredIntegrations((current) => ({
+          ...current,
+          winred: true,
+        }));
+
+        setWinredWebhookUrl(String(result.webhookUrl || ""));
+      } catch (error: any) {
+        console.error("Failed to create WinRed webhook connection", error);
+        setConnectionSaveError(
+          error?.message || "The WinRed webhook connection could not be created."
+        );
+      } finally {
+        setSavingConnection(false);
+      }
+      return;
+    }
+
     const currentCredentials = credentials[activeIntegration.id] || {
       accountName: "",
       accessToken: "",
@@ -1218,7 +1346,10 @@ export default function IntegrationsPage() {
           activeOrganizationId
         )}`,
         {
-          method: providerId === "website" ? "POST" : "DELETE",
+          method:
+            providerId === "website" || providerId === "winred"
+              ? "POST"
+              : "DELETE",
           credentials: "include",
         }
       );
@@ -1248,6 +1379,10 @@ export default function IntegrationsPage() {
         setWebsiteTrackerId("");
       }
 
+      if (providerId === "winred") {
+        setWinredWebhookUrl("");
+      }
+
       setActiveIntegration(null);
     } catch (error: any) {
       console.error(`Failed to disconnect ${providerName}`, error);
@@ -1264,6 +1399,7 @@ export default function IntegrationsPage() {
     setConnectionSaveError("");
     setWebsiteApiKey("");
     setWebsiteEndpoint("");
+    setWinredWebhookUrl("");
     setActiveIntegration(integration);
   }
 
@@ -1466,6 +1602,7 @@ export default function IntegrationsPage() {
           websiteApiKey={websiteApiKey}
           websiteEndpoint={websiteEndpoint}
           websiteTrackerId={websiteTrackerId}
+          winredWebhookUrl={winredWebhookUrl}
         />
       ) : null}
     </>
