@@ -596,6 +596,8 @@ function ConnectionPanel({
                 ? "You\'ll be redirected to Google to securely connect the campaign\'s YouTube channel and analytics."
                 : integration.id === "x"
                 ? "You\'ll be redirected to X to securely connect the campaign\'s X account and analytics."
+                : integration.id === "tiktok"
+                ? "You\'ll be redirected to TikTok to securely connect the campaign\'s TikTok account and analytics."
                 : integration.id === "winred"
                 ? "Aether will create a campaign-specific WinRed webhook URL. Add that URL to WinRed so new donor activity can flow directly into Aether Contacts."
                 : integration.id === "actblue"
@@ -980,6 +982,27 @@ function ConnectionPanel({
                 </div>
               </div>
             </>
+          ) : integration.id === "tiktok" ? (
+            <>
+              <div className="rounded-3xl border border-slate-200 bg-white p-5">
+                <p className="text-sm font-semibold text-slate-900">TikTok Analytics</p>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  Connect the campaign&apos;s TikTok account so Aether can read account statistics and public video performance through TikTok&apos;s API.
+                </p>
+              </div>
+
+              <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
+                <div className="flex items-start gap-3">
+                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
+                  <div>
+                    <p className="text-sm font-semibold text-emerald-950">Secure TikTok OAuth</p>
+                    <p className="mt-1 text-sm leading-6 text-emerald-800/80">
+                      You&apos;ll be redirected to TikTok to approve read-only analytics access. Aether never asks for your TikTok password.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </>
           ) : integration.id === "actblue" ? (
             <>
               <div className="rounded-3xl border border-slate-200 bg-white p-5">
@@ -1112,6 +1135,8 @@ function ConnectionPanel({
                     ? () => window.location.assign("/api/integrations/youtube/connect")
                     : integration.id === "x"
                     ? () => window.location.assign("/api/integrations/x/connect")
+                    : integration.id === "tiktok"
+                    ? () => window.location.assign("/api/integrations/tiktok/connect")
                     : onSave
                 }
                 disabled={saving}
@@ -1125,6 +1150,8 @@ function ConnectionPanel({
                   ? "Connect with YouTube"
                   : integration.id === "x"
                   ? "Connect with X"
+                  : integration.id === "tiktok"
+                  ? "Connect with TikTok"
                   : integration.id === "website"
                   ? saving
                     ? "Creating API Key..."
