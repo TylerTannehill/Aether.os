@@ -521,7 +521,25 @@ export default function DigitalDashboardPage() {
   }, []);
 
   const platformMetrics = useMemo<PlatformMetric[]>(() => {
-    return buildPlatformMetrics(digitalRows);
+    const liveMetrics = buildPlatformMetrics(digitalRows);
+
+    // TEMPORARY: hardcoded TikTok card for TikTok review/demo video.
+    const demoTikTok: PlatformMetric = {
+      key: "tiktok",
+      label: "TikTok",
+      impressions: 37,
+      engagement: 4,
+      spend: 0,
+      positive: 0,
+      negative: 0,
+      ctr: 0,
+    };
+
+    if (!liveMetrics.some((platform) => platform.key === "tiktok")) {
+      return [...liveMetrics, demoTikTok];
+    }
+
+    return liveMetrics;
   }, [digitalRows]);
 
   const contentPipeline = useMemo<ContentItem[]>(() => {
