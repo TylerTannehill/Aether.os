@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowRight, PlayCircle } from "lucide-react";
 
 const videos = [
-  ["Welcome to Aether","Learn what Aether is, why it was built, and how campaign teams can use it to simplify daily operations.","welcome-to-aether"],
+  ["Welcome to Aether","Learn what Aether is, why it was built, and how campaign teams can use it to simplify daily operations.","welcome-to-aether","lq_qHRNg2RA"],
   ["What is Aether?","Understand what makes Aether different from traditional campaign software and why we describe it as a Campaign Operating System.","what-is-aether"],
   ["Campaign Operating System","Explore how Aether connects every department into one unified platform.","campaign-operating-system"],
   ["Design Philosophy","Discover the principles that guide every decision behind Aether.","design-philosophy"],
@@ -55,14 +55,28 @@ export default function TrainingVideosPage() {
         </div>
 
         <div className="mt-20 space-y-8">
-          {videos.map(([title, desc, anchor]) => (
+          {videos.map(([title, desc, anchor, videoId]) => (
             <section key={anchor} className="rounded-3xl border border-white/10 bg-white/[0.03] p-8 backdrop-blur-xl">
               <h2 className="text-2xl font-bold">{title}</h2>
               <p className="mt-4 leading-8 text-slate-300">{desc}</p>
 
-              <div className="mt-6 inline-flex rounded-full border border-violet-400/30 bg-violet-500/10 px-4 py-2 text-sm font-semibold text-violet-300">
-                Coming Soon
-              </div>
+              {videoId ? (
+                <div className="mt-6 overflow-hidden rounded-2xl border border-white/10 bg-black">
+                  <div className="aspect-video">
+                    <iframe
+                      className="h-full w-full"
+                      src={`https://www.youtube.com/embed/${videoId}`}
+                      title={`${title} training video`}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="mt-6 inline-flex rounded-full border border-violet-400/30 bg-violet-500/10 px-4 py-2 text-sm font-semibold text-violet-300">
+                  Coming Soon
+                </div>
+              )}
 
               <div className="mt-8">
                 <Link
