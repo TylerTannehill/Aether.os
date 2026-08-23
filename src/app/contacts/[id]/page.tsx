@@ -895,6 +895,8 @@ export default function ContactDetailPage() {
   const [pledgeMessage, setPledgeMessage] = useState("");
   const [quickActionSaving, setQuickActionSaving] = useState(false);
   const [financeExpanded, setFinanceExpanded] = useState(true);
+  const [fecEnriching, setFecEnriching] = useState(false);
+  const [fecMessage, setFecMessage] = useState("");
   const [fieldIntelExpanded, setFieldIntelExpanded] = useState(false);
   const [printIntelExpanded, setPrintIntelExpanded] = useState(false);
   const [aetherTier, setAetherTier] = useState<AetherTier>("t3");
@@ -1280,6 +1282,52 @@ async function addToList() {
       setNotesSaving(false);
     }
   }
+
+  async function runFecEnrichment() {
+    if (!contact) return;
+
+    setFecMessage("");
+    setFecEnriching(true);
+
+    try {
+      const response = await fetch("/api/fec/enrich", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ contactId }),
+      });
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok || !data?.success) {
+        setFecMessage(
+          data?.error || "FEC enrichment failed.",
+        );
+        return;
+      }
+
+      if (data.matched) {
+        setFecMessage(
+          `FEC match found: ${data.recordCount ?? 0} record${
+            Number(data.recordCount ?? 0) === 1 ? "" : "s"
+          } · ${currency.format(Number(data.totalGiven ?? 0))} lifetime giving.`,
+        );
+      } else {
+        setFecMessage("No FEC records matched this contact's name and address.");
+      }
+
+      await fetchData();
+    } catch (error: any) {
+      setFecMessage(
+        `FEC enrichment failed: ${error?.message || "Unknown error"}`,
+      );
+    } finally {
+      setFecEnriching(false);
+    }
+  }
+
 
   async function saveContribution() {
     if (!contact) return;
@@ -1805,7 +1853,20 @@ const availableLists = lists.filter(
                   </Link>
                 </div>
 
-                <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+                {fecMessage ? (
+              <div
+                className={`mt-4 rounded-2xl border p-4 text-sm font-medium ${
+                  fecMessage.toLowerCase().includes("failed") ||
+                  fecMessage.toLowerCase().includes("required")
+                    ? "border-rose-200 bg-rose-50 text-rose-700"
+                    : "border-emerald-200 bg-white text-emerald-900"
+                }`}
+              >
+                {fecMessage}
+              </div>
+            ) : null}
+
+            <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
                   {signalBreakdown.map((signal) => (
                     <div
                       key={signal.label}
@@ -2362,16 +2423,27 @@ const availableLists = lists.filter(
                   External donor signal attached to this contact
                 </h3>
                 <p className="mt-2 max-w-3xl text-sm text-emerald-900/80">
-                  This is the first Phase 5 receiving surface. Matching and
-                  ingestion will wire into these fields next.
+                  Check public FEC contribution records against this contact using
+                  first name, last name, and street address.
                 </p>
               </div>
 
-              {donorIntelligence.jackpot_candidate ? (
-                <span className="inline-flex rounded-full border border-yellow-300 bg-yellow-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-yellow-900">
-                  Jackpot Anomaly
-                </span>
-              ) : null}
+              <div className="flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={runFecEnrichment}
+                  disabled={fecEnriching}
+                  className="rounded-2xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {fecEnriching ? "Checking FEC..." : "Check FEC Records"}
+                </button>
+
+                {donorIntelligence.jackpot_candidate ? (
+                  <span className="inline-flex rounded-full border border-yellow-300 bg-yellow-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-yellow-900">
+                    Jackpot Anomaly
+                  </span>
+                ) : null}
+              </div>
             </div>
 
             <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
