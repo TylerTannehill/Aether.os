@@ -48,6 +48,7 @@ const tiers = [
       "Lean field-first operating system for underfunded local races and volunteer-heavy campaigns.",
     originalPrice: "$5,000/year",
     launchPrice: "$2,500/year",
+    monthlyPrice: "$500/month",
     bullets: [
       "Field + Outreach infrastructure",
       "Contacts, Lists, and Calling",
@@ -63,6 +64,7 @@ const tiers = [
       "Full campaign operations with finance, digital, dashboard intelligence, and integrations.",
     originalPrice: "$10,000/year",
     launchPrice: "$5,000/year",
+    monthlyPrice: "$916.50/month",
     bullets: [
       "Finance + Digital departments",
       "Honest Abe intelligence layer",
@@ -78,6 +80,7 @@ const tiers = [
       "Strategic command infrastructure for high-scale campaigns and complex organizations.",
     originalPrice: "$20,000/year",
     launchPrice: "$10,000/year",
+    monthlyPrice: "$1,750/month",
     bullets: [
       "Full command infrastructure",
       "Tools + coordination layer",
@@ -424,13 +427,21 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
                     90-Day Launch Special • Ends 11/30/2026
                   </p>
 
-                  <div className="mt-3 flex items-end gap-3">
+                  <div className="mt-3 flex flex-wrap items-end gap-x-3 gap-y-2">
                     <span className="text-lg font-medium text-slate-500 line-through">
                       {tier.originalPrice}
                     </span>
 
                     <span className="text-3xl font-black tracking-tight text-white">
                       {tier.launchPrice}
+                    </span>
+
+                    <span className="text-sm font-semibold text-slate-400">
+                      or
+                    </span>
+
+                    <span className="text-xl font-black tracking-tight text-white">
+                      {tier.monthlyPrice}
                     </span>
                   </div>
                 </div>

@@ -29,6 +29,7 @@ const tierNavigation = [
     tier: "T1",
     name: "Ground Campaign OS",
     promise: "Build",
+    price: "$5,000/yr or $500/mo",
     href: "#t1",
     description:
       "A lean operating system for local, volunteer-heavy campaigns that need structure without unnecessary complexity.",
@@ -38,6 +39,7 @@ const tierNavigation = [
     tier: "T2",
     name: "Operational Campaign OS",
     promise: "Coordinate",
+    price: "$10,000/yr or $916.50/mo",
     href: "#t2",
     description:
       "Connected campaign operations for growing teams managing finance, digital, field, outreach, and integrations.",
@@ -47,6 +49,7 @@ const tierNavigation = [
     tier: "T3",
     name: "Command Campaign OS",
     promise: "Command",
+    price: "$20,000/yr or $1,750/mo",
     href: "#t3",
     description:
       "Strategic command infrastructure for high-scale campaigns where leadership visibility and coordination matter most.",
@@ -258,7 +261,7 @@ export default function PublicSalesPage() {
 
           <div className="mt-10 grid gap-6 lg:grid-cols-3">
             {tierNavigation.map(
-              ({ tier, name, promise, href, description, icon: Icon }) => (
+              ({ tier, name, promise, price, href, description, icon: Icon }) => (
                 <a
                   key={tier}
                   href={href}
@@ -275,6 +278,10 @@ export default function PublicSalesPage() {
                     {promise}
                   </p>
                   <h3 className="mt-3 text-3xl font-black">{name}</h3>
+                  <div className="mt-4 flex items-baseline gap-2">
+                    <span className="text-2xl font-black text-white">{price}</span>
+                    <span className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">Billing Options</span>
+                  </div>
                   <p className="mt-5 leading-7 text-slate-300">{description}</p>
 
                   <div className="mt-8 flex items-center gap-2 text-sm font-black text-violet-200">
@@ -305,6 +312,10 @@ export default function PublicSalesPage() {
               <h2 className="mt-6 text-4xl font-black tracking-tight sm:text-5xl">
                 Ground Campaign OS
               </h2>
+              <div className="mt-4 flex items-baseline gap-2">
+                <span className="text-3xl font-black text-white">$5,000/yr</span>
+                <span className="text-sm font-bold text-slate-400">or $500/mo</span>
+              </div>
               <p className="mt-5 max-w-3xl text-xl leading-8 text-slate-300">
                 For lean, underfunded, volunteer-heavy campaigns that need
                 structure without unnecessary complexity.
@@ -387,6 +398,10 @@ export default function PublicSalesPage() {
               <h2 className="mt-6 text-4xl font-black tracking-tight sm:text-5xl">
                 Operational Campaign OS
               </h2>
+              <div className="mt-4 flex items-baseline gap-2">
+                <span className="text-3xl font-black text-white">$10,000/yr</span>
+                <span className="text-sm font-bold text-slate-400">or $916.50/mo</span>
+              </div>
               <p className="mt-5 max-w-3xl text-xl leading-8 text-slate-300">
                 For growing campaigns with real staff, consultants, finance
                 activity, digital work, integrations, and several operational
@@ -471,6 +486,10 @@ export default function PublicSalesPage() {
               <h2 className="mt-6 text-4xl font-black tracking-tight sm:text-5xl">
                 Command Campaign OS
               </h2>
+              <div className="mt-4 flex items-baseline gap-2">
+                <span className="text-3xl font-black text-white">$20,000/yr</span>
+                <span className="text-sm font-bold text-slate-400">or $1,750/mo</span>
+              </div>
               <p className="mt-5 max-w-3xl text-xl leading-8 text-slate-300">
                 For high-scale campaigns where coordination complexity becomes the
                 real operational risk and leadership needs visibility across the
