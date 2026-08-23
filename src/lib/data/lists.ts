@@ -181,14 +181,14 @@ export async function getListDetail(
   const { data: membershipData, error: membershipError } = await supabase
     .from("list_contacts")
     .select(
-      "contact_id, contacts(id, first_name, last_name, email, phone, city, state, party, organization_id)"
+      "contact_id, contacts(id, first_name, last_name, email, phone, address, city, state, zip, party, organization_id)"
     )
     .eq("list_id", listId);
 
   const { data: contactsData, error: contactsError } = await supabase
     .from("contacts")
     .select(
-      "id, first_name, last_name, email, phone, city, state, party"
+      "id, first_name, last_name, email, phone, address, city, state, zip, party"
     )
     .eq("organization_id", organizationId)
     .order("last_name", { ascending: true });

@@ -191,6 +191,23 @@ const FINANCE_INTEGRATIONS: IntegrationCard[] = [
   },
 ];
 
+const FIELD_INTEGRATIONS: IntegrationCard[] = [
+  {
+    id: "routes",
+    name: "Google Routes",
+    category: "Field Team",
+    description:
+      "Optimize driving routes for campaign field lists and door-to-door operations.",
+    icon: MapPinned,
+    status: "ready_to_configure",
+    setupNote:
+      "Connect Google Routes to verify Aether-managed route optimization for this campaign.",
+    credentialHint: "Managed by Aether",
+    logoText: "G",
+    logoSubtext: "Routes",
+  },
+];
+
 const UTILITY_INTEGRATIONS: IntegrationCard[] = [
   {
     id: "gmail",
@@ -239,6 +256,7 @@ const UTILITY_INTEGRATIONS: IntegrationCard[] = [
 const ALL_INTEGRATIONS: IntegrationCard[] = [
   ...DIGITAL_INTEGRATIONS,
   ...FINANCE_INTEGRATIONS,
+  ...FIELD_INTEGRATIONS,
   ...UTILITY_INTEGRATIONS,
 ];
 
@@ -250,6 +268,7 @@ const SOCIAL_PROVIDER_IDS = new Set([
   "website",
   "winred",
   "actblue",
+  "routes",
   "google",
   "gmail",
   "calendar",
@@ -1043,6 +1062,26 @@ function ConnectionPanel({
                 </div>
               </div>
             </>
+          ) : integration.id === "routes" ? (
+            <>
+              <div className="rounded-3xl border border-slate-200 bg-white p-5">
+                <p className="text-sm font-semibold text-slate-900">Aether-Managed Google Routes</p>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  Aether uses its own Google Routes connection to optimize campaign field routes. No campaign Google account, API key, or billing setup is required.
+                </p>
+              </div>
+              <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
+                <div className="flex items-start gap-3">
+                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
+                  <div>
+                    <p className="text-sm font-semibold text-emerald-950">Managed by Aether</p>
+                    <p className="mt-1 text-sm leading-6 text-emerald-800/80">
+                      Connect verifies the live Google Routes service before enabling route tools for the active campaign.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </>
           ) : integration.id === "website" ? (
             <>
               <div className="rounded-3xl border border-slate-200 bg-white p-5">
@@ -1152,6 +1191,10 @@ function ConnectionPanel({
                   ? "Connect with X"
                   : integration.id === "tiktok"
                   ? "Connect with TikTok"
+                  : integration.id === "routes"
+                  ? saving
+                    ? "Connecting..."
+                    : "Connect Google Routes"
                   : integration.id === "website"
                   ? saving
                     ? "Creating API Key..."
@@ -1247,6 +1290,7 @@ export default function IntegrationsPage() {
           "tiktok",
           "youtube",
           "website",
+          "routes",
           "actblue",
           "winred",
         ] as const;
@@ -1318,6 +1362,36 @@ export default function IntegrationsPage() {
 
   async function saveCurrentConnection() {
     if (!activeIntegration || !activeOrganizationId) return;
+
+    if (activeIntegration.id === "routes") {
+      try {
+        setSavingConnection(true);
+        setConnectionSaveError("");
+
+        const response = await fetch("/api/integrations/routes/connect", {
+          method: "POST",
+          credentials: "include",
+          cache: "no-store",
+        });
+
+        const result = await response.json().catch(() => null);
+
+        if (!response.ok || !result?.success) {
+          throw new Error(result?.error || "Google Routes could not be connected.");
+        }
+
+        setConfiguredIntegrations((current) => ({
+          ...current,
+          routes: true,
+        }));
+      } catch (error: any) {
+        console.error("Failed to connect Google Routes", error);
+        setConnectionSaveError(error?.message || "Google Routes could not be connected.");
+      } finally {
+        setSavingConnection(false);
+      }
+      return;
+    }
 
     if (activeIntegration.id === "website") {
       try {
@@ -1500,7 +1574,8 @@ export default function IntegrationsPage() {
           method:
             providerId === "website" ||
             providerId === "winred" ||
-            providerId === "actblue"
+            providerId === "actblue" ||
+            providerId === "routes"
               ? "POST"
               : "DELETE",
           credentials: "include",
@@ -1585,6 +1660,7 @@ export default function IntegrationsPage() {
   const totalVisibleIntegrations =
     DIGITAL_INTEGRATIONS.length +
     visibleFinanceIntegrations.length +
+    FIELD_INTEGRATIONS.length +
     UTILITY_INTEGRATIONS.length;
 
   const configuredCount = useMemo(() => {
@@ -1690,33 +1766,13 @@ export default function IntegrationsPage() {
           onOpenConnection={openConnection}
         />
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="mb-6">
-            <h2 className="text-2xl font-semibold text-slate-900">
-              Field
-            </h2>
-
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-              Field tools and operational integrations are planned for a future
-              rollout.
-            </p>
-          </div>
-
-          <div className="rounded-3xl border border-dashed border-slate-300 bg-gradient-to-br from-slate-50 to-white p-8 text-center">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-sm">
-              <MapPinned className="h-7 w-7 text-slate-500" />
-            </div>
-
-            <p className="mt-4 text-lg font-semibold text-slate-800">
-              Field is part of the roadmap.
-            </p>
-
-            <p className="mx-auto mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-              Aether’s first launch focus is digital, finance, and campaign
-              operations. Dedicated field integrations will expand over time.
-            </p>
-          </div>
-        </section>
+        <IntegrationSection
+          title="Field"
+          description="Connect field operations services that support route planning and campaign execution."
+          integrations={FIELD_INTEGRATIONS}
+          configuredIntegrations={configuredIntegrations}
+          onOpenConnection={openConnection}
+        />
 
         <IntegrationSection
           title="Utilities"

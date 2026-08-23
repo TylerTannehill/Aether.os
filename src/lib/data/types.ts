@@ -80,8 +80,10 @@ export type Contact = {
   last_name?: string | null;
   email?: string | null;
   phone?: string | null;
+  address?: string | null;
   city?: string | null;
   state?: string | null;
+  zip?: string | null;
   party?: string | null;
   owner_name?: string | null;
   donor_intelligence?: ContactDonorIntelligence | null;
