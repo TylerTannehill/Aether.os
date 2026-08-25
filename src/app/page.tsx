@@ -137,6 +137,18 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
     minutes: "00",
     seconds: "00",
   });
+  const [promptCopied, setPromptCopied] = useState(false);
+
+  const copyAiPrompt = async () => {
+    try {
+      await navigator.clipboard.writeText(aiPrompt);
+      setPromptCopied(true);
+      window.setTimeout(() => setPromptCopied(false), 1800);
+    } catch {
+      // Leave the button usable even if clipboard access is unavailable.
+    }
+  };
+
 
   useEffect(() => {
     setTimeLeft(calculateTimeLeft());
@@ -549,7 +561,7 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
               <button
                 type="button"
                 onClick={() => openAiWithCopiedPrompt("https://gemini.google.com/app")}
-                className="inline-flex min-w-[260px] items-center justify-center gap-3 rounded-2xl border border-white/20 bg-white/[0.06] px-8 py-5 text-base font-black uppercase tracking-[0.08em] text-white shadow-xl shadow-black/20 transition hover:bg-white/[0.10]"
+                className="inline-flex min-w-[260px] items-center justify-center gap-3 rounded-2xl border border-violet-300/60 bg-gradient-to-b from-violet-500 to-violet-800 px-8 py-5 text-base font-black uppercase tracking-[0.08em] text-white shadow-2xl shadow-violet-950/40 transition hover:from-violet-400 hover:to-violet-700"
               >
                 Ask Gemini
                 <ArrowRight className="h-5 w-5" />
@@ -559,7 +571,7 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
                 href="https://claude.ai/new?q=I%27m%20considering%20running%20for%20office%20and%20I%20found%20a%20SaaS%20called...%0AURL%3A%20aetheros.pro%20%0AURL%3A%20aetheros.pro/aether-academy/comprehensive-guide%0A%0APlease%20take%20a%20deep%20dive%20on%20aetheros.pro/aether-academy/comprehensive-guide%20%26%20all%20of%20the%20public%20pages%20and%20give%20me%20your%20feedback."
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex min-w-[260px] items-center justify-center gap-3 rounded-2xl border border-white/20 bg-white/[0.06] px-8 py-5 text-base font-black uppercase tracking-[0.08em] text-white shadow-xl shadow-black/20 transition hover:bg-white/[0.10]"
+                className="inline-flex min-w-[260px] items-center justify-center gap-3 rounded-2xl border border-violet-300/60 bg-gradient-to-b from-violet-500 to-violet-800 px-8 py-5 text-base font-black uppercase tracking-[0.08em] text-white shadow-2xl shadow-violet-950/40 transition hover:from-violet-400 hover:to-violet-700"
               >
                 Ask Claude
                 <ArrowRight className="h-5 w-5" />
@@ -569,7 +581,7 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
                 href="https://grok.com/?q=I%27m%20considering%20running%20for%20office%20and%20I%20found%20a%20SaaS%20called...%0AURL%3A%20aetheros.pro%20%0AURL%3A%20aetheros.pro/aether-academy/comprehensive-guide%0A%0APlease%20take%20a%20deep%20dive%20on%20aetheros.pro/aether-academy/comprehensive-guide%20%26%20all%20of%20the%20public%20pages%20and%20give%20me%20your%20feedback."
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex min-w-[260px] items-center justify-center gap-3 rounded-2xl border border-white/20 bg-white/[0.06] px-8 py-5 text-base font-black uppercase tracking-[0.08em] text-white shadow-xl shadow-black/20 transition hover:bg-white/[0.10]"
+                className="inline-flex min-w-[260px] items-center justify-center gap-3 rounded-2xl border border-violet-300/60 bg-gradient-to-b from-violet-500 to-violet-800 px-8 py-5 text-base font-black uppercase tracking-[0.08em] text-white shadow-2xl shadow-violet-950/40 transition hover:from-violet-400 hover:to-violet-700"
               >
                 Ask Grok
                 <ArrowRight className="h-5 w-5" />
@@ -579,7 +591,7 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
                 href="https://www.perplexity.ai/search?q=I%27m%20considering%20running%20for%20office%20and%20I%20found%20a%20SaaS%20called...%0AURL%3A%20aetheros.pro%20%0AURL%3A%20aetheros.pro/aether-academy/comprehensive-guide%0A%0APlease%20take%20a%20deep%20dive%20on%20aetheros.pro/aether-academy/comprehensive-guide%20%26%20all%20of%20the%20public%20pages%20and%20give%20me%20your%20feedback."
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex min-w-[260px] items-center justify-center gap-3 rounded-2xl border border-white/20 bg-white/[0.06] px-8 py-5 text-base font-black uppercase tracking-[0.08em] text-white shadow-xl shadow-black/20 transition hover:bg-white/[0.10]"
+                className="inline-flex min-w-[260px] items-center justify-center gap-3 rounded-2xl border border-violet-300/60 bg-gradient-to-b from-violet-500 to-violet-800 px-8 py-5 text-base font-black uppercase tracking-[0.08em] text-white shadow-2xl shadow-violet-950/40 transition hover:from-violet-400 hover:to-violet-700"
               >
                 Ask Perplexity
                 <ArrowRight className="h-5 w-5" />
@@ -589,16 +601,22 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
                 href="https://copilot.microsoft.com/?q=I%27m%20considering%20running%20for%20office%20and%20I%20found%20a%20SaaS%20called...%0AURL%3A%20aetheros.pro%20%0AURL%3A%20aetheros.pro/aether-academy/comprehensive-guide%0A%0APlease%20take%20a%20deep%20dive%20on%20aetheros.pro/aether-academy/comprehensive-guide%20%26%20all%20of%20the%20public%20pages%20and%20give%20me%20your%20feedback."
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex min-w-[260px] items-center justify-center gap-3 rounded-2xl border border-white/20 bg-white/[0.06] px-8 py-5 text-base font-black uppercase tracking-[0.08em] text-white shadow-xl shadow-black/20 transition hover:bg-white/[0.10]"
+                className="inline-flex min-w-[260px] items-center justify-center gap-3 rounded-2xl border border-violet-300/60 bg-gradient-to-b from-violet-500 to-violet-800 px-8 py-5 text-base font-black uppercase tracking-[0.08em] text-white shadow-2xl shadow-violet-950/40 transition hover:from-violet-400 hover:to-violet-700"
               >
                 Ask Copilot
                 <ArrowRight className="h-5 w-5" />
               </a>
             </div>
 
-            <p className="mt-4 text-xs text-slate-400">
-              Gemini copies the same prompt automatically — paste it into the new Gemini window.
-            </p>
+            <div className="mt-6 flex justify-center">
+              <button
+                type="button"
+                onClick={copyAiPrompt}
+                className="inline-flex min-w-[260px] items-center justify-center gap-3 rounded-2xl border border-violet-300/60 bg-gradient-to-b from-violet-500 to-violet-800 px-8 py-4 text-sm font-black uppercase tracking-[0.08em] text-white shadow-2xl shadow-violet-950/40 transition hover:from-violet-400 hover:to-violet-700"
+              >
+                {promptCopied ? "Prompt Copied!" : "Copy Prompt"}
+              </button>
+            </div>
           </div>
         </section>
 
