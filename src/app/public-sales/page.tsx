@@ -470,12 +470,12 @@ export default function PublicSalesPage() {
 
         <section
           id="t3"
-          className="mt-10 scroll-mt-8 rounded-[2.5rem] border border-amber-300/25 bg-amber-300/[0.055] p-6 shadow-2xl backdrop-blur-xl sm:p-8 lg:p-10"
+          className="mt-10 scroll-mt-8 rounded-[2.5rem] border border-violet-400/25 bg-violet-500/[0.06] p-6 shadow-2xl backdrop-blur-xl sm:p-8 lg:p-10"
         >
           <div className="grid gap-10 xl:grid-cols-[1fr_0.34fr]">
             <div>
               <div className="flex flex-wrap items-center gap-3">
-                <span className="rounded-full border border-amber-300/30 bg-amber-300/10 px-4 py-2 text-xs font-black tracking-[0.18em] text-amber-200">
+                <span className="rounded-full border border-violet-400/30 bg-violet-500/10 px-4 py-2 text-xs font-black tracking-[0.18em] text-violet-200">
                   T3
                 </span>
                 <span className="text-xs font-black uppercase tracking-[0.22em] text-emerald-300">
@@ -498,7 +498,7 @@ export default function PublicSalesPage() {
 
               <div className="mt-10 grid gap-5 md:grid-cols-2">
                 <div className="rounded-[1.75rem] border border-white/10 bg-[#07111F]/45 p-6">
-                  <p className="text-xs font-black uppercase tracking-[0.2em] text-amber-200">
+                  <p className="text-xs font-black uppercase tracking-[0.2em] text-violet-200">
                     What it solves
                   </p>
                   <p className="mt-4 leading-8 text-slate-300">
@@ -510,7 +510,7 @@ export default function PublicSalesPage() {
                 </div>
 
                 <div className="rounded-[1.75rem] border border-white/10 bg-[#07111F]/45 p-6">
-                  <p className="text-xs font-black uppercase tracking-[0.2em] text-amber-200">
+                  <p className="text-xs font-black uppercase tracking-[0.2em] text-violet-200">
                     Why campaigns choose it
                   </p>
                   <p className="mt-4 leading-8 text-slate-300">
@@ -528,7 +528,7 @@ export default function PublicSalesPage() {
           <div className="mt-10 border-t border-white/10 pt-10">
             <div className="grid gap-8 lg:grid-cols-[0.34fr_1fr] lg:items-start">
               <div>
-                <p className="text-xs font-black uppercase tracking-[0.22em] text-amber-200">
+                <p className="text-xs font-black uppercase tracking-[0.22em] text-violet-200">
                   Core capabilities
                 </p>
                 <h3 className="mt-3 text-3xl font-black">
@@ -543,7 +543,7 @@ export default function PublicSalesPage() {
             </div>
           </div>
 
-          <div className="mt-10 flex flex-col gap-5 rounded-[2rem] border border-amber-300/20 bg-amber-300/10 p-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mt-10 flex flex-col gap-5 rounded-[2rem] border border-violet-300/20 bg-violet-500/10 p-6 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-lg font-black">
                 This campaign has coordination complexity.
@@ -630,6 +630,143 @@ export default function PublicSalesPage() {
           </p>
           <div className="mt-9">
             <DemoButton />
+          </div>
+        </section>
+
+        <section className="mb-20 rounded-[2.5rem] border border-violet-400/20 bg-white/[0.04] p-8 shadow-2xl backdrop-blur-xl lg:p-12">
+          <div className="max-w-4xl">
+            <p className="text-xs font-black uppercase tracking-[0.22em] text-violet-200">
+              Refund &amp; Cancellation Policy
+            </p>
+            <h2 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">
+              Simple. Fair. No Surprises.
+            </h2>
+            <p className="mt-5 text-lg leading-8 text-slate-300">
+              Campaigns should have enough time to determine whether Aether is the right
+              fit for their operation. Our refund policy is designed to provide that
+              flexibility while keeping billing simple and predictable.
+            </p>
+          </div>
+
+          <div className="mt-10 grid gap-6 lg:grid-cols-2">
+            <div className="rounded-[2rem] border border-white/10 bg-[#07111F]/55 p-6 sm:p-8">
+              <div className="inline-flex rounded-full border border-violet-400/30 bg-violet-500/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-violet-200">
+                Monthly Subscriptions
+              </div>
+
+              <div className="mt-7 space-y-6">
+                <div>
+                  <p className="font-black text-white">Days 1–7 — Full Refund</p>
+                  <p className="mt-2 leading-7 text-slate-300">
+                    During your first 7 days of Aether service, you may request a full
+                    refund of your first monthly payment.
+                  </p>
+                </div>
+
+                <div>
+                  <p className="font-black text-white">Days 8–14 — 50% Refund</p>
+                  <p className="mt-2 leading-7 text-slate-300">
+                    Between days 8 and 14 of your first month of Aether service, you may
+                    request a refund equal to 50% of your first monthly payment.
+                  </p>
+                </div>
+
+                <div>
+                  <p className="font-black text-white">After Day 14 — No Refund</p>
+                  <p className="mt-2 leading-7 text-slate-300">
+                    Beginning on day 15, monthly subscription payments are non-refundable.
+                  </p>
+                </div>
+
+                <div className="border-t border-white/10 pt-6">
+                  <p className="leading-7 text-slate-300">
+                    After your first month, monthly payments are non-refundable once
+                    charged. You may cancel at any time, and your Aether service will
+                    remain available through the end of your current paid billing period.
+                    Your subscription will not renew for another month.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-[2rem] border border-violet-400/20 bg-violet-500/[0.06] p-6 sm:p-8">
+              <div className="inline-flex rounded-full border border-violet-400/30 bg-violet-500/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-violet-200">
+                Annual Subscriptions
+              </div>
+
+              <div className="mt-7 space-y-6">
+                <div>
+                  <p className="font-black text-white">First 30 Days — Full Refund</p>
+                  <p className="mt-2 leading-7 text-slate-300">
+                    During your first 30 days of Aether service, you may request a full
+                    refund of your annual subscription.
+                  </p>
+                </div>
+
+                <p className="leading-7 text-slate-300">
+                  We want campaigns choosing an annual subscription to have enough time
+                  to actually use Aether before committing to the year.
+                </p>
+
+                <div>
+                  <p className="font-black text-white">After 30 Days — Prorated Refund</p>
+                  <p className="mt-2 leading-7 text-slate-300">
+                    After the initial 30-day period, you may request cancellation and a
+                    prorated refund for the remaining full, unused months of your annual
+                    subscription.
+                  </p>
+                </div>
+
+                <p className="leading-7 text-slate-300">
+                  When cancellation is requested, Team Aether will provide the effective
+                  end date of your service. Your campaign will retain access to Aether
+                  through that date, and any complete unused months remaining afterward
+                  will be refunded.
+                </p>
+
+                <div className="rounded-2xl border border-white/10 bg-[#07111F]/55 p-5">
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-violet-200">
+                    Example
+                  </p>
+                  <p className="mt-3 leading-7 text-slate-300">
+                    If a campaign with a 12-month subscription requests cancellation
+                    during Month 6 and its service ends during Month 7, Months 1–7 remain
+                    paid and Months 8–12 are refunded. The campaign would receive a
+                    refund equal to <strong className="text-white">5 months</strong> of
+                    its annual subscription.
+                  </p>
+                </div>
+
+                <p className="text-sm leading-7 text-slate-400">
+                  Partial months are not refundable. Annual prorated refunds are
+                  calculated using the complete unused months remaining after the
+                  effective cancellation date.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 grid gap-4 rounded-[2rem] border border-violet-300/20 bg-violet-500/10 p-6 md:grid-cols-2">
+            <div>
+              <p className="text-sm font-black uppercase tracking-[0.16em] text-violet-200">
+                Monthly
+              </p>
+              <p className="mt-2 leading-7 text-slate-300">
+                During your first 7 days, you may request a full refund. During days
+                8–14, you may request a 50% refund. After that, a paid month is a paid
+                month.
+              </p>
+            </div>
+            <div>
+              <p className="text-sm font-black uppercase tracking-[0.16em] text-violet-200">
+                Annual
+              </p>
+              <p className="mt-2 leading-7 text-slate-300">
+                Try Aether for your first 30 days. If it is not right for your campaign,
+                you may request a full refund. After 30 days, you may request a refund
+                for the remaining full unused months after your service ends.
+              </p>
+            </div>
           </div>
         </section>
       </div>

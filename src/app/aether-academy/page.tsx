@@ -153,14 +153,14 @@ export default function AetherAcademyPage() {
               href="/login"
               className="inline-flex items-center justify-center rounded-xl border border-violet-400/40 bg-violet-400/10 px-7 py-3.5 font-semibold text-violet-300 transition hover:-translate-y-0.5 hover:border-violet-300"
             >
-              Enter Aether →
+              Enter Aether
             </Link>
 
             <Link
               href="/"
               className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-white/5 px-7 py-3.5 font-semibold text-white transition hover:-translate-y-0.5 hover:border-violet-400/40 hover:bg-white/10"
             >
-              ← Back to Landing Page
+              Back to Landing Page
             </Link>
           </div>
         </div>

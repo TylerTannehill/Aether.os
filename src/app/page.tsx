@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
-  ArrowRight,
   BarChart3,
   Brain,
   Building2,
@@ -194,7 +193,6 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
               className="inline-flex items-center gap-3 rounded-2xl border border-violet-400/70 bg-violet-700/20 px-7 py-4 text-sm font-black uppercase tracking-[0.08em] text-white shadow-xl shadow-violet-950/30 transition hover:bg-violet-600/30"
             >
               <span>Enter Aether</span>
-              <ArrowRight className="h-4 w-4" />
             </Link>
 
             <button
@@ -267,7 +265,6 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
                 className="inline-flex min-w-[240px] items-center justify-center gap-3 rounded-2xl border border-violet-300/60 bg-gradient-to-b from-violet-500 to-violet-800 px-8 py-5 text-base font-black uppercase tracking-[0.08em] text-white shadow-2xl shadow-violet-950/40 transition hover:from-violet-400 hover:to-violet-700"
               >
                 <span>Enter Aether</span>
-                <ArrowRight className="h-5 w-5" />
               </Link>
 
               <Link
@@ -480,7 +477,6 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
                   className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-violet-300/40 bg-white/[0.03] px-5 py-4 text-sm font-black uppercase tracking-[0.08em] text-violet-200 transition hover:border-violet-300/70 hover:bg-violet-500/10 hover:text-white"
                 >
                   Learn More
-                  <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
             ))}
@@ -555,7 +551,6 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
                 className="inline-flex min-w-[260px] items-center justify-center gap-3 rounded-2xl border border-violet-300/60 bg-gradient-to-b from-violet-500 to-violet-800 px-8 py-5 text-base font-black uppercase tracking-[0.08em] text-white shadow-2xl shadow-violet-950/40 transition hover:from-violet-400 hover:to-violet-700"
               >
                 Ask ChatGPT
-                <ArrowRight className="h-5 w-5" />
               </a>
 
               <button
@@ -564,7 +559,6 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
                 className="inline-flex min-w-[260px] items-center justify-center gap-3 rounded-2xl border border-violet-300/60 bg-gradient-to-b from-violet-500 to-violet-800 px-8 py-5 text-base font-black uppercase tracking-[0.08em] text-white shadow-2xl shadow-violet-950/40 transition hover:from-violet-400 hover:to-violet-700"
               >
                 Ask Gemini
-                <ArrowRight className="h-5 w-5" />
               </button>
 
               <a
@@ -574,7 +568,6 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
                 className="inline-flex min-w-[260px] items-center justify-center gap-3 rounded-2xl border border-violet-300/60 bg-gradient-to-b from-violet-500 to-violet-800 px-8 py-5 text-base font-black uppercase tracking-[0.08em] text-white shadow-2xl shadow-violet-950/40 transition hover:from-violet-400 hover:to-violet-700"
               >
                 Ask Claude
-                <ArrowRight className="h-5 w-5" />
               </a>
 
               <a
@@ -584,7 +577,6 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
                 className="inline-flex min-w-[260px] items-center justify-center gap-3 rounded-2xl border border-violet-300/60 bg-gradient-to-b from-violet-500 to-violet-800 px-8 py-5 text-base font-black uppercase tracking-[0.08em] text-white shadow-2xl shadow-violet-950/40 transition hover:from-violet-400 hover:to-violet-700"
               >
                 Ask Grok
-                <ArrowRight className="h-5 w-5" />
               </a>
 
               <a
@@ -594,7 +586,6 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
                 className="inline-flex min-w-[260px] items-center justify-center gap-3 rounded-2xl border border-violet-300/60 bg-gradient-to-b from-violet-500 to-violet-800 px-8 py-5 text-base font-black uppercase tracking-[0.08em] text-white shadow-2xl shadow-violet-950/40 transition hover:from-violet-400 hover:to-violet-700"
               >
                 Ask Perplexity
-                <ArrowRight className="h-5 w-5" />
               </a>
 
               <a
@@ -604,7 +595,6 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
                 className="inline-flex min-w-[260px] items-center justify-center gap-3 rounded-2xl border border-violet-300/60 bg-gradient-to-b from-violet-500 to-violet-800 px-8 py-5 text-base font-black uppercase tracking-[0.08em] text-white shadow-2xl shadow-violet-950/40 transition hover:from-violet-400 hover:to-violet-700"
               >
                 Ask Copilot
-                <ArrowRight className="h-5 w-5" />
               </a>
             </div>
 
