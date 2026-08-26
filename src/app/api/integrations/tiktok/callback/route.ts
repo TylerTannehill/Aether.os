@@ -133,7 +133,7 @@ export async function GET(request: NextRequest) {
         token_type: tokenPayload.token_type ?? "Bearer",
         refresh_expires_in:
           tokenPayload.refresh_expires_in ?? null,
-        sandbox: true,
+        sandbox: false,
       },
     });
 
