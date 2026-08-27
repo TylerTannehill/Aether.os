@@ -235,6 +235,13 @@ export default function LoginPage() {
           </form>
         )}
 
+        <Link
+          href="/"
+          className="block w-full rounded border border-white/30 px-4 py-2 text-center text-sm font-medium text-white transition hover:bg-white/10"
+        >
+          Back to Landing Page
+        </Link>
+
         <p className="text-center text-xs text-white/60">
           By logging in, you agree to our{' '}
 
