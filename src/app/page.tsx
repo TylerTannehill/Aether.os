@@ -137,6 +137,18 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
     seconds: "00",
   });
   const [promptCopied, setPromptCopied] = useState(false);
+  const [easterEggClicks, setEasterEggClicks] = useState(0);
+  const [easterEggOpen, setEasterEggOpen] = useState(false);
+
+  const handleEasterEggClick = () => {
+    const nextClicks = easterEggClicks + 1;
+    if (nextClicks >= 3) {
+      setEasterEggClicks(0);
+      setEasterEggOpen(true);
+      return;
+    }
+    setEasterEggClicks(nextClicks);
+  };
 
   const copyAiPrompt = async () => {
     try {
@@ -652,10 +664,56 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
           </div>
 
           <div className="mt-16 border-t border-white/10 pt-8 text-center text-sm text-slate-500">
-            © 2026 Aether Systems LLC. All rights reserved.
+            <button
+              type="button"
+              onClick={handleEasterEggClick}
+              className="appearance-none border-0 bg-transparent p-0 font-inherit text-inherit"
+              aria-label="Copyright notice"
+            >
+              © 2026 Aether Systems LLC. All rights reserved.
+            </button>
           </div>
         </footer>
       </div>
+
+      {easterEggOpen && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 px-6 backdrop-blur-sm"
+          onClick={() => setEasterEggOpen(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="aether-easter-egg-title"
+            className="w-full max-w-lg rounded-[2rem] border border-violet-400/30 bg-[#0B1629] p-8 text-center shadow-[0_30px_120px_rgba(0,0,0,0.65)]"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h2 id="aether-easter-egg-title" className="text-2xl font-black tracking-tight text-white">
+              Congrats on finding one of our many Easter eggs!
+            </h2>
+
+            <p className="mt-4 text-base font-semibold text-violet-200">
+              Happy hunting!
+            </p>
+
+            <p className="mt-6 text-sm leading-7 text-slate-300">
+              We started Aether with <span className="font-bold text-white">$333</span>, between 3 founders.
+            </p>
+
+            <audio className="mx-auto mt-8 w-full" controls preload="metadata" src="/audio/333.m4a">
+              Your browser does not support audio playback.
+            </audio>
+
+            <button
+              type="button"
+              onClick={() => setEasterEggOpen(false)}
+              className="mt-7 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 transition hover:text-slate-300"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
