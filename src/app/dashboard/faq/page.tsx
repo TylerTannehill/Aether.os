@@ -449,6 +449,23 @@ function normalizeSearch(value: string) {
 
 export default function FAQPage() {
   const [query, setQuery] = useState("");
+  const [doctrineClicks, setDoctrineClicks] = useState(0);
+  const [warningStage, setWarningStage] = useState<0 | 1 | 2 | 3 | 4>(0);
+
+  function handleDoctrineClick() {
+    setDoctrineClicks((current) => {
+      const next = current + 1;
+      if (next >= 33) {
+        setWarningStage(1);
+        return 0;
+      }
+      return next;
+    });
+  }
+
+  function closeWarning() {
+    setWarningStage(0);
+  }
   const normalizedQuery = normalizeSearch(query);
 
   const filteredSections = useMemo(() => {
@@ -538,7 +555,10 @@ export default function FAQPage() {
                 Questions
               </div>
             </div>
-            <div className="rounded-2xl bg-white/10 p-4">
+            <div
+              className="rounded-2xl bg-white/10 p-4"
+              onClick={handleDoctrineClick}
+            >
               <div className="text-3xl font-black">OS</div>
               <div className="text-xs font-semibold uppercase tracking-wider text-slate-300">
                 Doctrine
@@ -702,6 +722,104 @@ export default function FAQPage() {
           </div>
         </div>
       </section>
+
+      {warningStage > 0 && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 px-6 backdrop-blur-sm"
+          onClick={closeWarning}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            className="w-full max-w-lg rounded-[2rem] border border-red-500/30 bg-[#0B1629] p-8 text-center shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            {warningStage === 1 && (
+              <>
+                <h2 className="text-3xl font-black text-white">Don't click this.</h2>
+                <button
+                  type="button"
+                  onClick={() => setWarningStage(2)}
+                  className="mt-8 w-full rounded-2xl border border-red-400 bg-red-600 px-6 py-4 text-lg font-black uppercase tracking-[0.18em] text-white shadow-lg transition hover:bg-red-500"
+                >
+                  DON'T
+                </button>
+                <button
+                  type="button"
+                  onClick={closeWarning}
+                  className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 transition hover:text-slate-300"
+                >
+                  Close
+                </button>
+              </>
+            )}
+
+            {warningStage === 2 && (
+              <>
+                <h2 className="text-3xl font-black text-white">Seriously...? Final Warning...</h2>
+                <button
+                  type="button"
+                  onClick={() => setWarningStage(3)}
+                  className="mt-8 w-full rounded-2xl border border-red-400 bg-red-600 px-6 py-4 text-lg font-black uppercase tracking-[0.18em] text-white shadow-lg transition hover:bg-red-500"
+                >
+                  DON'T
+                </button>
+                <button
+                  type="button"
+                  onClick={closeWarning}
+                  className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 transition hover:text-slate-300"
+                >
+                  Close
+                </button>
+              </>
+            )}
+
+            {warningStage === 3 && (
+              <>
+                <div className="text-5xl" aria-hidden="true">⚠️ ⚠️ ⚠️</div>
+                <h2 className="mt-5 text-3xl font-black uppercase tracking-wide text-red-400">
+                  Warning
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setWarningStage(4)}
+                  className="mt-8 w-full rounded-2xl border border-red-400 bg-red-600 px-6 py-4 text-lg font-black uppercase tracking-[0.18em] text-white shadow-lg transition hover:bg-red-500"
+                >
+                  Delete Org
+                </button>
+                <button
+                  type="button"
+                  onClick={closeWarning}
+                  className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 transition hover:text-slate-300"
+                >
+                  Close
+                </button>
+              </>
+            )}
+
+            {warningStage === 4 && (
+              <>
+                <h2 className="text-3xl font-black text-white">You've been warned...</h2>
+                <audio
+                  className="mx-auto mt-8 w-full"
+                  controls
+                  preload="metadata"
+                  src="/audio/dont-click-this.m4a"
+                >
+                  Your browser does not support audio playback.
+                </audio>
+                <button
+                  type="button"
+                  onClick={closeWarning}
+                  className="mt-7 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 transition hover:text-slate-300"
+                >
+                  Close
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </main>
   );
 }

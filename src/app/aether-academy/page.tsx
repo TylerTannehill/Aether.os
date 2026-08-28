@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 
 const libraryGroups = [
   {
@@ -103,6 +106,20 @@ const academyTabs = [
 ];
 
 export default function AetherAcademyPage() {
+  const [backToTopClicks, setBackToTopClicks] = useState(0);
+  const [showPotatoModal, setShowPotatoModal] = useState(false);
+
+  const handleBackToTopClick = () => {
+    setBackToTopClicks((current) => {
+      const next = current + 1;
+      if (next >= 33) {
+        setShowPotatoModal(true);
+        return 0;
+      }
+      return next;
+    });
+  };
+
   return (
     <main
       id="top"
@@ -1423,10 +1440,53 @@ export default function AetherAcademyPage() {
         </div>
       </section>
 
+      {/* Potato Easter Egg */}
+      {showPotatoModal && (
+        <div className="fixed inset-0 z-[100] overflow-hidden bg-[#07111f]/95 backdrop-blur-md">
+          <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+            {Array.from({ length: 120 }).map((_, index) => (
+              <span
+                key={index}
+                className="absolute select-none"
+                style={{
+                  left: `${(index * 37) % 103 - 3}%`,
+                  top: `${(index * 61) % 107 - 4}%`,
+                  fontSize: `${34 + ((index * 17) % 70)}px`,
+                  transform: `rotate(${(index * 47) % 360}deg)`,
+                  opacity: 0.72 + ((index % 4) * 0.07),
+                }}
+              >
+                🥔
+              </span>
+            ))}
+          </div>
+
+          <div className="relative z-10 flex min-h-screen items-center justify-center p-6">
+            <div className="w-full max-w-xl rounded-3xl border border-violet-300/40 bg-[#0b1729]/95 p-8 text-center shadow-[0_30px_100px_rgba(0,0,0,0.65)] sm:p-10">
+              <div className="text-6xl" aria-hidden="true">🥔</div>
+              <h2 className="mt-5 text-3xl font-black tracking-tight text-white sm:text-4xl">
+                Please go do your job...
+              </h2>
+              <p className="mt-5 text-lg leading-8 text-slate-300">
+                We know you clicked this 33 times to keep your computer from falling asleep.
+              </p>
+              <button
+                type="button"
+                onClick={() => setShowPotatoModal(false)}
+                className="mt-8 inline-flex items-center justify-center rounded-xl bg-violet-600 px-7 py-3.5 font-black text-white transition hover:-translate-y-0.5 hover:bg-violet-500"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Back to Top */}
       <a
         href="#top"
         aria-label="Back to top"
+        onClick={handleBackToTopClick}
         className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full border border-violet-300/40 bg-violet-600 font-black text-slate-950 shadow-[0_16px_40px_rgba(0,0,0,0.35)] transition hover:-translate-y-1 hover:bg-violet-400"
       >
         ↑

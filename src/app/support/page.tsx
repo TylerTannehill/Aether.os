@@ -15,6 +15,19 @@ export default function SupportPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
+  const [helpClicks, setHelpClicks] = useState(0);
+  const [potatoOpen, setPotatoOpen] = useState(false);
+
+  function handleHelpClick() {
+    setHelpClicks((current) => {
+      const next = current + 1;
+      if (next >= 9) {
+        setPotatoOpen(true);
+        return 0;
+      }
+      return next;
+    });
+  }
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -111,7 +124,9 @@ export default function SupportPage() {
           </div>
 
           <div className="mt-16 border-t border-white/10 pt-12">
-            <h2 className="text-3xl font-bold">Need Additional Help?</h2>
+            <h2 className="text-3xl font-bold" onClick={handleHelpClick}>
+              Need Additional Help?
+            </h2>
 
             <p className="mt-4 text-slate-300">
               If you weren't able to resolve your issue, send Team Aether a
@@ -209,6 +224,43 @@ export default function SupportPage() {
           </div>
         </div>
       </div>
+
+      {potatoOpen && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 px-4 backdrop-blur-sm"
+          onClick={() => setPotatoOpen(false)}
+        >
+          <div
+            className="relative flex h-[78vh] w-[min(88vw,760px)] items-center justify-center"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="absolute h-[68vh] w-[min(76vw,620px)] rotate-[-7deg] rounded-[48%_52%_45%_55%/55%_46%_54%_45%] border-[10px] border-[#8b5a2b] bg-[#b9793f] shadow-[inset_-35px_-28px_0_rgba(92,52,24,0.22),inset_28px_22px_0_rgba(255,220,160,0.12),0_35px_80px_rgba(0,0,0,0.55)]">
+              <span className="absolute left-[22%] top-[18%] h-5 w-7 rounded-full bg-[#7a4a27]/55" />
+              <span className="absolute right-[20%] top-[28%] h-4 w-6 rounded-full bg-[#7a4a27]/55" />
+              <span className="absolute left-[28%] bottom-[25%] h-4 w-5 rounded-full bg-[#7a4a27]/55" />
+              <span className="absolute right-[27%] bottom-[18%] h-6 w-8 rounded-full bg-[#7a4a27]/55" />
+              <span className="absolute left-[14%] top-[48%] h-3 w-5 rounded-full bg-[#7a4a27]/45" />
+            </div>
+
+            <div className="relative z-10 rotate-[4deg] rounded-md border border-amber-200 bg-[#fff4b8] px-8 py-7 text-center text-slate-900 shadow-2xl">
+              <div className="absolute -top-4 left-1/2 h-8 w-3 -translate-x-1/2 rotate-[8deg] rounded-full bg-slate-400 shadow-md" />
+              <p className="text-2xl font-black">Seriously...</p>
+              <p className="mt-3 text-lg font-bold">
+                just email team@aetheros.pro
+              </p>
+            </div>
+
+            <button
+              type="button"
+              aria-label="Close potato"
+              onClick={() => setPotatoOpen(false)}
+              className="absolute bottom-0 z-20 text-xs font-semibold uppercase tracking-[0.2em] text-white/50 transition hover:text-white"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

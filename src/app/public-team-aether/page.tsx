@@ -8,6 +8,19 @@ export default function PublicTeamAetherPage(){
   const [sending,setSending]=useState(false);
   const [submitted,setSubmitted]=useState(false);
   const [error,setError]=useState("");
+  const [ceoClicks,setCeoClicks]=useState(0);
+  const [ceoSecretOpen,setCeoSecretOpen]=useState(false);
+
+  function handleCeoSecret(){
+    setCeoClicks(current => {
+      const next = current + 1;
+      if(next >= 6){
+        setCeoSecretOpen(true);
+        return 0;
+      }
+      return next;
+    });
+  }
 
   function handleChange(e: ChangeEvent<HTMLInputElement|HTMLTextAreaElement>){
     const {name,value}=e.target;
@@ -109,7 +122,7 @@ return (
 
 <div className="rounded-3xl border border-white/10 bg-white/5 p-10">
 <h2 className="text-3xl font-bold">Meet the Founder</h2>
-<p className="mt-2 text-violet-300 font-semibold">Tyler Tannehill • Founder &amp; CEO</p>
+<p className="mt-2 text-violet-300 font-semibold">Tyler Tannehill • Founder &amp; <span onClick={handleCeoSecret}>CEO</span></p>
 <div className="mt-6 space-y-5 max-w-3xl text-slate-300 leading-8">
 <p>After years of managing large-scale technology operations—and spending enough time around campaigns to see how disconnected the technology had become—I couldn't shake one simple thought: <strong>Politics deserves better technology than this.</strong></p>
 <p>That thought became conversations with a Mystic and an Operator who challenged every assumption until those conversations became Aether.</p>
@@ -172,4 +185,41 @@ return (
 
 </div>
 
-</section></div></main>)}
+</section>
+
+{ceoSecretOpen && (
+  <div
+    className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/75 px-6 backdrop-blur-sm"
+    onClick={() => setCeoSecretOpen(false)}
+  >
+    <div
+      role="dialog"
+      aria-modal="true"
+      className="w-full max-w-lg rounded-[2rem] border border-violet-400/30 bg-[#0B1629] p-8 text-center shadow-2xl"
+      onClick={(event) => event.stopPropagation()}
+    >
+      <p className="text-xl font-bold leading-8 text-white">
+        I'm making my life mine again.
+      </p>
+
+      <audio
+        className="mx-auto mt-8 w-full"
+        controls
+        preload="metadata"
+        src="/audio/mine-again.m4a"
+      >
+        Your browser does not support audio playback.
+      </audio>
+
+      <button
+        type="button"
+        onClick={() => setCeoSecretOpen(false)}
+        className="mt-7 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 transition hover:text-slate-300"
+      >
+        Close
+      </button>
+    </div>
+  </div>
+)}
+
+</div></main>)}
