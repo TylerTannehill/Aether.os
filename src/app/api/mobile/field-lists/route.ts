@@ -119,8 +119,54 @@ export async function POST(request: Request) {
       );
     }
 
+    const fieldLists = lists ?? [];
+    const listIds = fieldLists.map((list) => list.id);
+
+    if (listIds.length === 0) {
+      return NextResponse.json({
+        lists: [],
+      });
+    }
+
+    const { data: listContacts, error: contactsError } = await databaseClient
+      .from("list_contacts")
+      .select("list_id,status,disposition,notes,completed_at")
+      .in("list_id", listIds);
+
+    if (contactsError) {
+      return NextResponse.json(
+        { error: contactsError.message },
+        { status: 500 }
+      );
+    }
+
+    const listsWithProgress = fieldLists.map((list) => {
+      const assignments = (listContacts ?? []).filter(
+        (assignment) => assignment.list_id === list.id
+      );
+
+      const completedContacts = assignments.filter((assignment) =>
+        Boolean(
+          assignment.disposition ||
+            assignment.notes ||
+            assignment.status === "completed" ||
+            assignment.completed_at
+        )
+      ).length;
+
+      const totalContacts = assignments.length;
+
+      return {
+        ...list,
+        total_contacts: totalContacts,
+        completed_contacts: completedContacts,
+        is_completed:
+          totalContacts > 0 && completedContacts >= totalContacts,
+      };
+    });
+
     return NextResponse.json({
-      lists: lists ?? [],
+      lists: listsWithProgress,
     });
   } catch (err: any) {
     return NextResponse.json(
