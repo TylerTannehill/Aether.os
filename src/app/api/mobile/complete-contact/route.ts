@@ -75,7 +75,7 @@ export async function POST(request: Request) {
 
     const { data: appUser, error: userError } = await databaseClient
       .from("users")
-      .select("id,is_active")
+      .select("id,name,is_active")
       .eq("auth_id", authenticatedUser.id)
       .maybeSingle();
 
@@ -100,6 +100,7 @@ export async function POST(request: Request) {
       .select(`
         id,
         list_id,
+        contact_id,
         lists!inner(
           organization_id
         )
@@ -140,6 +141,31 @@ export async function POST(request: Request) {
         { error: updateError.message },
         { status: 500 }
       );
+    }
+
+    const trimmedNotes = String(notes ?? "").trim();
+
+    if (trimmedNotes) {
+      const { error: noteError } = await databaseClient
+        .from("contact_notes")
+        .insert([
+          {
+            contact_id: assignment.contact_id,
+            organization_id: organizationId,
+            author_id: authenticatedUser.id,
+            author_name: appUser.name ?? authenticatedUser.email ?? "Aether Mobile",
+            note: trimmedNotes,
+          },
+        ]);
+
+      if (noteError) {
+        return NextResponse.json(
+          {
+            error: `List progress saved, but running note did not save: ${noteError.message}`,
+          },
+          { status: 500 }
+        );
+      }
     }
 
     return NextResponse.json({
