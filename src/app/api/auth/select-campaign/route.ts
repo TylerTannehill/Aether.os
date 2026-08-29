@@ -151,16 +151,6 @@ export async function POST(request: Request) {
       );
     }
 
-    if (
-      membership.profile_status &&
-      String(membership.profile_status).toLowerCase() !== "active"
-    ) {
-      return NextResponse.json(
-        { error: "Your campaign access is not active" },
-        { status: 403 }
-      );
-    }
-
     const response = NextResponse.json({
       organization,
       membership,
