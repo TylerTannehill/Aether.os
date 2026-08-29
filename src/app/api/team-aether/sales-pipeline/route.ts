@@ -3,25 +3,39 @@ import { createClient } from "@/lib/supabase/server";
 
 export async function GET() {
   const supabase = await createClient();
+  const pageSize = 1000;
+  const campaigns = [];
+  let from = 0;
 
-  const { data, error } = await supabase
-    .from("sales_campaigns")
-    .select("*")
-    .order("campaign", { ascending: true });
+  while (true) {
+    const { data, error } = await supabase
+      .from("sales_campaigns")
+      .select("*")
+      .order("campaign", { ascending: true })
+      .range(from, from + pageSize - 1);
 
-  if (error) {
-    return NextResponse.json(
-      {
-        success: false,
-        error: error.message,
-      },
-      { status: 500 }
-    );
+    if (error) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: error.message,
+        },
+        { status: 500 }
+      );
+    }
+
+    campaigns.push(...(data || []));
+
+    if (!data || data.length < pageSize) {
+      break;
+    }
+
+    from += pageSize;
   }
 
   return NextResponse.json({
     success: true,
-    campaigns: data,
+    campaigns,
   });
 }
 

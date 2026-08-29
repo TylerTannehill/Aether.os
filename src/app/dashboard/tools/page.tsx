@@ -17,7 +17,9 @@ import {
   Radio,
   Send,
   Sparkles,
+  Users,
   Wrench,
+  X,
 } from "lucide-react";
 
 import { getOrgContextTheme } from "@/lib/org-context-theme";
@@ -44,6 +46,16 @@ type CurrentUser = {
   org_id: string;
   id: string;
 };
+
+type TeamStatusMember = {
+  id: string;
+  name: string;
+  role: string;
+  department: string | null;
+  title: string | null;
+  profile_status: string;
+};
+
 
 type OrgMemberRole = {
   department: string;
@@ -240,6 +252,10 @@ export default function ToolsPage() {
   const [contextMode, setContextMode] = useState("default");
   const [organizationName, setOrganizationName] = useState("Active campaign");
   const [canAccessIntegrations, setCanAccessIntegrations] = useState(false);
+  const [teamStatusOpen, setTeamStatusOpen] = useState(false);
+  const [teamStatusLoading, setTeamStatusLoading] = useState(false);
+  const [teamStatusError, setTeamStatusError] = useState<string | null>(null);
+  const [teamStatusMembers, setTeamStatusMembers] = useState<TeamStatusMember[]>([]);
 const [gmailMessages, setGmailMessages] = useState<any[]>([]);
 const [gmailLoading, setGmailLoading] = useState(false);
 const [selectedGmailMessage, setSelectedGmailMessage] = useState<any | null>(null);
@@ -271,6 +287,37 @@ const [googleConnection, setGoogleConnection] = useState<{
   });
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
+  const messageScrollRef = useRef<HTMLDivElement | null>(null);
+  const previousMessageCountRef = useRef(0);
+
+  async function openTeamStatus() {
+    if (!user?.org_id) return;
+
+    setTeamStatusOpen(true);
+    setTeamStatusLoading(true);
+    setTeamStatusError(null);
+
+    try {
+      const response = await fetch("/api/tools/team-status", {
+        method: "GET",
+        cache: "no-store",
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.error || "Failed to load team status.");
+      }
+
+      setTeamStatusMembers((data?.members || []) as TeamStatusMember[]);
+    } catch (error: any) {
+      console.error("Failed to load team status:", error);
+      setTeamStatusMembers([]);
+      setTeamStatusError(error?.message || "Failed to load team status.");
+    } finally {
+      setTeamStatusLoading(false);
+    }
+  }
 
   async function loadMessages(orgId: string) {
     const { data, error } = await supabase
@@ -731,7 +778,18 @@ async function sendGmailMessage() {
   }, [user?.org_id]);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    const previousCount = previousMessageCountRef.current;
+    previousMessageCountRef.current = messages.length;
+
+    if (previousCount === 0 || messages.length <= previousCount) return;
+
+    const container = messageScrollRef.current;
+    if (!container) return;
+
+    container.scrollTo({
+      top: container.scrollHeight,
+      behavior: "smooth",
+    });
   }, [messages]);
 
   const orgTheme = getOrgContextTheme(contextMode);
@@ -789,16 +847,27 @@ async function sendGmailMessage() {
             </div>
           </div>
 
-          {canAccessIntegrations ? (
-            <Link
-              href="/dashboard/integrations"
-              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
+          <div className="flex shrink-0 flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={openTeamStatus}
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
             >
-              <PlugZap className="h-4 w-4" />
-              Open Integrations Hub
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          ) : null}
+              <Users className="h-4 w-4" />
+              Team Status
+            </button>
+
+            {canAccessIntegrations ? (
+              <Link
+                href="/dashboard/integrations"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
+              >
+                <PlugZap className="h-4 w-4" />
+                Open Integrations Hub
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            ) : null}
+          </div>
         </div>
       </section>
 
@@ -892,7 +961,7 @@ async function sendGmailMessage() {
           </div>
         </div>
 
-        <div className="h-[44vh] overflow-y-auto bg-slate-100/60 px-5 py-5">
+        <div ref={messageScrollRef} className="h-[44vh] overflow-y-auto bg-slate-100/60 px-5 py-5">
           <div className="mx-auto flex max-w-5xl flex-col gap-4">
             {messages.length === 0 ? (
               <div className="rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-600">
@@ -1555,6 +1624,88 @@ Reset
           </span>
         </div>
       </section>
+
+      {teamStatusOpen ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setTeamStatusOpen(false);
+          }}
+        >
+          <div className="w-full max-w-3xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl">
+            <div className={`flex items-start justify-between gap-4 bg-gradient-to-br px-6 py-5 text-white ${orgTheme.heroGradient}`}>
+              <div>
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200">
+                  <Users className="h-4 w-4" />
+                  Team Status
+                </div>
+                <h2 className="mt-2 text-2xl font-semibold">{organizationName}</h2>
+                <p className="mt-1 text-sm text-slate-300">
+                  Current availability across the active campaign team.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setTeamStatusOpen(false)}
+                className="rounded-xl border border-white/10 bg-white/10 p-2 text-white transition hover:bg-white/15"
+                aria-label="Close team status"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="max-h-[65vh] overflow-y-auto p-6">
+              {teamStatusLoading ? (
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-500">
+                  Loading team status...
+                </div>
+              ) : teamStatusError ? (
+                <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">
+                  {teamStatusError}
+                </div>
+              ) : teamStatusMembers.length === 0 ? (
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-500">
+                  No team members found for this campaign.
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200">
+                  {teamStatusMembers.map((member) => {
+                    const statusLabel =
+                      member.profile_status === "potato"
+                        ? "Potato 🥔"
+                        : member.profile_status
+                            .split("_")
+                            .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+                            .join(" ");
+
+                    return (
+                      <div
+                        key={member.id}
+                        className="flex flex-col gap-3 bg-white px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
+                      >
+                        <div>
+                          <div className="font-semibold text-slate-950">{member.name}</div>
+                          <div className="mt-1 text-sm text-slate-500">
+                            {[member.title, member.department, member.role]
+                              .filter(Boolean)
+                              .filter((value, index, values) => values.indexOf(value) === index)
+                              .join(" • ")}
+                          </div>
+                        </div>
+
+                        <div className="shrink-0 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-semibold text-slate-700">
+                          {statusLabel}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

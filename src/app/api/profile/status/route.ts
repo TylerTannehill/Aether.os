@@ -79,12 +79,32 @@ export async function PATCH(request: Request) {
       );
     }
 
+    const { data: appUser, error: appUserError } = await serviceSupabase
+      .from("users")
+      .select("id")
+      .eq("auth_id", user.id)
+      .maybeSingle();
+
+    if (appUserError) {
+      return NextResponse.json(
+        { error: appUserError.message },
+        { status: 500 }
+      );
+    }
+
+    if (!appUser) {
+      return NextResponse.json(
+        { error: "Aether user profile not found" },
+        { status: 403 }
+      );
+    }
+
     const { data: membership, error: membershipError } = await serviceSupabase
       .from("organization_members")
       .select(
         "id, user_id, organization_id, profile_status, potato_status_count, potato_easter_egg_unlocked"
       )
-      .eq("user_id", user.id)
+      .eq("user_id", appUser.id)
       .eq("organization_id", activeOrganizationId)
       .maybeSingle();
 

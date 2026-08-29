@@ -75,7 +75,7 @@ function BooleanStatus({
 }
 
 export default function TeamAetherSalesPage() {
-  const [expandedCampaign, setExpandedCampaign] = useState<string | null>(null);
+  const [expandedCampaignId, setExpandedCampaignId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] =
     useState<PipelineFilter>("all");
@@ -346,10 +346,8 @@ export default function TeamAetherSalesPage() {
         throw new Error(result?.error || "Failed to import campaigns.");
       }
 
-      const firstCampaignName = importedCampaigns[0].campaign;
-
       await loadCampaigns();
-      setExpandedCampaign(firstCampaignName);
+      setExpandedCampaignId(null);
       setActiveFilter("all");
       closeImportModal();
     } catch (error) {
@@ -361,7 +359,7 @@ export default function TeamAetherSalesPage() {
 
   function downloadCsvTemplate() {
     const template =
-      "Campaign,Contact,Email,Phone,Race,State,Campaign Website\\n";
+      "Campaign,Contact,Email,Phone,Race,State,Campaign Website\n";
 
     const blob = new Blob([template], {
       type: "text/csv;charset=utf-8;",
@@ -673,9 +671,9 @@ export default function TeamAetherSalesPage() {
             </div>
           ) : (
             <div className="mt-6 overflow-hidden rounded-3xl border border-slate-200">
-              <div className="overflow-x-auto">
+              <div className="max-h-[70vh] min-h-[500px] overflow-auto">
                 <table className="min-w-full text-left text-sm">
-                  <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+                  <thead className="sticky top-0 z-10 bg-slate-50 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 shadow-sm">
                     <tr>
                       <th className="px-5 py-4">Campaign</th>
                       <th className="px-5 py-4">Emails</th>
@@ -690,16 +688,16 @@ export default function TeamAetherSalesPage() {
                   <tbody className="divide-y divide-slate-200">
                     {filteredCampaigns.map((campaign) => {
                       const expanded =
-                        expandedCampaign === campaign.campaign;
+                        expandedCampaignId === campaign.id;
 
                       return (
                         <Fragment key={campaign.id || campaign.campaign}>
                           <tr
                             onClick={() =>
-                              setExpandedCampaign((current) =>
-                                current === campaign.campaign
+                              setExpandedCampaignId((current) =>
+                                current === campaign.id
                                   ? null
-                                  : campaign.campaign
+                                  : campaign.id || null
                               )
                             }
                             className={`cursor-pointer transition ${
