@@ -207,14 +207,14 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
               <span>Enter Aether</span>
             </Link>
 
-            <button
-              type="button"
-              disabled
-              className="inline-flex w-[250px] items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4 text-xs font-black uppercase tracking-[0.05em] text-slate-500 opacity-80 cursor-not-allowed"
+            <a
+              href="/aether-mobile.apk"
+              download
+              className="inline-flex w-[250px] items-center justify-center gap-2 rounded-2xl border border-violet-400/40 bg-violet-700/10 px-5 py-4 text-xs font-black uppercase tracking-[0.05em] text-white transition hover:border-violet-300/70 hover:bg-violet-600/20"
             >
               <Smartphone className="h-4 w-4" />
               <span>Download Aether Mobile</span>
-            </button>
+            </a>
 
             <p className="max-w-[300px] text-center text-[11px] leading-5 text-slate-300">
               Built for Finance &amp; Field teams.
@@ -629,7 +629,7 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
               <div className="mt-5 flex flex-col gap-3 text-sm text-slate-300">
                 <Link href="/#top">Landing Page</Link>
                 <Link href="/explore-abe">Explore Abe</Link>
-                <span className="text-slate-500">Download Mobile (Coming Soon)</span>
+                <a href="/aether-mobile.apk" download>Download Aether Mobile</a>
                 <Link href="/aether-academy">Aether Academy</Link>
               </div>
             </div>
