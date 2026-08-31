@@ -208,7 +208,7 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
             </Link>
 
             <a
-              href="/aether-mobile.apk"
+              href="https://github.com/TylerTannehill/Aether.os/releases/download/v1.0.0/aether-mobile.apk"
               download
               className="inline-flex w-[250px] items-center justify-center gap-2 rounded-2xl border border-violet-400/40 bg-violet-700/10 px-5 py-4 text-xs font-black uppercase tracking-[0.05em] text-white transition hover:border-violet-300/70 hover:bg-violet-600/20"
             >
@@ -216,9 +216,10 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
               <span>Download Aether Mobile</span>
             </a>
 
-            <p className="max-w-[300px] text-center text-[11px] leading-5 text-slate-300">
-              Built for Finance &amp; Field teams.
-            </p>
+            <div className="max-w-[300px] text-center text-[11px] leading-5 text-slate-300">
+              <p>Android available now • iOS coming soon</p>
+              <p>Built for Finance &amp; Field teams.</p>
+            </div>
           </div>
         </header>
 
@@ -629,7 +630,7 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
               <div className="mt-5 flex flex-col gap-3 text-sm text-slate-300">
                 <Link href="/#top">Landing Page</Link>
                 <Link href="/explore-abe">Explore Abe</Link>
-                <a href="/aether-mobile.apk" download>Download Aether Mobile</a>
+                <a href="https://github.com/TylerTannehill/Aether.os/releases/download/v1.0.0/aether-mobile.apk" download>Download Aether Mobile</a>
                 <Link href="/aether-academy">Aether Academy</Link>
               </div>
             </div>
