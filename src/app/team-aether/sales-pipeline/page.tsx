@@ -330,20 +330,45 @@ export default function TeamAetherSalesPage() {
     try {
       setImportError("");
 
-      const response = await fetch("/api/team-aether/sales-pipeline", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          campaigns: importedCampaigns,
-        }),
-      });
+      const batchSize = 2000;
+      let importedCount = 0;
 
-      const result = await response.json();
+      for (let i = 0; i < importedCampaigns.length; i += batchSize) {
+        const batch = importedCampaigns.slice(i, i + batchSize);
 
-      if (!response.ok || !result?.success) {
-        throw new Error(result?.error || "Failed to import campaigns.");
+        const response = await fetch("/api/team-aether/sales-pipeline", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            campaigns: batch,
+          }),
+        });
+
+        let result: {
+          success?: boolean;
+          error?: string;
+          imported?: number;
+        } = {};
+
+        try {
+          result = await response.json();
+        } catch {
+          throw new Error(
+            `Import failed after ${importedCount} campaigns. The server returned an invalid response for the batch starting at row ${i + 1}.`
+          );
+        }
+
+        if (!response.ok || !result?.success) {
+          throw new Error(
+            result?.error ||
+              `Import failed after ${importedCount} campaigns on the batch starting at row ${i + 1}.`
+          );
+        }
+
+        importedCount +=
+          typeof result.imported === "number" ? result.imported : batch.length;
       }
 
       await loadCampaigns();
