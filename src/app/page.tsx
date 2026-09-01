@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   BarChart3,
   Brain,
@@ -107,35 +107,6 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
-  const launchDate = new Date("2026-09-01T00:00:00-05:00").getTime();
-
-  const calculateTimeLeft = () => {
-    const now = new Date().getTime();
-    const difference = launchDate - now;
-
-    if (difference <= 0) {
-      return {
-        days: "00",
-        hours: "00",
-        minutes: "00",
-        seconds: "00",
-      };
-    }
-
-    return {
-      days: String(Math.floor(difference / (1000 * 60 * 60 * 24))).padStart(2, "0"),
-      hours: String(Math.floor((difference / (1000 * 60 * 60)) % 24)).padStart(2, "0"),
-      minutes: String(Math.floor((difference / 1000 / 60) % 60)).padStart(2, "0"),
-      seconds: String(Math.floor((difference / 1000) % 60)).padStart(2, "0"),
-    };
-  };
-
-  const [timeLeft, setTimeLeft] = useState({
-    days: "00",
-    hours: "00",
-    minutes: "00",
-    seconds: "00",
-  });
   const [promptCopied, setPromptCopied] = useState(false);
   const [easterEggClicks, setEasterEggClicks] = useState(0);
   const [easterEggOpen, setEasterEggOpen] = useState(false);
@@ -160,16 +131,6 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
     }
   };
 
-
-  useEffect(() => {
-    setTimeLeft(calculateTimeLeft());
-
-    const interval = setInterval(() => {
-      setTimeLeft(calculateTimeLeft());
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   return (
     <main id="top" className="relative min-h-screen overflow-hidden bg-[#07111F] text-white">
@@ -225,34 +186,6 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
 
         <section className="grid flex-1 gap-14 py-10 lg:grid-cols-[0.92fr_1fr] lg:items-start lg:py-8">
           <div className="max-w-4xl">
-
-            <div className="mt-2 inline-flex flex-col rounded-[1.75rem] border border-violet-400/20 bg-white/[0.03] px-6 py-5 shadow-xl shadow-black/20 backdrop-blur-xl">
-              <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-violet-300">
-                Launch Countdown • September 1st 2026
-              </div>
-
-              <div className="mt-4 flex items-center gap-3">
-                {[
-                  { label: "Days", value: timeLeft.days },
-                  { label: "Hours", value: timeLeft.hours },
-                  { label: "Minutes", value: timeLeft.minutes },
-                  { label: "Seconds", value: timeLeft.seconds },
-                ].map((item) => (
-                  <div
-                    key={item.label}
-                    className="flex min-w-[72px] flex-col items-center rounded-2xl border border-white/10 bg-[#0B1629] px-4 py-3"
-                  >
-                    <span className="text-2xl font-black tracking-tight text-white">
-                      {item.value}
-                    </span>
-
-                    <span className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                      {item.label}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
 
 
             <div className="mt-8 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-300">

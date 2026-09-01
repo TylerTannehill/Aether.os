@@ -129,6 +129,12 @@ Date: June 4, 2026
 
 Who do we appreciate?`;
 
+const MIKE_TRIGGER = "where is mike";
+
+const MIKE_MESSAGE = `Message received.
+
+8/31 - Mike decided that a founder message was less important than spending time with his honey boo boo and a short king... tsk tsk Mike. -Tyler`;
+
 const utilityModules: UtilityModule[] = [
   {
     id: "calendar",
@@ -696,6 +702,24 @@ async function sendGmailMessage() {
           sender_name: "Founder Message",
           sender_role: "System",
           message: ROBBY_MESSAGE,
+          created_at: new Date().toISOString(),
+          system: true,
+        },
+      ]);
+
+      return;
+    }
+
+    if (normalizedMessage === MIKE_TRIGGER) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `mike-${Date.now()}`,
+          org_id: user.org_id,
+          sender_id: "founder",
+          sender_name: "Founder Message",
+          sender_role: "System",
+          message: MIKE_MESSAGE,
           created_at: new Date().toISOString(),
           system: true,
         },
