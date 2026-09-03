@@ -292,6 +292,7 @@ export default function AetherComprehensiveGuidePage() {
                     <div>
                       <h3 className="text-2xl font-bold text-white">Built for Today. Ready for Tomorrow.</h3>
                       <p className="mt-4 leading-8">Honest Abe is not dependent on any single AI model. As artificial intelligence evolves, Aether can incorporate it where it genuinely improves campaign operations. The intelligence comes from understanding how campaigns work—not from relying on a particular technology.</p>
+                      <p className="mt-3 leading-8">Links to independent AI services do not, by themselves, provide those services access to campaign data stored within Aether. Where Aether introduces AI-enabled functionality, it is designed to support—not replace—human campaign judgment.</p>
                     </div>
                     <div>
                       <h3 className="text-2xl font-bold text-white">Why “Honest Abe”?</h3>
@@ -885,6 +886,7 @@ export default function AetherComprehensiveGuidePage() {
                       <h3 className="text-2xl font-bold text-white">How Connected Services Access Data</h3>
                       <p className="mt-4 leading-8">When campaign leadership connects a supported third-party service, Aether accesses only the information and capabilities authorized through that provider connection and uses that access to provide the integration features requested by the campaign.</p>
                       <p className="mt-3 leading-8">Each connected service remains subject to the permissions, security practices, and policies of its provider. Campaign leadership controls which supported integrations are connected to the organization.</p>
+                      <p className="mt-3 leading-8">Disconnecting a supported service stops future connection activity where supported, but does not necessarily remove information that was previously imported into Aether as part of the campaign’s operational data.</p>
                     </div>
 
                     <div>
@@ -1071,6 +1073,7 @@ export default function AetherComprehensiveGuidePage() {
       <p className="mt-4 leading-8">Aether exists to help campaigns manage their operations.</p>
       <p className="mt-3 leading-8">We don’t build the platform to own your campaign data or use it for purposes outside of supporting your organization’s experience within Aether.</p>
       <p className="mt-3 leading-8">Your campaign’s contacts, operational data, and organizational information remain your campaign’s information.</p>
+      <p className="mt-3 leading-8">Aether does not sell campaign data or treat campaign contacts, donor information, supporter information, volunteer records, or operational data as an advertising product.</p>
     </div>
 
     <div>
