@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 
-const LOGO = "https://aetheros.pro/aether-email-logo.jpg";
+const LOGO = "https://aetheros.pro/aether-logo-full.png";
 
 const templates = [
   {
