@@ -80,6 +80,20 @@ export default function TeamAetherSalesPage() {
   const [activeFilter, setActiveFilter] =
     useState<PipelineFilter>("all");
   const [showImportModal, setShowImportModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [addingCampaign, setAddingCampaign] = useState(false);
+  const [addCampaignError, setAddCampaignError] = useState("");
+  const [newCampaign, setNewCampaign] = useState({
+    campaign: "",
+    contact: "",
+    email: "",
+    phone: "",
+    race: "",
+    state: "",
+    website: "",
+    owner: "Tyler",
+    notes: "",
+  });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [parsedCsv, setParsedCsv] = useState<ParsedCampaignCsv | null>(null);
   const [csvMapping, setCsvMapping] = useState<Record<string, string>>({});
@@ -382,6 +396,100 @@ export default function TeamAetherSalesPage() {
     }
   }
 
+  function resetAddCampaignModal() {
+    setNewCampaign({
+      campaign: "",
+      contact: "",
+      email: "",
+      phone: "",
+      race: "",
+      state: "",
+      website: "",
+      owner: "Tyler",
+      notes: "",
+    });
+    setAddCampaignError("");
+  }
+
+  function closeAddCampaignModal() {
+    if (addingCampaign) return;
+    setShowAddModal(false);
+    resetAddCampaignModal();
+  }
+
+  async function handleAddCampaign() {
+    const campaignName = newCampaign.campaign.trim();
+
+    if (!campaignName) {
+      setAddCampaignError("Campaign name is required.");
+      return;
+    }
+
+    try {
+      setAddingCampaign(true);
+      setAddCampaignError("");
+
+      const response = await fetch("/api/team-aether/sales-pipeline", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          campaigns: [
+            {
+              campaign: campaignName,
+              contact: newCampaign.contact.trim(),
+              email: newCampaign.email.trim(),
+              phone: newCampaign.phone.trim(),
+              race: newCampaign.race.trim(),
+              state: newCampaign.state.trim(),
+              website: newCampaign.website.trim(),
+              owner: newCampaign.owner,
+              emails_sent: 0,
+              notes: newCampaign.notes.trim(),
+              reply_received: false,
+              demo_scheduled: false,
+              interested: false,
+              customer: false,
+              archived: false,
+              needs_follow_up: true,
+              last_activity: "Manually Added",
+            },
+          ],
+        }),
+      });
+
+      let result: {
+        success?: boolean;
+        error?: string;
+        imported?: number;
+      } = {};
+
+      try {
+        result = await response.json();
+      } catch {
+        throw new Error("The server returned an invalid response.");
+      }
+
+      if (!response.ok || !result?.success) {
+        throw new Error(result?.error || "Failed to add campaign.");
+      }
+
+      await loadCampaigns();
+      setExpandedCampaignId(null);
+      setActiveFilter("all");
+      setSearch("");
+      setShowAddModal(false);
+      resetAddCampaignModal();
+    } catch (error) {
+      setAddCampaignError(
+        error instanceof Error ? error.message : "Failed to add campaign."
+      );
+    } finally {
+      setAddingCampaign(false);
+    }
+  }
+
   function downloadCsvTemplate() {
     const template =
       "Campaign,Contact,Email,Phone,Race,State,Campaign Website\n";
@@ -600,7 +708,14 @@ export default function TeamAetherSalesPage() {
                 Import Campaigns
               </button>
 
-              <button className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50">
+              <button
+                type="button"
+                onClick={() => {
+                  resetAddCampaignModal();
+                  setShowAddModal(true);
+                }}
+                className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+              >
                 Add Campaign
               </button>
             </div>
@@ -998,6 +1113,178 @@ export default function TeamAetherSalesPage() {
             </div>
           )}
         </section>
+
+        {showAddModal && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-6"
+            onClick={closeAddCampaignModal}
+          >
+            <div
+              className="w-full max-w-3xl rounded-[2rem] bg-white p-8 shadow-2xl"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h2 className="text-3xl font-bold">Add Campaign</h2>
+                  <p className="mt-2 text-slate-500">
+                    Add a campaign opportunity directly to the Team Aether sales pipeline.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={closeAddCampaignModal}
+                  disabled={addingCampaign}
+                  className="rounded-xl border border-slate-200 px-3 py-2 text-slate-500 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  aria-label="Close add campaign"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                <label className="sm:col-span-2">
+                  <span className="text-sm font-semibold text-slate-700">Campaign Name *</span>
+                  <input
+                    value={newCampaign.campaign}
+                    onChange={(event) =>
+                      setNewCampaign({ ...newCampaign, campaign: event.target.value })
+                    }
+                    className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-slate-400"
+                    placeholder="Campaign name"
+                    autoFocus
+                  />
+                </label>
+
+                <label>
+                  <span className="text-sm font-semibold text-slate-700">Contact</span>
+                  <input
+                    value={newCampaign.contact}
+                    onChange={(event) =>
+                      setNewCampaign({ ...newCampaign, contact: event.target.value })
+                    }
+                    className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-slate-400"
+                    placeholder="Contact name"
+                  />
+                </label>
+
+                <label>
+                  <span className="text-sm font-semibold text-slate-700">Owner</span>
+                  <select
+                    value={newCampaign.owner}
+                    onChange={(event) =>
+                      setNewCampaign({ ...newCampaign, owner: event.target.value })
+                    }
+                    className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-400"
+                  >
+                    <option>Tyler</option>
+                    <option>Mike</option>
+                    <option>Robby</option>
+                  </select>
+                </label>
+
+                <label>
+                  <span className="text-sm font-semibold text-slate-700">Email</span>
+                  <input
+                    type="email"
+                    value={newCampaign.email}
+                    onChange={(event) =>
+                      setNewCampaign({ ...newCampaign, email: event.target.value })
+                    }
+                    className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-slate-400"
+                    placeholder="contact@example.com"
+                  />
+                </label>
+
+                <label>
+                  <span className="text-sm font-semibold text-slate-700">Phone</span>
+                  <input
+                    type="tel"
+                    value={newCampaign.phone}
+                    onChange={(event) =>
+                      setNewCampaign({ ...newCampaign, phone: event.target.value })
+                    }
+                    className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-slate-400"
+                    placeholder="Phone number"
+                  />
+                </label>
+
+                <label>
+                  <span className="text-sm font-semibold text-slate-700">Race</span>
+                  <input
+                    value={newCampaign.race}
+                    onChange={(event) =>
+                      setNewCampaign({ ...newCampaign, race: event.target.value })
+                    }
+                    className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-slate-400"
+                    placeholder="Office / district / race"
+                  />
+                </label>
+
+                <label>
+                  <span className="text-sm font-semibold text-slate-700">State</span>
+                  <input
+                    value={newCampaign.state}
+                    onChange={(event) =>
+                      setNewCampaign({ ...newCampaign, state: event.target.value })
+                    }
+                    className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-slate-400"
+                    placeholder="State"
+                  />
+                </label>
+
+                <label className="sm:col-span-2">
+                  <span className="text-sm font-semibold text-slate-700">Campaign Website</span>
+                  <input
+                    type="url"
+                    value={newCampaign.website}
+                    onChange={(event) =>
+                      setNewCampaign({ ...newCampaign, website: event.target.value })
+                    }
+                    className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-slate-400"
+                    placeholder="https://..."
+                  />
+                </label>
+
+                <label className="sm:col-span-2">
+                  <span className="text-sm font-semibold text-slate-700">Notes</span>
+                  <textarea
+                    value={newCampaign.notes}
+                    onChange={(event) =>
+                      setNewCampaign({ ...newCampaign, notes: event.target.value })
+                    }
+                    className="mt-2 h-28 w-full resize-none rounded-2xl border border-slate-200 p-4 text-sm outline-none transition focus:border-slate-400"
+                    placeholder="Internal notes..."
+                  />
+                </label>
+              </div>
+
+              {addCampaignError ? (
+                <div className="mt-5 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">
+                  {addCampaignError}
+                </div>
+              ) : null}
+
+              <div className="mt-8 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={closeAddCampaignModal}
+                  disabled={addingCampaign}
+                  className="rounded-2xl border border-slate-300 px-5 py-3 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleAddCampaign}
+                  disabled={addingCampaign || !newCampaign.campaign.trim()}
+                  className="rounded-2xl bg-slate-950 px-5 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {addingCampaign ? "Adding..." : "Add Campaign"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {showImportModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-6">

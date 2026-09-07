@@ -38,17 +38,34 @@ export default function TeamAetherDashboardPage() {
         customers:0,
     });
 
+    const [analytics, setAnalytics] = useState<any>({
+        website: { pageViews: 0, engagements: 0, clicks: 0 },
+        meta: { followers: 0, reach: 0, engagement: 0 },
+        instagram: { followers: 0, reach: 0, engagement: 0 },
+        x: { followers: 0, impressions: 0, engagement: 0 },
+        tiktok: { followers: 0, views: 0, engagement: 0 },
+        youtube: { subscribers: 0, views: 0, watchTime: 0 },
+    });
+
     async function loadSalesStats() {
         const r=await fetch("/api/team-aether/sales-pipeline");
         const d=await r.json();
         const campaigns=Array.isArray(d?.campaigns)?d.campaigns:(Array.isArray(d)?d:[]);
         setSalesStats({
-            leads:campaigns.filter((c:any)=>!c.archived).length,
-            needsFollowUp:campaigns.filter((c:any)=>c.needs_follow_up&&!c.archived).length,
-            awaitingReply:campaigns.filter((c:any)=>c.reply_status==="waiting"&&!c.archived).length,
-            upcomingDemos:campaigns.filter((c:any)=>c.demo_status&&c.demo_status!=="Not Set"&&!c.archived).length,
-            interested:campaigns.filter((c:any)=>c.interested===true&&!c.archived).length,
-            customers:campaigns.filter((c:any)=>c.customer===true&&!c.archived).length,
+            leads: campaigns.filter((c:any) => !c.archived).length,
+            needsFollowUp: campaigns.filter((c:any) => c.needs_follow_up && !c.archived).length,
+            awaitingReply: campaigns.filter(
+                (c:any) =>
+                    Number(c.emails_sent || 0) > 0 &&
+                    !c.reply_received &&
+                    !c.customer &&
+                    !c.archived
+            ).length,
+            upcomingDemos: campaigns.filter(
+                (c:any) => c.demo_scheduled && !c.customer
+            ).length,
+            interested: campaigns.filter((c:any) => c.interested === true && !c.archived).length,
+            customers: campaigns.filter((c:any) => c.customer === true).length,
         });
     }
 
@@ -64,6 +81,31 @@ export default function TeamAetherDashboardPage() {
         });
     }
 
+
+    async function loadAnalytics() {
+        try {
+            const r = await fetch("/api/team-aether/analytics", {
+                method: "GET",
+                cache: "no-store",
+            });
+            const d = await r.json();
+
+            if (!r.ok || !d?.success) {
+                throw new Error(d?.error || "Failed to load Team Aether analytics.");
+            }
+
+            setAnalytics(d.metrics ?? {
+                website: { pageViews: 0, engagements: 0, clicks: 0 },
+                meta: { followers: 0, reach: 0, engagement: 0 },
+                instagram: { followers: 0, reach: 0, engagement: 0 },
+                x: { followers: 0, impressions: 0, engagement: 0 },
+                tiktok: { followers: 0, views: 0, engagement: 0 },
+                youtube: { subscribers: 0, views: 0, watchTime: 0 },
+            });
+        } catch (error) {
+            console.error("Failed to load Team Aether analytics", error);
+        }
+    }
 
     async function loadFinance() {
         const r = await fetch("/api/team-aether/finance");
@@ -297,6 +339,7 @@ export default function TeamAetherDashboardPage() {
         loadFinance().catch(()=>setFinance([]));
         loadOrganizationStats().catch(()=>{});
         loadSalesStats().catch(()=>{});
+        loadAnalytics().catch(()=>{});
         loadWebsiteStatus().catch(()=>setWebsiteConnected(false));
         loadMetaStatus().catch(()=>setMetaConnected(false));
         loadXStatus().catch(()=>setXConnected(false));
@@ -459,37 +502,66 @@ export default function TeamAetherDashboardPage() {
 
                         <div className="space-y-5">
                             {[
-                                ["Website","Visitors","Page Views","Conversions"],
-                                ["Meta","Followers","Reach","Engagement"],
-                                ["X","Followers","Impressions","Engagement"],
-                                ["TikTok","Followers","Views","Engagement"],
-                                ["YouTube","Subscribers","Views","Watch Time"],
-                            ].map(([title,a,b,c])=>(
+                                {
+                                    title: "Website",
+                                    connected: websiteConnected,
+                                    metrics: [
+                                        ["Page Views", analytics.website?.pageViews ?? 0],
+                                        ["Engagements", analytics.website?.engagements ?? 0],
+                                        ["Clicks", analytics.website?.clicks ?? 0],
+                                    ],
+                                },
+                                {
+                                    title: "Meta",
+                                    connected: metaConnected,
+                                    metrics: [
+                                        ["Followers", analytics.meta?.followers ?? 0],
+                                        ["Reach", analytics.meta?.reach ?? 0],
+                                        ["Engagement", analytics.meta?.engagement ?? 0],
+                                    ],
+                                },
+                                {
+                                    title: "X",
+                                    connected: xConnected,
+                                    metrics: [
+                                        ["Followers", analytics.x?.followers ?? 0],
+                                        ["Impressions", analytics.x?.impressions ?? 0],
+                                        ["Engagement", analytics.x?.engagement ?? 0],
+                                    ],
+                                },
+                                {
+                                    title: "TikTok",
+                                    connected: tiktokConnected,
+                                    metrics: [
+                                        ["Followers", analytics.tiktok?.followers ?? 0],
+                                        ["Views", analytics.tiktok?.views ?? 0],
+                                        ["Engagement", analytics.tiktok?.engagement ?? 0],
+                                    ],
+                                },
+                                {
+                                    title: "YouTube",
+                                    connected: youtubeConnected,
+                                    metrics: [
+                                        ["Subscribers", analytics.youtube?.subscribers ?? 0],
+                                        ["Views", analytics.youtube?.views ?? 0],
+                                        ["Watch Time", analytics.youtube?.watchTime ?? 0],
+                                    ],
+                                },
+                            ].map(({ title, connected, metrics }) => (
                                 <div key={title} className="border-b border-slate-800 pb-4 last:border-0">
                                     <div className="flex justify-between mb-2">
                                         <span className="font-semibold">{title}</span>
-                                        <span className={
-                                            (title === "Website" && websiteConnected) ||
-                                            (title === "Meta" && metaConnected) ||
-                                            (title === "X" && xConnected) ||
-                                            (title === "TikTok" && tiktokConnected) ||
-                                            (title === "YouTube" && youtubeConnected)
-                                                ? "text-emerald-400"
-                                                : "text-slate-500"
-                                        }>
-                                            {(title === "Website" && websiteConnected) ||
-                                            (title === "Meta" && metaConnected) ||
-                                            (title === "X" && xConnected) ||
-                                            (title === "TikTok" && tiktokConnected) ||
-                                            (title === "YouTube" && youtubeConnected)
-                                                ? "Connected"
-                                                : "Not Connected"}
+                                        <span className={connected ? "text-emerald-400" : "text-slate-500"}>
+                                            {connected ? "Connected" : "Not Connected"}
                                         </span>
                                     </div>
                                     <div className="space-y-1 text-sm text-slate-300">
-                                        <div className="flex justify-between"><span>{a}</span><span>0</span></div>
-                                        <div className="flex justify-between"><span>{b}</span><span>0</span></div>
-                                        <div className="flex justify-between"><span>{c}</span><span>0</span></div>
+                                        {metrics.map(([label, value]) => (
+                                            <div key={String(label)} className="flex justify-between">
+                                                <span>{label}</span>
+                                                <span>{Number(value || 0).toLocaleString()}</span>
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
                             ))}

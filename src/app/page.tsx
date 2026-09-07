@@ -184,28 +184,28 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
           </div>
         </header>
 
-        <section className="grid flex-1 gap-14 py-10 lg:grid-cols-[0.92fr_1fr] lg:items-start lg:py-8">
+        <section className="grid flex-1 gap-14 py-10 lg:grid-cols-[0.92fr_1fr] lg:items-start lg:gap-10 lg:py-6 xl:grid-cols-[0.92fr_1.08fr]">
           <div className="max-w-4xl">
 
 
-            <div className="mt-8 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-300">
+            <div className="mt-8 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-300 lg:mt-5">
               <Building2 className="h-3.5 w-3.5" />
               Campaign Operating System
             </div>
 
-            <h1 className="mt-8 max-w-4xl text-6xl font-black leading-[0.96] tracking-[-0.06em] text-white lg:text-[92px]">
+            <h1 className="mt-8 max-w-4xl text-6xl font-black leading-[0.96] tracking-[-0.06em] text-white lg:mt-6 lg:text-[72px] xl:text-[78px] 2xl:text-[84px]">
               Run your campaign
               <br />
               from one place.
             </h1>
 
-            <p className="mt-8 max-w-2xl text-xl leading-9 text-slate-300">
+            <p className="mt-8 max-w-2xl text-xl leading-9 text-slate-300 lg:mt-6 lg:text-lg lg:leading-8 2xl:text-xl 2xl:leading-9">
               Aether Political connects field, outreach, finance, digital,
               print, contacts, lists, and execution queues into one operational
               command system.
             </p>
 
-            <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+            <div className="mt-10 flex flex-col gap-4 sm:flex-row lg:mt-8">
               <Link
                 href="/login"
                 className="inline-flex min-w-[240px] items-center justify-center gap-3 rounded-2xl border border-violet-300/60 bg-gradient-to-b from-violet-500 to-violet-800 px-8 py-5 text-base font-black uppercase tracking-[0.08em] text-white shadow-2xl shadow-violet-950/40 transition hover:from-violet-400 hover:to-violet-700"
@@ -222,72 +222,72 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
             </div>
           </div>
 
-          <div className="rounded-[2.25rem] border border-white/10 bg-white/[0.03] p-5 shadow-[0_30px_120px_rgba(0,0,0,0.45)] backdrop-blur-xl lg:p-8">
-            <div className="rounded-[1.75rem] border border-violet-200 bg-[#F5EEFF] p-6 text-slate-950 shadow-2xl lg:p-8">
-              <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+          <div className="rounded-[2.25rem] border border-white/10 bg-white/[0.03] p-5 shadow-[0_30px_120px_rgba(0,0,0,0.45)] backdrop-blur-xl lg:p-5 2xl:p-6">
+            <div className="rounded-[1.75rem] border border-violet-200 bg-[#F5EEFF] p-6 text-slate-950 shadow-2xl lg:p-6 2xl:p-7">
+              <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between lg:gap-5">
                 <div>
                   <div className="inline-flex items-center gap-2 rounded-full bg-violet-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-violet-800">
                     <Brain className="h-3.5 w-3.5" />
                     Honest Abe
                   </div>
 
-                  <p className="mt-6 text-xs font-semibold uppercase tracking-[0.2em] text-violet-700">
+                  <p className="mt-6 text-xs font-semibold uppercase tracking-[0.2em] text-violet-700 lg:mt-4">
                     Admin Preview
                   </p>
 
-                  <h2 className="mt-4 max-w-4xl text-2xl font-semibold leading-tight text-violet-950 lg:text-4xl">
+                  <h2 className="mt-4 max-w-4xl text-2xl font-semibold leading-tight text-violet-950 lg:text-[28px] lg:leading-[1.18] xl:text-[30px] 2xl:text-[32px]">
                     Outreach is shaping the campaign&apos;s pressure picture
                     right now, while{" "}
                     <span className="font-bold">Field execution</span> is
                     lagging behind and needs reinforcement.
                   </h2>
 
-                  <p className="mt-5 max-w-3xl text-sm leading-7 text-slate-600 lg:text-base">
+                  <p className="mt-5 max-w-3xl text-sm leading-7 text-slate-600 lg:mt-4 lg:text-sm lg:leading-6 2xl:text-base 2xl:leading-7">
                     Cross-domain signals indicate print deployment is affecting
                     field readiness and volunteer coordination.
                   </p>
                 </div>
 
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-4 lg:gap-3">
                   <Link
                     href="/abes-brief"
-                    className="w-[180px] rounded-2xl border border-amber-300 bg-amber-100 px-5 py-3 text-center text-sm font-semibold text-amber-800 transition hover:bg-amber-200"
+                    className="w-[180px] rounded-2xl border border-amber-300 bg-amber-100 px-5 py-3 text-center text-sm font-semibold text-amber-800 transition hover:bg-amber-200 lg:w-[160px] lg:py-2.5 2xl:w-[170px]"
                   >
                     Abe&apos;s Brief
                   </Link>
 
                   <Link
                     href="/explore-abe"
-                    className="w-[180px] rounded-2xl border border-violet-200 bg-white px-5 py-3 text-center text-sm font-semibold text-violet-800 transition hover:bg-violet-50"
+                    className="w-[180px] rounded-2xl border border-violet-200 bg-white px-5 py-3 text-center text-sm font-semibold text-violet-800 transition hover:bg-violet-50 lg:w-[160px] lg:py-2.5 2xl:w-[170px]"
                   >
                     Explore Abe
                   </Link>
 
                   <Link
                     href="/public-team-aether"
-                    className="w-[180px] rounded-2xl border border-violet-200 bg-white px-5 py-3 text-center text-sm font-semibold text-violet-800 transition hover:bg-violet-50"
+                    className="w-[180px] rounded-2xl border border-violet-200 bg-white px-5 py-3 text-center text-sm font-semibold text-violet-800 transition hover:bg-violet-50 lg:w-[160px] lg:py-2.5 2xl:w-[170px]"
                   >
                     Team Aether
                   </Link>
 
                   <Link
                     href="/aether-academy"
-                    className="w-[180px] rounded-2xl border border-violet-200 bg-white px-5 py-3 text-center text-sm font-semibold text-violet-800 transition hover:bg-violet-50"
+                    className="w-[180px] rounded-2xl border border-violet-200 bg-white px-5 py-3 text-center text-sm font-semibold text-violet-800 transition hover:bg-violet-50 lg:w-[160px] lg:py-2.5 2xl:w-[170px]"
                   >
                     Aether Academy
                   </Link>
 
                   <Link
                     href="/public-faq"
-                    className="w-[180px] rounded-2xl border border-violet-200 bg-white px-5 py-3 text-center text-sm font-semibold text-violet-800 transition hover:bg-violet-50"
+                    className="w-[180px] rounded-2xl border border-violet-200 bg-white px-5 py-3 text-center text-sm font-semibold text-violet-800 transition hover:bg-violet-50 lg:w-[160px] lg:py-2.5 2xl:w-[170px]"
                   >
                     FAQ
                   </Link>
                 </div>
               </div>
 
-              <div className="mt-8 grid gap-4 lg:grid-cols-3">
-                <div className="rounded-2xl border border-violet-200 bg-white p-5">
+              <div className="mt-8 grid gap-4 lg:mt-6 lg:grid-cols-3 lg:gap-3">
+                <div className="rounded-2xl border border-violet-200 bg-white p-5 lg:p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-700">
                     Cross-Domain Signal
                   </p>
@@ -297,7 +297,7 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-slate-200 bg-white p-5">
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 lg:p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                     Operational Health
                   </p>
@@ -307,7 +307,7 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-slate-200 bg-white p-5">
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 lg:p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                     Strategic Recommendation
                   </p>
