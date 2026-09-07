@@ -282,6 +282,9 @@ export default function PublicSalesPage() {
                     <span className="text-2xl font-black text-white">{price}</span>
                     <span className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">Billing Options</span>
                   </div>
+                  <p className="mt-3 text-sm font-bold text-emerald-300">
+                    Unlimited users • Dedicated account manager included
+                  </p>
                   <p className="mt-5 leading-7 text-slate-300">{description}</p>
 
                   <div className="mt-8 flex items-center gap-2 text-sm font-black text-violet-200">
@@ -583,6 +586,58 @@ export default function PublicSalesPage() {
           </div>
         </section>
 
+        <section className="mt-10 rounded-[2.5rem] border border-white/10 bg-white/[0.04] p-8 shadow-2xl backdrop-blur-xl lg:p-12">
+          <div className="max-w-4xl">
+            <p className="text-xs font-black uppercase tracking-[0.22em] text-violet-200">
+              Included with every tier
+            </p>
+            <h2 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">
+              One subscription. Your whole campaign team.
+            </h2>
+            <p className="mt-5 text-lg leading-8 text-slate-300">
+              Aether pricing is based on the operating system your campaign needs—not
+              the number of people helping you use it. Every Aether organization includes
+              the support and core access needed to get the campaign operational.
+            </p>
+          </div>
+
+          <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {[
+              ["Unlimited Users", "Add the campaign staff, volunteers, and authorized team members you need. Aether does not charge per seat."],
+              ["No Setup Fees", "Organization setup is included with your subscription. We do not charge an additional fee just to get your campaign started."],
+              ["No Implementation Fees", "Initial onboarding, data-import assistance, integration assistance, and implementation support are included."],
+              ["Dedicated Account Manager", "Every organization receives a dedicated Team Aether account manager who remains available throughout the campaign for technical needs, onboarding, integrations, data imports, account configuration, and Aether-related support."],
+              ["Aether Mobile Included", "Authorized members of your Aether organization can sign into Aether Mobile without a separate mobile subscription or per-user mobile charge."],
+              ["Google Routes Included", "Supported Google Routes usage is included with Aether. Team Aether handles the underlying Routes infrastructure so campaigns do not need to establish and manage separate Google Maps Platform billing just to use Aether routing."],
+            ].map(([title, description]) => (
+              <div
+                key={title}
+                className="rounded-[1.75rem] border border-white/10 bg-[#07111F]/45 p-6"
+              >
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="mt-1 h-5 w-5 shrink-0 text-emerald-400" />
+                  <div>
+                    <h3 className="text-lg font-black text-white">{title}</h3>
+                    <p className="mt-3 text-sm leading-7 text-slate-300">{description}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-6 rounded-[1.75rem] border border-violet-300/20 bg-violet-500/10 p-6">
+            <p className="text-sm font-black uppercase tracking-[0.16em] text-violet-200">
+              Third-party campaign costs
+            </p>
+            <p className="mt-3 leading-7 text-slate-300">
+              Campaign expenses incurred through external services remain the campaign&apos;s
+              responsibility. Aether can connect with supported third-party platforms and
+              organize their data, but your subscription does not include advertising spend
+              or other paid products purchased directly from those providers.
+            </p>
+          </div>
+        </section>
+
         <section className="mt-10 rounded-[2.5rem] border border-violet-400/20 bg-gradient-to-r from-violet-500/10 via-white/[0.04] to-blue-500/10 p-8 shadow-2xl backdrop-blur-xl lg:p-12">
           <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
             <div className="max-w-4xl">
@@ -599,9 +654,11 @@ export default function PublicSalesPage() {
                 until you&apos;re ready for the next campaign.
               </p>
               <p className="mt-4 text-sm leading-7 text-slate-400">
-                Campaigns may also use Aether&apos;s Full Data Export before the
-                post-subscription retention period expires if they prefer to take
-                their complete campaign-owned operational data with them.
+                <strong className="text-white">Full means full.</strong>{" "}Aether&apos;s Full Data
+                Export provides the organization&apos;s saved Aether data in portable CSV form—not
+                merely a simplified contacts export. Campaigns can take their complete
+                campaign-owned operational data with them before the post-subscription
+                retention period expires.
               </p>
             </div>
 
@@ -614,6 +671,7 @@ export default function PublicSalesPage() {
                 <CheckCircle2 className="h-4 w-4 text-emerald-400" />
                 Full Data Export available
               </div>
+              <div className="mt-3 text-sm font-black text-white">Your data is your data.</div>
             </div>
           </div>
         </section>

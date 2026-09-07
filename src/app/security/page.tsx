@@ -10,6 +10,11 @@ import {
   Database,
   KeyRound,
   CheckCircle2,
+  ServerCog,
+  UserCog,
+  Siren,
+  FileDown,
+  EyeOff,
 } from "lucide-react";
 
 const principles = [
@@ -151,6 +156,32 @@ export default function SecurityPage() {
 
           <section className="grid gap-6 lg:grid-cols-2">
             <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-8">
+              <UserCog className="h-10 w-10 text-violet-300" />
+              <h2 className="mt-5 text-3xl font-black">Team Aether Administrative Access</h2>
+              <p className="mt-4 leading-8 text-slate-300">
+                Authorized Team Aether personnel may retain administrative access for legitimate
+                account-management purposes including provisioning, onboarding, troubleshooting,
+                integration support, security response, and customer-requested assistance.
+              </p>
+              <p className="mt-4 leading-8 text-slate-300">
+                That access does not transfer ownership of campaign data to Aether and is not
+                intended for unrelated inspection or modification of a campaign&apos;s information.
+              </p>
+            </div>
+
+            <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-8">
+              <EyeOff className="h-10 w-10 text-violet-300" />
+              <h2 className="mt-5 text-3xl font-black">Data Use &amp; Campaign Separation</h2>
+              <p className="mt-4 leading-8 text-slate-300">
+                Aether does not sell campaign data or use customer campaign data as an advertising
+                product. Data belonging to one campaign is not provided to another campaign simply
+                because both organizations use Aether.
+              </p>
+            </div>
+          </section>
+
+          <section className="grid gap-6 lg:grid-cols-2">
+            <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-8">
               <Lock className="h-10 w-10 text-violet-300" />
               <h2 className="mt-5 text-3xl font-black">Encryption</h2>
               <p className="mt-4 leading-8 text-slate-300">
@@ -178,10 +209,10 @@ export default function SecurityPage() {
               <KeyRound className="h-10 w-10 text-violet-300" />
               <h2 className="mt-5 text-3xl font-black">Connected Integrations</h2>
               <p className="mt-4 leading-8 text-slate-300">
-                When a campaign connects a third-party service to Aether, Aether
-                accesses only the information and capabilities authorized through
-                that provider connection and uses that access to provide the
-                integration features requested by the campaign.
+                When a campaign connects a supported third-party service to Aether, Aether uses
+                provider-supported authorization mechanisms, including OAuth where implemented.
+                Aether accesses the information and capabilities authorized through that connection
+                to provide the integration features requested by the campaign.
               </p>
               <p className="mt-4 leading-8 text-slate-300">
                 Connected services remain subject to the permissions, security
@@ -195,9 +226,10 @@ export default function SecurityPage() {
               <Database className="h-10 w-10" />
               <h2 className="mt-5 text-3xl font-black">Your Data. Your Exit.</h2>
               <p className="mt-4 leading-8">
-                Your campaign data remains your data. Aether provides an easy-to-use
-                Full Data Export from inside the platform so campaign leadership can
-                retain a copy of campaign-owned operational data.
+                Your campaign data remains your data. Full means full: Aether&apos;s Full Data Export
+                provides the organization&apos;s saved Aether records in portable CSV form rather than
+                limiting the campaign to a simplified contacts export. The goal is portability, not
+                vendor lock-in.
               </p>
               <p className="mt-4 leading-8">
                 Following cancellation or completion of yearly usage, Aether may
@@ -211,6 +243,46 @@ export default function SecurityPage() {
                 retention period to expire.
               </p>
             </div>
+          </section>
+
+          <section className="grid gap-6 lg:grid-cols-2">
+            <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-8">
+              <Siren className="h-10 w-10 text-violet-300" />
+              <h2 className="mt-5 text-3xl font-black">Security Incident Response</h2>
+              <p className="mt-4 leading-8 text-slate-300">
+                If Team Aether becomes aware of a security incident affecting Aether systems or
+                customer data, we investigate the issue, take reasonable steps to contain and
+                remediate it, determine the affected systems and organizations, preserve relevant
+                information for review, and communicate with affected customers as appropriate to
+                the incident and applicable obligations.
+              </p>
+              <p className="mt-4 leading-8 text-slate-300">
+                We do not promise that security incidents are impossible. We commit to responding
+                to them responsibly.
+              </p>
+            </div>
+
+            <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-8">
+              <ServerCog className="h-10 w-10 text-violet-300" />
+              <h2 className="mt-5 text-3xl font-black">Shared Responsibility</h2>
+              <p className="mt-4 leading-8 text-slate-300">
+                Campaign security also depends on campaign practices. Organizations should protect
+                account credentials, remove users who no longer require access, assign roles
+                appropriately, secure connected third-party accounts, maintain independent data
+                exports, and promptly report suspected unauthorized access to Team Aether.
+              </p>
+            </div>
+          </section>
+
+          <section className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-8 lg:p-10">
+            <FileDown className="h-10 w-10 text-violet-300" />
+            <h2 className="mt-5 text-4xl font-black">Security Without Lock-In</h2>
+            <p className="mt-6 max-w-4xl leading-8 text-slate-300">
+              Security should not require a campaign to surrender control of its own information.
+              Aether combines organization isolation, authenticated access, role-based permissions,
+              supported integration controls, administrative accountability, and full data export
+              so campaigns can operate inside Aether without giving up ownership of their data.
+            </p>
           </section>
 
           <section className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-8 lg:p-10">

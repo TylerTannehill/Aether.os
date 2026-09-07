@@ -45,8 +45,7 @@ const tiers = [
     subtitle: "Ground Campaign OS",
     description:
       "Lean field-first operating system for underfunded local races and volunteer-heavy campaigns.",
-    originalPrice: "$5,000/year",
-    launchPrice: "$2,500/year",
+    annualPrice: "$5,000/year",
     monthlyPrice: "$500/month",
     bullets: [
       "Field + Outreach infrastructure",
@@ -61,8 +60,7 @@ const tiers = [
     subtitle: "Operational Campaign OS",
     description:
       "Full campaign operations with finance, digital, dashboard intelligence, and integrations.",
-    originalPrice: "$10,000/year",
-    launchPrice: "$5,000/year",
+    annualPrice: "$10,000/year",
     monthlyPrice: "$916.50/month",
     bullets: [
       "Finance + Digital departments",
@@ -77,8 +75,7 @@ const tiers = [
     subtitle: "Command Campaign OS",
     description:
       "Strategic command infrastructure for high-scale campaigns and complex organizations.",
-    originalPrice: "$20,000/year",
-    launchPrice: "$10,000/year",
+    annualPrice: "$20,000/year",
     monthlyPrice: "$1,750/month",
     bullets: [
       "Full command infrastructure",
@@ -378,17 +375,9 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
                 </p>
 
                 <div className="mt-8 rounded-2xl border border-violet-400/20 bg-violet-500/5 p-5">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-violet-300">
-                    90-Day Launch Special • Ends 11/30/2026
-                  </p>
-
-                  <div className="mt-3 flex flex-wrap items-end gap-x-3 gap-y-2">
-                    <span className="text-lg font-medium text-slate-500 line-through">
-                      {tier.originalPrice}
-                    </span>
-
+                  <div className="flex flex-wrap items-end gap-x-3 gap-y-2">
                     <span className="text-3xl font-black tracking-tight text-white">
-                      {tier.launchPrice}
+                      {tier.annualPrice}
                     </span>
 
                     <span className="text-sm font-semibold text-slate-400">
