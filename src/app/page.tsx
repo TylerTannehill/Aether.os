@@ -597,6 +597,49 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
             </div>
           </div>
 
+          <div className="mt-12 border-t border-white/10 pt-10">
+            <div className="flex flex-col items-center gap-5">
+              <div className="text-center">
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-300">
+                  Follow Team Aether
+                </p>
+                <p className="mt-2 text-sm text-slate-400">
+                  Find Aether across our official social channels.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <a href="https://x.com/AetherOSPro" target="_blank" rel="noopener noreferrer" aria-label="Aether on X" className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-white transition hover:border-violet-300/50 hover:bg-violet-500/10 hover:scale-105">
+                  <span className="text-xl font-black">X</span>
+                </a>
+
+                <a href="https://www.facebook.com/profile.php?id=61593622714798" target="_blank" rel="noopener noreferrer" aria-label="Aether on Facebook" className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-white transition hover:border-violet-300/50 hover:bg-violet-500/10 hover:scale-105">
+                  <span className="text-2xl font-black lowercase">f</span>
+                </a>
+
+                <a href="https://www.instagram.com/team_aetheros/" target="_blank" rel="noopener noreferrer" aria-label="Aether on Instagram" className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-white transition hover:border-violet-300/50 hover:bg-violet-500/10 hover:scale-105">
+                  <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                    <rect x="3" y="3" width="18" height="18" rx="5" />
+                    <circle cx="12" cy="12" r="4" />
+                    <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+                  </svg>
+                </a>
+
+                <a href="https://www.tiktok.com/@team.aetheros" target="_blank" rel="noopener noreferrer" aria-label="Aether on TikTok" className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-white transition hover:border-violet-300/50 hover:bg-violet-500/10 hover:scale-105">
+                  <svg viewBox="0 0 24 24" className="h-6 w-6" fill="currentColor" aria-hidden="true">
+                    <path d="M15.5 3c.35 2.35 1.65 3.8 4 4.25v3.1c-1.55-.05-2.9-.5-4-1.25v6.15a5.25 5.25 0 1 1-4.5-5.2v3.2a2.15 2.15 0 1 0 1.35 2V3h3.15Z" />
+                  </svg>
+                </a>
+
+                <a href="https://www.youtube.com/@AetherOSPro" target="_blank" rel="noopener noreferrer" aria-label="Aether on YouTube" className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-white transition hover:border-violet-300/50 hover:bg-violet-500/10 hover:scale-105">
+                  <svg viewBox="0 0 24 24" className="h-7 w-7" fill="currentColor" aria-hidden="true">
+                    <path d="M21.6 7.2a2.9 2.9 0 0 0-2.05-2.05C17.75 4.65 12 4.65 12 4.65s-5.75 0-7.55.5A2.9 2.9 0 0 0 2.4 7.2 30 30 0 0 0 1.9 12a30 30 0 0 0 .5 4.8 2.9 2.9 0 0 0 2.05 2.05c1.8.5 7.55.5 7.55.5s5.75 0 7.55-.5a2.9 2.9 0 0 0 2.05-2.05 30 30 0 0 0 .5-4.8 30 30 0 0 0-.5-4.8ZM10 15.2V8.8l5.5 3.2-5.5 3.2Z" />
+                  </svg>
+                </a>
+              </div>
+            </div>
+          </div>
+
           <div className="mt-16 border-t border-white/10 pt-8 text-center text-sm text-slate-500">
             <button
               type="button"
