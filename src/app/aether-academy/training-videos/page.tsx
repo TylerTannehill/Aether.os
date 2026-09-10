@@ -48,9 +48,9 @@ export default function TrainingVideosPage() {
           <h1 className="mt-8 text-5xl font-black lg:text-7xl">Learn Aether from Team Aether.</h1>
 
           <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-slate-300">
-            Every Academy lesson will eventually have a companion walkthrough demonstrating how the
-            feature works inside the platform. Videos are currently in production and will be
-            published before launch.
+            Aether Academy includes companion video walkthroughs demonstrating how the platform
+            works in practice. Explore the training library below alongside the written Academy,
+            with additional and updated walkthroughs published as Aether continues to evolve.
           </p>
         </div>
 

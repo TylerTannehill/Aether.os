@@ -528,33 +528,54 @@ export default function AetherAcademyPage() {
                     <div className="rounded-2xl border border-violet-400/20 bg-gradient-to-r from-violet-400/10 to-transparent p-6">
                       <h3 className="text-2xl font-bold text-white">A Strategy Engine, Not an AI Assistant</h3>
                       <p className="mt-4 leading-8">Despite its name, Honest Abe was never designed to be an artificial intelligence assistant. At its core, Honest Abe is a campaign strategy engine built to continuously interpret campaign operations, identify opportunities, recognize operational pressure, and help keep work moving throughout the organization.</p>
-                      <p className="mt-3 leading-8">Artificial intelligence may enhance those capabilities in the future, but it is not what makes Honest Abe valuable. The operational model behind it does.</p>
+                      <p className="mt-3 leading-8">Artificial intelligence may enhance those capabilities over time, but it is not what makes Honest Abe valuable. The operational model behind it does.</p>
                     </div>
+
                     <div>
                       <h3 className="text-2xl font-bold text-white">Built Around Campaign Strategy</h3>
                       <p className="mt-3 leading-8">Rather than answering questions like a chatbot, Abe continuously evaluates how the campaign is operating and helps ensure the right work reaches the right people at the right time. Its purpose is not conversation. Its purpose is execution.</p>
-                      <p className="mt-3 leading-8">As campaign priorities shift throughout the election cycle, Honest Abe adapts its interpretation so recommendations reflect where the campaign is today—not where it was months ago.</p>
+                      <p className="mt-3 leading-8">Because Aether operates as one connected Campaign Operating System, Abe can interpret performance metrics and operational activity across Finance, Field, Outreach, Digital, Print, and the organization as a whole. That broader picture helps Abe understand not simply whether an individual metric is rising or falling, but how activity across the campaign may affect its current priorities.</p>
                     </div>
+
+                    <div className="rounded-2xl border border-violet-400/20 bg-violet-400/5 p-6">
+                      <h3 className="text-2xl font-bold text-white">Campaign Stage Changes What Matters</h3>
+                      <p className="mt-4 leading-8">Campaign priorities are not static. What deserves attention early in a campaign may be very different from what matters as Election Day approaches.</p>
+                      <p className="mt-3 leading-8">Organization Administrators control Honest Abe&apos;s campaign stage and can move the organization between <strong className="text-white">Early Campaign, Mid Campaign, and Late Campaign</strong> as the campaign progresses.</p>
+                      <p className="mt-3 leading-8">Campaign stage changes the strategic context Abe applies when interpreting campaign performance. As the campaign moves through the election cycle, the relative importance of different operational areas shifts with it, allowing Abe&apos;s guidance to reflect what matters to the campaign <strong className="text-white">now</strong> rather than applying one static definition of success throughout the entire race.</p>
+                      <p className="mt-3 leading-8">The underlying weighting systems, thresholds, prioritization methods, and decision logic used by Honest Abe are proprietary to Aether.</p>
+                    </div>
+
                     <div className="rounded-2xl border border-violet-400/20 bg-black/20 p-6">
                       <h3 className="text-2xl font-bold text-white">Quietly Keeping Work Moving</h3>
                       <p className="mt-4 leading-8">Most of the time, Abe works quietly behind the scenes—routing work, keeping information flowing between departments, and reducing unnecessary coordination so campaign teams can focus on execution instead of administration.</p>
+                      <p className="mt-3 leading-8">As campaign performance changes, Abe&apos;s priorities can change with it. Strong performance in one area, emerging pressure in another, or changing relationships between departments can affect what Abe believes deserves leadership&apos;s attention next.</p>
+                      <p className="mt-3 leading-8">A shift in priority does not necessarily mean something is wrong. It means Abe is continuously interpreting the campaign&apos;s current operational picture within the strategic context established by campaign leadership.</p>
                     </div>
+
                     <div>
                       <h3 className="text-2xl font-bold text-white">Finding Opportunities Hidden in the Data</h3>
-                      <p className="mt-3 leading-8">Honest Abe connects imported contacts, voter files, contribution history, department activity, and campaign metrics to surface relationships that might otherwise go unnoticed. The campaign remains in control—Abe simply helps make valuable opportunities easier to discover.</p>
+                      <p className="mt-3 leading-8">Honest Abe connects imported contacts, voter files, contribution history, department activity, and campaign metrics to surface relationships that might otherwise go unnoticed.</p>
+                      <p className="mt-3 leading-8">That can mean identifying operational pressure, recognizing relationships between departments, surfacing opportunities that deserve additional attention, or helping leadership understand where campaign resources may have greater strategic value.</p>
+                      <p className="mt-3 leading-8">The campaign remains in control—Abe helps make those opportunities easier to discover and understand.</p>
                     </div>
+
                     <div>
                       <h3 className="text-2xl font-bold text-white">Human Judgment Always Comes First</h3>
-                      <p className="mt-3 leading-8">Campaign professionals remain responsible for setting priorities and making strategic decisions. Honest Abe provides operational awareness, not automated campaign strategy.</p>
+                      <p className="mt-3 leading-8">Campaign professionals remain responsible for setting priorities and making strategic decisions. Honest Abe provides operational awareness and strategic guidance, not autonomous campaign strategy.</p>
+                      <p className="mt-3 leading-8">That human control exists at multiple levels. Organization Administrators establish the campaign stage that provides Abe&apos;s strategic context, and campaign leadership determines whether Abe&apos;s recommendations make sense within the political, organizational, and human realities of the campaign.</p>
+                      <p className="mt-3 leading-8 font-semibold text-white">Abe can identify what deserves attention. The campaign decides what to do about it.</p>
                     </div>
+
                     <div className="rounded-2xl border border-violet-400/20 bg-violet-400/5 p-6">
                       <h3 className="text-2xl font-bold text-white">Built for Today. Ready for Tomorrow.</h3>
                       <p className="mt-4 leading-8">Honest Abe is not dependent on any single AI model. As artificial intelligence evolves, Aether can incorporate it where it genuinely improves campaign operations. The intelligence comes from understanding how campaigns work—not from relying on a particular technology.</p>
                       <p className="mt-3 leading-8">Links to independent AI services do not, by themselves, provide those services access to campaign data stored within Aether. Where Aether introduces AI-enabled functionality, it is designed to support—not replace—human campaign judgment.</p>
                     </div>
+
                     <div className="rounded-2xl border border-violet-400/20 bg-gradient-to-r from-violet-400/10 to-transparent p-6">
                       <h3 className="text-2xl font-bold text-white">Why “Honest Abe”?</h3>
-                      <p className="mt-4 leading-8">Campaign leaders need software that helps them understand what they need to know—not simply what they want to hear. Honest Abe was designed to think about the operational health of the campaign so campaign teams can spend more time leading it.</p>
+                      <p className="mt-4 leading-8">Campaign leaders need software that helps them understand what they need to know—not simply what they want to hear.</p>
+                      <p className="mt-3 leading-8">Honest Abe was designed to think about the operational health of the campaign, recognize when the campaign&apos;s needs are changing, and help leadership understand what deserves attention next—so campaign teams can spend more time leading and executing.</p>
                     </div>
                   </div>
                 ) : id === "dashboard" ? (
@@ -1115,35 +1136,24 @@ export default function AetherAcademyPage() {
                 ) : id === "integrations" ? (
                   <div className="mt-8 max-w-4xl space-y-8 text-slate-300">
                     <p className="text-lg leading-8">No campaign operates with a single piece of software. Fundraising platforms. Social media. Calendars. Email. Cloud storage. Analytics. Modern campaigns rely on dozens of tools to accomplish their goals.</p>
-                    <p className="leading-8">Aether was built to become the Campaign Operating System that connects those tools together, allowing campaign teams to work from one operational picture instead of constantly switching between disconnected platforms.</p>
+                    <p className="leading-8">Aether connects the services campaigns already rely on so campaign teams can work from one operational picture instead of constantly switching between disconnected platforms.</p>
 
                     <div className="rounded-2xl border border-violet-400/20 bg-violet-400/5 p-6">
-                      <h3 className="text-2xl font-bold text-white">An Ongoing Commitment</h3>
-                      <p className="mt-4 leading-8">Integrations are never truly finished. Campaign technology evolves. New platforms emerge. Campaign workflows change. Because of that, integrations will always remain an active area of development within Aether. Rather than treating integrations as a one-time feature, we view them as an ongoing commitment to helping campaigns connect the tools they rely on every day.</p>
-                    </div>
-
-                    <div>
-                      <h3 className="text-2xl font-bold text-white">Our Initial Focus</h3>
-                      <p className="mt-3 leading-8">Every integration we build is intended to strengthen Aether as the Campaign Operating System. Our launch roadmap focuses on connecting the systems campaign teams interact with most frequently, bringing fundraising activity, digital engagement, and operational workflows into one shared operational picture.</p>
-                      <p className="mt-3 leading-8">By establishing that foundation first, campaigns can immediately reduce manual work, improve visibility across departments, and begin experiencing the benefits of a connected Campaign Operating System from day one. As Aether grows, so will the ecosystem around it.</p>
-                    </div>
-
-                    <div className="rounded-2xl border border-violet-400/20 bg-black/20 p-6">
-                      <h3 className="text-2xl font-bold text-white">Supported Integrations</h3>
-                      <p className="mt-4 leading-8">Aether is designed to connect the services campaigns already rely on while bringing their information into one shared operational picture. Supported and planned connections across the platform include:</p>
+                      <h3 className="text-2xl font-bold text-white">Live Integrations</h3>
+                      <p className="mt-4 leading-8">The following integrations are live and currently supported within Aether:</p>
                       <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                         {[
+                          "Google Drive",
+                          "Gmail",
+                          "Google Calendar",
+                          "Google Routes",
+                          "ActBlue",
+                          "WinRed",
+                          "YouTube",
                           "Meta",
                           "Instagram",
                           "TikTok",
-                          "YouTube",
-                          "Campaign Website",
-                          "Google Drive",
-                          "Google Calendar",
-                          "Gmail",
-                          "ActBlue",
-                          "WinRed",
-                          "Google Routes",
+                          "Campaign Websites",
                         ].map((integration) => (
                           <div
                             key={integration}
@@ -1153,13 +1163,24 @@ export default function AetherAcademyPage() {
                           </div>
                         ))}
                       </div>
-                      <p className="mt-5 leading-8">Integration availability can depend on third-party platform access, API permissions, and provider requirements. Aether will continue expanding supported connections as those services and campaign needs evolve.</p>
+                      <p className="mt-5 leading-8">Integration availability can depend on third-party platform access, API permissions, provider requirements, and the capabilities made available by each connected service.</p>
                     </div>
 
                     <div>
-                      <h3 className="text-2xl font-bold text-white">Supporting Field Operations</h3>
-                      <p className="mt-3 leading-8">Aether already supports field work through its shared contact data, lists, mobile execution workflows, dispositions, running notes, and Google Routes integration. These capabilities help campaign teams move from planning to real-world execution while keeping activity connected to the rest of the campaign.</p>
-                      <p className="mt-3 leading-8">Field technology is a broad ecosystem, and we don't consider that work finished. We will continue bringing additional supporting integrations to life where they meaningfully reduce duplicate work, improve field execution, or strengthen the campaign's shared operational picture.</p>
+                      <h3 className="text-2xl font-bold text-white">Google Routes in the Field</h3>
+                      <p className="mt-3 leading-8">Google Routes is live within Aether and Aether Mobile, supporting field execution alongside shared contact data, lists, dispositions, and running notes. This keeps route planning and field activity connected to the same operational picture used by the rest of the campaign.</p>
+                    </div>
+
+                    <div className="rounded-2xl border border-violet-400/20 bg-black/20 p-6">
+                      <h3 className="text-2xl font-bold text-white">CSV Imports and Manual Workflows</h3>
+                      <p className="mt-4 leading-8">Live integrations are not the only way to bring campaign information into Aether. CSV import functionality is available today for campaigns that prefer manual workflows or need to bring data in from systems without a direct connection.</p>
+                      <p className="mt-3 leading-8">This gives campaigns flexibility to use live connections where available while continuing to import structured campaign data on their own schedule when that workflow makes more sense.</p>
+                    </div>
+
+                    <div>
+                      <h3 className="text-2xl font-bold text-white">Integration Roadmap</h3>
+                      <p className="mt-3 leading-8">Direct integrations with NGP VAN and VoteBuilder are currently on Aether's roadmap. Until those direct connections are available, campaigns can use Aether's existing CSV import functionality to bring compatible campaign data into the platform.</p>
+                      <p className="mt-3 leading-8">Additional integrations may be added over time when they meaningfully reduce duplicate work, improve campaign visibility, or strengthen execution across the Campaign Operating System.</p>
                     </div>
 
                     <div className="rounded-2xl border border-violet-400/20 bg-violet-400/5 p-6">
@@ -1171,19 +1192,13 @@ export default function AetherAcademyPage() {
 
                     <div>
                       <h3 className="text-2xl font-bold text-white">Built with Purpose</h3>
-                      <p className="mt-3 leading-8">Not every integration belongs inside a Campaign Operating System. Every integration is selected because it helps campaigns reduce duplicate work, improve visibility, enrich campaign data, or strengthen operational awareness. Our roadmap includes fundraising platforms such as ActBlue and WinRed, productivity tools like Google Workspace, campaign website integrations, and analytics from platforms including Meta, X, TikTok, and YouTube. Wherever practical, Aether leverages open APIs so campaigns can continue using the tools they already trust while working from one connected operational picture.</p>
-                    </div>
-
-                    <div>
-                      <h3 className="text-2xl font-bold text-white">Growing Alongside Campaigns</h3>
-                      <p className="mt-3 leading-8">The list of supported integrations will continue to grow over time as campaigns evolve and new technologies emerge. Our goal isn't to replace every tool campaigns already trust. It's to bring those tools together into one place where campaign teams can operate with greater clarity, focus, and confidence.</p>
+                      <p className="mt-3 leading-8">Not every outside service belongs inside a Campaign Operating System. Aether prioritizes integrations that help campaigns reduce duplicate work, improve visibility, enrich campaign data, or strengthen operational awareness while allowing campaigns to continue using the tools they already trust.</p>
                     </div>
 
                     <div className="rounded-2xl border border-violet-400/20 bg-gradient-to-r from-violet-400/10 to-transparent p-6">
                       <h3 className="text-2xl font-bold text-white">Clarity. Focus. Execution.</h3>
                       <p className="mt-4 leading-8">The best campaign software doesn't exist in isolation. It works alongside the tools campaigns already depend on. Connect what matters. Reduce unnecessary work. Keep information flowing. Help every department operate from the same shared understanding of the campaign.</p>
-                      <p className="mt-3 leading-8">Because great software isn't measured by how many integrations it has. It's measured by how effectively those integrations help campaigns execute.</p>
-                    <h3 className="text-2xl font-bold text-white">Built Around Connected Campaigns</h3><p className="mt-3 leading-8">Aether is designed to work alongside the tools campaigns already rely on, reducing duplicate work while creating one shared operational picture.</p><h3 className="text-2xl font-bold text-white">Growing Ecosystem</h3><p className="mt-3 leading-8">As additional public APIs and partnerships become available, integrations will continue expanding across fundraising, communications, analytics, cloud collaboration, and campaign operations.</p>
+                      <p className="mt-3 leading-8">Great integrations are not measured by how many logos appear on a page. They are measured by how effectively they help campaigns execute.</p>
                     </div>
                   </div>
                 ) : id === "organizations" ? (
