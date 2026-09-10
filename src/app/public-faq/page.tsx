@@ -15,7 +15,7 @@ const faqs = [
   ["Who owns our campaign's data?","Your campaign. Always. Aether exists to organize campaign operations—not to own, sell, or monetize campaign data."],
   ["Does Aether process campaign donations?","No. Contributions continue through trusted fundraising platforms such as ActBlue and WinRed. Aether tracks contribution information after processing to support campaign operations."],
   ["Is Aether available on mobile?","Yes. Aether Mobile supports field operations and call time, allowing campaign staff and volunteers to work wherever campaign work happens."],
-  ["How much does Aether cost?","Aether is available in three subscription tiers designed around campaign size and operational complexity. Current launch pricing is available on the home page."],
+  ["How much does Aether cost?","Aether is available in three subscription tiers designed around campaign size and operational complexity: Tier 1 is $5,000 per year, Tier 2 is $10,000 per year, and Tier 3 is $20,000 per year."],
   ["Can Aether replace our current CRM?","In many cases, yes. Aether was designed as a campaign operating system rather than simply a contact database, allowing organizations to consolidate multiple workflows into one platform."],
   ["Can I schedule a demonstration?","Absolutely. We'd be happy to walk through the platform, answer your questions, and discuss whether Aether is the right fit for your campaign."]
 ];
