@@ -43,59 +43,52 @@ const sections = [
     ]
   },
   {
-    title: "7. Artificial Intelligence and External AI Services",
-    body: [
-      "Aether may provide features, links, or workflows involving artificial intelligence. Where a feature sends information to an external AI provider, users should review the information being shared and the provider's applicable terms and privacy practices before proceeding. Users are responsible for ensuring they have the right to disclose information they choose to send to an external service.",
-      "Links or buttons that open an independent AI service do not, by themselves, give that service access to campaign data stored inside Aether."
-    ]
-  },
-  {
-    title: "8. Service Providers and Disclosure of Information",
+    title: "7. Service Providers and Disclosure of Information",
     body: [
       "We may use service providers and infrastructure partners to help host, secure, maintain, communicate about, and operate the Services. These providers may process information on our behalf only as reasonably necessary to perform those functions.",
       "We may also disclose information when reasonably necessary to comply with applicable law or valid legal process; protect the rights, safety, or security of Aether, our users, or others; investigate fraud, abuse, or security incidents; enforce our agreements; or complete a corporate transaction such as a merger, acquisition, financing, reorganization, or sale of relevant business assets, subject to applicable law."
     ]
   },
   {
-    title: "9. Data Retention, Export, and Account Closure",
+    title: "8. Data Retention, Export, and Account Closure",
     body: [
       "Aether is built around the principle that your data is your data. Organizations may use available export tools to retrieve their data. Following cancellation or completion of yearly usage, Aether may retain organization data for up to 60 days to allow for export, reactivation, support, or orderly account closure, unless a longer period is required by law or specifically arranged with the organization.",
       "Where offered, an organization may elect a separate paid data-storage option after its primary subscription or yearly usage ends. Information may also remain temporarily in backups, logs, or disaster-recovery systems until those systems cycle through their normal retention processes."
     ]
   },
   {
-    title: "10. Security",
+    title: "9. Security",
     body: [
       "We use reasonable administrative, technical, and organizational safeguards designed to protect information against unauthorized access, loss, misuse, alteration, or disclosure. Security is a shared responsibility. Users should protect their credentials, use appropriate access controls, and promptly notify Team Aether of suspected unauthorized access.",
       "No internet-connected service, transmission method, or storage system can guarantee absolute security. Aether therefore cannot promise that information will never be accessed, used, or disclosed in an unauthorized manner."
     ]
   },
   {
-    title: "11. Cookies and Similar Technologies",
+    title: "10. Cookies and Similar Technologies",
     body: [
       "Aether may use cookies, local storage, session technologies, and similar mechanisms reasonably necessary for authentication, security, preferences, application functionality, and performance. If Aether introduces additional analytics, advertising, or tracking technologies, this Privacy Policy may be updated to describe those practices."
     ]
   },
   {
-    title: "12. Children's Privacy",
+    title: "11. Children's Privacy",
     body: [
       "The Services are designed for campaign and organizational use and are not directed to children under 13. Aether does not knowingly seek to collect personal information directly from children under 13 through account registration. If you believe a child has provided personal information directly to Aether inappropriately, please contact Team Aether."
     ]
   },
   {
-    title: "13. Campaign and Regulatory Responsibilities",
+    title: "12. Campaign and Regulatory Responsibilities",
     body: [
       "Campaigns and political organizations may be subject to federal, state, local, or other requirements concerning voter, donor, supporter, employee, volunteer, financial, communications, and campaign records. Each organization is responsible for determining the laws, regulations, reporting obligations, consent requirements, and retention rules that apply to its activities. Aether provides operational software and does not replace an organization's legal, compliance, accounting, or campaign-finance advisers."
     ]
   },
   {
-    title: "14. Changes to This Privacy Policy",
+    title: "13. Changes to This Privacy Policy",
     body: [
       "We may update this Privacy Policy as Aether evolves, our practices change, or legal requirements develop. When we make changes, we will update the Last Updated date above. Material changes may also be communicated through the Services or other reasonable means when appropriate."
     ]
   },
   {
-    title: "15. Questions and Privacy Requests",
+    title: "14. Questions and Privacy Requests",
     body: [
       "If you have questions about this Privacy Policy, want to request access to or deletion of information associated with your account or organization, or need help understanding how Aether handles data, please contact Team Aether. Requests involving organization-controlled campaign data may require verification or coordination with the organization's administrator."
     ]
