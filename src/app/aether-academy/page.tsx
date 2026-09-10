@@ -528,7 +528,6 @@ export default function AetherAcademyPage() {
                     <div className="rounded-2xl border border-violet-400/20 bg-gradient-to-r from-violet-400/10 to-transparent p-6">
                       <h3 className="text-2xl font-bold text-white">A Strategy Engine, Not an AI Assistant</h3>
                       <p className="mt-4 leading-8">Despite its name, Honest Abe was never designed to be an artificial intelligence assistant. At its core, Honest Abe is a campaign strategy engine built to continuously interpret campaign operations, identify opportunities, recognize operational pressure, and help keep work moving throughout the organization.</p>
-                      <p className="mt-3 leading-8">Artificial intelligence may enhance those capabilities over time, but it is not what makes Honest Abe valuable. The operational model behind it does.</p>
                     </div>
 
                     <div>
@@ -564,12 +563,6 @@ export default function AetherAcademyPage() {
                       <p className="mt-3 leading-8">Campaign professionals remain responsible for setting priorities and making strategic decisions. Honest Abe provides operational awareness and strategic guidance, not autonomous campaign strategy.</p>
                       <p className="mt-3 leading-8">That human control exists at multiple levels. Organization Administrators establish the campaign stage that provides Abe&apos;s strategic context, and campaign leadership determines whether Abe&apos;s recommendations make sense within the political, organizational, and human realities of the campaign.</p>
                       <p className="mt-3 leading-8 font-semibold text-white">Abe can identify what deserves attention. The campaign decides what to do about it.</p>
-                    </div>
-
-                    <div className="rounded-2xl border border-violet-400/20 bg-violet-400/5 p-6">
-                      <h3 className="text-2xl font-bold text-white">Built for Today. Ready for Tomorrow.</h3>
-                      <p className="mt-4 leading-8">Honest Abe is not dependent on any single AI model. As artificial intelligence evolves, Aether can incorporate it where it genuinely improves campaign operations. The intelligence comes from understanding how campaigns work—not from relying on a particular technology.</p>
-                      <p className="mt-3 leading-8">Links to independent AI services do not, by themselves, provide those services access to campaign data stored within Aether. Where Aether introduces AI-enabled functionality, it is designed to support—not replace—human campaign judgment.</p>
                     </div>
 
                     <div className="rounded-2xl border border-violet-400/20 bg-gradient-to-r from-violet-400/10 to-transparent p-6">
@@ -1175,12 +1168,6 @@ export default function AetherAcademyPage() {
                       <h3 className="text-2xl font-bold text-white">CSV Imports and Manual Workflows</h3>
                       <p className="mt-4 leading-8">Live integrations are not the only way to bring campaign information into Aether. CSV import functionality is available today for campaigns that prefer manual workflows or need to bring data in from systems without a direct connection.</p>
                       <p className="mt-3 leading-8">This gives campaigns flexibility to use live connections where available while continuing to import structured campaign data on their own schedule when that workflow makes more sense.</p>
-                    </div>
-
-                    <div>
-                      <h3 className="text-2xl font-bold text-white">Integration Roadmap</h3>
-                      <p className="mt-3 leading-8">Direct integrations with NGP VAN and VoteBuilder are currently on Aether's roadmap. Until those direct connections are available, campaigns can use Aether's existing CSV import functionality to bring compatible campaign data into the platform.</p>
-                      <p className="mt-3 leading-8">Additional integrations may be added over time when they meaningfully reduce duplicate work, improve campaign visibility, or strengthen execution across the Campaign Operating System.</p>
                     </div>
 
                     <div className="rounded-2xl border border-violet-400/20 bg-violet-400/5 p-6">
