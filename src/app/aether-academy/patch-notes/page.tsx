@@ -79,7 +79,6 @@ export default function PatchNotesPage() {
                     <li>✓ ActBlue and WinRed live.</li>
                     <li>✓ YouTube, Meta, Instagram, TikTok, and Campaign Websites live.</li>
                     <li>✓ CSV import workflows available.</li>
-                    <li>→ NGP VAN and VoteBuilder remain on the integration roadmap.</li>
                   </ul>
                 </div>
 
@@ -109,7 +108,7 @@ export default function PatchNotesPage() {
                   <h4 className="text-base font-semibold text-white">Aether Academy & Training</h4>
                   <ul className="mt-1.5 space-y-0.5">
                     <li>✓ Expanded Honest Abe documentation.</li>
-                    <li>✓ Updated integration and roadmap documentation.</li>
+                    <li>✓ Updated integration documentation.</li>
                     <li>✓ Expanded security, governance, and data-portability documentation.</li>
                     <li>✓ Updated post-launch platform status language.</li>
                     <li>✓ Continued expansion of the companion training library.</li>
