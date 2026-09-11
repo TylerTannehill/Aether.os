@@ -442,7 +442,6 @@ export default function DigitalDashboardPage() {
   const [trendView, setTrendView] = useState<TrendView>("impressions");
   const [digitalRows, setDigitalRows] = useState<DigitalPlatformRow[]>([]);
   const [digitalLoading, setDigitalLoading] = useState(true);
-  const [syncingAnalytics, setSyncingAnalytics] = useState(false);
   const [isDemoOrg, setIsDemoOrg] = useState(false);
 
   const [selectedTaskId, setSelectedTaskId] = useState("");
@@ -520,69 +519,6 @@ export default function DigitalDashboardPage() {
       mounted = false;
     };
   }, []);
-
-  async function syncDigitalAnalytics() {
-    if (syncingAnalytics) return;
-
-    setSyncingAnalytics(true);
-
-    try {
-      const analyticsProviders = ["meta", "x", "tiktok", "youtube"] as const;
-
-      const connectionChecks = await Promise.allSettled(
-        analyticsProviders.map(async (provider) => {
-          const response = await fetch(`/api/integrations/${provider}/status`, {
-            method: "GET",
-            credentials: "include",
-            cache: "no-store",
-          });
-
-          const result = await response.json().catch(() => null);
-
-          return {
-            provider,
-            connected: Boolean(response.ok && result?.connected === true),
-          };
-        })
-      );
-
-      const connectedProviders = connectionChecks.flatMap((check) =>
-        check.status === "fulfilled" && check.value.connected
-          ? [check.value.provider]
-          : []
-      );
-
-      if (connectedProviders.length === 0) {
-        return;
-      }
-
-      await Promise.allSettled(
-        connectedProviders.map(async (provider) => {
-          const response = await fetch(`/api/integrations/${provider}/sync`, {
-            method: "POST",
-            credentials: "include",
-            cache: "no-store",
-          });
-
-          const result = await response.json().catch(() => null);
-
-          if (!response.ok || result?.success !== true) {
-            console.warn(
-              `[Digital] ${provider} analytics sync skipped:`,
-              result?.error || `HTTP ${response.status}`
-            );
-          }
-        })
-      );
-
-      const refreshedRows = await getDigitalPlatformRows();
-      setDigitalRows(refreshedRows);
-    } catch (error) {
-      console.warn("Digital analytics refresh did not complete:", error);
-    } finally {
-      setSyncingAnalytics(false);
-    }
-  }
 
   const platformMetrics = useMemo<PlatformMetric[]>(() => {
     return buildPlatformMetrics(digitalRows);
@@ -1008,16 +944,6 @@ export default function DigitalDashboardPage() {
           </div>
 
           <div className="flex flex-wrap gap-3 lg:gap-2">
-            <button
-              type="button"
-              onClick={syncDigitalAnalytics}
-              disabled={syncingAnalytics}
-              className="inline-flex items-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-60 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
-            >
-              <BarChart3 className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
-              {syncingAnalytics ? "Refreshing..." : "Refresh Analytics"}
-            </button>
-
             <Link
               href="/dashboard/digital/focus"
               className="inline-flex items-center gap-2 rounded-2xl border border-amber-300 bg-amber-100 px-4 py-3 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-amber-200 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
