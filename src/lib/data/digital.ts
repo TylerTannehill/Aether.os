@@ -288,27 +288,48 @@ function isDigitalAnalyticsRow(row: Record<string, any>) {
 async function getAnalyticsEventRows(
   organizationId: string
 ): Promise<DigitalPlatformRow[]> {
-  const { data, error } = await supabase
-    .from("analytics_events")
-    .select("*")
-    .eq("organization_id", organizationId)
-    .order("metric_date", { ascending: false });
+  const pageSize = 1000;
+  const allRows: Record<string, any>[] = [];
+  let from = 0;
 
-  if (error) {
-    console.error("Failed to load analytics_events for digital metrics", {
-      organizationId,
-      error,
-    });
-    return [];
+  while (true) {
+    const to = from + pageSize - 1;
+
+    const { data, error } = await supabase
+      .from("analytics_events")
+      .select("*")
+      .eq("organization_id", organizationId)
+      .order("metric_date", { ascending: false })
+      .order("id", { ascending: true })
+      .range(from, to);
+
+    if (error) {
+      console.error("Failed to load analytics_events for digital metrics", {
+        organizationId,
+        from,
+        to,
+        error,
+      });
+      return [];
+    }
+
+    const batch = (data as Record<string, any>[]) ?? [];
+    allRows.push(...batch);
+
+    if (batch.length < pageSize) {
+      break;
+    }
+
+    from += pageSize;
   }
 
-  const rows = ((data as Record<string, any>[]) ?? [])
+  const rows = allRows
     .filter(isDigitalAnalyticsRow)
     .map(normalizeAnalyticsEventRow);
 
   console.info("Digital analytics_events loaded", {
     organizationId,
-    rawCount: data?.length ?? 0,
+    rawCount: allRows.length,
     digitalCount: rows.length,
     sample: rows[0] ?? null,
   });
