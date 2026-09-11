@@ -35,33 +35,33 @@ export default function TrainingVideosPage() {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.18),transparent_55%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(59,130,246,0.10),transparent_45%)]" />
 
-      <div className="relative mx-auto max-w-6xl px-6 py-20">
-        <Link href="/aether-academy" className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold hover:border-violet-400/40">
+      <div className="relative mx-auto max-w-6xl px-6 py-20 lg:py-12">
+        <Link href="/aether-academy" className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold hover:border-violet-400/40 lg:gap-1.5 lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-xs">
           ← Back to Aether Academy
         </Link>
 
-        <div className="mt-10 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-violet-400/30 bg-violet-500/10 px-4 py-2 text-violet-300">
-            <PlayCircle className="h-4 w-4" /> Training Videos
+        <div className="mt-10 text-center lg:mt-7">
+          <div className="inline-flex items-center gap-2 rounded-full border border-violet-400/30 bg-violet-500/10 px-4 py-2 text-violet-300 lg:gap-1.5 lg:px-3 lg:py-1.5 lg:text-sm">
+            <PlayCircle className="h-4 w-4 lg:h-3.5 lg:w-3.5" /> Training Videos
           </div>
 
-          <h1 className="mt-8 text-5xl font-black lg:text-7xl">Learn Aether from Team Aether.</h1>
+          <h1 className="mt-8 text-5xl font-black lg:mt-5 lg:text-5xl">Learn Aether from Team Aether.</h1>
 
-          <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-slate-300">
+          <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-slate-300 lg:mt-4 lg:text-base lg:leading-7">
             Aether Academy includes companion video walkthroughs demonstrating how the platform
             works in practice. Explore the training library below alongside the written Academy,
             with additional and updated walkthroughs published as Aether continues to evolve.
           </p>
         </div>
 
-        <div className="mt-20 space-y-8">
+        <div className="mt-20 space-y-8 lg:mt-12 lg:space-y-6">
           {videos.map(([title, desc, anchor, videoId]) => (
-            <section key={anchor} className="rounded-3xl border border-white/10 bg-white/[0.03] p-8 backdrop-blur-xl">
-              <h2 className="text-2xl font-bold">{title}</h2>
-              <p className="mt-4 leading-8 text-slate-300">{desc}</p>
+            <section key={anchor} className="rounded-3xl border border-white/10 bg-white/[0.03] p-8 backdrop-blur-xl lg:rounded-2xl lg:p-6">
+              <h2 className="text-2xl font-bold lg:text-xl">{title}</h2>
+              <p className="mt-4 leading-8 text-slate-300 lg:mt-3 lg:text-sm lg:leading-6">{desc}</p>
 
               {videoId ? (
-                <div className="mt-6 overflow-hidden rounded-2xl border border-white/10 bg-black">
+                <div className="mt-6 overflow-hidden rounded-2xl border border-white/10 bg-black lg:mt-4 lg:rounded-xl">
                   <div className="aspect-video">
                     <iframe
                       className="h-full w-full"
@@ -73,17 +73,17 @@ export default function TrainingVideosPage() {
                   </div>
                 </div>
               ) : (
-                <div className="mt-6 inline-flex rounded-full border border-violet-400/30 bg-violet-500/10 px-4 py-2 text-sm font-semibold text-violet-300">
+                <div className="mt-6 inline-flex rounded-full border border-violet-400/30 bg-violet-500/10 px-4 py-2 text-sm font-semibold text-violet-300 lg:mt-4 lg:px-3 lg:py-1.5 lg:text-xs">
                   Coming Soon
                 </div>
               )}
 
-              <div className="mt-8">
+              <div className="mt-8 lg:mt-5">
                 <Link
                   href={`/aether-academy#${anchor}`}
-                  className="inline-flex items-center gap-2 font-semibold text-violet-300 transition hover:text-violet-200"
+                  className="inline-flex items-center gap-2 font-semibold text-violet-300 transition hover:text-violet-200 lg:gap-1.5 lg:text-sm"
                 >
-                  View Related Article <ArrowRight className="h-4 w-4" />
+                  View Related Article <ArrowRight className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                 </Link>
               </div>
             </section>

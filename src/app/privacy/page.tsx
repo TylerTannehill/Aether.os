@@ -97,46 +97,46 @@ const sections = [
 
 export default function PrivacyPage() {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#07111F] px-6 py-16 text-white">
+    <div className="relative min-h-screen overflow-hidden bg-[#07111F] px-6 py-16 text-white lg:py-10">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.18),transparent_55%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(59,130,246,0.10),transparent_45%)]" />
       <div className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent,rgba(7,17,31,0.35),transparent)]" />
 
       <div className="relative mx-auto max-w-4xl">
-        <Link href="/" className="mb-8 inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-violet-400/40 hover:bg-white/10">
+        <Link href="/" className="mb-8 inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-violet-400/40 hover:bg-white/10 lg:mb-6 lg:gap-1.5 lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-xs">
           <span>←</span><span>Back to Landing Page</span>
         </Link>
 
-        <div className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-10 backdrop-blur-xl">
-          <h1 className="text-5xl font-black tracking-tight">Privacy Policy</h1>
-          <p className="mt-4 text-sm font-semibold uppercase tracking-[0.2em] text-violet-300">Last Updated: September 3, 2026</p>
+        <div className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-10 backdrop-blur-xl lg:rounded-2xl lg:p-7">
+          <h1 className="text-5xl font-black tracking-tight lg:text-4xl">Privacy Policy</h1>
+          <p className="mt-4 text-sm font-semibold uppercase tracking-[0.2em] text-violet-300 lg:mt-3 lg:text-xs">Last Updated: September 3, 2026</p>
 
-          <p className="mt-6 text-lg leading-8 text-slate-300">
+          <p className="mt-6 text-lg leading-8 text-slate-300 lg:mt-4 lg:text-base lg:leading-7">
             Your campaign&apos;s data belongs to your campaign. Always. Aether exists to help campaigns organize, execute, and operate more effectively—not to sell or monetize the information entrusted to us.
           </p>
-          <p className="mt-4 leading-8 text-slate-300">
+          <p className="mt-4 leading-8 text-slate-300 lg:mt-3 lg:text-sm lg:leading-6">
             This Privacy Policy explains how Aether Systems LLC (&quot;Aether,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) collects, uses, stores, and protects information when you use Aether&apos;s websites, applications, Campaign Operating System, integrations, and related services (collectively, the &quot;Services&quot;).
           </p>
 
-          <div className="mt-12 space-y-10">
+          <div className="mt-12 space-y-10 lg:mt-8 lg:space-y-7">
             {sections.map((section) => (
               <section key={section.title}>
-                <h2 className="text-2xl font-bold">{section.title}</h2>
+                <h2 className="text-2xl font-bold lg:text-xl">{section.title}</h2>
                 {section.body.map((paragraph) => (
-                  <p key={paragraph} className="mt-4 leading-8 text-slate-300">{paragraph}</p>
+                  <p key={paragraph} className="mt-4 leading-8 text-slate-300 lg:mt-3 lg:text-sm lg:leading-6">{paragraph}</p>
                 ))}
               </section>
             ))}
           </div>
 
-          <div className="mt-12 rounded-2xl border border-violet-400/20 bg-violet-500/5 p-6">
-            <p className="leading-7 text-slate-300">
+          <div className="mt-12 rounded-2xl border border-violet-400/20 bg-violet-500/5 p-6 lg:mt-8 lg:rounded-xl lg:p-5">
+            <p className="leading-7 text-slate-300 lg:text-sm lg:leading-6">
               <strong className="text-white">Our operating principle:</strong> Aether exists to help campaigns use their information—not to turn their information into somebody else&apos;s product.
             </p>
           </div>
 
-          <div className="mt-12 flex justify-center">
-            <Link href="/public-team-aether#contact-team-aether" className="rounded-xl bg-violet-600 px-6 py-3 font-bold text-white transition hover:bg-violet-500">
+          <div className="mt-12 flex justify-center lg:mt-8">
+            <Link href="/public-team-aether#contact-team-aether" className="rounded-xl bg-violet-600 px-6 py-3 font-bold text-white transition hover:bg-violet-500 lg:px-5 lg:py-2.5 lg:text-sm">
               Contact Team Aether
             </Link>
           </div>

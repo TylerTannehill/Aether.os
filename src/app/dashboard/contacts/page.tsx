@@ -219,7 +219,7 @@ function FilterButton({
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-full border px-3 py-2 text-sm font-semibold transition ${
+      className={`rounded-full border px-3 py-2 text-sm font-semibold transition lg:px-2.5 lg:py-1.5 lg:text-[10px] ${
         active
           ? "border-slate-900 bg-slate-900 text-white shadow-sm"
           : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
@@ -557,11 +557,11 @@ export default function DashboardContactsPage() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
+      <div className="space-y-6 lg:space-y-4">
+        <h1 className="text-3xl font-semibold tracking-tight text-slate-900 lg:text-2xl">
           Contact Management
         </h1>
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm lg:rounded-2xl lg:p-4">
           <p className="text-slate-600">Loading contacts...</p>
         </div>
       </div>
@@ -569,157 +569,157 @@ export default function DashboardContactsPage() {
   }
 
   return (
-    <div className="space-y-8 pb-10">
+    <div className="space-y-8 pb-10 lg:space-y-6 lg:pb-8">
       <section
-        className={`rounded-3xl border border-slate-900 bg-gradient-to-r p-5 shadow-sm transition-colors duration-300 lg:p-8 ${orgTheme.heroGradient}`}
+        className={`rounded-3xl border border-slate-900 bg-gradient-to-r p-5 shadow-sm transition-colors duration-300 lg:rounded-2xl lg:p-6 ${orgTheme.heroGradient}`}
       >
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-4">
           <div className="space-y-3">
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-slate-500">
+            <p className="text-sm font-medium uppercase tracking-[0.18em] text-slate-500 lg:text-[10px]">
               Contact Management
             </p>
             <div className="space-y-2">
-              <h1 className="text-3xl font-semibold tracking-tight text-white lg:text-4xl">
+              <h1 className="text-3xl font-semibold tracking-tight text-white lg:text-3xl">
                 Contact Management
               </h1>
-              <p className="max-w-3xl text-sm text-slate-300 lg:text-base">
+              <p className="max-w-3xl text-sm text-slate-300 lg:text-sm">
                 Search, segment, assign, and organize the contact layer that powers
                 Outreach, Lists, and downstream execution.
               </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-3 lg:gap-2">
             <Link
               href="/dashboard/outreach"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/30 bg-white/5 px-4 py-3 text-sm font-semibold !text-white transition hover:bg-white/10"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/30 bg-white/5 px-4 py-3 text-sm font-semibold !text-white transition hover:bg-white/10 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               Back to Outreach
             </Link>
 
             <Link
               href="/dashboard/lists"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/30 bg-white/5 px-4 py-3 text-sm font-semibold !text-white transition hover:bg-white/10"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/30 bg-white/5 px-4 py-3 text-sm font-semibold !text-white transition hover:bg-white/10 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
-              <Users className="h-4 w-4" />
+              <Users className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               View Lists
             </Link>
 
             <Link
               href="/dashboard/contacts/new"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/30 bg-white/5 px-4 py-3 text-sm font-semibold !text-white transition hover:bg-white/10"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/30 bg-white/5 px-4 py-3 text-sm font-semibold !text-white transition hover:bg-white/10 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               Add Contact
             </Link>
           </div>
         </div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-3 xl:grid-cols-5">
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm font-medium text-slate-500">Total Contacts</p>
-          <p className="mt-3 text-3xl font-semibold text-slate-900">{counts.total}</p>
+      <section className="grid gap-4 md:grid-cols-3 xl:grid-cols-5 lg:gap-3">
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm lg:rounded-2xl lg:p-4">
+          <p className="text-sm font-medium text-slate-500 lg:text-[11px]">Total Contacts</p>
+          <p className="mt-3 text-3xl font-semibold text-slate-900 lg:mt-2 lg:text-2xl">{counts.total}</p>
         </div>
 
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm font-medium text-slate-500">Filtered</p>
-          <p className="mt-3 text-3xl font-semibold text-slate-900">{counts.filtered}</p>
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm lg:rounded-2xl lg:p-4">
+          <p className="text-sm font-medium text-slate-500 lg:text-[11px]">Filtered</p>
+          <p className="mt-3 text-3xl font-semibold text-slate-900 lg:mt-2 lg:text-2xl">{counts.filtered}</p>
         </div>
 
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm font-medium text-slate-500">With Phone</p>
-          <p className="mt-3 text-3xl font-semibold text-slate-900">{counts.withPhone}</p>
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm lg:rounded-2xl lg:p-4">
+          <p className="text-sm font-medium text-slate-500 lg:text-[11px]">With Phone</p>
+          <p className="mt-3 text-3xl font-semibold text-slate-900 lg:mt-2 lg:text-2xl">{counts.withPhone}</p>
         </div>
 
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm font-medium text-slate-500">Assigned Owner</p>
-          <p className="mt-3 text-3xl font-semibold text-emerald-600">{assignedCount}</p>
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm lg:rounded-2xl lg:p-4">
+          <p className="text-sm font-medium text-slate-500 lg:text-[11px]">Assigned Owner</p>
+          <p className="mt-3 text-3xl font-semibold text-emerald-600 lg:mt-2 lg:text-2xl">{assignedCount}</p>
         </div>
 
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm font-medium text-slate-500">Unassigned</p>
-          <p className="mt-3 text-3xl font-semibold text-rose-600">{unassignedCount}</p>
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm lg:rounded-2xl lg:p-4">
+          <p className="text-sm font-medium text-slate-500 lg:text-[11px]">Unassigned</p>
+          <p className="mt-3 text-3xl font-semibold text-rose-600 lg:mt-2 lg:text-2xl">{unassignedCount}</p>
         </div>
       </section>
 
       {showFinanceContactSurfaces ? (
-      <section className="grid gap-4 md:grid-cols-3">
-        <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm">
+      <section className="grid gap-4 md:grid-cols-3 lg:gap-3">
+        <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm lg:rounded-2xl lg:p-4">
           <p className="text-sm font-medium text-emerald-800">FEC Matched</p>
-          <p className="mt-3 text-3xl font-semibold text-emerald-950">
+          <p className="mt-3 text-3xl font-semibold text-emerald-950 lg:mt-2 lg:text-2xl">
             {donorStats.fecMatched}
           </p>
-          <p className="mt-2 text-sm text-emerald-900/70">
+          <p className="mt-2 text-sm text-emerald-900/70 lg:mt-1.5 lg:text-[11px]">
             Contacts with matched or probable donor records
           </p>
         </div>
 
-        <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm">
+        <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm lg:rounded-2xl lg:p-4">
           <p className="text-sm font-medium text-emerald-800">Major Donors</p>
-          <p className="mt-3 text-3xl font-semibold text-emerald-950">
+          <p className="mt-3 text-3xl font-semibold text-emerald-950 lg:mt-2 lg:text-2xl">
             {donorStats.majorDonors}
           </p>
-          <p className="mt-2 text-sm text-emerald-900/70">
+          <p className="mt-2 text-sm text-emerald-900/70 lg:mt-1.5 lg:text-[11px]">
             Contacts at major or maxed donor tiers
           </p>
         </div>
 
-        <div className="rounded-3xl border border-yellow-300 bg-yellow-50 p-5 shadow-sm">
+        <div className="rounded-3xl border border-yellow-300 bg-yellow-50 p-5 shadow-sm lg:rounded-2xl lg:p-4">
           <p className="text-sm font-medium text-yellow-900">Jackpot Candidates</p>
-          <p className="mt-3 text-3xl font-semibold text-yellow-950">
+          <p className="mt-3 text-3xl font-semibold text-yellow-950 lg:mt-2 lg:text-2xl">
             {donorStats.jackpotCandidates}
           </p>
-          <p className="mt-2 text-sm text-yellow-900/80">
+          <p className="mt-2 text-sm text-yellow-900/80 lg:mt-1.5 lg:text-[11px]">
             Donor anomalies that should be reviewed
           </p>
         </div>
       </section>
       ) : null}
 
-      <section className="rounded-3xl border-2 border-slate-900 bg-white p-6 shadow-md lg:p-8">
+      <section className="rounded-3xl border-2 border-slate-900 bg-white p-6 shadow-md lg:rounded-2xl lg:p-6">
         {message ? (
-          <div className="mb-6 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+          <div className="mb-6 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700 lg:mb-4 lg:rounded-xl lg:p-3 lg:text-[11px]">
             {message}
           </div>
         ) : null}
 
-        <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between lg:mb-4 lg:gap-3">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-slate-600">
               <SlidersHorizontal className="h-3.5 w-3.5" />
               Strategic Segmentation
             </div>
-            <h2 className="mt-3 text-2xl font-semibold text-slate-900">
+            <h2 className="mt-3 text-2xl font-semibold text-slate-900 lg:mt-2 lg:text-xl">
               Build a Contact Universe
             </h2>
-            <p className="mt-1 max-w-3xl text-sm text-slate-500">
+            <p className="mt-1 max-w-3xl text-sm text-slate-500 lg:text-[11px]">
               Use human-controlled filters for giving history, location, and party.
               Then select, assign, or stage the current segment as a list.
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-600">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-600 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]">
             {filteredContacts.length} matching contact
             {filteredContacts.length === 1 ? "" : "s"}
           </div>
         </div>
 
-        <div className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
-          <div className="rounded-3xl bg-slate-50 p-4 ring-1 ring-slate-200/70">
-            <p className="mb-3 text-sm font-semibold text-slate-900">
+        <div className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr] lg:gap-3">
+          <div className="rounded-3xl bg-slate-50 p-4 ring-1 ring-slate-200/70 lg:rounded-2xl lg:p-3">
+            <p className="mb-3 text-sm font-semibold text-slate-900 lg:mb-2 lg:text-[11px]">
               Search + Location
             </p>
 
-            <div className="grid gap-3 md:grid-cols-4">
+            <div className="grid gap-3 md:grid-cols-4 lg:gap-2">
               <div className="relative md:col-span-1">
                 <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search contacts, donor terms..."
-                  className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm"
+                  className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm lg:rounded-xl lg:py-2 lg:pl-9 lg:pr-3 lg:text-[11px]"
                 />
               </div>
 
@@ -727,14 +727,14 @@ export default function DashboardContactsPage() {
                 value={cityFilter}
                 onChange={(e) => setCityFilter(e.target.value)}
                 placeholder="City"
-                className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm"
+                className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
               />
 
               <input
                 value={stateFilter}
                 onChange={(e) => setStateFilter(e.target.value)}
                 placeholder="State"
-                className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm"
+                className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
               />
 
               <input
@@ -742,28 +742,28 @@ export default function DashboardContactsPage() {
                 onChange={(e) => setZipFilter(e.target.value)}
                 placeholder="ZIP Code"
                 inputMode="numeric"
-                className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm"
+                className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
               />
             </div>
           </div>
 
-          <div className="rounded-3xl bg-slate-50 p-4 ring-1 ring-slate-200/70">
-            <p className="mb-3 text-sm font-semibold text-slate-900">
+          <div className="rounded-3xl bg-slate-50 p-4 ring-1 ring-slate-200/70 lg:rounded-2xl lg:p-3">
+            <p className="mb-3 text-sm font-semibold text-slate-900 lg:mb-2 lg:text-[11px]">
               Save Current Segment
             </p>
 
-            <div className="grid gap-3 sm:grid-cols-[1fr_180px_auto]">
+            <div className="grid gap-3 sm:grid-cols-[1fr_180px_auto] lg:gap-2 lg:sm:grid-cols-[1fr_135px_auto]">
               <input
                 value={segmentName}
                 onChange={(e) => setSegmentName(e.target.value)}
                 placeholder="Example: North Side Turf Walk"
-                className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm"
+                className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
               />
 
               <select
                 value={segmentType}
                 onChange={(e) => setSegmentType(e.target.value as ListType)}
-                className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700"
+                className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
               >
                 <option value="outreach">Outreach</option>
                 {showFinanceContactSurfaces ? (
@@ -776,19 +776,19 @@ export default function DashboardContactsPage() {
               <button
                 type="button"
                 onClick={stageCurrentSegment}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-100"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-100 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
               >
-                <Save className="h-4 w-4" />
+                <Save className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                 Save List
               </button>
             </div>
           </div>
         </div>
 
-        <div className="mt-4 grid gap-4 lg:grid-cols-3">
+        <div className="mt-4 grid gap-4 lg:grid-cols-3 lg:gap-3">
           {showFinanceContactSurfaces ? (
-          <div className="rounded-3xl bg-white/70 p-4 ring-1 ring-slate-200/70">
-            <p className="mb-3 text-sm font-semibold text-slate-900">Giving History</p>
+          <div className="rounded-3xl bg-white/70 p-4 ring-1 ring-slate-200/70 lg:rounded-2xl lg:p-3">
+            <p className="mb-3 text-sm font-semibold text-slate-900 lg:mb-2 lg:text-[11px]">Giving History</p>
             <div className="flex flex-wrap gap-2">
               {[
                 ["any", "Any"],
@@ -811,8 +811,8 @@ export default function DashboardContactsPage() {
           ) : null}
 
           {showFinanceContactSurfaces ? (
-          <div className="rounded-3xl bg-white/70 p-4 ring-1 ring-slate-200/70">
-            <p className="mb-3 text-sm font-semibold text-slate-900">FEC + Donor Tier</p>
+          <div className="rounded-3xl bg-white/70 p-4 ring-1 ring-slate-200/70 lg:rounded-2xl lg:p-3">
+            <p className="mb-3 text-sm font-semibold text-slate-900 lg:mb-2 lg:text-[11px]">FEC + Donor Tier</p>
             <div className="flex flex-wrap gap-2">
               {[
                 ["any", "Any FEC"],
@@ -850,8 +850,8 @@ export default function DashboardContactsPage() {
           </div>
           ) : null}
 
-          <div className="rounded-3xl bg-white/70 p-4 ring-1 ring-slate-200/70">
-            <p className="mb-3 text-sm font-semibold text-slate-900">Party</p>
+          <div className="rounded-3xl bg-white/70 p-4 ring-1 ring-slate-200/70 lg:rounded-2xl lg:p-3">
+            <p className="mb-3 text-sm font-semibold text-slate-900 lg:mb-2 lg:text-[11px]">Party</p>
             <div className="flex flex-wrap gap-2">
               {[
                 ["any", "Any"],
@@ -872,7 +872,7 @@ export default function DashboardContactsPage() {
           </div>
         </div>
 
-        <div className="mt-4 rounded-3xl border border-slate-200 bg-slate-50 p-4">
+        <div className="mt-4 rounded-3xl border border-slate-200 bg-slate-50 p-4 lg:rounded-2xl lg:p-3">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex flex-col gap-3">
               <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
@@ -881,7 +881,7 @@ export default function DashboardContactsPage() {
 
               <div className="flex flex-wrap gap-2">
               {activeFilters.length === 0 ? (
-                <span className="text-sm text-slate-500">
+                <span className="text-sm text-slate-500 lg:text-[11px]">
                   No active filters applied.
                 </span>
               ) : (
@@ -890,7 +890,7 @@ export default function DashboardContactsPage() {
                     key={filter.label}
                     type="button"
                     onClick={filter.onClear}
-                    className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+                    className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 lg:gap-1.5 lg:px-2.5 lg:py-1 lg:text-[10px]"
                   >
                     {filter.label}
                     <X className="h-3.5 w-3.5" />
@@ -903,7 +903,7 @@ export default function DashboardContactsPage() {
             <button
               type="button"
               onClick={clearFilters}
-              className="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+              className="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 lg:rounded-xl lg:px-3 lg:py-1.5 lg:text-[11px]"
             >
               Clear Filters
             </button>
@@ -911,60 +911,60 @@ export default function DashboardContactsPage() {
         </div>
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
-        <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-6">
+        <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between lg:mb-4 lg:gap-3">
           <div>
-            <h2 className="text-xl font-semibold text-slate-900">Contact Records</h2>
-            <p className="mt-1 text-sm text-slate-500">
+            <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">Contact Records</h2>
+            <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
               Filtered work surface. Open profiles, update ownership, or select rows for bulk action.
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-600">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-600 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]">
             {filteredContacts.length} visible record
             {filteredContacts.length === 1 ? "" : "s"}
           </div>
         </div>
 
-        <div className="max-h-[680px] overflow-auto rounded-3xl border border-slate-200 bg-slate-50">
-          <table className="w-full min-w-[1180px] border-separate border-spacing-0">
+        <div className="max-h-[680px] overflow-auto rounded-3xl border border-slate-200 bg-slate-50 lg:max-h-[620px] lg:rounded-2xl">
+          <table className="w-full min-w-[1180px] border-separate border-spacing-0 lg:min-w-[1000px]">
             <thead className="sticky top-0 z-10 bg-white shadow-sm">
               <tr>
-                <th className="w-[72px] px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                <th className="w-[72px] px-4 py-4 text-left text-xs lg:px-3 lg:py-3 lg:text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500">
                   Select
                 </th>
-                <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                <th className="px-4 py-4 text-left text-xs lg:px-3 lg:py-3 lg:text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500">
                   Name
                 </th>
-                <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                <th className="px-4 py-4 text-left text-xs lg:px-3 lg:py-3 lg:text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500">
                   Email
                 </th>
-                <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                <th className="px-4 py-4 text-left text-xs lg:px-3 lg:py-3 lg:text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500">
                   Phone
                 </th>
-                <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                <th className="px-4 py-4 text-left text-xs lg:px-3 lg:py-3 lg:text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500">
                   City
                 </th>
-                <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                <th className="px-4 py-4 text-left text-xs lg:px-3 lg:py-3 lg:text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500">
                   State
                 </th>
-                <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                <th className="px-4 py-4 text-left text-xs lg:px-3 lg:py-3 lg:text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500">
                   Party
                 </th>
                 {showFinanceContactSurfaces ? (
                   <>
-                <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                <th className="px-4 py-4 text-left text-xs lg:px-3 lg:py-3 lg:text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500">
                   Giving
                 </th>
-                <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                <th className="px-4 py-4 text-left text-xs lg:px-3 lg:py-3 lg:text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500">
                   Donor Signal
                 </th>
                   </>
                 ) : null}
-                <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                <th className="px-4 py-4 text-left text-xs lg:px-3 lg:py-3 lg:text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500">
                   Owner
                 </th>
-                <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                <th className="px-4 py-4 text-left text-xs lg:px-3 lg:py-3 lg:text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500">
                   Action
                 </th>
               </tr>
@@ -979,7 +979,7 @@ export default function DashboardContactsPage() {
                     key={contact.id}
                     className="border-b border-slate-200 bg-white transition hover:bg-slate-50"
                   >
-                    <td className="border-b border-slate-100 px-4 py-3">
+                    <td className="border-b border-slate-100 px-4 py-3 lg:px-3 lg:py-2">
                       <input
                         type="checkbox"
                         checked={selectedIds.includes(contact.id)}
@@ -988,7 +988,7 @@ export default function DashboardContactsPage() {
                       />
                     </td>
 
-                    <td className="border-b border-slate-100 px-4 py-3">
+                    <td className="border-b border-slate-100 px-4 py-3 lg:px-3 lg:py-2">
                       <Link
                         href={`/contacts/${contact.id}`}
                         className="group inline-flex items-center rounded-xl px-2 py-1 -mx-2 -my-1 font-semibold text-blue-700 transition hover:bg-blue-50 hover:text-blue-800"
@@ -1001,33 +1001,33 @@ export default function DashboardContactsPage() {
                       </Link>
                     </td>
 
-                    <td className="border-b border-slate-100 px-4 py-3 text-sm text-slate-600">
+                    <td className="border-b border-slate-100 px-4 py-3 text-sm text-slate-600 lg:px-3 lg:py-2 lg:text-[11px]">
                       {contact.email || "—"}
                     </td>
 
-                    <td className="border-b border-slate-100 px-4 py-3 text-sm text-slate-600">
+                    <td className="border-b border-slate-100 px-4 py-3 text-sm text-slate-600 lg:px-3 lg:py-2 lg:text-[11px]">
                       {contact.phone || "—"}
                     </td>
 
-                    <td className="border-b border-slate-100 px-4 py-3 text-sm text-slate-600">
+                    <td className="border-b border-slate-100 px-4 py-3 text-sm text-slate-600 lg:px-3 lg:py-2 lg:text-[11px]">
                       {contact.city || "—"}
                     </td>
 
-                    <td className="border-b border-slate-100 px-4 py-3 text-sm text-slate-600">
+                    <td className="border-b border-slate-100 px-4 py-3 text-sm text-slate-600 lg:px-3 lg:py-2 lg:text-[11px]">
                       {contact.state || "—"}
                     </td>
 
-                    <td className="border-b border-slate-100 px-4 py-3 text-sm text-slate-600">
+                    <td className="border-b border-slate-100 px-4 py-3 text-sm text-slate-600 lg:px-3 lg:py-2 lg:text-[11px]">
                       {contact.party || "—"}
                     </td>
 
                     {showFinanceContactSurfaces ? (
                       <>
-                    <td className="border-b border-slate-100 px-4 py-3 text-sm font-semibold text-slate-700">
+                    <td className="border-b border-slate-100 px-4 py-3 text-sm font-semibold text-slate-700 lg:px-3 lg:py-2 lg:text-[11px]">
                       {formatCurrency(contact.fec_total_given)}
                     </td>
 
-                    <td className="border-b border-slate-100 px-4 py-3">
+                    <td className="border-b border-slate-100 px-4 py-3 lg:px-3 lg:py-2">
                       <div className="flex flex-wrap gap-2">
                         {contact.jackpot_candidate ? (
                           <span className="rounded-full border border-yellow-300 bg-yellow-100 px-2.5 py-1 text-xs font-semibold text-yellow-900">
@@ -1061,7 +1061,7 @@ export default function DashboardContactsPage() {
                       </>
                     ) : null}
 
-                    <td className="border-b border-slate-100 px-4 py-3">
+                    <td className="border-b border-slate-100 px-4 py-3 lg:px-3 lg:py-2">
                       <input
                         value={currentOwnerValue}
                         onChange={(e) =>
@@ -1071,15 +1071,15 @@ export default function DashboardContactsPage() {
                           }))
                         }
                         placeholder="Assign owner..."
-                        className="w-full min-w-[180px] rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm"
+                        className="w-full min-w-[180px] rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm lg:min-w-[135px] lg:rounded-xl lg:px-2.5 lg:py-1.5 lg:text-[11px]"
                       />
                     </td>
 
-                    <td className="border-b border-slate-100 px-4 py-3">
+                    <td className="border-b border-slate-100 px-4 py-3 lg:px-3 lg:py-2">
                       <button
                         onClick={() => saveOwner(contact.id)}
                         disabled={savingId === contact.id}
-                        className="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60 lg:rounded-xl lg:px-3 lg:py-1.5 lg:text-[11px]"
                       >
                         {savingId === contact.id ? "Saving..." : "Save"}
                       </button>
@@ -1104,11 +1104,11 @@ export default function DashboardContactsPage() {
       </section>
 
       {selectedIds.length > 0 ? (
-        <section className="sticky bottom-5 z-20 rounded-3xl border border-slate-200 bg-slate-950 p-5 text-white shadow-2xl lg:p-6">
-          <div className="grid gap-4 lg:grid-cols-[1fr_220px_190px_190px] lg:items-center">
+        <section className="sticky bottom-5 z-20 rounded-3xl border border-slate-200 bg-slate-950 p-5 text-white shadow-2xl lg:rounded-2xl lg:p-4">
+          <div className="grid gap-4 lg:grid-cols-[1fr_165px_145px_145px] lg:items-center lg:gap-3">
             <div>
-              <h2 className="text-lg font-semibold">Bulk Owner Assignment</h2>
-              <p className="mt-1 text-sm text-slate-300">
+              <h2 className="text-lg font-semibold lg:text-base">Bulk Owner Assignment</h2>
+              <p className="mt-1 text-sm text-slate-300 lg:text-[11px]">
                 {selectedIds.length} selected. Assign ownership in one move or expand selection to all filtered contacts.
               </p>
             </div>
@@ -1117,23 +1117,23 @@ export default function DashboardContactsPage() {
               value={bulkOwnerName}
               onChange={(e) => setBulkOwnerName(e.target.value)}
               placeholder="Bulk owner name..."
-              className="rounded-2xl border border-white/10 bg-white px-4 py-3 text-sm text-slate-900"
+              className="rounded-2xl border border-white/10 bg-white px-4 py-3 text-sm text-slate-900 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             />
 
             <button
               onClick={toggleSelectAllFiltered}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/15"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/15 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
-              <Users className="h-4 w-4" />
+              <Users className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               {allFilteredSelected ? "Clear Filtered" : "Select Filtered"}
             </button>
 
             <button
               onClick={applyBulkOwner}
               disabled={bulkSaving || selectedIds.length === 0}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
-              <Zap className="h-4 w-4" />
+              <Zap className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               {bulkSaving ? "Applying..." : "Apply Owner"}
             </button>
           </div>

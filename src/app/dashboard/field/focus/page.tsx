@@ -475,9 +475,9 @@ export default function FieldFocusModePage() {
 
   if (roleLoading) {
     return (
-      <div className="space-y-6 p-6">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <p className="text-sm text-slate-600">Loading field context...</p>
+      <div className="space-y-6 p-6 lg:space-y-4 lg:p-[18px] lg:space-y-4 lg:p-[18px]">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <p className="text-sm text-slate-600 lg:text-[11px]">Loading field context...</p>
         </div>
       </div>
     );
@@ -485,25 +485,25 @@ export default function FieldFocusModePage() {
 
   if (!hasFieldAccess) {
     return (
-      <div className="space-y-6 p-6">
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-sm">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50">
-            <MapPinned className="h-5 w-5 text-slate-500" />
+      <div className="space-y-6 p-6 lg:space-y-4 lg:p-[18px] lg:space-y-4 lg:p-[18px]">
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 lg:rounded-xl">
+            <MapPinned className="h-5 w-5 text-slate-500 lg:h-4 lg:w-4" />
           </div>
-          <h1 className="mt-4 text-xl font-semibold text-slate-900">
+          <h1 className="mt-4 text-xl font-semibold text-slate-900 lg:mt-3 lg:text-lg">
             No Field Role Assigned
           </h1>
-          <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-600">
+          <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-600 lg:text-[11px]">
             You are not currently assigned to Field. Ask an admin to add a Field
             Director or Field User role before working this focus lane.
           </p>
-          <div className="mt-5 flex justify-center">
+          <div className="mt-5 flex justify-center lg:mt-4">
             <Link
               href="/dashboard"
-              className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+              className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
               Back to Dashboard
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
             </Link>
           </div>
         </section>
@@ -512,78 +512,78 @@ export default function FieldFocusModePage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 lg:space-y-6">
       {activeTurf && (
-        <section className="rounded-3xl border-2 border-emerald-300 bg-emerald-50 p-6 shadow-md">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+        <section className="rounded-3xl border-2 border-emerald-300 bg-emerald-50 p-6 shadow-md lg:rounded-2xl lg:p-[18px]">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between lg:gap-4">
             <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-800">
+              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-800 lg:text-[9px]">
                 <Zap className="h-3.5 w-3.5" />
                 Active Turf Execution
               </div>
 
               <div>
-                <h2 className="text-xl font-semibold text-emerald-950">
+                <h2 className="text-xl font-semibold text-emerald-950 lg:text-lg">
                   {activeTurf.title}
                 </h2>
-                <p className="mt-1 text-sm text-emerald-900">
+                <p className="mt-1 text-sm text-emerald-900 lg:text-[11px]">
                   {activeTurf.region} • Owner: {activeTurf.owner}
                 </p>
               </div>
 
-              <p className="max-w-3xl text-sm text-emerald-900">
+              <p className="max-w-3xl text-sm text-emerald-900 lg:text-[11px]">
                 {activeTurf.summary}
               </p>
 
               {activeTurf.linkedListName ? (
-                <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white px-3 py-1 text-xs font-semibold text-emerald-800">
+                <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white px-3 py-1 text-xs font-semibold text-emerald-800 lg:text-[9px]">
                   <ListChecks className="h-3.5 w-3.5" />
                   Working list: {activeTurf.linkedListName}
                 </div>
               ) : null}
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-3">
-              <div className="rounded-2xl border border-emerald-200 bg-white p-4">
-                <p className="text-xs uppercase tracking-wide text-emerald-700">
+            <div className="grid gap-3 sm:grid-cols-3 lg:gap-2">
+              <div className="rounded-2xl border border-emerald-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                <p className="text-xs uppercase tracking-wide text-emerald-700 lg:text-[9px]">
                   Completion
                 </p>
-                <p className="mt-2 text-xl font-semibold text-emerald-950">
+                <p className="mt-2 text-xl font-semibold text-emerald-950 lg:text-lg">
                   {activeTurf.completion}%
                 </p>
               </div>
-                            <div className="rounded-2xl border border-emerald-200 bg-white p-4">
-                <p className="text-xs uppercase tracking-wide text-emerald-700">
+                            <div className="rounded-2xl border border-emerald-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                <p className="text-xs uppercase tracking-wide text-emerald-700 lg:text-[9px]">
                   Linked Routing
                 </p>
-                <p className="mt-2 text-sm font-medium text-emerald-950">
+                <p className="mt-2 text-sm font-medium text-emerald-950 lg:text-[11px]">
                   {activeTurf.linkedListName || "No linked list"}
                 </p>
-                <p className="mt-1 text-xs text-emerald-800">
+                <p className="mt-1 text-xs text-emerald-800 lg:text-[9px]">
                   Turf execution should stay tied to a usable list container.
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-emerald-200 bg-white p-4">
-                <p className="text-xs uppercase tracking-wide text-emerald-700">
+              <div className="rounded-2xl border border-emerald-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                <p className="text-xs uppercase tracking-wide text-emerald-700 lg:text-[9px]">
                   Execution
                 </p>
-                <div className="mt-3 flex flex-wrap gap-2">
+                <div className="mt-3 flex flex-wrap gap-2 lg:mt-2">
                   <button
                     onClick={markTurfInProgress}
-                    className="rounded-xl border border-emerald-300 px-3 py-2 text-xs font-medium text-emerald-900 transition hover:bg-emerald-100"
+                    className="rounded-xl border border-emerald-300 px-3 py-2 text-xs font-medium text-emerald-900 transition hover:bg-emerald-100 lg:text-[9px]"
                   >
                     Mark In Progress
                   </button>
                   <button
                     onClick={markTurfComplete}
-                    className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-emerald-700"
+                    className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-emerald-700 lg:text-[9px]"
                   >
                     Mark Complete
                   </button>
                   <button
                     onClick={clearActiveTurf}
-                    className="rounded-xl border border-emerald-300 px-3 py-2 text-xs font-medium text-emerald-900 transition hover:bg-emerald-100"
+                    className="rounded-xl border border-emerald-300 px-3 py-2 text-xs font-medium text-emerald-900 transition hover:bg-emerald-100 lg:text-[9px]"
                   >
                     Clear
                   </button>
@@ -595,36 +595,36 @@ export default function FieldFocusModePage() {
       )}
 
       <section
-        className={`rounded-3xl border border-slate-200 bg-gradient-to-br p-6 text-white shadow-sm transition-colors duration-300 lg:p-8 ${orgTheme.heroGradient}`}
+        className={`rounded-3xl border border-slate-200 bg-gradient-to-br p-6 text-white shadow-sm transition-colors duration-300 lg:p-6 ${orgTheme.heroGradient} lg:rounded-2xl lg:p-[18px]`}
       >
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-4">
+          <div className="space-y-4 lg:space-y-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200 lg:text-[9px]">
               <Zap className="h-3.5 w-3.5" />
               Field Focus Mode
             </div>
 
-            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-medium text-slate-200">
+            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-medium text-slate-200 lg:text-[9px]">
               {hasFieldDirector ? "Field Director Access" : "Field User Access"}
             </div>
 
-            <div className="space-y-3">
-              <h1 className="text-3xl font-semibold tracking-tight lg:text-4xl">
+            <div className="space-y-3 lg:space-y-2">
+              <h1 className="text-3xl font-semibold tracking-tight lg:text-3xl lg:text-2xl">
                 {nowLine.headline}
               </h1>
-              <p className="max-w-3xl text-sm text-slate-300 lg:text-base">
+              <p className="max-w-3xl text-sm text-slate-300 lg:text-sm lg:text-[11px]">
                 {nowLine.body}
               </p>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 lg:gap-2">
             <Link
               href="/dashboard/field"
-              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
               Back to Field
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
             </Link>
           </div>
         </div>
@@ -633,53 +633,53 @@ export default function FieldFocusModePage() {
       
 
       {generatedLists.length > 0 ? (
-        <section className="rounded-3xl border border-purple-200 bg-purple-50 p-6 shadow-sm">
-          <div className="mb-4 flex items-center justify-between">
+        <section className="rounded-3xl border border-purple-200 bg-purple-50 p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <div className="mb-4 flex items-center justify-between lg:mb-3">
             <div>
-              <p className="text-sm font-medium text-purple-800">
+              <p className="text-sm font-medium text-purple-800 lg:text-[11px]">
                 Generated Follow-Up Lists
               </p>
-              <h2 className="text-xl font-semibold text-purple-950">
+              <h2 className="text-xl font-semibold text-purple-950 lg:text-lg">
                 Field → Outreach Routing
               </h2>
             </div>
 
-            <div className="rounded-2xl border border-purple-200 bg-white px-4 py-2 text-sm font-medium text-purple-800">
+            <div className="rounded-2xl border border-purple-200 bg-white px-4 py-2 text-sm font-medium text-purple-800 lg:rounded-xl lg:px-3 lg:text-[11px]">
               {linkedListPressure.generatedCount} generated
             </div>
           </div>
 
-          <div className="grid gap-3 md:grid-cols-2">
+          <div className="grid gap-3 md:grid-cols-2 lg:gap-2">
             {generatedLists.map((list) => (
               <div
                 key={list.id}
-                className="rounded-2xl border border-purple-200 bg-white p-4"
+                className="rounded-2xl border border-purple-200 bg-white p-4 lg:rounded-xl lg:p-3"
               >
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start justify-between gap-3 lg:gap-2">
                   <div>
                     <p className="font-semibold text-slate-900">{list.name}</p>
-                    <p className="mt-1 text-sm text-slate-600">{list.source}</p>
+                    <p className="mt-1 text-sm text-slate-600 lg:text-[11px]">{list.source}</p>
                   </div>
 
-                  <span className="inline-flex rounded-full border border-purple-200 bg-purple-100 px-3 py-1 text-xs font-semibold text-purple-700">
+                  <span className="inline-flex rounded-full border border-purple-200 bg-purple-100 px-3 py-1 text-xs font-semibold text-purple-700 lg:text-[9px]">
                     field_follow_up
                   </span>
                 </div>
 
-                <p className="mt-3 text-xs text-slate-500">
+                <p className="mt-3 text-xs text-slate-500 lg:mt-2 lg:text-[9px]">
                   Created: {list.created}
                 </p>
 
-                <div className="mt-4 flex flex-wrap gap-2">
+                <div className="mt-4 flex flex-wrap gap-2 lg:mt-3">
                   <Link
                     href="/dashboard/lists"
-                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100 lg:text-[9px]"
                   >
                     Open Lists
                   </Link>
                   <Link
                     href="/dashboard/outreach"
-                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100 lg:text-[9px]"
                   >
                     Open Outreach
                   </Link>
@@ -690,21 +690,21 @@ export default function FieldFocusModePage() {
         </section>
       ) : null}
 
-      <section className="grid gap-6 xl:grid-cols-[1.6fr_1fr_0.9fr]">
-        <div className="rounded-3xl border-2 border-sky-300 bg-white p-6 shadow-md">
-          <div className="mb-5 flex items-center justify-between">
+      <section className="grid gap-6 xl:grid-cols-[1.6fr_1fr_0.9fr] lg:gap-4">
+        <div className="rounded-3xl border-2 border-sky-300 bg-white p-6 shadow-md lg:rounded-2xl lg:p-[18px]">
+          <div className="mb-5 flex items-center justify-between lg:mb-4">
             <div>
-              <p className="text-sm font-medium text-sky-700">Turf Lane</p>
-              <h2 className="text-xl font-semibold text-slate-900">
+              <p className="text-sm font-medium text-sky-700 lg:text-[11px]">Turf Lane</p>
+              <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">
                 Finish active turf
               </h2>
             </div>
-            <MapPinned className="h-5 w-5 text-sky-600" />
+            <MapPinned className="h-5 w-5 text-sky-600 lg:h-4 lg:w-4" />
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-4 lg:space-y-3">
             {grouped.turf.length === 0 ? (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 lg:rounded-xl lg:p-3 lg:text-[11px]">
                 {loadingFieldLists
                   ? "Loading field turf actions..."
                   : "No turf focus actions are available from live field lists yet."}
@@ -721,57 +721,57 @@ export default function FieldFocusModePage() {
                     isActive
                       ? "border-emerald-300 bg-emerald-50"
                       : "border-slate-200 bg-slate-50"
-                  }`}
+                  } lg:rounded-xl lg:p-3`}
                 >
                   <div className="flex flex-wrap gap-2">
                     <span
                       className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${priorityTone(
                         item.priority
-                      )}`}
+                      )} lg:text-[9px]`}
                     >
                       {item.priority}
                     </span>
                     <span
                       className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${typeTone(
                         item.type
-                      )}`}
+                      )} lg:text-[9px]`}
                     >
                       {item.type}
                     </span>
                     {isActive && (
-                      <span className="inline-flex rounded-full border border-emerald-300 bg-white px-3 py-1 text-xs font-semibold text-emerald-700">
+                      <span className="inline-flex rounded-full border border-emerald-300 bg-white px-3 py-1 text-xs font-semibold text-emerald-700 lg:text-[9px]">
                         active
                       </span>
                     )}
                   </div>
 
-                  <p className="mt-3 font-semibold text-slate-900">{item.title}</p>
-                  <p className="mt-2 text-sm text-slate-600">{item.summary}</p>
+                  <p className="mt-3 font-semibold text-slate-900 lg:mt-2">{item.title}</p>
+                  <p className="mt-2 text-sm text-slate-600 lg:text-[11px]">{item.summary}</p>
 
                   {item.linkedListName ? (
-                    <p className="mt-2 text-xs text-slate-500">
+                    <p className="mt-2 text-xs text-slate-500 lg:text-[9px]">
                       Linked list: {item.linkedListName}
                     </p>
                   ) : null}
 
-                  <div className="mt-4 flex flex-wrap gap-2">
+                  <div className="mt-4 flex flex-wrap gap-2 lg:mt-3">
                     <button
                       onClick={() => startTurf(item)}
-                      className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white transition hover:bg-slate-800"
+                      className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white transition hover:bg-slate-800 lg:text-[9px]"
                     >
                       Start Turf
                     </button>
                     <button
                       onClick={markTurfInProgress}
                       disabled={!isActive}
-                      className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 lg:text-[9px]"
                     >
                       Mark In Progress
                     </button>
                     <button
                       onClick={markTurfComplete}
                       disabled={!isActive}
-                      className="rounded-xl border border-emerald-300 px-3 py-2 text-xs font-medium text-emerald-900 transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="rounded-xl border border-emerald-300 px-3 py-2 text-xs font-medium text-emerald-900 transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50 lg:text-[9px]"
                     >
                       Complete
                     </button>
@@ -782,20 +782,20 @@ export default function FieldFocusModePage() {
           </div>
         </div>
         {hasFieldDirector ? (
-                <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="mb-5 flex items-center justify-between">
+                <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <div className="mb-5 flex items-center justify-between lg:mb-4">
             <div>
-              <p className="text-sm font-medium text-slate-500">Canvass Lane</p>
-              <h2 className="text-xl font-semibold text-slate-900">
+              <p className="text-sm font-medium text-slate-500 lg:text-[11px]">Canvass Lane</p>
+              <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">
                 Support strongest operators
               </h2>
             </div>
-            <Users className="h-5 w-5 text-emerald-600" />
+            <Users className="h-5 w-5 text-emerald-600 lg:h-4 lg:w-4" />
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-4 lg:space-y-3">
             {grouped.canvass.length === 0 ? (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 lg:rounded-xl lg:p-3 lg:text-[11px]">
                 {loadingFieldLists
                   ? "Loading canvass actions..."
                   : "No canvass focus actions are available from live field lists yet."}
@@ -813,78 +813,78 @@ export default function FieldFocusModePage() {
                     isActive
                       ? "border-emerald-300 bg-emerald-50"
                       : "border-slate-200 bg-slate-50"
-                  }`}
+                  } lg:rounded-xl lg:p-3`}
                 >
                   <div className="flex flex-wrap gap-2">
                     <span
                       className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${priorityTone(
                         item.priority
-                      )}`}
+                      )} lg:text-[9px]`}
                     >
                       {item.priority}
                     </span>
                     <span
                       className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${typeTone(
                         item.type
-                      )}`}
+                      )} lg:text-[9px]`}
                     >
                       {item.type}
                     </span>
                     {isConfirmed && (
-                      <span className="inline-flex rounded-full border border-emerald-300 bg-white px-3 py-1 text-xs font-semibold text-emerald-700">
+                      <span className="inline-flex rounded-full border border-emerald-300 bg-white px-3 py-1 text-xs font-semibold text-emerald-700 lg:text-[9px]">
                         assigned
                       </span>
                     )}
                   </div>
 
-                  <p className="mt-3 font-semibold text-slate-900">{item.title}</p>
-                  <p className="mt-2 text-sm text-slate-600">{item.summary}</p>
+                  <p className="mt-3 font-semibold text-slate-900 lg:mt-2">{item.title}</p>
+                  <p className="mt-2 text-sm text-slate-600 lg:text-[11px]">{item.summary}</p>
 
                   {item.linkedListName ? (
-                    <p className="mt-2 text-xs text-slate-500">
+                    <p className="mt-2 text-xs text-slate-500 lg:text-[9px]">
                       Routing packet: {item.linkedListName}
                     </p>
                   ) : null}
 
                   {!isActive ? (
-                    <div className="mt-4 flex flex-wrap gap-2">
+                    <div className="mt-4 flex flex-wrap gap-2 lg:mt-3">
                       <button
                         onClick={() => openCanvassPanel(item.id)}
-                        className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white transition hover:bg-slate-800"
+                        className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white transition hover:bg-slate-800 lg:text-[9px]"
                       >
                         {item.id === "focus-2" ? "Reassign Tyler" : "Create Pairing"}
                       </button>
                       <button
                         onClick={() => openCanvassPanel(item.id)}
-                        className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+                        className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100 lg:text-[9px]"
                       >
                         {item.id === "focus-2" ? "View Packet" : "Assign Support"}
                       </button>
                     </div>
                   ) : (
-                    <div className="mt-4 rounded-2xl border border-emerald-200 bg-white p-4">
-                      <p className="text-xs uppercase tracking-wide text-emerald-700">
+                    <div className="mt-4 rounded-2xl border border-emerald-200 bg-white p-4 lg:rounded-xl lg:p-3 lg:mt-3">
+                      <p className="text-xs uppercase tracking-wide text-emerald-700 lg:text-[9px]">
                         Assignment Panel
                       </p>
 
-                      <div className="mt-3 space-y-3">
+                      <div className="mt-3 space-y-3 lg:space-y-2 lg:mt-2">
                         <div>
-                          <p className="text-sm font-medium text-slate-900">
+                          <p className="text-sm font-medium text-slate-900 lg:text-[11px]">
                             Operator
                           </p>
-                          <p className="mt-1 text-sm text-slate-600">
+                          <p className="mt-1 text-sm text-slate-600 lg:text-[11px]">
                             {"Assigned Operator"}
                           </p>
                         </div>
 
                         <div>
-                          <label className="text-sm font-medium text-slate-900">
+                          <label className="text-sm font-medium text-slate-900 lg:text-[11px]">
                             Target Packet / Turf
                           </label>
                           <select
                             value={selectedPacket}
                             onChange={(e) => setSelectedPacket(e.target.value)}
-                            className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none"
+                            className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none lg:text-[11px]"
                           >
                             <option>Highest-ID Packet</option>
                             <option>South Persuasion Support Turf</option>
@@ -896,20 +896,20 @@ export default function FieldFocusModePage() {
                         <div className="flex flex-wrap gap-2">
                           <button
                             onClick={confirmCanvassAssignment}
-                            className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-emerald-700"
+                            className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-emerald-700 lg:text-[9px]"
                           >
                             Confirm Assignment
                           </button>
                           <button
                             onClick={clearCanvassPanel}
-                            className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+                            className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100 lg:text-[9px]"
                           >
                             Clear
                           </button>
                         </div>
 
                         {isConfirmed && (
-                          <p className="text-sm font-medium text-emerald-700">
+                          <p className="text-sm font-medium text-emerald-700 lg:text-[11px]">
                             Assignment confirmed to {selectedPacket}.
                           </p>
                         )}
@@ -923,20 +923,20 @@ export default function FieldFocusModePage() {
         </div>
         ) : null}
 
-        <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm">
-          <div className="mb-5 flex items-center justify-between">
+        <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <div className="mb-5 flex items-center justify-between lg:mb-4">
             <div>
-              <p className="text-sm font-medium text-slate-500">Follow-Up Lane</p>
-              <h2 className="text-xl font-semibold text-slate-900">
+              <p className="text-sm font-medium text-slate-500 lg:text-[11px]">Follow-Up Lane</p>
+              <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">
                 Convert strong conversations
               </h2>
             </div>
-            <ClipboardList className="h-5 w-5 text-purple-600" />
+            <ClipboardList className="h-5 w-5 text-purple-600 lg:h-4 lg:w-4" />
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-4 lg:space-y-3">
             {grouped.follow_up.length === 0 ? (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 lg:rounded-xl lg:p-3 lg:text-[11px]">
                 {loadingFieldLists
                   ? "Loading field follow-up actions..."
                   : "No field follow-up actions are available from live field lists yet."}
@@ -954,66 +954,66 @@ export default function FieldFocusModePage() {
                     isActive
                       ? "border-purple-300 bg-purple-50"
                       : "border-slate-200 bg-slate-50"
-                  }`}
+                  } lg:rounded-xl lg:p-3`}
                 >
                   <div className="flex flex-wrap gap-2">
                     <span
                       className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${priorityTone(
                         item.priority
-                      )}`}
+                      )} lg:text-[9px]`}
                     >
                       {item.priority}
                     </span>
                     <span
                       className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${typeTone(
                         item.type
-                      )}`}
+                      )} lg:text-[9px]`}
                     >
                       {item.type}
                     </span>
                     {isConfirmed && (
-                      <span className="inline-flex rounded-full border border-purple-300 bg-white px-3 py-1 text-xs font-semibold text-purple-700">
+                      <span className="inline-flex rounded-full border border-purple-300 bg-white px-3 py-1 text-xs font-semibold text-purple-700 lg:text-[9px]">
                         queued
                       </span>
                     )}
                   </div>
 
-                  <p className="mt-3 font-semibold text-slate-900">{item.title}</p>
-                  <p className="mt-2 text-sm text-slate-600">{item.summary}</p>
+                  <p className="mt-3 font-semibold text-slate-900 lg:mt-2">{item.title}</p>
+                  <p className="mt-2 text-sm text-slate-600 lg:text-[11px]">{item.summary}</p>
 
                   {item.linkedListName ? (
-                    <p className="mt-2 text-xs text-slate-500">
+                    <p className="mt-2 text-xs text-slate-500 lg:text-[9px]">
                       Destination list: {item.linkedListName}
                     </p>
                   ) : null}
 
                   {!isActive ? (
-                    <div className="mt-4 flex flex-wrap gap-2">
+                    <div className="mt-4 flex flex-wrap gap-2 lg:mt-3">
                       <button
                         onClick={() => openFollowUpPanel(item.id)}
-                        className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white transition hover:bg-slate-800"
+                        className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white transition hover:bg-slate-800 lg:text-[9px]"
                       >
                         {item.id === "focus-3" ? "Generate List" : "Queue Callbacks"}
                       </button>
                       <button
                         onClick={() => openFollowUpPanel(item.id)}
-                        className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+                        className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100 lg:text-[9px]"
                       >
                         {item.id === "focus-3" ? "View Conversations" : "Start Calling"}
                       </button>
                     </div>
                   ) : (
-                    <div className="mt-4 rounded-2xl border border-purple-200 bg-white p-4">
-                      <p className="text-xs uppercase tracking-wide text-purple-700">
+                    <div className="mt-4 rounded-2xl border border-purple-200 bg-white p-4 lg:rounded-xl lg:p-3 lg:mt-3">
+                      <p className="text-xs uppercase tracking-wide text-purple-700 lg:text-[9px]">
                         Follow-Up Panel
                       </p>
 
-                      <div className="mt-3 space-y-3">
+                      <div className="mt-3 space-y-3 lg:space-y-2 lg:mt-2">
                         <div>
-                          <p className="text-sm font-medium text-slate-900">
+                          <p className="text-sm font-medium text-slate-900 lg:text-[11px]">
                             Detected Opportunity
                           </p>
-                          <p className="mt-1 text-sm text-slate-600">
+                          <p className="mt-1 text-sm text-slate-600 lg:text-[11px]">
                             {item.id === "focus-3"
                               ? "8 recent engaged conversations ready for task creation."
                               : "10 high-quality callbacks ready to queue immediately."}
@@ -1021,13 +1021,13 @@ export default function FieldFocusModePage() {
                         </div>
 
                         <div>
-                          <label className="text-sm font-medium text-slate-900">
+                          <label className="text-sm font-medium text-slate-900 lg:text-[11px]">
                             Execution Action
                           </label>
                           <select
                             value={followUpAction}
                             onChange={(e) => setFollowUpAction(e.target.value)}
-                            className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none"
+                            className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none lg:text-[11px]"
                           >
                             <option>Create Follow-Up Tasks</option>
                             <option>Queue 10 Callbacks</option>
@@ -1039,20 +1039,20 @@ export default function FieldFocusModePage() {
                         <div className="flex flex-wrap gap-2">
                           <button
                             onClick={confirmFollowUpAction}
-                            className="rounded-xl bg-purple-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-purple-700"
+                            className="rounded-xl bg-purple-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-purple-700 lg:text-[9px]"
                           >
                             Confirm Action
                           </button>
                           <button
                             onClick={clearFollowUpPanel}
-                            className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+                            className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100 lg:text-[9px]"
                           >
                             Clear
                           </button>
                         </div>
 
                         {isConfirmed && (
-                          <p className="text-sm font-medium text-purple-700">
+                          <p className="text-sm font-medium text-purple-700 lg:text-[11px]">
                             Follow-up action confirmed: {followUpAction}.
                           </p>
                         )}
@@ -1069,19 +1069,19 @@ export default function FieldFocusModePage() {
 <section
         className={`grid gap-4 ${
           hasFieldDirector ? "md:grid-cols-4" : "md:grid-cols-3"
-        }`}
+        } lg:gap-3`}
       >
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:rounded-xl lg:p-3">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-slate-700">
+            <p className="text-sm font-medium text-slate-700 lg:text-[11px]">
               Turf Priority
             </p>
-            <MapPinned className="h-5 w-5 text-slate-500" />
+            <MapPinned className="h-5 w-5 text-slate-500 lg:h-4 lg:w-4" />
           </div>
-          <p className="mt-3 text-xl font-semibold text-slate-900">
+          <p className="mt-3 text-xl font-semibold text-slate-900 lg:mt-2 lg:text-lg">
             {grouped.turf.length}
           </p>
-          <p className="mt-2 text-sm text-slate-600">
+          <p className="mt-2 text-sm text-slate-600 lg:text-[11px]">
             Turf tasks requiring immediate execution
           </p>
         </div>
@@ -1092,7 +1092,7 @@ export default function FieldFocusModePage() {
               grouped.canvass.length > 0
                 ? "border-emerald-200 bg-emerald-50"
                 : "border-slate-200 bg-white"
-            }`}
+            } lg:rounded-xl lg:p-3`}
           >
             <div className="flex items-center justify-between">
               <p
@@ -1100,7 +1100,7 @@ export default function FieldFocusModePage() {
                   grouped.canvass.length > 0
                     ? "text-emerald-800"
                     : "text-slate-700"
-                }`}
+                } lg:text-[11px]`}
               >
                 Canvasser Moves
               </p>
@@ -1109,7 +1109,7 @@ export default function FieldFocusModePage() {
                   grouped.canvass.length > 0
                     ? "text-emerald-700"
                     : "text-slate-500"
-                }`}
+                } lg:h-4 lg:w-4`}
               />
             </div>
             <p
@@ -1117,7 +1117,7 @@ export default function FieldFocusModePage() {
                 grouped.canvass.length > 0
                   ? "text-emerald-900"
                   : "text-slate-900"
-              }`}
+              } lg:mt-2 lg:text-lg`}
             >
               {grouped.canvass.length}
             </p>
@@ -1126,7 +1126,7 @@ export default function FieldFocusModePage() {
                 grouped.canvass.length > 0
                   ? "text-emerald-800"
                   : "text-slate-600"
-              }`}
+              } lg:text-[11px]`}
             >
               Allocation and execution changes
             </p>
@@ -1138,33 +1138,33 @@ export default function FieldFocusModePage() {
             grouped.follow_up.length > 0
               ? "border-rose-200 bg-rose-50"
               : "border-slate-200 bg-white"
-          }`}
+          } lg:rounded-xl lg:p-3`}
         >
           <div className="flex items-center justify-between">
             <p
               className={`text-sm font-medium ${
                 grouped.follow_up.length > 0 ? "text-rose-800" : "text-slate-700"
-              }`}
+              } lg:text-[11px]`}
             >
               Follow-Up Queue
             </p>
             <ClipboardList
               className={`h-5 w-5 ${
                 grouped.follow_up.length > 0 ? "text-rose-700" : "text-slate-500"
-              }`}
+              } lg:h-4 lg:w-4`}
             />
           </div>
           <p
             className={`mt-3 text-2xl font-semibold ${
               grouped.follow_up.length > 0 ? "text-rose-900" : "text-slate-900"
-            }`}
+            } lg:mt-2 lg:text-xl`}
           >
             {grouped.follow_up.length}
           </p>
           <p
             className={`mt-2 text-sm ${
               grouped.follow_up.length > 0 ? "text-rose-800" : "text-slate-600"
-            }`}
+            } lg:text-[11px]`}
           >
             Conversation-driven follow-up actions
           </p>
@@ -1175,33 +1175,33 @@ export default function FieldFocusModePage() {
             completedLaneActions > 0
               ? "border-emerald-200 bg-emerald-50"
               : "border-slate-200 bg-white"
-          }`}
+          } lg:rounded-xl lg:p-3`}
         >
           <div className="flex items-center justify-between">
             <p
               className={`text-sm font-medium ${
                 completedLaneActions > 0 ? "text-emerald-800" : "text-slate-700"
-              }`}
+              } lg:text-[11px]`}
             >
               Actions Saved
             </p>
             <ListChecks
               className={`h-5 w-5 ${
                 completedLaneActions > 0 ? "text-emerald-700" : "text-slate-500"
-              }`}
+              } lg:h-4 lg:w-4`}
             />
           </div>
           <p
             className={`mt-3 text-2xl font-semibold ${
               completedLaneActions > 0 ? "text-emerald-900" : "text-slate-900"
-            }`}
+            } lg:mt-2 lg:text-xl`}
           >
             {completedLaneActions}
           </p>
           <p
             className={`mt-2 text-sm ${
               completedLaneActions > 0 ? "text-emerald-800" : "text-slate-600"
-            }`}
+            } lg:text-[11px]`}
           >
             Confirmed field actions this session
           </p>
@@ -1209,13 +1209,13 @@ export default function FieldFocusModePage() {
       </section>
 
       <section className="hidden" aria-hidden="true">
-        <div className="flex items-start gap-3">
-          <Sparkles className="mt-0.5 h-5 w-5 text-amber-700" />
+        <div className="flex items-start gap-3 lg:gap-2">
+          <Sparkles className="mt-0.5 h-5 w-5 text-amber-700 lg:h-4 lg:w-4" />
           <div>
-            <h2 className="text-lg font-semibold text-amber-900">
+            <h2 className="text-lg font-semibold text-amber-900 lg:text-base">
               Field Operating Pattern
             </h2>
-            <p className="mt-2 text-sm text-amber-800">
+            <p className="mt-2 text-sm text-amber-800 lg:text-[11px]">
               {hasFieldDirector
                 ? "This page should stay ruthless: finish turf first, move strongest canvassers second, and convert the best conversations into follow-up third. Everything else in Field should support those actions, not distract from them."
                 : "This page should stay ruthless: finish turf first and convert the best conversations into follow-up. Assignment and operator routing stay with Field Director access."} {loadingFieldLists

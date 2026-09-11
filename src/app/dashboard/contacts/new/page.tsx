@@ -49,17 +49,17 @@ export default function NewContactPage() {
   }
 
   return (
-    <div className="space-y-8 pb-10">
-      <section className="rounded-3xl border border-slate-900 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 p-8 shadow-sm">
-        <p className="text-sm font-medium uppercase tracking-[0.18em] text-slate-400">
+    <div className="space-y-8 pb-10 lg:space-y-6 lg:pb-8">
+      <section className="rounded-3xl border border-slate-900 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 p-8 shadow-sm lg:rounded-2xl lg:p-6">
+        <p className="text-sm font-medium uppercase tracking-[0.18em] text-slate-400 lg:text-[10px]">
           Contact Management
         </p>
 
-        <h1 className="mt-2 text-4xl font-semibold text-white">
+        <h1 className="mt-2 text-4xl font-semibold text-white lg:text-3xl">
           Add Contact
         </h1>
 
-        <p className="mt-2 max-w-2xl text-slate-300">
+        <p className="mt-2 max-w-2xl text-slate-300 lg:text-sm">
           Create a new contact. Additional information can be added later from
           the contact profile.
         </p>
@@ -67,58 +67,58 @@ export default function NewContactPage() {
 
       <form
         onSubmit={handleSave}
-        className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm"
+        className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm lg:rounded-2xl lg:p-6"
       >
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-3 lg:gap-4">
           <div>
-            <label className="mb-2 block text-sm font-semibold text-slate-700">
+            <label className="mb-2 block text-sm font-semibold text-slate-700 lg:mb-1.5 lg:text-[11px]">
               First Name *
             </label>
             <input
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
-              className="w-full rounded-2xl border border-slate-300 px-4 py-3"
+              className="w-full rounded-2xl border border-slate-300 px-4 py-3 lg:rounded-xl lg:px-3 lg:py-2 lg:text-sm"
             />
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-semibold text-slate-700">
+            <label className="mb-2 block text-sm font-semibold text-slate-700 lg:mb-1.5 lg:text-[11px]">
               Last Name *
             </label>
             <input
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
-              className="w-full rounded-2xl border border-slate-300 px-4 py-3"
+              className="w-full rounded-2xl border border-slate-300 px-4 py-3 lg:rounded-xl lg:px-3 lg:py-2 lg:text-sm"
             />
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-semibold text-slate-700">
+            <label className="mb-2 block text-sm font-semibold text-slate-700 lg:mb-1.5 lg:text-[11px]">
               Phone Number *
             </label>
             <input
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              className="w-full rounded-2xl border border-slate-300 px-4 py-3"
+              className="w-full rounded-2xl border border-slate-300 px-4 py-3 lg:rounded-xl lg:px-3 lg:py-2 lg:text-sm"
             />
           </div>
         </div>
 
-        <div className="mt-8 flex items-center justify-between">
+        <div className="mt-8 flex items-center justify-between lg:mt-6">
           <Link
             href="/dashboard/contacts"
-            className="inline-flex items-center gap-2 rounded-2xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            className="inline-flex items-center gap-2 rounded-2xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 lg:rounded-xl lg:px-4 lg:py-2 lg:text-[11px]"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
             Back to Contacts
           </Link>
 
           <button
             type="submit"
             disabled={saving}
-            className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-60 lg:rounded-xl lg:px-4 lg:py-2 lg:text-[11px]"
           >
-            <Save className="h-4 w-4" />
+            <Save className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
             {saving ? "Saving..." : "Save Contact"}
           </button>
         </div>

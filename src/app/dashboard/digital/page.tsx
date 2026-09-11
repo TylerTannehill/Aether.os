@@ -913,8 +913,8 @@ export default function DigitalDashboardPage() {
 
   if (digitalLoading) {
     return (
-      <div className="space-y-6">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="space-y-6 lg:space-y-4">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
           <p className="text-slate-600">Connecting digital intelligence...</p>
         </div>
       </div>
@@ -922,43 +922,43 @@ export default function DigitalDashboardPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 lg:space-y-6">
       <section
-        className={`rounded-3xl border border-slate-800 bg-gradient-to-br p-6 text-white shadow-sm transition-colors duration-300 lg:p-8 ${orgTheme.heroGradient}`}
+        className={`rounded-3xl border border-slate-800 bg-gradient-to-br p-6 text-white shadow-sm transition-colors duration-300 lg:rounded-2xl lg:p-6 ${orgTheme.heroGradient}`}
       >
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm text-slate-300">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-4">
+          <div className="space-y-3 lg:space-y-2">
+            <div className="flex items-center gap-2 text-sm text-slate-300 lg:text-[11px]">
               <Megaphone className="h-4 w-4" />
               Media + paid performance center
             </div>
 
             <div className="space-y-2">
-              <h1 className="text-3xl font-semibold tracking-tight text-white lg:text-4xl">
+              <h1 className="text-3xl font-semibold tracking-tight text-white lg:text-3xl">
                 {perspectiveHeadline}
               </h1>
-              <p className="max-w-3xl text-sm text-slate-300 lg:text-base">
+              <p className="max-w-3xl text-sm text-slate-300 lg:text-sm">
                 {perspectiveSubheadline}
               </p>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 lg:gap-2">
             <Link
               href="/dashboard/digital/focus"
-              className="inline-flex items-center gap-2 rounded-2xl border border-amber-300 bg-amber-100 px-4 py-3 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-amber-200"
+              className="inline-flex items-center gap-2 rounded-2xl border border-amber-300 bg-amber-100 px-4 py-3 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-amber-200 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
-              <Zap className="h-4 w-4 text-slate-950" />
+              <Zap className="h-4 w-4 lg:h-3.5 lg:w-3.5 text-slate-950" />
               <span className="text-slate-950">{focusButtonLabel}</span>
             </Link>
           </div>
         </div>
       </section>
 
-      {isDemoOrg && (<section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="grid gap-5 lg:grid-cols-[1fr_1fr]">
-          <div className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+      {isDemoOrg && (<section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+        <div className="grid gap-5 lg:grid-cols-[1fr_1fr] lg:gap-4">
+          <div className="space-y-3 lg:space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 lg:text-[9px]">
               Demo role perspective
             </p>
             <div className="flex flex-wrap gap-2">
@@ -966,7 +966,7 @@ export default function DigitalDashboardPage() {
                 <button
                   key={role}
                   onClick={() => setDemoRole(role)}
-                  className={`rounded-full px-3 py-1 text-xs font-medium transition ${
+                  className={`rounded-full px-3 py-1 text-xs font-medium transition lg:px-2.5 lg:py-0.5 lg:text-[9px] ${
                     demoRole === role
                       ? "bg-slate-900 text-white"
                       : "border border-slate-200 bg-white text-slate-700"
@@ -978,8 +978,8 @@ export default function DigitalDashboardPage() {
             </div>
           </div>
 
-          <div className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+          <div className="space-y-3 lg:space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 lg:text-[9px]">
               Demo department perspective
             </p>
             <div className="flex flex-wrap gap-2">
@@ -989,7 +989,7 @@ export default function DigitalDashboardPage() {
                 <button
                   key={department}
                   onClick={() => setDemoDepartment(department)}
-                  className={`rounded-full px-3 py-1 text-xs font-medium transition ${
+                  className={`rounded-full px-3 py-1 text-xs font-medium transition lg:px-2.5 lg:py-0.5 lg:text-[9px] ${
                     demoDepartment === department
                       ? "bg-slate-900 text-white"
                       : "border border-slate-200 bg-white text-slate-700"
@@ -1002,7 +1002,7 @@ export default function DigitalDashboardPage() {
           </div>
         </div>
 
-        <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+        <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700 lg:mt-4 lg:rounded-xl lg:p-3 lg:text-[11px]">
           <span className="font-medium text-slate-900">
             {getRoleLabel(demoRole)}:
           </span>{" "}
@@ -1012,20 +1012,20 @@ export default function DigitalDashboardPage() {
       </section>)}
 
       {showDepartmentAbe && digitalAbeReady ? (
-      <section className="rounded-3xl border border-fuchsia-200 bg-fuchsia-50 p-6 shadow-sm">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm text-fuchsia-800">
+      <section className="rounded-3xl border border-fuchsia-200 bg-fuchsia-50 p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between lg:gap-4">
+          <div className="space-y-3 lg:space-y-2">
+            <div className="flex items-center gap-2 text-sm text-fuchsia-800 lg:text-[11px]">
               <Sparkles className="h-4 w-4" />
               Honest Abe
             </div>
 
             <div className="space-y-2">
-              <p className="text-sm font-medium uppercase tracking-[0.18em] text-fuchsia-700/80">
+              <p className="text-sm font-medium uppercase tracking-[0.18em] text-fuchsia-700/80 lg:text-[10px]">
                 {getRoleLabel(demoRole)}
               </p>
 
-              <div className="flex flex-wrap gap-4 text-sm text-fuchsia-900">
+              <div className="flex flex-wrap gap-4 text-sm text-fuchsia-900 lg:gap-3 lg:text-[11px]">
                 <div>
                   <span className="font-medium text-fuchsia-700">Health:</span>{" "}
                   {digitalAbeBriefing.health}
@@ -1044,7 +1044,7 @@ export default function DigitalDashboardPage() {
                 </div>
               </div>
 
-              <h2 className="text-2xl font-semibold text-fuchsia-900">
+              <h2 className="text-2xl font-semibold text-fuchsia-900 lg:text-xl">
                 {digitalAbeBriefing.primaryLane === "digital"
                   ? "Digital is the lane that needs active shaping right now."
                   : `${departmentLabel(
@@ -1052,39 +1052,39 @@ export default function DigitalDashboardPage() {
                     )} is shaping what digital should do next.`}
               </h2>
 
-              <p className="max-w-3xl text-sm text-slate-700 lg:text-base">
+              <p className="max-w-3xl text-sm text-slate-700 lg:text-sm">
                 {aiSummary.body}
               </p>
 
-              <p className="max-w-3xl text-sm italic text-slate-600">
+              <p className="max-w-3xl text-sm italic text-slate-600 lg:text-[11px]">
                 Why now: {digitalAbeInsight}
               </p>
 
               {digitalAbeBriefing.crossDomainSignal ? (
-                <p className="max-w-3xl text-sm text-fuchsia-900/80">
+                <p className="max-w-3xl text-sm text-fuchsia-900/80 lg:text-[11px]">
                   {digitalAbeBriefing.crossDomainSignal}
                 </p>
               ) : null}
 
-              <p className="max-w-3xl text-sm text-slate-600">
+              <p className="max-w-3xl text-sm text-slate-600 lg:text-[11px]">
                 {digitalAbeBriefing.supportText}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="mt-5 rounded-2xl border border-white/70 bg-white/70 p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-fuchsia-700">
+        <div className="mt-5 rounded-2xl border border-white/70 bg-white/70 p-5 lg:mt-4 lg:rounded-xl lg:p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-fuchsia-700 lg:text-[9px]">
             What Abe Would Do
           </p>
 
-          <div className="mt-3 space-y-3">
+          <div className="mt-3 space-y-3 lg:mt-2 lg:space-y-2">
             {digitalAbeBriefing.actions.map((move, index) => (
               <div
                 key={`${move}-${index}`}
-                className="flex items-start gap-3 text-sm text-slate-700"
+                className="flex items-start gap-3 text-sm text-slate-700 lg:gap-2 lg:text-[11px]"
               >
-                <div className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-fuchsia-200 bg-fuchsia-100 text-xs font-semibold text-fuchsia-800">
+                <div className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-fuchsia-200 bg-fuchsia-100 text-xs font-semibold text-fuchsia-800 lg:h-5 lg:w-5 lg:text-[9px]">
                   {index + 1}
                 </div>
                 <p>{move}</p>
@@ -1094,21 +1094,21 @@ export default function DigitalDashboardPage() {
         </div>
 
         {digitalPatternWatch.length > 0 ? (
-          <div className="mt-5 rounded-2xl border border-white/70 bg-white/70 p-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-fuchsia-700">
+          <div className="mt-5 rounded-2xl border border-white/70 bg-white/70 p-5 lg:mt-4 lg:rounded-xl lg:p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-fuchsia-700 lg:text-[9px]">
               Pattern Watch
             </p>
 
-            <div className="mt-3 space-y-3">
+            <div className="mt-3 space-y-3 lg:mt-2 lg:space-y-2">
               {digitalPatternWatch.map((insight, index) => (
                 <div
                   key={`${insight.label}-${index}`}
-                  className={`rounded-2xl border p-4 ${patternSeverityTone(
+                  className={`rounded-2xl border p-4 lg:rounded-xl lg:p-3 ${patternSeverityTone(
                     insight.severity
                   )}`}
                 >
-                  <p className="text-sm font-semibold">{insight.label}</p>
-                  <p className="mt-1 text-sm opacity-90">{insight.detail}</p>
+                  <p className="text-sm font-semibold lg:text-[11px]">{insight.label}</p>
+                  <p className="mt-1 text-sm opacity-90 lg:text-[11px]">{insight.detail}</p>
                 </div>
               ))}
             </div>
@@ -1119,7 +1119,7 @@ export default function DigitalDashboardPage() {
       ) : null}
 
       <section
-        className={`grid gap-4 ${
+        className={`grid gap-4 lg:gap-3 ${
           visibleStats.length === 2
             ? "md:grid-cols-2"
             : visibleStats.length === 3
@@ -1130,28 +1130,28 @@ export default function DigitalDashboardPage() {
         {visibleStats.map((stat) => (
           <div
             key={stat.id}
-            className={`rounded-3xl border p-6 shadow-sm ${stat.tone}`}
+            className={`rounded-3xl border p-6 shadow-sm lg:rounded-2xl lg:p-4 ${stat.tone}`}
           >
-            <p className="text-sm font-medium">{stat.label}</p>
-            <p className="mt-3 text-3xl font-semibold">{stat.value}</p>
-            <p className="mt-2 text-sm opacity-90">{stat.helper}</p>
+            <p className="text-sm font-medium lg:text-[11px]">{stat.label}</p>
+            <p className="mt-3 text-3xl font-semibold lg:mt-2 lg:text-2xl">{stat.value}</p>
+            <p className="mt-2 text-sm opacity-90 lg:mt-1.5 lg:text-[11px]">{stat.helper}</p>
           </div>
         ))}
       </section>
 
       {visibleActivation.show ? (
-        <section className="rounded-3xl border border-indigo-200 bg-indigo-50 p-6 shadow-sm">
-          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <section className="rounded-3xl border border-indigo-200 bg-indigo-50 p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:mb-4 lg:gap-3">
             <div>
-              <p className="text-sm font-medium text-indigo-800">
+              <p className="text-sm font-medium text-indigo-800 lg:text-[11px]">
                 Campaign Activation
               </p>
-              <h2 className="text-xl font-semibold text-indigo-950">
+              <h2 className="text-xl font-semibold text-indigo-950 lg:text-lg">
                 Digital → Campaign Outputs
               </h2>
             </div>
 
-            <div className="rounded-2xl border border-indigo-200 bg-white px-4 py-2 text-sm font-medium text-indigo-800">
+            <div className="rounded-2xl border border-indigo-200 bg-white px-4 py-2 text-sm font-medium text-indigo-800 lg:rounded-xl lg:px-3 lg:py-1.5 lg:text-[11px]">
               {visibleActivation.drops.length} content drop
               {visibleActivation.drops.length === 1 ? "" : "s"} •{" "}
               {visibleActivation.spikes.length} spend move
@@ -1162,25 +1162,25 @@ export default function DigitalDashboardPage() {
           </div>
 
           <div
-            className={`grid gap-4 ${
+            className={`grid gap-4 lg:gap-3 ${
               demoRole === "director" ? "lg:grid-cols-2" : "lg:grid-cols-3"
             }`}
           >
-            <div className="rounded-2xl border border-indigo-200 bg-white p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700">
+            <div className="rounded-2xl border border-indigo-200 bg-white p-4 lg:rounded-xl lg:p-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700 lg:text-[9px]">
                 Content Drops
               </p>
-              <div className="mt-3 space-y-3">
+              <div className="mt-3 space-y-3 lg:mt-2 lg:space-y-2">
                 {visibleActivation.drops.map((drop) => (
                   <div
                     key={drop.id}
-                    className="rounded-2xl border border-slate-200 bg-slate-50 p-3"
+                    className="rounded-2xl border border-slate-200 bg-slate-50 p-3 lg:rounded-xl lg:p-2.5"
                   >
                     <p className="font-medium text-slate-900">{drop.title}</p>
-                    <p className="mt-1 text-xs text-slate-500">
+                    <p className="mt-1 text-xs text-slate-500 lg:text-[9px]">
                       {drop.platform} • {drop.goal}
                     </p>
-                    <p className="mt-1 text-xs text-slate-500">
+                    <p className="mt-1 text-xs text-slate-500 lg:text-[9px]">
                       {drop.audience} • {drop.narrative}
                     </p>
                   </div>
@@ -1188,23 +1188,23 @@ export default function DigitalDashboardPage() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-indigo-200 bg-white p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700">
+            <div className="rounded-2xl border border-indigo-200 bg-white p-4 lg:rounded-xl lg:p-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700 lg:text-[9px]">
                 Spend Moves
               </p>
-              <div className="mt-3 space-y-3">
+              <div className="mt-3 space-y-3 lg:mt-2 lg:space-y-2">
                 {visibleActivation.spikes.map((spike) => (
                   <div
                     key={spike.id}
-                    className="rounded-2xl border border-slate-200 bg-slate-50 p-3"
+                    className="rounded-2xl border border-slate-200 bg-slate-50 p-3 lg:rounded-xl lg:p-2.5"
                   >
                     <p className="font-medium text-slate-900">
                       {spike.platform} · {spike.budgetShift}
                     </p>
-                    <p className="mt-1 text-xs text-slate-500">
+                    <p className="mt-1 text-xs text-slate-500 lg:text-[9px]">
                       {spike.goal} • {spike.audience}
                     </p>
-                    <p className="mt-1 text-xs text-slate-500">
+                    <p className="mt-1 text-xs text-slate-500 lg:text-[9px]">
                       {spike.narrative}
                     </p>
                   </div>
@@ -1213,23 +1213,23 @@ export default function DigitalDashboardPage() {
             </div>
 
             {demoRole === "admin" ? (
-              <div className="rounded-2xl border border-indigo-200 bg-white p-4">
-                <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700">
+              <div className="rounded-2xl border border-indigo-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700 lg:text-[9px]">
                   Sentiment Shifts
                 </p>
-                <div className="mt-3 space-y-3">
+                <div className="mt-3 space-y-3 lg:mt-2 lg:space-y-2">
                   {visibleActivation.shifts.map((shift) => (
                     <div
                       key={shift.id}
-                      className="rounded-2xl border border-slate-200 bg-slate-50 p-3"
+                      className="rounded-2xl border border-slate-200 bg-slate-50 p-3 lg:rounded-xl lg:p-2.5"
                     >
                       <p className="font-medium text-slate-900">
                         {shift.platform} · {shift.tone}
                       </p>
-                      <p className="mt-1 text-xs text-slate-500">
+                      <p className="mt-1 text-xs text-slate-500 lg:text-[9px]">
                         {shift.goal} • {shift.audience}
                       </p>
-                      <p className="mt-1 text-xs text-slate-500">
+                      <p className="mt-1 text-xs text-slate-500 lg:text-[9px]">
                         {shift.narrative}
                       </p>
                     </div>
@@ -1242,19 +1242,19 @@ export default function DigitalDashboardPage() {
       ) : null}
 
       <section
-        className={`grid gap-6 ${
+        className={`grid gap-6 lg:gap-4 ${
           demoRole === "general_user" ? "lg:grid-cols-2" : "lg:grid-cols-3"
         }`}
       >
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm lg:rounded-2xl lg:p-4">
           <div className="flex items-center justify-between">
-            <div className="text-sm font-medium text-slate-500">
+            <div className="text-sm font-medium text-slate-500 lg:text-[11px]">
               Creative Pressure
             </div>
-            <BarChart3 className="h-4 w-4 text-slate-500" />
+            <BarChart3 className="h-4 w-4 lg:h-3.5 lg:w-3.5 text-slate-500" />
           </div>
 
-          <div className="mt-4 space-y-2 text-sm text-slate-700">
+          <div className="mt-4 space-y-2 text-sm text-slate-700 lg:mt-3 lg:space-y-1.5 lg:text-[11px]">
             <div>
               Drafting: {contentPipeline.filter((i) => i.status === "drafting").length}
             </div>
@@ -1269,15 +1269,15 @@ export default function DigitalDashboardPage() {
           </div>
         </div>
 
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm lg:rounded-2xl lg:p-4">
           <div className="flex items-center justify-between">
-            <div className="text-sm font-medium text-slate-500">
+            <div className="text-sm font-medium text-slate-500 lg:text-[11px]">
               Paid Media Signal
             </div>
-            <CircleDollarSign className="h-4 w-4 text-slate-500" />
+            <CircleDollarSign className="h-4 w-4 lg:h-3.5 lg:w-3.5 text-slate-500" />
           </div>
 
-          <div className="mt-4 space-y-2 text-sm text-slate-700">
+          <div className="mt-4 space-y-2 text-sm text-slate-700 lg:mt-3 lg:space-y-1.5 lg:text-[11px]">
             <div>Best spend candidate: {getBestSpendCandidate(platformMetrics)}</div>
             <div>Needs creative refresh: {getCreativeRefreshCandidate(platformMetrics)}</div>
             <div>Weakest sentiment: {getWeakestSentimentCandidate(platformMetrics)}</div>
@@ -1285,15 +1285,15 @@ export default function DigitalDashboardPage() {
         </div>
 
         {demoRole !== "general_user" ? (
-          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm lg:rounded-2xl lg:p-4">
             <div className="flex items-center justify-between">
-              <div className="text-sm font-medium text-slate-500">
+              <div className="text-sm font-medium text-slate-500 lg:text-[11px]">
                 Response Queue
               </div>
-              <MessageSquare className="h-4 w-4 text-slate-500" />
+              <MessageSquare className="h-4 w-4 lg:h-3.5 lg:w-3.5 text-slate-500" />
             </div>
 
-            <div className="mt-4 space-y-2 text-sm text-slate-700">
+            <div className="mt-4 space-y-2 text-sm text-slate-700 lg:mt-3 lg:space-y-1.5 lg:text-[11px]">
               <div>Comments needing review: 0</div>
               <div>Suggested replies queued: 0</div>
               <div>Rapid response item: 0</div>
@@ -1303,13 +1303,13 @@ export default function DigitalDashboardPage() {
       </section>
 
       {demoRole !== "general_user" ? (
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:mb-4 lg:gap-3">
             <div>
-              <p className="text-sm font-medium text-slate-500">
+              <p className="text-sm font-medium text-slate-500 lg:text-[11px]">
                 Performance Trend
               </p>
-              <h2 className="text-xl font-semibold text-slate-900">
+              <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">
                 {demoRole === "admin"
                   ? "Cross-Platform Trend View"
                   : "Lane Trend View"}
@@ -1325,7 +1325,7 @@ export default function DigitalDashboardPage() {
                       view as "impressions" | "engagement" | "spend" | "sentiment"
                     )
                   }
-                  className={`rounded-full px-3 py-1 text-xs font-medium ${
+                  className={`rounded-full px-3 py-1 text-xs font-medium lg:px-2.5 lg:py-0.5 lg:text-[9px] ${
                     trendView === view
                       ? "bg-slate-900 text-white"
                       : "border border-slate-200 bg-white text-slate-700"
@@ -1338,7 +1338,7 @@ export default function DigitalDashboardPage() {
           </div>
 
           {chartData.length > 0 ? (
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-4 gap-4 lg:gap-3">
               {chartData.map((point, index) => {
                 const value = point[trendView];
                 const height = (value / chartMax) * 120;
@@ -1346,21 +1346,21 @@ export default function DigitalDashboardPage() {
                 return (
                   <div
                     key={`${point.label}-${index}`}
-                    className="flex flex-col items-center gap-2"
+                    className="flex flex-col items-center gap-2 lg:gap-1.5"
                   >
-                    <div className="flex h-32 items-end">
+                    <div className="flex h-32 items-end lg:h-24">
                       <div
                         style={{ height }}
-                        className="w-10 rounded-2xl bg-slate-900"
+                        className="w-10 rounded-2xl bg-slate-900 lg:w-8 lg:rounded-xl"
                       />
                     </div>
-                    <p className="text-xs text-slate-500">{point.label}</p>
+                    <p className="text-xs text-slate-500 lg:text-[9px]">{point.label}</p>
                   </div>
                 );
               })}
             </div>
           ) : (
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-600">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-600 lg:rounded-xl lg:p-4 lg:text-[11px]">
               No digital trend data available yet.
             </div>
           )}
@@ -1368,7 +1368,7 @@ export default function DigitalDashboardPage() {
       ) : null}
 
       <section
-        className={`grid gap-6 ${
+        className={`grid gap-6 lg:gap-4 ${
           visiblePlatformMetrics.length === 2
             ? "xl:grid-cols-2"
             : visiblePlatformMetrics.length === 3
@@ -1377,7 +1377,7 @@ export default function DigitalDashboardPage() {
         }`}
       >
         {visiblePlatformMetrics.length === 0 ? (
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 text-sm text-slate-600 shadow-sm xl:col-span-4">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 text-sm text-slate-600 shadow-sm xl:col-span-4 lg:rounded-2xl lg:p-4 lg:text-[11px]">
             {digitalLoading
               ? "Loading digital metrics..."
               : "No digital platform metrics available for this campaign yet."}
@@ -1387,14 +1387,14 @@ export default function DigitalDashboardPage() {
         {visiblePlatformMetrics.map((platform) => (
           <div
             key={platform.key}
-            className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
+            className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]"
           >
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-slate-900">
+              <h3 className="text-lg font-semibold text-slate-900 lg:text-base">
                 {platform.label}
               </h3>
               <span
-                className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${platformTone(
+                className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold lg:px-2.5 lg:py-0.5 lg:text-[9px] ${platformTone(
                   platform.key
                 )}`}
               >
@@ -1402,7 +1402,7 @@ export default function DigitalDashboardPage() {
               </span>
             </div>
 
-            <div className="mt-4 space-y-3 text-sm text-slate-700">
+            <div className="mt-4 space-y-3 text-sm text-slate-700 lg:mt-3 lg:space-y-2 lg:text-[11px]">
               <div className="flex items-center justify-between">
                 <span>Impressions</span>
                 <span className="font-semibold">
@@ -1442,26 +1442,26 @@ export default function DigitalDashboardPage() {
         ))}
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="mb-6 flex items-center justify-between">
+      <section className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr] lg:gap-4">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <div className="mb-6 flex items-center justify-between lg:mb-4">
             <div>
-              <p className="text-sm font-medium text-slate-500">
+              <p className="text-sm font-medium text-slate-500 lg:text-[11px]">
                 Content Pipeline
               </p>
-              <h2 className="text-xl font-semibold text-slate-900">
+              <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">
                 {demoRole === "general_user"
                   ? "Active Content Schedule"
                   : "Content Schedule"}
               </h2>
             </div>
 
-            <Clock3 className="h-5 w-5 text-slate-500" />
+            <Clock3 className="h-5 w-5 lg:h-4 lg:w-4 text-slate-500" />
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-4 lg:space-y-3">
             {visibleContentPipeline.length === 0 ? (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 lg:rounded-xl lg:p-3 lg:text-[11px]">
                 No live content pipeline items are connected yet.
               </div>
             ) : null}
@@ -1469,17 +1469,17 @@ export default function DigitalDashboardPage() {
             {visibleContentPipeline.map((item) => (
               <div
                 key={item.id}
-                className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                className="rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3"
               >
-                <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between lg:gap-2">
                   <div>
                     <p className="font-semibold text-slate-900">{item.title}</p>
                     {demoRole !== "general_user" ? (
-                      <p className="mt-1 text-sm text-slate-500">
+                      <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
                         Owner: {item.owner}
                       </p>
                     ) : null}
-                    <p className="mt-1 text-sm text-slate-500">
+                    <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
                       {item.publish_at
                         ? `Publish: ${item.publish_at}`
                         : "No publish time set"}
@@ -1488,7 +1488,7 @@ export default function DigitalDashboardPage() {
 
                   <div className="flex flex-wrap gap-2">
                     <span
-                      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${platformTone(
+                      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold lg:px-2.5 lg:py-0.5 lg:text-[9px] ${platformTone(
                         item.platform
                       )}`}
                     >
@@ -1496,7 +1496,7 @@ export default function DigitalDashboardPage() {
                     </span>
 
                     <span
-                      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${statusTone(
+                      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold lg:px-2.5 lg:py-0.5 lg:text-[9px] ${statusTone(
                         item.status
                       )}`}
                     >
@@ -1509,25 +1509,25 @@ export default function DigitalDashboardPage() {
           </div>
         </div>
 
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="mb-6 flex items-center justify-between">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <div className="mb-6 flex items-center justify-between lg:mb-4">
             <div>
-              <p className="text-sm font-medium text-slate-500">
+              <p className="text-sm font-medium text-slate-500 lg:text-[11px]">
                 Today&apos;s Touchpoints
               </p>
-              <h2 className="text-xl font-semibold text-slate-900">
+              <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">
                 {demoRole === "general_user"
                   ? "Next Digital Actions"
                   : "Content + Spend Priorities"}
               </h2>
             </div>
 
-            <Zap className="h-5 w-5 text-amber-500" />
+            <Zap className="h-5 w-5 lg:h-4 lg:w-4 text-amber-500" />
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-4 lg:space-y-3">
             {visibleFocusQueue.length === 0 ? (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 lg:rounded-xl lg:p-3 lg:text-[11px]">
                 No digital touchpoints are available from live metrics yet.
               </div>
             ) : null}
@@ -1535,14 +1535,14 @@ export default function DigitalDashboardPage() {
             {visibleFocusQueue.map((item) => (
               <div
                 key={item.id}
-                className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                className="rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3"
               >
-                <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between lg:gap-2">
                   <div>
                     <p className="font-semibold text-slate-900">{item.title}</p>
-                    <p className="mt-2 text-sm text-slate-500">{item.summary}</p>
+                    <p className="mt-2 text-sm text-slate-500 lg:mt-1.5 lg:text-[11px]">{item.summary}</p>
                     {selectedTaskId === item.id && selectedDigitalPatternHint ? (
-                      <p className="mt-2 text-xs font-medium text-amber-700">
+                      <p className="mt-2 text-xs font-medium text-amber-700 lg:mt-1.5 lg:text-[9px]">
                         {selectedDigitalPatternHint}
                       </p>
                     ) : null}
@@ -1550,14 +1550,14 @@ export default function DigitalDashboardPage() {
 
                   <div className="flex flex-wrap gap-2">
                     <span
-                      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${priorityTone(
+                      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold lg:px-2.5 lg:py-0.5 lg:text-[9px] ${priorityTone(
                         item.priority
                       )}`}
                     >
                       {item.priority}
                     </span>
 
-                    <span className="inline-flex rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700">
+                    <span className="inline-flex rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 lg:px-2.5 lg:py-0.5 lg:text-[9px]">
                       {item.type}
                     </span>
                   </div>
@@ -1566,11 +1566,11 @@ export default function DigitalDashboardPage() {
             ))}
           </div>
 
-          <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-4">
-            <p className="text-sm font-semibold text-amber-900">
+          <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 lg:mt-4 lg:rounded-xl lg:p-3">
+            <p className="text-sm font-semibold text-amber-900 lg:text-[11px]">
               Touchpoint Intent
             </p>
-            <p className="mt-2 text-sm text-amber-800">
+            <p className="mt-2 text-sm text-amber-800 lg:mt-1.5 lg:text-[11px]">
               {demoRole === "admin"
                 ? "Today&apos;s touchpoints should narrow attention to content creation, spend movement, and response handling based on what is actually performing."
                 : demoRole === "director"

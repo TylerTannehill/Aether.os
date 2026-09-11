@@ -832,8 +832,8 @@ export default function FieldDashboardPage() {
 
   if (fieldLoading) {
     return (
-      <div className="space-y-6">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="space-y-6 lg:space-y-4">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
           <p className="text-slate-600">Preparing field operations...</p>
         </div>
       </div>
@@ -841,42 +841,42 @@ export default function FieldDashboardPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 lg:space-y-6">
       <section
-        className={`rounded-3xl border border-slate-800 bg-gradient-to-br p-6 text-white shadow-sm transition-colors duration-300 lg:p-8 ${orgTheme.heroGradient}`}
+        className={`rounded-3xl border border-slate-800 bg-gradient-to-br p-6 text-white shadow-sm transition-colors duration-300 lg:p-6 ${orgTheme.heroGradient} lg:rounded-2xl lg:p-[18px]`}
       >
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="space-y-3">
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-slate-300">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-4">
+          <div className="space-y-3 lg:space-y-2">
+            <p className="text-sm font-medium uppercase tracking-[0.18em] text-slate-300 lg:text-[11px]">
               Field Dashboard
             </p>
 
             <div className="space-y-2">
-              <h1 className="text-3xl font-semibold tracking-tight text-white lg:text-4xl">
+              <h1 className="text-3xl font-semibold tracking-tight text-white lg:text-3xl lg:text-2xl">
                 {perspectiveHeadline}
               </h1>
-              <p className="max-w-3xl text-sm text-slate-300 lg:text-base">
+              <p className="max-w-3xl text-sm text-slate-300 lg:text-sm lg:text-[11px]">
                 {perspectiveSubheadline}
               </p>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 lg:gap-2">
             <Link
               href="/dashboard/field/focus"
-              className="inline-flex items-center gap-2 rounded-2xl border border-amber-300 bg-amber-100 px-4 py-3 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-amber-200"
+              className="inline-flex items-center gap-2 rounded-2xl border border-amber-300 bg-amber-100 px-4 py-3 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-amber-200 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
-              <Zap className="h-4 w-4 text-slate-950" />
+              <Zap className="h-4 w-4 text-slate-950 lg:h-3.5 lg:w-3.5" />
               <span className="text-slate-950">Open Focus Mode</span>
             </Link>
           </div>
         </div>
       </section>
 
-      {isDemoOrg && (<section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="grid gap-5 lg:grid-cols-[1fr_1fr]">
-          <div className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+      {isDemoOrg && (<section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+        <div className="grid gap-5 lg:grid-cols-[1fr_1fr] lg:gap-4">
+          <div className="space-y-3 lg:space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 lg:text-[9px]">
               Demo role perspective
             </p>
             <div className="flex flex-wrap gap-2">
@@ -888,7 +888,7 @@ export default function FieldDashboardPage() {
                     demoRole === role
                       ? "bg-slate-900 text-white"
                       : "border border-slate-200 bg-white text-slate-700"
-                  }`}
+                  } lg:text-[9px]`}
                 >
                   {role}
                 </button>
@@ -896,8 +896,8 @@ export default function FieldDashboardPage() {
             </div>
           </div>
 
-          <div className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+          <div className="space-y-3 lg:space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 lg:text-[9px]">
               Demo department perspective
             </p>
             <div className="flex flex-wrap gap-2">
@@ -911,7 +911,7 @@ export default function FieldDashboardPage() {
                     demoDepartment === department
                       ? "bg-slate-900 text-white"
                       : "border border-slate-200 bg-white text-slate-700"
-                  }`}
+                  } lg:text-[9px]`}
                 >
                   {department}
                 </button>
@@ -920,7 +920,7 @@ export default function FieldDashboardPage() {
           </div>
         </div>
 
-        <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+        <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700 lg:rounded-xl lg:p-3 lg:mt-4 lg:text-[11px]">
           <span className="font-medium text-slate-900">
             {getRoleLabel(demoRole)}:
           </span>{" "}
@@ -930,20 +930,20 @@ export default function FieldDashboardPage() {
       </section>)}
 
       {showDepartmentAbe && fieldAbeReady ? (
-      <section className="rounded-3xl border border-violet-200 bg-violet-50 p-6 shadow-sm">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm text-violet-800">
-              <Sparkles className="h-4 w-4" />
+      <section className="rounded-3xl border border-violet-200 bg-violet-50 p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between lg:gap-4">
+          <div className="space-y-3 lg:space-y-2">
+            <div className="flex items-center gap-2 text-sm text-violet-800 lg:text-[11px]">
+              <Sparkles className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               Honest Abe
             </div>
 
             <div className="space-y-2">
-              <p className="text-sm font-medium uppercase tracking-[0.18em] text-violet-700/80">
+              <p className="text-sm font-medium uppercase tracking-[0.18em] text-violet-700/80 lg:text-[11px]">
                 {getRoleLabel(demoRole)}
               </p>
 
-              <div className="flex flex-wrap gap-4 text-sm text-violet-900">
+              <div className="flex flex-wrap gap-4 text-sm text-violet-900 lg:gap-3 lg:text-[11px]">
                 <div>
                   <span className="font-medium text-violet-700">Health:</span>{" "}
                   {fieldAbeBriefing.health}
@@ -962,7 +962,7 @@ export default function FieldDashboardPage() {
                 </div>
               </div>
 
-              <h2 className="text-2xl font-semibold text-violet-900">
+              <h2 className="text-2xl font-semibold text-violet-900 lg:text-xl">
                 {fieldAbeBriefing.primaryLane === "field"
                   ? "Field is the operating lane that needs attention right now."
                   : `${departmentLabel(
@@ -970,39 +970,39 @@ export default function FieldDashboardPage() {
                     )} is shaping what field should do next.`}
               </h2>
 
-              <p className="max-w-3xl text-sm text-slate-700 lg:text-base">
+              <p className="max-w-3xl text-sm text-slate-700 lg:text-sm lg:text-[11px]">
                 {aiSummary.body}
               </p>
 
-              <p className="max-w-3xl text-sm italic text-slate-600">
+              <p className="max-w-3xl text-sm italic text-slate-600 lg:text-[11px]">
                 Why now: {fieldAbeInsight}
               </p>
 
               {fieldAbeBriefing.crossDomainSignal ? (
-                <p className="max-w-3xl text-sm text-violet-900/80">
+                <p className="max-w-3xl text-sm text-violet-900/80 lg:text-[11px]">
                   {fieldAbeBriefing.crossDomainSignal}
                 </p>
               ) : null}
 
-              <p className="max-w-3xl text-sm text-slate-600">
+              <p className="max-w-3xl text-sm text-slate-600 lg:text-[11px]">
                 {fieldAbeBriefing.supportText}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="mt-5 rounded-2xl border border-white/70 bg-white/70 p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-700">
+        <div className="mt-5 rounded-2xl border border-white/70 bg-white/70 p-5 lg:rounded-xl lg:p-4 lg:mt-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-700 lg:text-[9px]">
             What Abe Would Do
           </p>
 
-          <div className="mt-3 space-y-3">
+          <div className="mt-3 space-y-3 lg:space-y-2">
             {fieldAbeBriefing.actions.map((move, index) => (
               <div
                 key={`${move}-${index}`}
-                className="flex items-start gap-3 text-sm text-slate-700"
+                className="flex items-start gap-3 text-sm text-slate-700 lg:gap-2 lg:text-[11px]"
               >
-                <div className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-amber-200 bg-amber-100 text-xs font-semibold text-violet-800">
+                <div className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-amber-200 bg-amber-100 text-xs font-semibold text-violet-800 lg:text-[9px]">
                   {index + 1}
                 </div>
                 <p>{move}</p>
@@ -1012,21 +1012,21 @@ export default function FieldDashboardPage() {
         </div>
 
         {fieldPatternWatch.length > 0 ? (
-          <div className="mt-5 rounded-2xl border border-white/70 bg-white/70 p-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-700">
+          <div className="mt-5 rounded-2xl border border-white/70 bg-white/70 p-5 lg:rounded-xl lg:p-4 lg:mt-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-700 lg:text-[9px]">
               Pattern Watch
             </p>
 
-            <div className="mt-3 space-y-3">
+            <div className="mt-3 space-y-3 lg:space-y-2">
               {fieldPatternWatch.map((insight, index) => (
                 <div
                   key={`${insight.label}-${index}`}
                   className={`rounded-2xl border p-4 ${patternSeverityTone(
                     insight.severity
-                  )}`}
+                  )} lg:rounded-xl lg:p-3`}
                 >
-                  <p className="text-sm font-semibold">{insight.label}</p>
-                  <p className="mt-1 text-sm opacity-90">{insight.detail}</p>
+                  <p className="text-sm font-semibold lg:text-[11px]">{insight.label}</p>
+                  <p className="mt-1 text-sm opacity-90 lg:text-[11px]">{insight.detail}</p>
                 </div>
               ))}
             </div>
@@ -1043,7 +1043,7 @@ export default function FieldDashboardPage() {
             : visibleStats.length === 3
             ? "md:grid-cols-3"
             : "md:grid-cols-4"
-        }`}
+        } lg:gap-3`}
       >
         {visibleStats.map((stat) => (
           <div
@@ -1064,27 +1064,27 @@ export default function FieldDashboardPage() {
                   ? "border-sky-200 bg-sky-50"
                   : "border-slate-200 bg-white"
                 : "border-slate-200 bg-white"
-            }`}
+            } lg:rounded-2xl lg:p-[18px]`}
           >
-            <p className="text-sm font-medium text-slate-500">{stat.label}</p>
-            <p className="mt-3 text-3xl font-semibold text-slate-900">
+            <p className="text-sm font-medium text-slate-500 lg:text-[11px]">{stat.label}</p>
+            <p className="mt-3 text-3xl font-semibold text-slate-900 lg:text-2xl">
               {stat.value}
             </p>
           </div>
         ))}
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between lg:gap-3">
           <div>
             <div className="flex items-center gap-2">
-              <MapPinned className="h-5 w-5 text-violet-600" />
-              <p className="text-sm font-medium text-slate-500">Route Planning</p>
+              <MapPinned className="h-5 w-5 text-violet-600 lg:h-4 lg:w-4" />
+              <p className="text-sm font-medium text-slate-500 lg:text-[11px]">Route Planning</p>
             </div>
-            <h2 className="mt-2 text-xl font-semibold text-slate-900">
+            <h2 className="mt-2 text-xl font-semibold text-slate-900 lg:text-lg">
               Field Lists
             </h2>
-            <p className="mt-2 max-w-3xl text-sm text-slate-600">
+            <p className="mt-2 max-w-3xl text-sm text-slate-600 lg:text-[11px]">
               Generate optimized routes only when your field team is ready to work a list.
               Aether will not call Google Routes until you explicitly generate a route.
             </p>
@@ -1097,23 +1097,23 @@ export default function FieldDashboardPage() {
                 : routesState === "loading"
                 ? "border-slate-200 bg-slate-50 text-slate-600"
                 : "border-amber-200 bg-amber-50 text-violet-800"
-            }`}
+            } lg:text-[9px]`}
           >
             Google Routes: {routesState === "connected" ? "Connected" : routesState === "loading" ? "Checking" : "Not Connected"}
           </div>
         </div>
 
         {routesState === "disconnected" || routesState === "error" ? (
-          <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4">
-            <p className="text-sm font-semibold text-violet-900">
+          <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 lg:rounded-xl lg:p-3 lg:mt-4">
+            <p className="text-sm font-semibold text-violet-900 lg:text-[11px]">
               Google Routes is not enabled for this campaign.
             </p>
-            <p className="mt-1 text-sm text-violet-800">
+            <p className="mt-1 text-sm text-violet-800 lg:text-[11px]">
               Connect the Aether-managed Routes integration before generating field routes.
             </p>
             <Link
               href="/dashboard/integrations"
-              className="mt-3 inline-flex rounded-xl border border-amber-300 bg-white px-3 py-2 text-xs font-semibold text-violet-900 transition hover:bg-amber-100"
+              className="mt-3 inline-flex rounded-xl border border-amber-300 bg-white px-3 py-2 text-xs font-semibold text-violet-900 transition hover:bg-amber-100 lg:text-[9px]"
             >
               Open Integrations Hub
             </Link>
@@ -1121,34 +1121,34 @@ export default function FieldDashboardPage() {
         ) : null}
 
         {fieldListsLoading ? (
-          <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+          <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 lg:rounded-xl lg:p-3 lg:mt-4 lg:text-[11px]">
             Loading field lists...
           </div>
         ) : fieldLists.length === 0 ? (
-          <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <p className="text-sm font-semibold text-slate-900">No Field lists are ready yet.</p>
-            <p className="mt-1 text-sm text-slate-600">
+          <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3 lg:mt-4">
+            <p className="text-sm font-semibold text-slate-900 lg:text-[11px]">No Field lists are ready yet.</p>
+            <p className="mt-1 text-sm text-slate-600 lg:text-[11px]">
               Create or tag a contact list for Field to make it available for route planning.
             </p>
             <Link
               href="/dashboard/lists"
-              className="mt-3 inline-flex rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
+              className="mt-3 inline-flex rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 lg:text-[9px]"
             >
               Open Lists
             </Link>
           </div>
         ) : (
-          <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3 lg:gap-2 lg:mt-4">
             {fieldLists.map((list) => (
-              <div key={list.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <div className="flex items-start justify-between gap-3">
+              <div key={list.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
+                <div className="flex items-start justify-between gap-3 lg:gap-2">
                   <div>
                     <p className="font-semibold text-slate-900">{list.name}</p>
-                    <p className="mt-1 text-xs uppercase tracking-wide text-slate-500">
+                    <p className="mt-1 text-xs uppercase tracking-wide text-slate-500 lg:text-[9px]">
                       {list.type || "Field"} list
                     </p>
                   </div>
-                  <Route className="h-4 w-4 shrink-0 text-slate-500" />
+                  <Route className="h-4 w-4 shrink-0 text-slate-500 lg:h-3.5 lg:w-3.5" />
                 </div>
 
                 <button
@@ -1162,17 +1162,17 @@ export default function FieldDashboardPage() {
                     routesState === "connected" && routeGeneratingListId === null
                       ? "bg-slate-900 text-white hover:bg-slate-800"
                       : "cursor-not-allowed border border-slate-200 bg-white text-slate-400"
-                  }`}
+                  } lg:mt-3 lg:text-[11px]`}
                 >
                   {routeGeneratingListId === list.id ? "Generating Route..." : "Generate Route"}
                 </button>
 
                 {routeErrors[list.id] ? (
                   <div className="mt-3 rounded-xl border border-rose-200 bg-rose-50 p-3">
-                    <p className="text-xs font-semibold text-rose-800">
+                    <p className="text-xs font-semibold text-rose-800 lg:text-[9px]">
                       Route generation failed
                     </p>
-                    <p className="mt-1 text-xs text-rose-700">
+                    <p className="mt-1 text-xs text-rose-700 lg:text-[9px]">
                       {routeErrors[list.id]}
                     </p>
                   </div>
@@ -1181,16 +1181,16 @@ export default function FieldDashboardPage() {
                 {routeResults[list.id]?.success === true ? (
                   <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 p-3">
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <p className="text-xs font-semibold text-emerald-800">
+                      <p className="text-xs font-semibold text-emerald-800 lg:text-[9px]">
                         Route generated
                       </p>
-                      <p className="text-xs font-medium text-emerald-700">
+                      <p className="text-xs font-medium text-emerald-700 lg:text-[9px]">
                         {formatRouteDistance(routeResults[list.id]?.route?.distanceMeters)} ·{" "}
                         {formatRouteDuration(routeResults[list.id]?.route?.duration)}
                       </p>
                     </div>
 
-                    <p className="mt-2 text-xs text-emerald-800">
+                    <p className="mt-2 text-xs text-emerald-800 lg:text-[9px]">
                       {routeResults[list.id]?.counts?.routedContacts ?? 0} contact
                       {(routeResults[list.id]?.counts?.routedContacts ?? 0) === 1 ? "" : "s"} routed
                       {routeResults[list.id]?.counts?.skippedContacts > 0
@@ -1206,7 +1206,7 @@ export default function FieldDashboardPage() {
                             key={`${stop.contactId}-${stop.order}`}
                             className="rounded-lg border border-emerald-200 bg-white p-2"
                           >
-                            <p className="text-xs font-semibold text-slate-900">
+                            <p className="text-xs font-semibold text-slate-900 lg:text-[9px]">
                               {stop.order}. {stop.name}
                             </p>
                             <p className="mt-0.5 text-[11px] text-slate-600">
@@ -1227,32 +1227,32 @@ export default function FieldDashboardPage() {
       <section
         className={`grid gap-6 ${
           demoRole === "general_user" ? "lg:grid-cols-2" : "lg:grid-cols-3"
-        }`}
+        } lg:gap-4`}
       >
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm lg:rounded-2xl lg:p-4">
           <div className="flex items-center justify-between">
-            <div className="text-sm font-medium text-slate-500">
+            <div className="text-sm font-medium text-slate-500 lg:text-[11px]">
               Turf Pressure
             </div>
-            <Route className="h-4 w-4 text-slate-500" />
+            <Route className="h-4 w-4 text-slate-500 lg:h-3.5 lg:w-3.5" />
           </div>
 
-          <div className="mt-4 space-y-2 text-sm text-slate-700">
+          <div className="mt-4 space-y-2 text-sm text-slate-700 lg:mt-3 lg:text-[11px]">
             <div>Active turf: {visibleTurfRows.length}</div>
             <div>Under 60% complete: {turfPressure.underSixtyCount}</div>
             <div>Unfinished turf: {turfPressure.unfinishedCount}</div>
           </div>
         </div>
 
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm lg:rounded-2xl lg:p-4">
           <div className="flex items-center justify-between">
-            <div className="text-sm font-medium text-slate-500">
+            <div className="text-sm font-medium text-slate-500 lg:text-[11px]">
               Conversation Yield
             </div>
-            <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+            <CheckCircle2 className="h-4 w-4 text-emerald-500 lg:h-3.5 lg:w-3.5" />
           </div>
 
-          <div className="mt-4 space-y-2 text-sm text-slate-700">
+          <div className="mt-4 space-y-2 text-sm text-slate-700 lg:mt-3 lg:text-[11px]">
             <div>
               Avg conversation rate:{" "}
               {topLine.doors > 0
@@ -1270,15 +1270,15 @@ export default function FieldDashboardPage() {
         </div>
 
         {demoRole !== "general_user" ? (
-          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm lg:rounded-2xl lg:p-4">
             <div className="flex items-center justify-between">
-              <div className="text-sm font-medium text-slate-500">
+              <div className="text-sm font-medium text-slate-500 lg:text-[11px]">
                 Follow-Up Signal
               </div>
-              <Zap className="h-4 w-4 text-amber-500" />
+              <Zap className="h-4 w-4 text-amber-500 lg:h-3.5 lg:w-3.5" />
             </div>
 
-            <div className="mt-4 space-y-2 text-sm text-slate-700">
+            <div className="mt-4 space-y-2 text-sm text-slate-700 lg:mt-3 lg:text-[11px]">
               <div>Generated follow-up lists: {generatedLists.length}</div>
               <div>Conversation clusters to review: 0</div>
               <div>Immediate action items: {visibleFocusQueue.length}</div>
@@ -1288,9 +1288,9 @@ export default function FieldDashboardPage() {
       </section>
 
       {demoRole !== "general_user" ? (
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-lg font-semibold text-slate-900">
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3 lg:gap-2 lg:mb-3">
+            <h2 className="text-lg font-semibold text-slate-900 lg:text-base">
               {trendHeadline}
             </h2>
 
@@ -1304,7 +1304,7 @@ export default function FieldDashboardPage() {
                       trendView === view
                         ? "bg-slate-900 text-white"
                         : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-100"
-                    }`}
+                    } lg:text-[9px]`}
                   >
                     {view}
                   </button>
@@ -1324,7 +1324,7 @@ export default function FieldDashboardPage() {
                       className="rounded-t-lg bg-slate-900 transition-all"
                       style={{ height: `${height}%` }}
                     />
-                    <p className="mt-2 text-center text-xs text-slate-500">
+                    <p className="mt-2 text-center text-xs text-slate-500 lg:text-[9px]">
                       {point.label}
                     </p>
                   </div>
@@ -1332,24 +1332,24 @@ export default function FieldDashboardPage() {
               })}
             </div>
           ) : (
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-600">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-600 lg:rounded-xl lg:p-4 lg:text-[11px]">
               No field trend data available yet.
             </div>
           )}
         </section>
       ) : null}
       <div className="hidden" aria-hidden="true">
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="flex items-start gap-3">
-          <Sparkles className="mt-0.5 h-5 w-5 text-slate-500" />
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+        <div className="flex items-start gap-3 lg:gap-2">
+          <Sparkles className="mt-0.5 h-5 w-5 text-slate-500 lg:h-4 lg:w-4" />
           <div>
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold text-slate-900 lg:text-base">
               Field Command Signal
             </h2>
-            <p className="mt-2 text-sm text-slate-700">
+            <p className="mt-2 text-sm text-slate-700 lg:text-[11px]">
               {fieldCommandSignal.title}
             </p>
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-slate-500 lg:text-[9px]">
               {fieldCommandSignal.detail}
             </p>
           </div>
@@ -1359,38 +1359,38 @@ export default function FieldDashboardPage() {
 
       {generatedLists.length > 0 &&
       (demoRole === "admin" || demoRole === "director") ? (
-        <section className="rounded-3xl border border-purple-200 bg-purple-50 p-6 shadow-sm">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-purple-900">
+        <section className="rounded-3xl border border-purple-200 bg-purple-50 p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <div className="mb-4 flex items-center justify-between lg:mb-3">
+            <h2 className="text-lg font-semibold text-purple-900 lg:text-base">
               Generated Follow-Up Lists
             </h2>
-            <span className="text-sm font-medium text-purple-700">
+            <span className="text-sm font-medium text-purple-700 lg:text-[11px]">
               {generatedLists.length} created
             </span>
           </div>
 
-          <div className="grid gap-3 md:grid-cols-2">
+          <div className="grid gap-3 md:grid-cols-2 lg:gap-2">
             {generatedLists.map((list) => (
               <div
                 key={list.id}
-                className="rounded-2xl border border-purple-200 bg-white p-4"
+                className="rounded-2xl border border-purple-200 bg-white p-4 lg:rounded-xl lg:p-3"
               >
                 <p className="font-semibold text-slate-900">{list.name}</p>
-                <p className="mt-1 text-sm text-slate-600">{list.source}</p>
-                <p className="mt-2 text-xs text-slate-500">
+                <p className="mt-1 text-sm text-slate-600 lg:text-[11px]">{list.source}</p>
+                <p className="mt-2 text-xs text-slate-500 lg:text-[9px]">
                   Created: {list.created}
                 </p>
 
                 <div className="mt-3 flex gap-2">
                   <Link
                     href="/dashboard/lists"
-                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100"
+                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100 lg:text-[9px]"
                   >
                     Open Lists
                   </Link>
                   <Link
                     href="/dashboard/outreach"
-                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100"
+                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100 lg:text-[9px]"
                   >
                     Send to Outreach
                   </Link>
@@ -1408,10 +1408,10 @@ export default function FieldDashboardPage() {
             : visibleTurfRows.length === 3
             ? "xl:grid-cols-3"
             : "xl:grid-cols-4"
-        }`}
+        } lg:gap-4`}
       >
         {visibleTurfRows.length === 0 ? (
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 text-sm text-slate-600 shadow-sm xl:col-span-4">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 text-sm text-slate-600 shadow-sm xl:col-span-4 lg:rounded-2xl lg:p-[18px] lg:text-[11px]">
             {fieldLoading
               ? "Loading field metrics..."
               : "No field turf metrics available for this campaign yet."}
@@ -1421,18 +1421,18 @@ export default function FieldDashboardPage() {
         {visibleTurfRows.map((turf) => (
           <div
             key={turf.id}
-            className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
+            className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]"
           >
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-slate-900">
+              <h3 className="text-lg font-semibold text-slate-900 lg:text-base">
                 {turf.name}
               </h3>
-              <span className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">
+              <span className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700 lg:text-[9px]">
                 {turf.region}
               </span>
             </div>
 
-            <div className="mt-4 space-y-3 text-sm text-slate-700">
+            <div className="mt-4 space-y-3 text-sm text-slate-700 lg:space-y-2 lg:mt-3 lg:text-[11px]">
               <div className="flex items-center justify-between">
                 <span>Doors</span>
                 <span className="font-semibold">{turf.doors}</span>
@@ -1461,11 +1461,11 @@ export default function FieldDashboardPage() {
               ) : null}
 
               {turf.linkedListName && demoRole !== "general_user" ? (
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
-                  <p className="text-xs uppercase tracking-wide text-slate-400">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 lg:rounded-xl">
+                  <p className="text-xs uppercase tracking-wide text-slate-400 lg:text-[9px]">
                     Linked List
                   </p>
-                  <p className="mt-1 text-sm font-medium text-slate-900">
+                  <p className="mt-1 text-sm font-medium text-slate-900 lg:text-[11px]">
                     {turf.linkedListName}
                   </p>
                 </div>
@@ -1475,23 +1475,23 @@ export default function FieldDashboardPage() {
         ))}
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
+      <section className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr] lg:gap-4">
         {demoRole !== "general_user" ? (
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="mb-6 flex items-center justify-between">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+            <div className="mb-6 flex items-center justify-between lg:mb-4">
               <div>
-                <p className="text-sm font-medium text-slate-500">Team Output</p>
-                <h2 className="text-xl font-semibold text-slate-900">
+                <p className="text-sm font-medium text-slate-500 lg:text-[11px]">Team Output</p>
+                <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">
                   Canvasser Performance
                 </h2>
               </div>
 
-              <Users className="h-5 w-5 text-slate-500" />
+              <Users className="h-5 w-5 text-slate-500 lg:h-4 lg:w-4" />
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-4 lg:space-y-3">
               {visibleCanvasserRows.length === 0 ? (
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 lg:rounded-xl lg:p-3 lg:text-[11px]">
                   No canvasser output is connected yet.
                 </div>
               ) : null}
@@ -1499,22 +1499,22 @@ export default function FieldDashboardPage() {
               {visibleCanvasserRows.map((canvasser) => (
                 <div
                   key={canvasser.id}
-                  className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                  className="rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3"
                 >
-                  <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-3">
                     <div>
-                      <p className="text-lg font-semibold text-slate-900">
+                      <p className="text-lg font-semibold text-slate-900 lg:text-base">
                         {canvasser.name}
                       </p>
-                      <p className="text-sm text-slate-500">
+                      <p className="text-sm text-slate-500 lg:text-[11px]">
                         {canvasser.shifts} shift
                         {canvasser.shifts === 1 ? "" : "s"}
                       </p>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-3 lg:min-w-[320px]">
-                      <div className="rounded-2xl border border-slate-200 bg-white p-3">
-                        <p className="text-xs uppercase tracking-wide text-slate-400">
+                    <div className="grid grid-cols-3 gap-3 lg:min-w-[320px] lg:gap-2">
+                      <div className="rounded-2xl border border-slate-200 bg-white p-3 lg:rounded-xl">
+                        <p className="text-xs uppercase tracking-wide text-slate-400 lg:text-[9px]">
                           Doors
                         </p>
                         <p className="mt-1 font-semibold text-slate-900">
@@ -1522,8 +1522,8 @@ export default function FieldDashboardPage() {
                         </p>
                       </div>
 
-                      <div className="rounded-2xl border border-slate-200 bg-white p-3">
-                        <p className="text-xs uppercase tracking-wide text-slate-400">
+                      <div className="rounded-2xl border border-slate-200 bg-white p-3 lg:rounded-xl">
+                        <p className="text-xs uppercase tracking-wide text-slate-400 lg:text-[9px]">
                           Convos
                         </p>
                         <p className="mt-1 font-semibold text-slate-900">
@@ -1531,8 +1531,8 @@ export default function FieldDashboardPage() {
                         </p>
                       </div>
 
-                      <div className="rounded-2xl border border-slate-200 bg-white p-3">
-                        <p className="text-xs uppercase tracking-wide text-slate-400">
+                      <div className="rounded-2xl border border-slate-200 bg-white p-3 lg:rounded-xl">
+                        <p className="text-xs uppercase tracking-wide text-slate-400 lg:text-[9px]">
                           IDs
                         </p>
                         <p className="mt-1 font-semibold text-slate-900">
@@ -1546,21 +1546,21 @@ export default function FieldDashboardPage() {
             </div>
           </div>
         ) : (
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="mb-6 flex items-center justify-between">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+            <div className="mb-6 flex items-center justify-between lg:mb-4">
               <div>
-                <p className="text-sm font-medium text-slate-500">Work Output</p>
-                <h2 className="text-xl font-semibold text-slate-900">
+                <p className="text-sm font-medium text-slate-500 lg:text-[11px]">Work Output</p>
+                <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">
                   Active Field Priorities
                 </h2>
               </div>
 
-              <MapPinned className="h-5 w-5 text-slate-500" />
+              <MapPinned className="h-5 w-5 text-slate-500 lg:h-4 lg:w-4" />
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-4 lg:space-y-3">
               {visibleTurfRows.length === 0 ? (
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 lg:rounded-xl lg:p-3 lg:text-[11px]">
                   No active field priorities are available yet.
                 </div>
               ) : null}
@@ -1568,10 +1568,10 @@ export default function FieldDashboardPage() {
               {visibleTurfRows.map((turf) => (
                 <div
                   key={turf.id}
-                  className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                  className="rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3"
                 >
                   <p className="font-semibold text-slate-900">{turf.name}</p>
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
                     {turf.completion}% complete · {turf.conversations} conversations
                   </p>
                 </div>
@@ -1580,21 +1580,21 @@ export default function FieldDashboardPage() {
           </div>
         )}
 
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="mb-6 flex items-center justify-between">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <div className="mb-6 flex items-center justify-between lg:mb-4">
             <div>
-              <p className="text-sm font-medium text-slate-500">Focus Queue</p>
-              <h2 className="text-xl font-semibold text-slate-900">
+              <p className="text-sm font-medium text-slate-500 lg:text-[11px]">Focus Queue</p>
+              <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">
                 Field Priorities
               </h2>
             </div>
 
-            <ClipboardList className="h-5 w-5 text-slate-500" />
+            <ClipboardList className="h-5 w-5 text-slate-500 lg:h-4 lg:w-4" />
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-4 lg:space-y-3">
             {visibleFocusQueue.length === 0 ? (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 lg:rounded-xl lg:p-3 lg:text-[11px]">
                 No field focus queue items are available from live metrics yet.
               </div>
             ) : null}
@@ -1602,19 +1602,19 @@ export default function FieldDashboardPage() {
             {visibleFocusQueue.map((item) => (
               <div
                 key={item.id}
-                className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                className="rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3"
               >
-                <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between lg:gap-2">
                   <div>
                     <p className="font-semibold text-slate-900">{item.title}</p>
-                    <p className="mt-2 text-sm text-slate-500">{item.summary}</p>
+                    <p className="mt-2 text-sm text-slate-500 lg:text-[11px]">{item.summary}</p>
                     {item.linkedListName && demoRole !== "general_user" ? (
-                      <p className="mt-2 text-xs text-slate-500">
+                      <p className="mt-2 text-xs text-slate-500 lg:text-[9px]">
                         Linked list: {item.linkedListName}
                       </p>
                     ) : null}
                     {selectedFocusTaskId === item.id && selectedFocusPatternHint ? (
-                      <p className="mt-2 text-xs font-medium text-violet-700">
+                      <p className="mt-2 text-xs font-medium text-violet-700 lg:text-[9px]">
                         {selectedFocusPatternHint}
                       </p>
                     ) : null}
@@ -1624,7 +1624,7 @@ export default function FieldDashboardPage() {
                     <span
                       className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${priorityTone(
                         item.priority
-                      )}`}
+                      )} lg:text-[9px]`}
                     >
                       {item.priority}
                     </span>
@@ -1632,7 +1632,7 @@ export default function FieldDashboardPage() {
                     <span
                       className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${typeTone(
                         item.type
-                      )}`}
+                      )} lg:text-[9px]`}
                     >
                       {item.type}
                     </span>
@@ -1642,11 +1642,11 @@ export default function FieldDashboardPage() {
             ))}
           </div>
 
-          <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <p className="text-sm font-semibold text-slate-900">
+          <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3 lg:mt-4">
+            <p className="text-sm font-semibold text-slate-900 lg:text-[11px]">
               Focus Mode Intent
             </p>
-            <p className="mt-2 text-sm text-slate-700">
+            <p className="mt-2 text-sm text-slate-700 lg:text-[11px]">
               {demoRole === "admin"
                 ? "Field focus mode should narrow execution to turf completion, strongest-canvasser allocation, and immediate follow-up generation from high-value conversations."
                 : demoRole === "director"

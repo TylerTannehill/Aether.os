@@ -80,7 +80,7 @@ export default function SupportPage() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#07111F] px-6 py-16 text-white">
+    <div className="relative min-h-screen overflow-hidden bg-[#07111F] px-6 py-16 text-white lg:py-10">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.18),transparent_55%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(59,130,246,0.10),transparent_45%)]" />
       <div className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent,rgba(7,17,31,0.35),transparent)]" />
@@ -88,54 +88,54 @@ export default function SupportPage() {
       <div className="relative mx-auto max-w-4xl">
         <Link
           href="/"
-          className="mb-8 inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-violet-400/40 hover:bg-white/10"
+          className="mb-8 inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-violet-400/40 hover:bg-white/10 lg:mb-6 lg:gap-1.5 lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-xs"
         >
           <span>←</span>
           <span>Back to Landing Page</span>
         </Link>
 
-        <div className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-10 backdrop-blur-xl">
-          <h1 className="text-5xl font-black tracking-tight">Support</h1>
+        <div className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-10 backdrop-blur-xl lg:rounded-2xl lg:p-7">
+          <h1 className="text-5xl font-black tracking-tight lg:text-4xl">Support</h1>
 
-          <p className="mt-6 text-lg leading-8 text-slate-300">
+          <p className="mt-6 text-lg leading-8 text-slate-300 lg:mt-4 lg:text-base lg:leading-7">
             We're sorry you're experiencing trouble with Aether.
           </p>
 
-          <p className="mt-6 leading-8 text-slate-300">
+          <p className="mt-6 leading-8 text-slate-300 lg:mt-4 lg:text-sm lg:leading-6">
             Campaigns rely on Aether during long days and critical moments, and
             we understand how important it is for the platform to work
             reliably. While issues can occasionally happen, Team Aether is
             committed to resolving them as quickly as possible.
           </p>
 
-          <p className="mt-6 leading-8 text-slate-300">
+          <p className="mt-6 leading-8 text-slate-300 lg:mt-4 lg:text-sm lg:leading-6">
             Before reaching out, you may find the answer you're looking for in
             Aether Academy, where we maintain documentation, walkthroughs, and
             platform guides.
           </p>
 
-          <div className="mt-8 flex justify-center">
+          <div className="mt-8 flex justify-center lg:mt-6">
             <Link
               href="/aether-academy"
-              className="rounded-xl bg-violet-600 px-6 py-3 font-bold text-white transition hover:bg-violet-500"
+              className="rounded-xl bg-violet-600 px-6 py-3 font-bold text-white transition hover:bg-violet-500 lg:px-5 lg:py-2.5 lg:text-sm"
             >
               Visit Aether Academy
             </Link>
           </div>
 
-          <div className="mt-16 border-t border-white/10 pt-12">
-            <h2 className="text-3xl font-bold" onClick={handleHelpClick}>
+          <div className="mt-16 border-t border-white/10 pt-12 lg:mt-10 lg:pt-8">
+            <h2 className="text-3xl font-bold lg:text-2xl" onClick={handleHelpClick}>
               Need Additional Help?
             </h2>
 
-            <p className="mt-4 text-slate-300">
+            <p className="mt-4 text-slate-300 lg:mt-3 lg:text-sm">
               If you weren't able to resolve your issue, send Team Aether a
               support request below.
             </p>
 
             <form
               onSubmit={handleSubmit}
-              className="mt-8 space-y-6"
+              className="mt-8 space-y-6 lg:mt-6 lg:space-y-4"
             >
               <input
                 name="name"
@@ -143,7 +143,7 @@ export default function SupportPage() {
                 required
                 value={form.name}
                 onChange={handleChange}
-                className="w-full rounded-xl border border-white/10 bg-white/5 p-4 text-white placeholder:text-slate-400"
+                className="w-full rounded-xl border border-white/10 bg-white/5 p-4 text-white placeholder:text-slate-400 lg:p-3 lg:text-sm"
               />
 
               <input
@@ -153,7 +153,7 @@ export default function SupportPage() {
                 required
                 value={form.email}
                 onChange={handleChange}
-                className="w-full rounded-xl border border-white/10 bg-white/5 p-4 text-white placeholder:text-slate-400"
+                className="w-full rounded-xl border border-white/10 bg-white/5 p-4 text-white placeholder:text-slate-400 lg:p-3 lg:text-sm"
               />
 
               <input
@@ -161,7 +161,7 @@ export default function SupportPage() {
                 placeholder="Organization"
                 value={form.organization}
                 onChange={handleChange}
-                className="w-full rounded-xl border border-white/10 bg-white/5 p-4 text-white placeholder:text-slate-400"
+                className="w-full rounded-xl border border-white/10 bg-white/5 p-4 text-white placeholder:text-slate-400 lg:p-3 lg:text-sm"
               />
 
               <input
@@ -169,7 +169,7 @@ export default function SupportPage() {
                 placeholder="Phone"
                 value={form.phone}
                 onChange={handleChange}
-                className="w-full rounded-xl border border-white/10 bg-white/5 p-4 text-white placeholder:text-slate-400"
+                className="w-full rounded-xl border border-white/10 bg-white/5 p-4 text-white placeholder:text-slate-400 lg:p-3 lg:text-sm"
               />
 
               <textarea
@@ -179,17 +179,17 @@ export default function SupportPage() {
                 required
                 value={form.message}
                 onChange={handleChange}
-                className="w-full rounded-xl border border-white/10 bg-white/5 p-4 text-white placeholder:text-slate-400"
+                className="w-full rounded-xl border border-white/10 bg-white/5 p-4 text-white placeholder:text-slate-400 lg:p-3 lg:text-sm"
               />
 
               {success && (
-                <div className="rounded-xl border border-green-500/40 bg-green-500/10 p-4 text-green-300">
+                <div className="rounded-xl border border-green-500/40 bg-green-500/10 p-4 text-green-300 lg:p-3 lg:text-sm">
                   {success}
                 </div>
               )}
 
               {error && (
-                <div className="rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-red-300">
+                <div className="rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-red-300 lg:p-3 lg:text-sm">
                   {error}
                 </div>
               )}
@@ -197,25 +197,25 @@ export default function SupportPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full rounded-xl bg-violet-600 px-6 py-4 font-bold text-white transition hover:bg-violet-500 disabled:opacity-60"
+                className="w-full rounded-xl bg-violet-600 px-6 py-4 font-bold text-white transition hover:bg-violet-500 disabled:opacity-60 lg:px-5 lg:py-3 lg:text-sm"
               >
                 {loading ? "Sending..." : "Send Support Request"}
               </button>
             </form>
 
-            <div className="mt-16 border-t border-white/10 pt-12 text-center">
-              <h3 className="text-2xl font-bold">
+            <div className="mt-16 border-t border-white/10 pt-12 text-center lg:mt-10 lg:pt-8">
+              <h3 className="text-2xl font-bold lg:text-xl">
                 Need to get back to work?
               </h3>
 
-              <p className="mt-4 text-slate-300">
+              <p className="mt-4 text-slate-300 lg:mt-3 lg:text-sm">
                 Return to your campaign workspace.
               </p>
 
-              <div className="mt-8 flex justify-center">
+              <div className="mt-8 flex justify-center lg:mt-6">
                 <Link
                   href="/login"
-                  className="inline-flex w-full max-w-md items-center justify-center rounded-xl bg-violet-600 px-8 py-4 font-bold text-white transition hover:bg-violet-500"
+                  className="inline-flex w-full max-w-md items-center justify-center rounded-xl bg-violet-600 px-8 py-4 font-bold text-white transition hover:bg-violet-500 lg:max-w-sm lg:px-6 lg:py-3 lg:text-sm"
                 >
                   Enter Aether
                 </Link>

@@ -1721,9 +1721,9 @@ const availableLists = lists.filter(
   }, []);
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-100 p-6 lg:p-10">
-        <div className="mx-auto max-w-7xl space-y-6">
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="min-h-screen bg-slate-100 p-6 lg:p-6 lg:p-[18px]">
+        <div className="mx-auto max-w-7xl space-y-6 lg:space-y-4">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
             <p className="text-slate-600">Loading contact...</p>
           </div>
         </div>
@@ -1732,51 +1732,51 @@ const availableLists = lists.filter(
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 p-6 lg:p-10">
-      <div className="mx-auto max-w-7xl space-y-8">
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
-          <div className="flex flex-col gap-6">
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-              <div className="space-y-3">
-                <p className="text-sm font-medium uppercase tracking-[0.18em] text-slate-500">
+    <div className="min-h-screen bg-slate-100 p-6 lg:p-6 lg:p-[18px]">
+      <div className="mx-auto max-w-7xl space-y-8 lg:space-y-6">
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-6 lg:rounded-2xl lg:p-[18px]">
+          <div className="flex flex-col gap-6 lg:gap-4">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-4">
+              <div className="space-y-3 lg:space-y-2">
+                <p className="text-sm font-medium uppercase tracking-[0.18em] text-slate-500 lg:text-[11px]">
                   Contact Profile
                 </p>
 
                 <div className="space-y-2">
-                  <h1 className="text-3xl font-semibold tracking-tight text-slate-900 lg:text-4xl">
+                  <h1 className="text-3xl font-semibold tracking-tight text-slate-900 lg:text-3xl lg:text-2xl">
                     {fullName(contact)}
                   </h1>
-                  <p className="max-w-3xl text-sm text-slate-600 lg:text-base">
+                  <p className="max-w-3xl text-sm text-slate-600 lg:text-sm lg:text-[11px]">
                     Operating profile for identity, outreach signal, list
                     placement, active tasks, finance context, and direct
                     execution on this person.
                   </p>
 
-                  <div className="mt-4 grid gap-3 text-sm sm:grid-cols-2 xl:grid-cols-4">
-                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
-                      <p className="text-xs font-medium text-slate-500">Email</p>
+                  <div className="mt-4 grid gap-3 text-sm sm:grid-cols-2 xl:grid-cols-4 lg:gap-2 lg:mt-3 lg:text-[11px]">
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 lg:rounded-xl">
+                      <p className="text-xs font-medium text-slate-500 lg:text-[9px]">Email</p>
                       <p className="mt-1 break-words font-semibold text-slate-900">
                         {contact?.email || "—"}
                       </p>
                     </div>
 
-                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
-                      <p className="text-xs font-medium text-slate-500">Phone</p>
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 lg:rounded-xl">
+                      <p className="text-xs font-medium text-slate-500 lg:text-[9px]">Phone</p>
                       <p className="mt-1 font-semibold text-slate-900">
                         {contact?.phone || "—"}
                       </p>
                     </div>
 
-                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
-                      <p className="text-xs font-medium text-slate-500">Location</p>
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 lg:rounded-xl">
+                      <p className="text-xs font-medium text-slate-500 lg:text-[9px]">Location</p>
                       <p className="mt-1 font-semibold text-slate-900">
                         {[contact?.city, contact?.state].filter(Boolean).join(", ") ||
                           "—"}
                       </p>
                     </div>
 
-                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
-                      <p className="text-xs font-medium text-slate-500">Contact Code</p>
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 lg:rounded-xl">
+                      <p className="text-xs font-medium text-slate-500 lg:text-[9px]">Contact Code</p>
                       <p className="mt-1 font-semibold text-slate-900">
                         {contact?.contact_code || "—"}
                       </p>
@@ -1785,23 +1785,23 @@ const availableLists = lists.filter(
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-3 lg:gap-2">
                 <Link
                   href="/dashboard/outreach"
-                  className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                  className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
                 >
                   Back to Outreach
                 </Link>
 
                 <Link
                   href="/dashboard/contacts"
-                  className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                  className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
                 >
                   Back to Contacts
                 </Link>
                 <button
                   onClick={() => setEditingContact((v) => !v)}
-                  className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700"
+                  className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
                 >
                   {editingContact ? "Cancel Edit" : "Edit Contact"}
                 </button>
@@ -1810,46 +1810,46 @@ const availableLists = lists.filter(
 
             
 {editingContact && (
-<div className="mb-6 rounded-3xl border border-blue-200 bg-blue-50 p-5">
-  <h3 className="mb-4 text-lg font-semibold">Edit Contact</h3>
-  <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+<div className="mb-6 rounded-3xl border border-blue-200 bg-blue-50 p-5 lg:rounded-2xl lg:p-4 lg:mb-4">
+  <h3 className="mb-4 text-lg font-semibold lg:mb-3 lg:text-base">Edit Contact</h3>
+  <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3 lg:gap-2">
     {["first_name","last_name","email","phone","secondary_phone","address","city","state","zip","employer","occupation","owner_name"].map((field)=>(
-      <input key={field} value={editForm[field]||""} onChange={(e)=>setEditForm((c:any)=>({...c,[field]:e.target.value}))} placeholder={field.replace("_"," ")} className="rounded-xl border border-slate-300 bg-white px-3 py-2"/>
+      <input key={field} value={editForm[field]||""} onChange={(e)=>setEditForm((c:any)=>({...c,[field]:e.target.value}))} placeholder={field.replace("_"," ")} className="rounded-xl border border-slate-300 bg-white px-3 py-2 lg:px-2.5"/>
     ))}
   </div>
-  <div className="mt-4">
-    <button onClick={saveContactProfileEdits} className="rounded-xl bg-slate-900 px-4 py-2 text-white">Save Contact</button>
+  <div className="mt-4 lg:mt-3">
+    <button onClick={saveContactProfileEdits} className="rounded-xl bg-slate-900 px-4 py-2 text-white lg:px-3">Save Contact</button>
   </div>
 </div>
 )}
-<div className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
-              <div className="rounded-3xl border border-amber-200 bg-amber-50 p-5 shadow-sm">
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+<div className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr] lg:gap-3">
+              <div className="rounded-3xl border border-amber-200 bg-amber-50 p-5 shadow-sm lg:rounded-2xl lg:p-4">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between lg:gap-3">
                   <div>
-                    <div className="inline-flex items-center gap-2 rounded-full border border-amber-300 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-amber-800">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-amber-300 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-amber-800 lg:px-2.5 lg:text-[9px]">
                       <Sparkles className="h-3.5 w-3.5" />
                       Why This Contact Matters
                     </div>
 
-                    <div className="mt-4">
+                    <div className="mt-4 lg:mt-3">
                       <span
-                        className={`inline-flex rounded-full px-3 py-1 text-sm font-semibold ${prioritySignal.classes}`}
+                        className={`inline-flex rounded-full px-3 py-1 text-sm font-semibold ${prioritySignal.classes} lg:px-2.5 lg:text-[11px]`}
                       >
                         {prioritySignal.label}
                       </span>
                     </div>
 
-                    <p className="mt-3 max-w-2xl text-sm text-amber-900/80">
+                    <p className="mt-3 max-w-2xl text-sm text-amber-900/80 lg:mt-2 lg:text-[11px]">
                       {prioritySignal.description}
                     </p>
                   </div>
 
                   <Link
                     href={prioritySignal.actionHref}
-                    className="inline-flex items-center gap-2 rounded-2xl bg-amber-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-amber-700"
+                    className="inline-flex items-center gap-2 rounded-2xl bg-amber-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-amber-700 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
                   >
                     {prioritySignal.actionLabel}
-                    <ArrowRight className="h-4 w-4" />
+                    <ArrowRight className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                   </Link>
                 </div>
 
@@ -1860,43 +1860,43 @@ const availableLists = lists.filter(
                   fecMessage.toLowerCase().includes("required")
                     ? "border-rose-200 bg-rose-50 text-rose-700"
                     : "border-emerald-200 bg-white text-emerald-900"
-                }`}
+                } lg:rounded-xl lg:p-3 lg:mt-3 lg:text-[11px]`}
               >
                 {fecMessage}
               </div>
             ) : null}
 
-            <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+            <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-5 lg:gap-2 lg:mt-4">
                   {signalBreakdown.map((signal) => (
                     <div
                       key={signal.label}
-                      className="rounded-2xl border border-amber-200 bg-white p-4"
+                      className="rounded-2xl border border-amber-200 bg-white p-4 lg:rounded-xl lg:p-3"
                     >
-                      <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-amber-700 lg:text-[9px]">
                         {signal.label}
                       </p>
-                      <p className="mt-2 text-sm text-slate-700">
+                      <p className="mt-2 text-sm text-slate-700 lg:mt-1.5 lg:text-[11px]">
                         {signal.value}
                       </p>
                     </div>
                   ))}
                 </div>
 
-                <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4 lg:gap-2 lg:mt-4">
                   {executionLinks.map((link) => (
                     <Link
                       key={link.label}
                       href={link.href}
-                      className="inline-flex items-center justify-center gap-2 rounded-2xl border border-amber-200 bg-white px-4 py-3 text-sm font-medium text-slate-800 transition hover:bg-amber-50"
+                      className="inline-flex items-center justify-center gap-2 rounded-2xl border border-amber-200 bg-white px-4 py-3 text-sm font-medium text-slate-800 transition hover:bg-amber-50 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
                     >
                       {link.icon === "outreach" ? (
-                        <PhoneCall className="h-4 w-4" />
+                        <PhoneCall className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                       ) : link.icon === "finance" ? (
-                        <Landmark className="h-4 w-4" />
+                        <Landmark className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                       ) : link.icon === "print" ? (
-                        <Printer className="h-4 w-4" />
+                        <Printer className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                       ) : (
-                        <ListChecks className="h-4 w-4" />
+                        <ListChecks className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                       )}
                       {link.label}
                     </Link>
@@ -1904,56 +1904,56 @@ const availableLists = lists.filter(
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5 lg:rounded-2xl lg:p-4">
                 <div className="flex items-center gap-2">
-                  <Workflow className="h-4 w-4 text-slate-500" />
-                  <p className="text-sm font-medium text-slate-500">
+                  <Workflow className="h-4 w-4 text-slate-500 lg:h-3.5 lg:w-3.5" />
+                  <p className="text-sm font-medium text-slate-500 lg:text-[11px]">
                     Quick Execution
                   </p>
                 </div>
 
-                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:gap-2 lg:mt-3">
                   <Link
                     href={outreachCallHref}
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-medium text-blue-700 transition hover:bg-blue-100"
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-medium text-blue-700 transition hover:bg-blue-100 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
                   >
-                    <PhoneCall className="h-4 w-4" />
+                    <PhoneCall className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                     Call
                   </Link>
 
                   <Link
                     href={outreachTextHref}
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-purple-200 bg-purple-50 px-4 py-3 text-sm font-medium text-purple-700 transition hover:bg-purple-100"
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-purple-200 bg-purple-50 px-4 py-3 text-sm font-medium text-purple-700 transition hover:bg-purple-100 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
                   >
-                    <MessageSquare className="h-4 w-4" />
+                    <MessageSquare className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                     Text
                   </Link>
 
                   {showFinanceContactProfileSurfaces ? (
                   <Link
                     href={financeFocusHref}
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700 transition hover:bg-emerald-100"
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700 transition hover:bg-emerald-100 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
                   >
-                    <Landmark className="h-4 w-4" />
+                    <Landmark className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                     Finance Focus
                   </Link>
                   ) : null}
 
                   <a
                     href="#contact-tasks"
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
                   >
-                    <ClipboardList className="h-4 w-4" />
+                    <ClipboardList className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                     Review Tasks
                   </a>
                 </div>
 
-                <div className="mt-5 space-y-3 rounded-2xl border border-slate-200 bg-white p-4">
-                  <p className="text-sm font-medium text-slate-900">
+                <div className="mt-5 space-y-3 rounded-2xl border border-slate-200 bg-white p-4 lg:space-y-2 lg:rounded-xl lg:p-3 lg:mt-4">
+                  <p className="text-sm font-medium text-slate-900 lg:text-[11px]">
                     Log Action Here
                   </p>
 
-                  <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="grid gap-3 sm:grid-cols-2 lg:gap-2">
                     <select
                       value={quickActionDraft.channel}
                       onChange={(e) => {
@@ -1965,7 +1965,7 @@ const availableLists = lists.filter(
                           notes: quickActionDraft.notes,
                         });
                       }}
-                      className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none"
+                      className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none lg:px-2.5 lg:text-[11px]"
                     >
                       <option value="call">Call</option>
                       <option value="text">Text</option>
@@ -1979,7 +1979,7 @@ const availableLists = lists.filter(
                           result: e.target.value,
                         }))
                       }
-                      className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none"
+                      className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none lg:px-2.5 lg:text-[11px]"
                     >
                       {quickActionResultOptions[quickActionDraft.channel].map(
                         (option) => (
@@ -2001,13 +2001,13 @@ const availableLists = lists.filter(
                     }
                     placeholder="Add note for this outreach action..."
                     rows={3}
-                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none"
+                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none lg:px-2.5 lg:text-[11px]"
                   />
 
                   <button
                     onClick={runQuickAction}
                     disabled={quickActionSaving}
-                    className="w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
                   >
                     {quickActionSaving
                       ? "Logging Action..."
@@ -2020,81 +2020,81 @@ const availableLists = lists.filter(
         </section>
 
         {message ? (
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700 lg:rounded-xl lg:p-3 lg:text-[11px]">
             {message}
           </div>
         ) : null}
 
-        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <p className="text-sm font-medium text-slate-500">Current Status</p>
-            <div className="mt-3">
+        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5 lg:gap-3">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+            <p className="text-sm font-medium text-slate-500 lg:text-[11px]">Current Status</p>
+            <div className="mt-3 lg:mt-2">
               <span
-                className={`inline-flex rounded-full px-3 py-1 text-sm font-semibold ${intelligence.classes}`}
+                className={`inline-flex rounded-full px-3 py-1 text-sm font-semibold ${intelligence.classes} lg:px-2.5 lg:text-[11px]`}
               >
                 {intelligence.label}
               </span>
             </div>
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-2 text-sm text-slate-500 lg:mt-1.5 lg:text-[11px]">
               {intelligence.description}
             </p>
           </div>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <p className="text-sm font-medium text-slate-500">Next Action</p>
-            <div className="mt-3">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+            <p className="text-sm font-medium text-slate-500 lg:text-[11px]">Next Action</p>
+            <div className="mt-3 lg:mt-2">
               <span
-                className={`inline-flex rounded-full px-3 py-1 text-sm font-semibold ${intelligence.nextActionClasses}`}
+                className={`inline-flex rounded-full px-3 py-1 text-sm font-semibold ${intelligence.nextActionClasses} lg:px-2.5 lg:text-[11px]`}
               >
                 {intelligence.nextAction}
               </span>
             </div>
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-2 text-sm text-slate-500 lg:mt-1.5 lg:text-[11px]">
               Derived from latest outreach signal
             </p>
           </div>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <p className="text-sm font-medium text-slate-500">Last Contact</p>
-            <p className="mt-3 text-lg font-semibold text-slate-900">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+            <p className="text-sm font-medium text-slate-500 lg:text-[11px]">Last Contact</p>
+            <p className="mt-3 text-lg font-semibold text-slate-900 lg:mt-2 lg:text-base">
               {formatDateTime(latestLog?.created_at)}
             </p>
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-2 text-sm text-slate-500 lg:mt-1.5 lg:text-[11px]">
               {latestLog?.result || "No outreach logged yet"}
             </p>
           </div>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <p className="text-sm font-medium text-slate-500">Open Tasks</p>
-            <p className="mt-3 text-3xl font-semibold text-slate-900">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+            <p className="text-sm font-medium text-slate-500 lg:text-[11px]">Open Tasks</p>
+            <p className="mt-3 text-3xl font-semibold text-slate-900 lg:mt-2 lg:text-2xl">
               {openTasksCount}
             </p>
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-2 text-sm text-slate-500 lg:mt-1.5 lg:text-[11px]">
               Outstanding work tied to this contact
             </p>
           </div>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <p className="text-sm font-medium text-slate-500">Lists Assigned</p>
-            <p className="mt-3 text-3xl font-semibold text-slate-900">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+            <p className="text-sm font-medium text-slate-500 lg:text-[11px]">Lists Assigned</p>
+            <p className="mt-3 text-3xl font-semibold text-slate-900 lg:mt-2 lg:text-2xl">
               {contactLists.length}
             </p>
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-2 text-sm text-slate-500 lg:mt-1.5 lg:text-[11px]">
               Current list memberships
             </p>
           </div>
         </section>
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
-          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-6 lg:rounded-2xl lg:p-[18px]">
+          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between lg:gap-3 lg:mb-4">
             <div>
-              <p className="text-sm font-medium text-slate-500">
+              <p className="text-sm font-medium text-slate-500 lg:text-[11px]">
                 Contact Notes
               </p>
-              <h2 className="text-xl font-semibold text-slate-900">
+              <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">
                 Internal notes for this contact
               </h2>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
                 Add timestamped relationship notes, meeting context, donor
                 details, local issues, family references, and anything the team
                 should remember before working this contact.
@@ -2105,7 +2105,7 @@ const availableLists = lists.filter(
               type="button"
               onClick={saveContactNotes}
               disabled={notesSaving}
-              className="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
               {notesSaving ? "Saving Note..." : "Save Note"}
             </button>
@@ -2116,10 +2116,10 @@ const availableLists = lists.filter(
             onChange={(e) => setNotesDraft(e.target.value)}
             placeholder="Add a new note for this contact..."
             rows={4}
-            className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-900 outline-none transition focus:border-slate-400 focus:bg-white"
+            className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-900 outline-none transition focus:border-slate-400 focus:bg-white lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
           />
 
-          <div className="mt-3 flex flex-col gap-2 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mt-3 flex flex-col gap-2 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between lg:mt-2 lg:text-[9px]">
             <p>Notes are timestamped and added to this contact record.</p>
 
             {notesMessage ? (
@@ -2137,38 +2137,38 @@ const availableLists = lists.filter(
             ) : null}
           </div>
 
-          <div className="mt-6 space-y-3">
+          <div className="mt-6 space-y-3 lg:space-y-2 lg:mt-4">
             {contact?.notes ? (
-              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
-                <p className="text-xs font-semibold uppercase tracking-wide text-amber-800">
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 lg:rounded-xl lg:p-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-amber-800 lg:text-[9px]">
                   Legacy Profile Note
                 </p>
-                <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-800">
+                <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-800 lg:mt-1.5 lg:text-[11px]">
                   {contact.notes}
                 </p>
               </div>
             ) : null}
 
             {contactNotes.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
+              <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500 lg:rounded-xl lg:p-3 lg:text-[11px]">
                 No contact notes have been added yet.
               </div>
             ) : (
               contactNotes.map((note) => (
                 <div
                   key={note.id}
-                  className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                  className="rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3"
                 >
                   <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                    <p className="text-sm font-semibold text-slate-900">
+                    <p className="text-sm font-semibold text-slate-900 lg:text-[11px]">
                       {note.author_name || "Aether User"}
                     </p>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-slate-500 lg:text-[9px]">
                       {formatDateTime(note.created_at)}
                     </p>
                   </div>
 
-                  <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-700">
+                  <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-700 lg:mt-2 lg:text-[11px]">
                     {note.note}
                   </p>
                 </div>
@@ -2180,41 +2180,41 @@ const availableLists = lists.filter(
         {showFinanceContactProfileSurfaces ? (
         <section
           id="finance-overview"
-          className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8"
+          className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-6 lg:rounded-2xl lg:p-[18px]"
         >
-          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-3 lg:mb-4">
             <div>
-              <p className="text-sm font-medium text-slate-500">
+              <p className="text-sm font-medium text-slate-500 lg:text-[11px]">
                 Finance Intelligence
               </p>
-              <h2 className="text-xl font-semibold text-slate-900">
+              <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">
                 Contributions, pledges, and compliance
               </h2>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
                 This section reflects donor activity, pending pledges, and any
                 compliance gaps tied to this contact.
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-3 lg:gap-2">
               <Link
                 href={financeHref}
-                className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
               >
                 Open Finance Dashboard
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               </Link>
 
               <button
                 type="button"
                 onClick={() => setFinanceExpanded((current) => !current)}
-                className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
+                className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
               >
                 {financeExpanded ? "Collapse" : "Expand"}
                 <ChevronDown
                   className={`h-4 w-4 transition ${
                     financeExpanded ? "rotate-180" : ""
-                  }`}
+                  } lg:h-3.5 lg:w-3.5`}
                 />
               </button>
             </div>
@@ -2222,63 +2222,63 @@ const availableLists = lists.filter(
 
           {financeExpanded ? (
             <>
-          <div className="grid gap-4 md:grid-cols-4">
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-xs font-medium text-slate-500">
+          <div className="grid gap-4 md:grid-cols-4 lg:gap-3">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
+              <p className="text-xs font-medium text-slate-500 lg:text-[9px]">
                 Lifetime Contributions
               </p>
-              <p className="mt-2 text-xl font-semibold text-slate-900">
+              <p className="mt-2 text-xl font-semibold text-slate-900 lg:mt-1.5 lg:text-lg">
                 {currency.format(financeSummary.lifetimeContributionTotal)}
               </p>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-xs font-medium text-slate-500">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
+              <p className="text-xs font-medium text-slate-500 lg:text-[9px]">
                 Active Pledges
               </p>
-              <p className="mt-2 text-xl font-semibold text-slate-900">
+              <p className="mt-2 text-xl font-semibold text-slate-900 lg:mt-1.5 lg:text-lg">
                 {currency.format(financeSummary.activePledgeTotal)}
               </p>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-xs font-medium text-slate-500">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
+              <p className="text-xs font-medium text-slate-500 lg:text-[9px]">
                 Compliance Issues
               </p>
-              <p className="mt-2 text-xl font-semibold text-rose-700">
+              <p className="mt-2 text-xl font-semibold text-rose-700 lg:mt-1.5 lg:text-lg">
                 {financeSummary.nonCompliantContributionCount}
               </p>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-xs font-medium text-slate-500">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
+              <p className="text-xs font-medium text-slate-500 lg:text-[9px]">
                 Total Records
               </p>
-              <p className="mt-2 text-xl font-semibold text-slate-900">
+              <p className="mt-2 text-xl font-semibold text-slate-900 lg:mt-1.5 lg:text-lg">
                 {financeSummary.contributionCount + financeSummary.pledgeCount}
               </p>
             
 </div>
           </div>
 
-          <div className="mt-6 rounded-3xl border border-blue-200 bg-blue-50 p-5">
-            <p className="text-sm font-medium text-blue-800">Add Pledge</p>
-            <h3 className="mt-1 text-xl font-semibold text-blue-950">
+          <div className="mt-6 rounded-3xl border border-blue-200 bg-blue-50 p-5 lg:rounded-2xl lg:p-4 lg:mt-4">
+            <p className="text-sm font-medium text-blue-800 lg:text-[11px]">Add Pledge</p>
+            <h3 className="mt-1 text-xl font-semibold text-blue-950 lg:text-lg">
               Record a pledge on this contact
             </h3>
 
-            <div className="mt-4 grid gap-3 md:grid-cols-[1fr_1fr_1fr_auto]">
+            <div className="mt-4 grid gap-3 md:grid-cols-[1fr_1fr_1fr_auto] lg:gap-2 lg:mt-3">
               <input
                 type="number"
                 placeholder="500.00"
                 value={pledgeDraft.amount}
                 onChange={(e)=>setPledgeDraft((c)=>({...c,amount:e.target.value}))}
-                className="rounded-xl border border-blue-200 bg-white px-3 py-2"
+                className="rounded-xl border border-blue-200 bg-white px-3 py-2 lg:px-2.5"
               />
               <select
                 value={pledgeDraft.status}
                 onChange={(e)=>setPledgeDraft((c)=>({...c,status:e.target.value as any}))}
-                className="rounded-xl border border-blue-200 bg-white px-3 py-2"
+                className="rounded-xl border border-blue-200 bg-white px-3 py-2 lg:px-2.5"
               >
                 <option value="pledged">Pledged</option>
                 <option value="follow_up">Follow Up</option>
@@ -2287,35 +2287,35 @@ const availableLists = lists.filter(
                 type="date"
                 value={pledgeDraft.nextFollowUp}
                 onChange={(e)=>setPledgeDraft((c)=>({...c,nextFollowUp:e.target.value}))}
-                className="rounded-xl border border-blue-200 bg-white px-3 py-2"
+                className="rounded-xl border border-blue-200 bg-white px-3 py-2 lg:px-2.5"
               />
               <button
                 type="button"
                 onClick={savePledge}
                 disabled={pledgeSaving}
-                className="rounded-xl bg-blue-700 px-4 py-2 text-white"
+                className="rounded-xl bg-blue-700 px-4 py-2 text-white lg:px-3"
               >
                 {pledgeSaving ? "Saving..." : "Save Pledge"}
               </button>
             </div>
 
             {pledgeMessage ? (
-              <div className="mt-3 rounded-xl border border-blue-200 bg-white p-3 text-sm">
+              <div className="mt-3 rounded-xl border border-blue-200 bg-white p-3 text-sm lg:mt-2 lg:text-[11px]">
                 {pledgeMessage}
               </div>
             ) : null}
           </div>
 
-          <div className="mt-6 rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
-            <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="mt-6 rounded-3xl border border-emerald-200 bg-emerald-50 p-5 lg:rounded-2xl lg:p-4 lg:mt-4">
+            <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between lg:gap-3 lg:mb-4">
               <div>
-                <p className="text-sm font-medium text-emerald-800">
+                <p className="text-sm font-medium text-emerald-800 lg:text-[11px]">
                   Add Contribution
                 </p>
-                <h3 className="mt-1 text-xl font-semibold text-emerald-950">
+                <h3 className="mt-1 text-xl font-semibold text-emerald-950 lg:text-lg">
                   Record a payment on this contact
                 </h3>
-                <p className="mt-2 max-w-3xl text-sm text-emerald-900/80">
+                <p className="mt-2 max-w-3xl text-sm text-emerald-900/80 lg:mt-1.5 lg:text-[11px]">
                   Add check, cash, or online contribution activity here. Employer
                   and occupation stay on the contact record, so compliance can
                   remain open until those fields are cleaned up.
@@ -2323,9 +2323,9 @@ const availableLists = lists.filter(
               </div>
             </div>
 
-            <div className="grid gap-3 md:grid-cols-[1fr_1fr_1fr_auto]">
+            <div className="grid gap-3 md:grid-cols-[1fr_1fr_1fr_auto] lg:gap-2">
               <div>
-                <label className="text-xs font-semibold uppercase tracking-wide text-emerald-800">
+                <label className="text-xs font-semibold uppercase tracking-wide text-emerald-800 lg:text-[9px]">
                   Amount
                 </label>
                 <input
@@ -2340,12 +2340,12 @@ const availableLists = lists.filter(
                     }))
                   }
                   placeholder="250.00"
-                  className="mt-1 w-full rounded-xl border border-emerald-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-emerald-500"
+                  className="mt-1 w-full rounded-xl border border-emerald-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-emerald-500 lg:px-2.5 lg:text-[11px]"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-semibold uppercase tracking-wide text-emerald-800">
+                <label className="text-xs font-semibold uppercase tracking-wide text-emerald-800 lg:text-[9px]">
                   Payment Type
                 </label>
                 <select
@@ -2356,7 +2356,7 @@ const availableLists = lists.filter(
                       source: e.target.value as ContributionRecord["method"],
                     }))
                   }
-                  className="mt-1 w-full rounded-xl border border-emerald-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-emerald-500"
+                  className="mt-1 w-full rounded-xl border border-emerald-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-emerald-500 lg:px-2.5 lg:text-[11px]"
                 >
                   <option value="check">Check</option>
                   <option value="cash">Cash</option>
@@ -2365,7 +2365,7 @@ const availableLists = lists.filter(
               </div>
 
               <div>
-                <label className="text-xs font-semibold uppercase tracking-wide text-emerald-800">
+                <label className="text-xs font-semibold uppercase tracking-wide text-emerald-800 lg:text-[9px]">
                   Contribution Date
                 </label>
                 <input
@@ -2377,7 +2377,7 @@ const availableLists = lists.filter(
                       date: e.target.value,
                     }))
                   }
-                  className="mt-1 w-full rounded-xl border border-emerald-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-emerald-500"
+                  className="mt-1 w-full rounded-xl border border-emerald-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-emerald-500 lg:px-2.5 lg:text-[11px]"
                 />
               </div>
 
@@ -2386,7 +2386,7 @@ const availableLists = lists.filter(
                   type="button"
                   onClick={saveContribution}
                   disabled={contributionSaving}
-                  className="w-full rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60 md:w-auto"
+                  className="w-full rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60 md:w-auto lg:px-3 lg:text-[11px]"
                 >
                   {contributionSaving ? "Saving..." : "Save Contribution"}
                 </button>
@@ -2400,12 +2400,12 @@ const availableLists = lists.filter(
                   contributionMessage.includes("failed")
                     ? "border-rose-200 bg-rose-50 text-rose-700"
                     : "border-emerald-200 bg-white text-emerald-900"
-                }`}
+                } lg:rounded-xl lg:p-3 lg:mt-3 lg:text-[11px]`}
               >
                 {contributionMessage}
               </div>
             ) : (
-              <div className="mt-4 rounded-2xl border border-emerald-200 bg-white p-4 text-xs text-emerald-900">
+              <div className="mt-4 rounded-2xl border border-emerald-200 bg-white p-4 text-xs text-emerald-900 lg:rounded-xl lg:p-3 lg:mt-3 lg:text-[9px]">
                 This records the payment and updates the contact donation total.
                 Compliance fields remain separate so missing employer or occupation
                 details can still be handled intentionally.
@@ -2413,90 +2413,90 @@ const availableLists = lists.filter(
             )}
           </div>
 
-          <div className="mt-6 rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="mt-6 rounded-3xl border border-emerald-200 bg-emerald-50 p-5 lg:rounded-2xl lg:p-4 lg:mt-4">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between lg:gap-3">
               <div>
-                <p className="text-sm font-medium text-emerald-800">
+                <p className="text-sm font-medium text-emerald-800 lg:text-[11px]">
                   FEC Intelligence
                 </p>
-                <h3 className="mt-1 text-xl font-semibold text-emerald-950">
+                <h3 className="mt-1 text-xl font-semibold text-emerald-950 lg:text-lg">
                   External donor signal attached to this contact
                 </h3>
-                <p className="mt-2 max-w-3xl text-sm text-emerald-900/80">
+                <p className="mt-2 max-w-3xl text-sm text-emerald-900/80 lg:mt-1.5 lg:text-[11px]">
                   Check public FEC contribution records against this contact using
                   first name, last name, and street address.
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3 lg:gap-2">
                 <button
                   type="button"
                   onClick={runFecEnrichment}
                   disabled={fecEnriching}
-                  className="rounded-2xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="rounded-2xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60 lg:rounded-xl lg:px-3 lg:text-[11px]"
                 >
                   {fecEnriching ? "Checking FEC..." : "Check FEC Records"}
                 </button>
 
                 {donorIntelligence.jackpot_candidate ? (
-                  <span className="inline-flex rounded-full border border-yellow-300 bg-yellow-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-yellow-900">
+                  <span className="inline-flex rounded-full border border-yellow-300 bg-yellow-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-yellow-900 lg:px-2.5 lg:text-[9px]">
                     Jackpot Anomaly
                   </span>
                 ) : null}
               </div>
             </div>
 
-            <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-              <div className="rounded-2xl border border-emerald-200 bg-white p-4">
-                <p className="text-xs font-medium text-slate-500">FEC Match</p>
+            <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-5 lg:gap-2 lg:mt-4">
+              <div className="rounded-2xl border border-emerald-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                <p className="text-xs font-medium text-slate-500 lg:text-[9px]">FEC Match</p>
                 <span
                   className={`mt-2 inline-flex rounded-full px-3 py-1 text-xs font-semibold ${fecMatchClasses(
                     donorIntelligence.fec_match_status,
-                  )}`}
+                  )} lg:px-2.5 lg:mt-1.5 lg:text-[9px]`}
                 >
                   {formatFecMatchStatus(donorIntelligence.fec_match_status)}
                 </span>
-                <p className="mt-2 text-xs text-slate-500">
+                <p className="mt-2 text-xs text-slate-500 lg:mt-1.5 lg:text-[9px]">
                   {donorIntelligence.fec_confidence_score
                     ? `${donorIntelligence.fec_confidence_score}% confidence`
                     : "Awaiting match"}
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-emerald-200 bg-white p-4">
-                <p className="text-xs font-medium text-slate-500">
+              <div className="rounded-2xl border border-emerald-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                <p className="text-xs font-medium text-slate-500 lg:text-[9px]">
                   FEC Lifetime
                 </p>
-                <p className="mt-2 text-xl font-semibold text-slate-900">
+                <p className="mt-2 text-xl font-semibold text-slate-900 lg:mt-1.5 lg:text-lg">
                   {currency.format(donorIntelligence.fec_total_given ?? 0)}
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-emerald-200 bg-white p-4">
-                <p className="text-xs font-medium text-slate-500">
+              <div className="rounded-2xl border border-emerald-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                <p className="text-xs font-medium text-slate-500 lg:text-[9px]">
                   Last FEC Gift
                 </p>
-                <p className="mt-2 text-sm font-semibold text-slate-900">
+                <p className="mt-2 text-sm font-semibold text-slate-900 lg:mt-1.5 lg:text-[11px]">
                   {donorIntelligence.fec_last_donation_date || "—"}
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-emerald-200 bg-white p-4">
-                <p className="text-xs font-medium text-slate-500">Donor Tier</p>
+              <div className="rounded-2xl border border-emerald-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                <p className="text-xs font-medium text-slate-500 lg:text-[9px]">Donor Tier</p>
                 <span
                   className={`mt-2 inline-flex rounded-full px-3 py-1 text-xs font-semibold ${donorTierClasses(
                     donorIntelligence.fec_donor_tier,
-                  )}`}
+                  )} lg:px-2.5 lg:mt-1.5 lg:text-[9px]`}
                 >
                   {formatDonorTier(donorIntelligence.fec_donor_tier)}
                 </span>
               </div>
 
-              <div className="rounded-2xl border border-emerald-200 bg-white p-4">
-                <p className="text-xs font-medium text-slate-500">
+              <div className="rounded-2xl border border-emerald-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                <p className="text-xs font-medium text-slate-500 lg:text-[9px]">
                   Opportunity
                 </p>
-                <p className="mt-2 text-sm font-semibold text-slate-900">
+                <p className="mt-2 text-sm font-semibold text-slate-900 lg:mt-1.5 lg:text-[11px]">
                   {donorIntelligence.jackpot_candidate
                     ? "Review now"
                     : donorIntelligence.fec_recent_activity
@@ -2507,22 +2507,22 @@ const availableLists = lists.filter(
             </div>
 
             {donorIntelligence.jackpot_reason ? (
-              <div className="mt-4 rounded-2xl border border-yellow-300 bg-yellow-100 p-4 text-sm text-yellow-950">
+              <div className="mt-4 rounded-2xl border border-yellow-300 bg-yellow-100 p-4 text-sm text-yellow-950 lg:rounded-xl lg:p-3 lg:mt-3 lg:text-[11px]">
                 <span className="font-semibold">Jackpot read:</span>{" "}
                 {donorIntelligence.jackpot_reason}
               </div>
             ) : null}
           </div>
 
-          <div className="mt-6 grid gap-6 lg:grid-cols-2">
+          <div className="mt-6 grid gap-6 lg:grid-cols-2 lg:gap-4 lg:mt-4">
             <div>
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500 lg:text-[11px]">
                 Contribution History
               </h3>
 
-              <div className="mt-3 space-y-2">
+              <div className="mt-3 space-y-2 lg:mt-2">
                 {contributionHistory.length === 0 ? (
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500 lg:rounded-xl lg:p-3 lg:text-[11px]">
                     No contributions are recorded for this contact yet.
                   </div>
                 ) : null}
@@ -2530,7 +2530,7 @@ const availableLists = lists.filter(
                 {contributionHistory.map((c) => (
                   <div
                     key={c.id}
-                    className="rounded-2xl border border-slate-200 bg-white p-4"
+                    className="rounded-2xl border border-slate-200 bg-white p-4 lg:rounded-xl lg:p-3"
                   >
                     <div className="flex items-center justify-between">
                       <p className="font-medium text-slate-900">
@@ -2541,18 +2541,18 @@ const availableLists = lists.filter(
                           c.compliant
                             ? "border border-emerald-200 bg-emerald-100 text-emerald-700"
                             : "border border-rose-200 bg-rose-100 text-rose-700"
-                        }`}
+                        } lg:px-2.5 lg:text-[9px]`}
                       >
                         {c.compliant ? "Compliant" : "Missing Info"}
                       </span>
                     </div>
 
-                    <p className="mt-1 text-sm text-slate-500">
+                    <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
                       {c.method} · {c.date}
                     </p>
 
                     {!c.compliant && (
-                      <p className="mt-1 text-xs text-rose-600">
+                      <p className="mt-1 text-xs text-rose-600 lg:text-[9px]">
                         Employer and occupation required for compliance
                       </p>
                     )}
@@ -2562,13 +2562,13 @@ const availableLists = lists.filter(
             </div>
 
             <div>
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500 lg:text-[11px]">
                 Pledge History
               </h3>
 
-              <div className="mt-3 space-y-2">
+              <div className="mt-3 space-y-2 lg:mt-2">
                 {pledgeHistory.length === 0 ? (
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500 lg:rounded-xl lg:p-3 lg:text-[11px]">
                     No pledges are recorded for this contact yet.
                   </div>
                 ) : null}
@@ -2576,7 +2576,7 @@ const availableLists = lists.filter(
                 {pledgeHistory.map((p) => (
                   <div
                     key={p.id}
-                    className="rounded-2xl border border-slate-200 bg-white p-4"
+                    className="rounded-2xl border border-slate-200 bg-white p-4 lg:rounded-xl lg:p-3"
                   >
                     <div className="flex items-center justify-between">
                       <p className="font-medium text-slate-900">
@@ -2587,18 +2587,18 @@ const availableLists = lists.filter(
                           p.status === "converted"
                             ? "border border-emerald-200 bg-emerald-100 text-emerald-700"
                             : "border border-amber-200 bg-amber-100 text-amber-700"
-                        }`}
+                        } lg:px-2.5 lg:text-[9px]`}
                       >
                         {p.status}
                       </span>
                     </div>
 
-                    <p className="mt-1 text-sm text-slate-500">
+                    <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
                       Created: {p.created_at}
                     </p>
 
                     {p.status !== "converted" && (
-                      <p className="mt-1 text-xs text-amber-700">
+                      <p className="mt-1 text-xs text-amber-700 lg:text-[9px]">
                         Needs follow-up to convert pledge
                       </p>
                     )}
@@ -2609,7 +2609,7 @@ const availableLists = lists.filter(
           </div>
                     </>
           ) : (
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500 lg:rounded-xl lg:p-3 lg:text-[11px]">
               Finance details are collapsed. Expand to view contribution history,
               pledge history, FEC intelligence, and finance entry tools.
             </div>
@@ -2622,17 +2622,17 @@ const availableLists = lists.filter(
 
         <section
           id="field-intelligence"
-          className="rounded-3xl border border-sky-200 bg-sky-50 p-6 shadow-sm lg:p-8"
+          className="rounded-3xl border border-sky-200 bg-sky-50 p-6 shadow-sm lg:p-6 lg:rounded-2xl lg:p-[18px]"
         >
-          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-3 lg:mb-4">
             <div>
-              <p className="text-sm font-medium text-sky-700">
+              <p className="text-sm font-medium text-sky-700 lg:text-[11px]">
                 Field Intelligence
               </p>
-              <h2 className="text-xl font-semibold text-slate-900">
+              <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">
                 Turf placement, canvass context, and field follow-up
               </h2>
-              <p className="mt-1 text-sm text-sky-900/70">
+              <p className="mt-1 text-sm text-sky-900/70 lg:text-[11px]">
                 Field context is derived from Field-tagged lists, operational
                 list names, contact ownership, contact code, and recent
                 execution activity.
@@ -2642,16 +2642,16 @@ const availableLists = lists.filter(
             <div className="flex flex-wrap gap-2">
               <Link
                 href="/dashboard/field/focus"
-                className="inline-flex items-center gap-2 rounded-2xl border border-sky-200 bg-white px-4 py-3 text-sm font-medium text-sky-700 transition hover:bg-sky-100"
+                className="inline-flex items-center gap-2 rounded-2xl border border-sky-200 bg-white px-4 py-3 text-sm font-medium text-sky-700 transition hover:bg-sky-100 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
               >
                 Open Field Focus
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               </Link>
 
               <button
                 type="button"
                 onClick={() => setFieldIntelExpanded((current) => !current)}
-                className="inline-flex items-center gap-2 rounded-2xl border border-sky-200 bg-white px-4 py-3 text-sm font-medium text-sky-700 transition hover:bg-sky-100"
+                className="inline-flex items-center gap-2 rounded-2xl border border-sky-200 bg-white px-4 py-3 text-sm font-medium text-sky-700 transition hover:bg-sky-100 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
               >
                 {fieldIntelExpanded ? "Collapse" : "Expand"}
               </button>
@@ -2659,13 +2659,13 @@ const availableLists = lists.filter(
           </div>
 
           {!fieldIntelExpanded ? (
-            <div className="rounded-2xl border border-sky-200 bg-white p-4">
-              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="rounded-2xl border border-sky-200 bg-white p-4 lg:rounded-xl lg:p-3">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between lg:gap-2">
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">
+                  <p className="text-sm font-semibold text-slate-900 lg:text-[11px]">
                     {fieldSignal.status}
                   </p>
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
                     fieldListMemberships.length field list
                     {fieldListMemberships.length === 1 ? "" : "s"} attached ·
                     Primary: {fieldSignal.turf}
@@ -2674,7 +2674,7 @@ const availableLists = lists.filter(
                 <button
                   type="button"
                   onClick={() => setFieldIntelExpanded(true)}
-                  className="rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-semibold text-sky-700 transition hover:bg-sky-100"
+                  className="rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-semibold text-sky-700 transition hover:bg-sky-100 lg:px-2.5 lg:text-[9px]"
                 >
                   Show details
                 </button>
@@ -2682,68 +2682,68 @@ const availableLists = lists.filter(
             </div>
           ) : (
             <>
-              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                <div className="rounded-2xl border border-sky-200 bg-white p-4">
-                  <p className="text-xs font-medium uppercase tracking-wide text-sky-700">
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4 lg:gap-3">
+                <div className="rounded-2xl border border-sky-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                  <p className="text-xs font-medium uppercase tracking-wide text-sky-700 lg:text-[9px]">
                     Field Status
                   </p>
-                  <p className="mt-2 text-lg font-semibold text-slate-900">
+                  <p className="mt-2 text-lg font-semibold text-slate-900 lg:mt-1.5 lg:text-base">
                     {fieldSignal.status}
                   </p>
-                  <p className="mt-2 text-xs text-slate-500">
+                  <p className="mt-2 text-xs text-slate-500 lg:mt-1.5 lg:text-[9px]">
                     {fieldListMemberships.length} field list
                     {fieldListMemberships.length === 1 ? "" : "s"} attached
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-sky-200 bg-white p-4">
-                  <p className="text-xs font-medium uppercase tracking-wide text-sky-700">
+                <div className="rounded-2xl border border-sky-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                  <p className="text-xs font-medium uppercase tracking-wide text-sky-700 lg:text-[9px]">
                     Current Turf / List
                   </p>
-                  <p className="mt-2 text-lg font-semibold text-slate-900">
+                  <p className="mt-2 text-lg font-semibold text-slate-900 lg:mt-1.5 lg:text-base">
                     {fieldSignal.turf}
                   </p>
-                  <p className="mt-2 text-xs text-slate-500">
+                  <p className="mt-2 text-xs text-slate-500 lg:mt-1.5 lg:text-[9px]">
                     Primary field routing surface
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-sky-200 bg-white p-4">
-                  <p className="text-xs font-medium uppercase tracking-wide text-sky-700">
+                <div className="rounded-2xl border border-sky-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                  <p className="text-xs font-medium uppercase tracking-wide text-sky-700 lg:text-[9px]">
                     Assigned Canvasser / Owner
                   </p>
-                  <p className="mt-2 text-lg font-semibold text-slate-900">
+                  <p className="mt-2 text-lg font-semibold text-slate-900 lg:mt-1.5 lg:text-base">
                     {fieldSignal.owner}
                   </p>
-                  <p className="mt-2 text-xs text-slate-500">
+                  <p className="mt-2 text-xs text-slate-500 lg:mt-1.5 lg:text-[9px]">
                     Uses contact owner until dedicated field assignment exists
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-sky-200 bg-white p-4">
-                  <p className="text-xs font-medium uppercase tracking-wide text-sky-700">
+                <div className="rounded-2xl border border-sky-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                  <p className="text-xs font-medium uppercase tracking-wide text-sky-700 lg:text-[9px]">
                     Support / Contact Code
                   </p>
-                  <p className="mt-2 text-lg font-semibold text-slate-900">
+                  <p className="mt-2 text-lg font-semibold text-slate-900 lg:mt-1.5 lg:text-base">
                     {fieldSignal.support}
                   </p>
-                  <p className="mt-2 text-xs text-slate-500">
+                  <p className="mt-2 text-xs text-slate-500 lg:mt-1.5 lg:text-[9px]">
                     Can become support ID / field result later
                   </p>
                 </div>
               </div>
 
-              <div className="mt-5 rounded-2xl border border-sky-200 bg-white p-4 text-sm text-sky-950">
+              <div className="mt-5 rounded-2xl border border-sky-200 bg-white p-4 text-sm text-sky-950 lg:rounded-xl lg:p-3 lg:mt-4 lg:text-[11px]">
                 {fieldSignal.note}
               </div>
 
-              <div className="mt-5 space-y-2">
-                <p className="text-sm font-semibold text-slate-900">
+              <div className="mt-5 space-y-2 lg:mt-4">
+                <p className="text-sm font-semibold text-slate-900 lg:text-[11px]">
                   Field List Memberships
                 </p>
 
                 {fieldListMemberships.length === 0 ? (
-                  <div className="rounded-2xl border border-sky-200 bg-white p-4 text-sm text-slate-500">
+                  <div className="rounded-2xl border border-sky-200 bg-white p-4 text-sm text-slate-500 lg:rounded-xl lg:p-3 lg:text-[11px]">
                     No Field or field-adjacent operational lists are currently
                     attached to this contact. Add the contact to a turf, walk
                     packet, persuasion, volunteer, route, universe, or follow-up
@@ -2754,20 +2754,20 @@ const availableLists = lists.filter(
                 {fieldListMemberships.map((list) => (
                   <div
                     key={`field-${list.id}`}
-                    className="flex items-center justify-between rounded-2xl border border-sky-200 bg-white p-3"
+                    className="flex items-center justify-between rounded-2xl border border-sky-200 bg-white p-3 lg:rounded-xl"
                   >
                     <div className="flex items-center gap-2">
-                      <span className="rounded-full border border-sky-200 bg-sky-100 px-2 py-0.5 text-xs font-semibold text-sky-700">
+                      <span className="rounded-full border border-sky-200 bg-sky-100 px-2 py-0.5 text-xs font-semibold text-sky-700 lg:text-[9px]">
                         field
                       </span>
-                      <span className="text-sm font-medium text-slate-900">
+                      <span className="text-sm font-medium text-slate-900 lg:text-[11px]">
                         {list.name}
                       </span>
                     </div>
 
                     <Link
                       href="/dashboard/field/focus"
-                      className="text-xs font-medium text-sky-700 hover:underline"
+                      className="text-xs font-medium text-sky-700 hover:underline lg:text-[9px]"
                     >
                       Work in Field Focus
                     </Link>
@@ -2780,17 +2780,17 @@ const availableLists = lists.filter(
 
         <section
           id="print-intelligence"
-          className="rounded-3xl border border-violet-200 bg-violet-50 p-6 shadow-sm lg:p-8"
+          className="rounded-3xl border border-violet-200 bg-violet-50 p-6 shadow-sm lg:p-6 lg:rounded-2xl lg:p-[18px]"
         >
-          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-3 lg:mb-4">
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-violet-700">
+              <p className="text-sm font-medium text-violet-700 lg:text-[11px]">
                 Print Intelligence
               </p>
-              <h2 className="text-xl font-semibold text-slate-900">
+              <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">
                 Physical materials, print routing, and delivery handoff
               </h2>
-              <p className="mt-1 text-sm text-violet-900/70">
+              <p className="mt-1 text-sm text-violet-900/70 lg:text-[11px]">
                 Print context is derived only from physical material lists: palm
                 cards, door hangers, mailers, yard signs, postcards, literature
                 drops, walk packets, and print universes. Cleanup lists like
@@ -2801,16 +2801,16 @@ const availableLists = lists.filter(
             <div className="flex shrink-0 flex-row flex-nowrap gap-2">
               <Link
                 href="/dashboard/print/focus"
-                className="inline-flex items-center gap-2 rounded-2xl border border-violet-200 bg-white px-4 py-3 text-sm font-medium text-violet-700 transition hover:bg-violet-100"
+                className="inline-flex items-center gap-2 rounded-2xl border border-violet-200 bg-white px-4 py-3 text-sm font-medium text-violet-700 transition hover:bg-violet-100 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
               >
                 Open Print Focus
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               </Link>
 
               <button
                 type="button"
                 onClick={() => setPrintIntelExpanded((current) => !current)}
-                className="inline-flex items-center gap-2 rounded-2xl border border-violet-200 bg-white px-4 py-3 text-sm font-medium text-violet-700 transition hover:bg-violet-100"
+                className="inline-flex items-center gap-2 rounded-2xl border border-violet-200 bg-white px-4 py-3 text-sm font-medium text-violet-700 transition hover:bg-violet-100 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
               >
                 {printIntelExpanded ? "Collapse" : "Expand"}
               </button>
@@ -2818,13 +2818,13 @@ const availableLists = lists.filter(
           </div>
 
           {!printIntelExpanded ? (
-            <div className="rounded-2xl border border-violet-200 bg-white p-4">
-              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="rounded-2xl border border-violet-200 bg-white p-4 lg:rounded-xl lg:p-3">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between lg:gap-2">
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">
+                  <p className="text-sm font-semibold text-slate-900 lg:text-[11px]">
                     {printSignal.status}
                   </p>
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
                     printListMemberships.length print material list
                     {printListMemberships.length === 1 ? "" : "s"} attached ·
                     Primary: {printSignal.material}
@@ -2833,7 +2833,7 @@ const availableLists = lists.filter(
                 <button
                   type="button"
                   onClick={() => setPrintIntelExpanded(true)}
-                  className="rounded-xl border border-violet-200 bg-violet-50 px-3 py-2 text-xs font-semibold text-violet-700 transition hover:bg-violet-100"
+                  className="rounded-xl border border-violet-200 bg-violet-50 px-3 py-2 text-xs font-semibold text-violet-700 transition hover:bg-violet-100 lg:px-2.5 lg:text-[9px]"
                 >
                   Show details
                 </button>
@@ -2841,68 +2841,68 @@ const availableLists = lists.filter(
             </div>
           ) : (
             <>
-              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                <div className="rounded-2xl border border-violet-200 bg-white p-4">
-                  <p className="text-xs font-medium uppercase tracking-wide text-violet-700">
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4 lg:gap-3">
+                <div className="rounded-2xl border border-violet-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                  <p className="text-xs font-medium uppercase tracking-wide text-violet-700 lg:text-[9px]">
                     Print Status
                   </p>
-                  <p className="mt-2 text-lg font-semibold text-slate-900">
+                  <p className="mt-2 text-lg font-semibold text-slate-900 lg:mt-1.5 lg:text-base">
                     {printSignal.status}
                   </p>
-                  <p className="mt-2 text-xs text-slate-500">
+                  <p className="mt-2 text-xs text-slate-500 lg:mt-1.5 lg:text-[9px]">
                     {printListMemberships.length} print material list
                     {printListMemberships.length === 1 ? "" : "s"} attached
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-violet-200 bg-white p-4">
-                  <p className="text-xs font-medium uppercase tracking-wide text-violet-700">
+                <div className="rounded-2xl border border-violet-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                  <p className="text-xs font-medium uppercase tracking-wide text-violet-700 lg:text-[9px]">
                     Primary Material
                   </p>
-                  <p className="mt-2 text-lg font-semibold text-slate-900">
+                  <p className="mt-2 text-lg font-semibold text-slate-900 lg:mt-1.5 lg:text-base">
                     {printSignal.material}
                   </p>
-                  <p className="mt-2 text-xs text-slate-500">
+                  <p className="mt-2 text-xs text-slate-500 lg:mt-1.5 lg:text-[9px]">
                     Physical print use case
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-violet-200 bg-white p-4">
-                  <p className="text-xs font-medium uppercase tracking-wide text-violet-700">
+                <div className="rounded-2xl border border-violet-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                  <p className="text-xs font-medium uppercase tracking-wide text-violet-700 lg:text-[9px]">
                     Owner / Handoff
                   </p>
-                  <p className="mt-2 text-lg font-semibold text-slate-900">
+                  <p className="mt-2 text-lg font-semibold text-slate-900 lg:mt-1.5 lg:text-base">
                     {printSignal.owner}
                   </p>
-                  <p className="mt-2 text-xs text-slate-500">
+                  <p className="mt-2 text-xs text-slate-500 lg:mt-1.5 lg:text-[9px]">
                     Uses contact owner until print assignment exists
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-violet-200 bg-white p-4">
-                  <p className="text-xs font-medium uppercase tracking-wide text-violet-700">
+                <div className="rounded-2xl border border-violet-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                  <p className="text-xs font-medium uppercase tracking-wide text-violet-700 lg:text-[9px]">
                     Primary Print List
                   </p>
-                  <p className="mt-2 text-lg font-semibold text-slate-900">
+                  <p className="mt-2 text-lg font-semibold text-slate-900 lg:mt-1.5 lg:text-base">
                     {printSignal.listName}
                   </p>
-                  <p className="mt-2 text-xs text-slate-500">
+                  <p className="mt-2 text-xs text-slate-500 lg:mt-1.5 lg:text-[9px]">
                     Main material routing surface
                   </p>
                 </div>
               </div>
 
-              <div className="mt-5 rounded-2xl border border-violet-200 bg-white p-4 text-sm text-violet-950">
+              <div className="mt-5 rounded-2xl border border-violet-200 bg-white p-4 text-sm text-violet-950 lg:rounded-xl lg:p-3 lg:mt-4 lg:text-[11px]">
                 {printSignal.note}
               </div>
 
-              <div className="mt-5 space-y-2">
-                <p className="text-sm font-semibold text-slate-900">
+              <div className="mt-5 space-y-2 lg:mt-4">
+                <p className="text-sm font-semibold text-slate-900 lg:text-[11px]">
                   Print Material List Memberships
                 </p>
 
                 {printListMemberships.length === 0 ? (
-                  <div className="rounded-2xl border border-violet-200 bg-white p-4 text-sm text-slate-500">
+                  <div className="rounded-2xl border border-violet-200 bg-white p-4 text-sm text-slate-500 lg:rounded-xl lg:p-3 lg:text-[11px]">
                     No physical print material lists are currently attached to
                     this contact. Add the contact to a palm card, door hanger,
                     mailer, yard sign, postcard, literature drop, walk packet,
@@ -2914,23 +2914,23 @@ const availableLists = lists.filter(
                 {printListMemberships.map((list) => (
                   <div
                     key={`print-${list.id}`}
-                    className="flex items-center justify-between rounded-2xl border border-violet-200 bg-white p-3"
+                    className="flex items-center justify-between rounded-2xl border border-violet-200 bg-white p-3 lg:rounded-xl"
                   >
                     <div className="flex items-center gap-2">
-                      <span className="rounded-full border border-violet-200 bg-violet-100 px-2 py-0.5 text-xs font-semibold text-violet-700">
+                      <span className="rounded-full border border-violet-200 bg-violet-100 px-2 py-0.5 text-xs font-semibold text-violet-700 lg:text-[9px]">
                         print
                       </span>
-                      <span className="rounded-full border border-violet-200 bg-violet-50 px-2 py-0.5 text-xs font-semibold text-violet-700">
+                      <span className="rounded-full border border-violet-200 bg-violet-50 px-2 py-0.5 text-xs font-semibold text-violet-700 lg:text-[9px]">
                         {resolvePrintUseCase(list.name)}
                       </span>
-                      <span className="text-sm font-medium text-slate-900">
+                      <span className="text-sm font-medium text-slate-900 lg:text-[11px]">
                         {list.name}
                       </span>
                     </div>
 
                     <Link
                       href="/dashboard/print/focus"
-                      className="text-xs font-medium text-violet-700 hover:underline"
+                      className="text-xs font-medium text-violet-700 hover:underline lg:text-[9px]"
                     >
                       Work in Print Focus
                     </Link>
@@ -2942,41 +2942,41 @@ const availableLists = lists.filter(
         </section>
 
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
-          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-6 lg:rounded-2xl lg:p-[18px]">
+          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-3 lg:mb-4">
             <div>
-              <p className="text-sm font-medium text-slate-500">Lists</p>
-              <h2 className="text-xl font-semibold text-slate-900">
+              <p className="text-sm font-medium text-slate-500 lg:text-[11px]">Lists</p>
+              <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">
                 List membership and routing
               </h2>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
                 Lists determine how this contact flows through outreach,
                 finance, field, and print execution.
               </p>
             </div>
           </div>
 
-          <div className="flex flex-col gap-4 lg:flex-row">
+          <div className="flex flex-col gap-4 lg:flex-row lg:gap-3">
             <div className="flex-1 space-y-2">
               {listMembershipSummary.map((list) => (
                 <div
                   key={list.id}
-                  className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-3"
+                  className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-3 lg:rounded-xl"
                 >
                   <div className="flex min-w-0 items-start gap-2">
                     <span
                       className={`mt-0.5 rounded-full px-2 py-0.5 text-xs font-semibold ${listTagClasses(
                         list.tag,
-                      )}`}
+                      )} lg:text-[9px]`}
                     >
                       {list.tag}
                     </span>
                     <div className="min-w-0">
-                      <span className="text-sm font-medium text-slate-900">
+                      <span className="text-sm font-medium text-slate-900 lg:text-[11px]">
                         {list.name}
                       </span>
                       {(list.disposition || list.completed_at || list.list_notes) && (
-                        <div className="mt-1 space-y-1 text-xs text-slate-500">
+                        <div className="mt-1 space-y-1 text-xs text-slate-500 lg:text-[9px]">
                           <div className="flex flex-wrap items-center gap-2">
                             {list.disposition && (
                               <span className="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 font-medium text-slate-700">
@@ -2997,7 +2997,7 @@ const availableLists = lists.filter(
 
                   <button
                     onClick={() => removeFromList(list.id)}
-                    className="text-xs text-rose-600 hover:underline"
+                    className="text-xs text-rose-600 hover:underline lg:text-[9px]"
                   >
                     Remove
                   </button>
@@ -3005,7 +3005,7 @@ const availableLists = lists.filter(
               ))}
 
               {contactLists.length === 0 && (
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500 lg:rounded-xl lg:p-3 lg:text-[11px]">
                   This contact is not assigned to any lists.
                 </div>
               )}
@@ -3015,7 +3015,7 @@ const availableLists = lists.filter(
               <select
                 value={selectedListId}
                 onChange={(e) => setSelectedListId(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm lg:px-2.5 lg:text-[11px]"
               >
                 <option value="">Select list</option>
                 {availableLists.map((list) => (
@@ -3028,7 +3028,7 @@ const availableLists = lists.filter(
               <button
                 onClick={addToList}
                 disabled={saving}
-                className="w-full rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60"
+                className="w-full rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60 lg:px-3 lg:text-[11px]"
               >
                 Add to List
               </button>
@@ -3038,15 +3038,15 @@ const availableLists = lists.filter(
 
         <section
           id="contact-tasks"
-          className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8"
+          className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-6 lg:rounded-2xl lg:p-[18px]"
         >
-          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-3 lg:mb-4">
             <div>
-              <p className="text-sm font-medium text-slate-500">Tasks</p>
-              <h2 className="text-xl font-semibold text-slate-900">
+              <p className="text-sm font-medium text-slate-500 lg:text-[11px]">Tasks</p>
+              <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">
                 Work tied to this contact
               </h2>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
                 Track tasks and close out work as it gets completed.
               </p>
             </div>
@@ -3056,47 +3056,47 @@ const availableLists = lists.filter(
             {tasks.map((task) => (
               <div
                 key={task.id}
-                className="rounded-2xl border border-slate-200 bg-white p-4"
+                className="rounded-2xl border border-slate-200 bg-white p-4 lg:rounded-xl lg:p-3"
               >
                 <div className="flex items-center justify-between">
                   <p className="font-medium text-slate-900">{task.title}</p>
                   <span
                     className={`rounded-full px-3 py-1 text-xs font-semibold ${priorityClasses(
                       task.priority,
-                    )}`}
+                    )} lg:px-2.5 lg:text-[9px]`}
                   >
                     {task.priority}
                   </span>
                 </div>
 
                 {task.description && (
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
                     {task.description}
                   </p>
                 )}
 
-                <div className="mt-3 flex items-center justify-between">
-                  <p className="text-xs text-slate-400">
+                <div className="mt-3 flex items-center justify-between lg:mt-2">
+                  <p className="text-xs text-slate-400 lg:text-[9px]">
                     {task.due_date ? `Due: ${task.due_date}` : "No due date"}
                   </p>
 
                   {task.status !== "done" && task.status !== "cancelled" ? (
                     <button
                       onClick={() => completeTask(task.id)}
-                      className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100"
+                      className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 lg:px-2.5 lg:text-[9px]"
                     >
                       <CheckCircle2 className="h-3.5 w-3.5" />
                       Complete
                     </button>
                   ) : (
-                    <span className="text-xs text-emerald-600">Completed</span>
+                    <span className="text-xs text-emerald-600 lg:text-[9px]">Completed</span>
                   )}
                 </div>
               </div>
             ))}
 
             {tasks.length === 0 && (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500 lg:rounded-xl lg:p-3 lg:text-[11px]">
                 No tasks assigned to this contact.
               </div>
             )}

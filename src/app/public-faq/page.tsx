@@ -23,44 +23,44 @@ const faqs = [
 export default function PublicFAQPage() {
   return (
     <main className="min-h-screen bg-[#07111F] text-white">
-      <div className="mx-auto max-w-5xl px-6 py-20">
+      <div className="mx-auto max-w-5xl px-6 py-20 lg:py-12">
         <Link
           href="/"
-          className="mb-8 inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-violet-400/40 hover:bg-white/10"
+          className="mb-8 inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-violet-400/40 hover:bg-white/10 lg:mb-6 lg:gap-1.5 lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-xs"
         >
           <span>←</span>
           <span>Back to Landing Page</span>
         </Link>
         <div className="text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-violet-400/30 bg-violet-500/10 px-4 py-2 text-sm text-violet-300">
-            <HelpCircle className="h-4 w-4"/> Frequently Asked Questions
+          <div className="inline-flex items-center gap-2 rounded-full border border-violet-400/30 bg-violet-500/10 px-4 py-2 text-sm text-violet-300 lg:gap-1.5 lg:px-3 lg:py-1.5 lg:text-xs">
+            <HelpCircle className="h-4 w-4 lg:h-3.5 lg:w-3.5"/> Frequently Asked Questions
           </div>
-          <h1 className="mt-8 text-5xl font-black tracking-tight lg:text-7xl">Everything you need to know before requesting a demo.</h1>
-          <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-slate-300">
+          <h1 className="mt-8 text-5xl font-black tracking-tight lg:mt-6 lg:text-5xl">Everything you need to know before requesting a demo.</h1>
+          <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-slate-300 lg:mt-4 lg:text-base lg:leading-7">
             Aether was designed to simplify campaign operations—not make them more complicated.
             These are the questions we hear most often from campaign teams.
           </p>
         </div>
 
-        <div className="mt-20 space-y-8">
+        <div className="mt-20 space-y-8 lg:mt-12 lg:space-y-5">
           {faqs.map(([q,a])=>(
-            <section key={q} className="rounded-3xl border border-white/10 bg-white/[0.03] p-8 backdrop-blur-xl">
-              <h2 className="text-2xl font-bold text-white">{q}</h2>
-              <p className="mt-5 text-base leading-8 text-slate-300">{a}</p>
+            <section key={q} className="rounded-3xl border border-white/10 bg-white/[0.03] p-8 backdrop-blur-xl lg:rounded-2xl lg:p-5">
+              <h2 className="text-2xl font-bold text-white lg:text-xl">{q}</h2>
+              <p className="mt-5 text-base leading-8 text-slate-300 lg:mt-3 lg:text-sm lg:leading-6">{a}</p>
             </section>
           ))}
         </div>
 
-        <section className="mt-20 rounded-[2rem] border border-violet-400/20 bg-violet-500/5 p-12 text-center">
-          <h2 className="text-4xl font-bold">Still Have Questions?</h2>
-          <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-slate-300">
+        <section className="mt-20 rounded-[2rem] border border-violet-400/20 bg-violet-500/5 p-12 text-center lg:mt-12 lg:rounded-2xl lg:p-8">
+          <h2 className="text-4xl font-bold lg:text-3xl">Still Have Questions?</h2>
+          <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-slate-300 lg:mt-4 lg:text-base lg:leading-7">
             Every campaign operates differently. If your question isn't answered here, we'd be happy to show you how Aether works, discuss your campaign's goals, and determine whether it's the right fit for your organization.
           </p>
           <Link
             href="/explore-abe"
-            className="mt-10 inline-flex items-center gap-3 rounded-2xl border border-violet-300/60 bg-gradient-to-b from-violet-500 to-violet-800 px-8 py-5 font-black uppercase tracking-[0.08em] shadow-2xl transition hover:from-violet-400 hover:to-violet-700"
+            className="mt-10 inline-flex items-center gap-3 rounded-2xl border border-violet-300/60 bg-gradient-to-b from-violet-500 to-violet-800 px-8 py-5 font-black uppercase tracking-[0.08em] shadow-2xl transition hover:from-violet-400 hover:to-violet-700 lg:mt-6 lg:gap-2 lg:rounded-xl lg:px-6 lg:py-3.5 lg:text-sm"
           >
-            Request a Demo <ArrowRight className="h-5 w-5"/>
+            Request a Demo <ArrowRight className="h-5 w-5 lg:h-4 lg:w-4"/>
           </Link>
         </section>
       </div>

@@ -317,11 +317,11 @@ function DashboardListsPageContent() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
+      <div className="space-y-6 lg:space-y-4">
+        <h1 className="text-3xl font-semibold tracking-tight text-slate-900 lg:text-2xl">
           Lists
         </h1>
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
           <p className="text-slate-600">Loading lists...</p>
         </div>
       </div>
@@ -329,42 +329,42 @@ function DashboardListsPageContent() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 lg:space-y-6">
       <section
-        className={`rounded-3xl border border-slate-900 bg-gradient-to-r p-6 text-white shadow-sm transition-colors duration-300 lg:p-8 ${orgTheme.heroGradient}`}
+        className={`rounded-3xl border border-slate-900 bg-gradient-to-r p-6 text-white shadow-sm transition-colors duration-300 lg:p-6 ${orgTheme.heroGradient} lg:rounded-2xl lg:p-[18px]`}
       >
-        <div className="space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+        <div className="space-y-3 lg:space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400 lg:text-[9px]">
             List Infrastructure
           </p>
 
-          <h1 className="text-3xl font-semibold tracking-tight lg:text-4xl">
+          <h1 className="text-3xl font-semibold tracking-tight lg:text-3xl lg:text-2xl">
             List Management
           </h1>
 
-          <p className="max-w-3xl text-sm text-slate-300 lg:text-base">
+          <p className="max-w-3xl text-sm text-slate-300 lg:text-sm lg:text-[11px]">
             Build, organize, and deploy operational universes across Outreach,
             Finance, Field, and Print.
           </p>
         </div>
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="space-y-3">
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-slate-500">
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-6 lg:rounded-2xl lg:p-[18px]">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-4">
+          <div className="space-y-3 lg:space-y-2">
+            <p className="text-sm font-medium uppercase tracking-[0.18em] text-slate-500 lg:text-[11px]">
               Lists &amp; Call Packs
             </p>
-            <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
+            <h1 className="text-3xl font-semibold tracking-tight text-slate-900 lg:text-2xl">
               Manage Lists
             </h1>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 lg:gap-2">
             <div className="hidden" aria-hidden="true">
               <button
                 onClick={loadLists}
-                className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
               >
                 Refresh
               </button>
@@ -372,7 +372,7 @@ function DashboardListsPageContent() {
             <Link
               href="/dashboard/contacts"
               aria-label="Create List from Contacts"
-              className="inline-flex min-w-[120px] items-center justify-center rounded-2xl bg-slate-900 px-4 py-3 text-center text-sm font-semibold !text-white shadow-sm transition hover:bg-slate-800"
+              className="inline-flex min-w-[120px] items-center justify-center rounded-2xl bg-slate-900 px-4 py-3 text-center text-sm font-semibold !text-white shadow-sm transition hover:bg-slate-800 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
               <span className="block !text-white">Create List</span>
             </Link>
@@ -380,160 +380,160 @@ function DashboardListsPageContent() {
         </div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-500">
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5 lg:gap-3">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:rounded-xl lg:p-3">
+          <p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-500 lg:text-[9px]">
             Saved Lists
           </p>
-          <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+          <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900 lg:text-2xl">
             {counts.total}
           </p>
-          <p className="mt-1 text-xs text-slate-500">Total available lists</p>
+          <p className="mt-1 text-xs text-slate-500 lg:text-[9px]">Total available lists</p>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-500">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:rounded-xl lg:p-3">
+          <p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-500 lg:text-[9px]">
             Filtered
           </p>
-          <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+          <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900 lg:text-2xl">
             {counts.filtered}
           </p>
-          <p className="mt-1 text-xs text-slate-500">Current visible lists</p>
+          <p className="mt-1 text-xs text-slate-500 lg:text-[9px]">Current visible lists</p>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-500">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:rounded-xl lg:p-3">
+          <p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-500 lg:text-[9px]">
             Ready
           </p>
-          <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+          <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900 lg:text-2xl">
             {counts.ready}
           </p>
-          <p className="mt-1 text-xs text-slate-500">Lists ready to route</p>
+          <p className="mt-1 text-xs text-slate-500 lg:text-[9px]">Lists ready to route</p>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-500">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:rounded-xl lg:p-3">
+          <p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-500 lg:text-[9px]">
             Owner Assigned
           </p>
-          <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+          <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900 lg:text-2xl">
             {assignedOwnerCount}
           </p>
-          <p className="mt-1 text-xs text-slate-500">Routing defaults set</p>
+          <p className="mt-1 text-xs text-slate-500 lg:text-[9px]">Routing defaults set</p>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-500">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:rounded-xl lg:p-3">
+          <p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-500 lg:text-[9px]">
             Needs Owner
           </p>
-          <p className="mt-2 text-3xl font-semibold tracking-tight text-rose-600">
+          <p className="mt-2 text-3xl font-semibold tracking-tight text-rose-600 lg:text-2xl">
             {unassignedOwnerCount}
           </p>
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-xs text-slate-500 lg:text-[9px]">
             Still routing to unassigned
           </p>
         </div>
       </section>
 
-      <section className="grid gap-4 xl:grid-cols-4">
+      <section className="grid gap-4 xl:grid-cols-4 lg:gap-3">
         <Link
           href="/dashboard/outreach/focus"
-          className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:bg-slate-50"
+          className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:bg-slate-50 lg:rounded-2xl lg:p-[18px]"
         >
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 lg:text-[9px]">
             Execution Route
           </p>
-          <h2 className="mt-3 text-xl font-semibold text-slate-900">
+          <h2 className="mt-3 text-xl font-semibold text-slate-900 lg:mt-2 lg:text-lg">
             Work Lists in Outreach
           </h2>
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-slate-500 lg:text-[11px]">
             Push active contact lists straight into outreach execution without
             losing routing context.
           </p>
-          <div className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-slate-900">
+          <div className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-slate-900 lg:mt-3 lg:text-[11px]">
             Open Outreach Focus
-            <ArrowRight className="h-4 w-4" />
+            <ArrowRight className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
           </div>
         </Link>
 
         {showFinanceListSurfaces ? (
         <Link
           href="/dashboard/finance/focus"
-          className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:bg-slate-50"
+          className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:bg-slate-50 lg:rounded-2xl lg:p-[18px]"
         >
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 lg:text-[9px]">
             Finance Route
           </p>
-          <h2 className="mt-3 text-xl font-semibold text-slate-900">
+          <h2 className="mt-3 text-xl font-semibold text-slate-900 lg:mt-2 lg:text-lg">
             Work Donor Lists
           </h2>
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-slate-500 lg:text-[11px]">
             Move finance and donor lists into pledge collection, compliance
             cleanup, and follow-up.
           </p>
-          <div className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-slate-900">
+          <div className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-slate-900 lg:mt-3 lg:text-[11px]">
             Open Finance Focus
-            <ArrowRight className="h-4 w-4" />
+            <ArrowRight className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
           </div>
         </Link>
         ) : null}
 
         <Link
           href="/dashboard/field/focus"
-          className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:bg-slate-50"
+          className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:bg-slate-50 lg:rounded-2xl lg:p-[18px]"
         >
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 lg:text-[9px]">
             Field Route
           </p>
-          <h2 className="mt-3 text-xl font-semibold text-slate-900">
+          <h2 className="mt-3 text-xl font-semibold text-slate-900 lg:mt-2 lg:text-lg">
             Deploy Field Lists
           </h2>
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-slate-500 lg:text-[11px]">
             Turn turf packets and call packs into active field execution with
             cleaner lane alignment.
           </p>
-          <div className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-slate-900">
+          <div className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-slate-900 lg:mt-3 lg:text-[11px]">
             Open Field Focus
-            <ArrowRight className="h-4 w-4" />
+            <ArrowRight className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
           </div>
         </Link>
 
         <Link
           href="/dashboard/print/focus"
-          className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:bg-slate-50"
+          className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:bg-slate-50 lg:rounded-2xl lg:p-[18px]"
         >
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 lg:text-[9px]">
             Print Route
           </p>
-          <h2 className="mt-3 text-xl font-semibold text-slate-900">
+          <h2 className="mt-3 text-xl font-semibold text-slate-900 lg:mt-2 lg:text-lg">
             Activate Print Universes
           </h2>
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-slate-500 lg:text-[11px]">
             Move literature drops, mail universes, and door hanger routes into
             print execution without breaking list context.
           </p>
-          <div className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-slate-900">
+          <div className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-slate-900 lg:mt-3 lg:text-[11px]">
             Open Print Focus
-            <ArrowRight className="h-4 w-4" />
+            <ArrowRight className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
           </div>
         </Link>
       </section>
 
-      <section className="rounded-3xl border-2 border-slate-900 bg-white p-6 shadow-md lg:p-8">
-        <div className="mb-6 flex items-center justify-between gap-4">
+      <section className="rounded-3xl border-2 border-slate-900 bg-white p-6 shadow-md lg:p-6 lg:rounded-2xl lg:p-[18px]">
+        <div className="mb-6 flex items-center justify-between gap-4 lg:gap-3 lg:mb-4">
           <div>
-            <h2 className="text-xl font-semibold text-slate-900">
+            <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">
               Saved Lists
             </h2>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
               Showing {filteredLists.length} list
               {filteredLists.length === 1 ? "" : "s"}.
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 lg:gap-2">
             <Link
               href="/dashboard/contacts"
-              className="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+              className="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 lg:rounded-xl lg:px-3 lg:text-[11px]"
             >
               Contacts
             </Link>
@@ -541,7 +541,7 @@ function DashboardListsPageContent() {
             <Link
               href="/dashboard/outreach/focus"
               aria-label="Open Outreach Focus"
-              className="inline-flex min-w-[120px] items-center justify-center rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-semibold !text-white shadow-sm transition hover:bg-slate-800"
+              className="inline-flex min-w-[120px] items-center justify-center rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-semibold !text-white shadow-sm transition hover:bg-slate-800 lg:rounded-xl lg:px-3 lg:text-[11px]"
             >
               <span className="block !text-white">Outreach Focus</span>
             </Link>
@@ -549,31 +549,31 @@ function DashboardListsPageContent() {
         </div>
 
         {message ? (
-          <div className="mb-6 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+          <div className="mb-6 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700 lg:rounded-xl lg:p-3 lg:mb-4 lg:text-[11px]">
             {message}
           </div>
         ) : null}
 
-        <div className="overflow-x-auto rounded-3xl border border-slate-200 bg-slate-50 p-3">
-          <table className="w-full min-w-[1180px] border-separate border-spacing-y-3">
+        <div className="overflow-x-auto rounded-3xl border border-slate-200 bg-slate-50 p-3 lg:rounded-2xl lg:p-2.5">
+          <table className="w-full min-w-[1180px] lg:min-w-[980px] border-separate border-spacing-y-3 lg:border-spacing-y-2">
             <thead>
               <tr>
-                <th className="px-4 text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                <th className="px-4 text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 lg:px-3 lg:text-[9px]">
                   Name
                 </th>
-                <th className="px-4 text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                <th className="px-4 text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 lg:px-3 lg:text-[9px]">
                   Operational Identity
                 </th>
-                <th className="px-4 text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                <th className="px-4 text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 lg:px-3 lg:text-[9px]">
                   Default Owner
                 </th>
-                <th className="px-4 text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                <th className="px-4 text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 lg:px-3 lg:text-[9px]">
                   Created
                 </th>
-                <th className="px-4 text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                <th className="px-4 text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 lg:px-3 lg:text-[9px]">
                   Readiness
                 </th>
-                <th className="px-4 text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                <th className="px-4 text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 lg:px-3 lg:text-[9px]">
                   Actions
                 </th>
               </tr>
@@ -594,7 +594,7 @@ function DashboardListsPageContent() {
                     key={list.id}
                     className={isHighlighted ? "bg-amber-50" : "bg-slate-50"}
                   >
-                    <td className="rounded-l-2xl px-4 py-4">
+                    <td className="rounded-l-2xl px-4 py-4 lg:px-3 lg:py-3">
                       <Link
                         href={`/dashboard/lists/${list.id}`}
                         className="font-semibold text-blue-700 underline-offset-2 transition hover:underline"
@@ -602,10 +602,10 @@ function DashboardListsPageContent() {
                         {list.name}
                       </Link>
                     </td>
-                    <td className="px-4 py-4">
+                    <td className="px-4 py-4 lg:px-3 lg:py-3">
                       <div className="flex max-w-md flex-wrap gap-2">
                         {showFinanceListSurfaces || route !== "finance" ? (
-                          <span className="inline-flex rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-700">
+                          <span className="inline-flex rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-700 lg:px-2.5 lg:text-[9px]">
                             Route: {routeLabel(route)}
                           </span>
                         ) : null}
@@ -619,32 +619,32 @@ function DashboardListsPageContent() {
                               key={`${list.id}-${tag}`}
                               className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${tagTone(
                                 tag
-                              )}`}
+                              )} lg:px-2.5 lg:text-[9px]`}
                             >
                               {tag}
                             </span>
                           ))}
                       </div>
                     </td>
-                    <td className="px-4 py-4 text-slate-600">
+                    <td className="px-4 py-4 text-slate-600 lg:px-3 lg:py-3">
                       {list.default_owner_name || "Assigned Owner"}
                     </td>
-                    <td className="px-4 py-4 text-slate-600">
+                    <td className="px-4 py-4 text-slate-600 lg:px-3 lg:py-3">
                       {formatCreatedAt(list.created_at)}
                     </td>
-                    <td className="px-4 py-4">
+                    <td className="px-4 py-4 lg:px-3 lg:py-3">
                       {hasOwner ? (
-                        <span className="inline-flex rounded-full border border-emerald-200 bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+                        <span className="inline-flex rounded-full border border-emerald-200 bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 lg:px-2.5 lg:text-[9px]">
                           {readyLabel}
                         </span>
                       ) : (
-                        <span className="inline-flex rounded-full border border-rose-200 bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-700">
+                        <span className="inline-flex rounded-full border border-rose-200 bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-700 lg:px-2.5 lg:text-[9px]">
                           {readyLabel}
                         </span>
                       )}
                     </td>
-                    <td className="rounded-r-2xl px-4 py-4 text-slate-600">
-                      <div className="flex flex-wrap gap-3">
+                    <td className="rounded-r-2xl px-4 py-4 text-slate-600 lg:px-3 lg:py-3">
+                      <div className="flex flex-wrap gap-3 lg:gap-2">
                         <Link
                           href={routeHref(route, list.id)}
                           className="font-semibold text-emerald-700 underline underline-offset-2 transition hover:text-emerald-800"
@@ -668,7 +668,7 @@ function DashboardListsPageContent() {
                 <tr>
                   <td
                     colSpan={6}
-                    className="rounded-2xl bg-slate-50 px-4 py-8 text-center text-slate-500"
+                    className="rounded-2xl bg-slate-50 px-4 py-8 text-center text-slate-500 lg:rounded-xl lg:px-3 lg:py-6"
                   >
                     No lists matched your search.
                   </td>
@@ -678,35 +678,35 @@ function DashboardListsPageContent() {
           </table>
         </div>
 
-        <section className="rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm lg:p-8">
-          <div className="mb-6">
-            <h2 className="text-xl font-semibold text-slate-900">
+        <section className="rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm lg:p-6 lg:rounded-2xl lg:p-[18px]">
+          <div className="mb-6 lg:mb-4">
+            <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">
               List Controls
             </h2>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
               Create lists from Contacts segmentation, or narrow the current routing view.
             </p>
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-[1fr_260px_160px]">
+          <div className="grid gap-4 lg:grid-cols-[1fr_195px_120px] lg:gap-3">
             <input
               value={newListName}
               onChange={(e) => setNewListName(e.target.value)}
               placeholder="New list name..."
-              className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400"
+              className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             />
 
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search lists, owner, type, or tag..."
-              className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400"
+              className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             />
 
             <Link
               href="/dashboard/contacts"
               aria-label="Create List from Contacts"
-              className="inline-flex min-w-[120px] items-center justify-center rounded-2xl bg-slate-900 px-4 py-3 text-center text-sm font-semibold !text-white shadow-sm transition hover:bg-slate-800"
+              className="inline-flex min-w-[120px] items-center justify-center rounded-2xl bg-slate-900 px-4 py-3 text-center text-sm font-semibold !text-white shadow-sm transition hover:bg-slate-800 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
               <span className="block !text-white">Create List</span>
             </Link>
@@ -719,7 +719,7 @@ function DashboardListsPageContent() {
 
 export default function DashboardListsPage() {
   return (
-    <Suspense fallback={<div className="p-6">Loading lists...</div>}>
+    <Suspense fallback={<div className="p-6 lg:p-[18px]">Loading lists...</div>}>
       <DashboardListsPageContent />
     </Suspense>
   );

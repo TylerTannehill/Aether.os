@@ -886,8 +886,8 @@ export default function FocusModePage() {
 
   if (loading || roleLoading) {
     return (
-      <div className="space-y-6">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="space-y-6 lg:space-y-4">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
           <p className="text-slate-600">Loading focus mode...</p>
         </div>
       </div>
@@ -900,21 +900,21 @@ export default function FocusModePage() {
       : [demoDepartment];
 
     return (
-      <div className="space-y-8">
+      <div className="space-y-8 lg:space-y-6">
         <section
-          className={`rounded-3xl border border-slate-200 bg-gradient-to-br p-6 text-white shadow-sm transition-colors duration-300 lg:p-8 ${orgTheme.heroGradient}`}
+          className={`rounded-3xl border border-slate-200 bg-gradient-to-br p-6 text-white shadow-sm transition-colors duration-300 lg:p-6 ${orgTheme.heroGradient} lg:rounded-2xl lg:p-[18px]`}
         >
-          <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200">
+          <div className="space-y-4 lg:space-y-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200 lg:text-[9px]">
               <Crosshair className="h-3.5 w-3.5" />
               Dashboard Focus
             </div>
 
             <div className="space-y-2">
-              <h1 className="text-3xl font-semibold tracking-tight lg:text-4xl">
+              <h1 className="text-3xl font-semibold tracking-tight lg:text-3xl lg:text-2xl">
                 Dashboard Focus is reserved for campaign leadership.
               </h1>
-              <p className="max-w-3xl text-sm text-slate-300 lg:text-base">
+              <p className="max-w-3xl text-sm text-slate-300 lg:text-sm lg:text-[11px]">
                 You can still review overall campaign health from the dashboard.
                 Execution work should happen inside your assigned department Focus Mode.
               </p>
@@ -922,13 +922,13 @@ export default function FocusModePage() {
           </div>
         </section>
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between lg:gap-3">
             <div>
-              <h2 className="text-xl font-semibold text-slate-900">
+              <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">
                 Open your department focus lane
               </h2>
-              <p className="mt-2 max-w-3xl text-sm text-slate-600">
+              <p className="mt-2 max-w-3xl text-sm text-slate-600 lg:text-[11px]">
                 Department users should work from their assigned lane. Dashboard
                 Focus stays clean for admin and campaign manager-level decisions.
               </p>
@@ -936,22 +936,22 @@ export default function FocusModePage() {
 
             <Link
               href="/dashboard"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               Back to Dashboard
             </Link>
           </div>
 
-          <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+          <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-5 lg:gap-2 lg:mt-4">
             {departmentLinks.map((department) => (
               <Link
                 key={department}
                 href={`/dashboard/${department}/focus`}
-                className="inline-flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+                className="inline-flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
               >
                 {getFocusDepartmentLabel(department)} Focus
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               </Link>
             ))}
           </div>
@@ -961,48 +961,48 @@ export default function FocusModePage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 lg:space-y-6">
       <section
-        className={`rounded-3xl border border-slate-200 bg-gradient-to-br p-6 text-white shadow-sm transition-colors duration-300 lg:p-8 ${orgTheme.heroGradient}`}
+        className={`rounded-3xl border border-slate-200 bg-gradient-to-br p-6 text-white shadow-sm transition-colors duration-300 lg:p-6 ${orgTheme.heroGradient} lg:rounded-2xl lg:p-[18px]`}
       >
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-4">
+          <div className="space-y-4 lg:space-y-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200 lg:text-[9px]">
               <Crosshair className="h-3.5 w-3.5" />
               Focus Mode • {dashboardFocusRoleLabel}
             </div>
 
             <div className="space-y-2">
-              <h1 className="text-3xl font-semibold tracking-tight lg:text-4xl">
+              <h1 className="text-3xl font-semibold tracking-tight lg:text-3xl lg:text-2xl">
                 {focusRoleHeadline}
               </h1>
-              <p className="max-w-3xl text-sm text-slate-300 lg:text-base">
+              <p className="max-w-3xl text-sm text-slate-300 lg:text-sm lg:text-[11px]">
                 {focusRoleSubheadline}
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-3">
-              <div className="inline-flex items-center gap-2 rounded-2xl border border-rose-400/30 bg-rose-400/10 px-4 py-2 text-sm text-rose-100">
-                <AlertTriangle className="h-4 w-4" />
+            <div className="flex flex-wrap gap-3 lg:gap-2">
+              <div className="inline-flex items-center gap-2 rounded-2xl border border-rose-400/30 bg-rose-400/10 px-4 py-2 text-sm text-rose-100 lg:rounded-xl lg:px-3 lg:text-[11px]">
+                <AlertTriangle className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                 {scopedFocusBoard.fixNow.length} fix now
               </div>
 
-              <div className="inline-flex items-center gap-2 rounded-2xl border border-amber-400/30 bg-amber-400/10 px-4 py-2 text-sm text-amber-100">
-                <Zap className="h-4 w-4" />
+              <div className="inline-flex items-center gap-2 rounded-2xl border border-amber-400/30 bg-amber-400/10 px-4 py-2 text-sm text-amber-100 lg:rounded-xl lg:px-3 lg:text-[11px]">
+                <Zap className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                 {scopedFocusBoard.immediate.length} immediate
               </div>
 
-              <div className="inline-flex items-center gap-2 rounded-2xl border border-emerald-400/30 bg-emerald-400/10 px-4 py-2 text-sm text-emerald-100">
-                <Users className="h-4 w-4" />
+              <div className="inline-flex items-center gap-2 rounded-2xl border border-emerald-400/30 bg-emerald-400/10 px-4 py-2 text-sm text-emerald-100 lg:rounded-xl lg:px-3 lg:text-[11px]">
+                <Users className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                 {followUpCount} follow up
               </div>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 lg:gap-2">
             <button
               onClick={loadData}
-              className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/15"
+              className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/15 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
               Refresh
             </button>
@@ -1012,31 +1012,31 @@ export default function FocusModePage() {
       </section>
 
       {message ? (
-        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700 lg:rounded-xl lg:p-3 lg:text-[11px]">
           {message}
         </div>
       ) : null}
 
 
-      <section className="space-y-6">
-        <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-          <div className="mb-6 flex items-center justify-between gap-4">
+      <section className="space-y-6 lg:space-y-4">
+        <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm lg:rounded-2xl lg:p-6">
+          <div className="mb-6 flex items-center justify-between gap-4 lg:gap-3 lg:mb-4">
             <div>
-              <h2 className="text-xl font-semibold text-slate-900">
+              <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">
                 Strategic Pushes
               </h2>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
                 Start here. These are the coordinated moves most likely to change the campaign’s trajectory.
               </p>
             </div>
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-500 lg:rounded-xl lg:text-[9px]">
               {strategicPushes.length} pushes
             </div>
           </div>
 
-          <div className="grid gap-4 xl:grid-cols-3">
+          <div className="grid gap-4 xl:grid-cols-3 lg:gap-3">
             {strategicPushes.length === 0 ? (
-              <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-600 xl:col-span-3">
+              <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-600 xl:col-span-3 lg:rounded-2xl lg:p-[18px] lg:text-[11px]">
                 No strategic pushes are available from live Focus actions right now.
               </div>
             ) : null}
@@ -1051,66 +1051,66 @@ export default function FocusModePage() {
                     isActivePush
                       ? "border-slate-900 bg-slate-50"
                       : "border-slate-200 bg-white"
-                  }`}
+                  } lg:rounded-2xl lg:p-4`}
                 >
                   <div className="flex flex-wrap items-center gap-2">
                     <span
                       className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${getStrategicPushTone(
                         push.type
-                      )}`}
+                      )} lg:text-[9px]`}
                     >
                       {push.type}
                     </span>
-                    <span className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600">
+                    <span className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600 lg:text-[9px]">
                       {push.lanes
                         .map((lane) => getFocusDepartmentLabel(lane))
                         .join(" / ")}
                     </span>
                   </div>
 
-                  <p className="mt-4 text-lg font-semibold text-slate-900">
+                  <p className="mt-4 text-lg font-semibold text-slate-900 lg:mt-3 lg:text-base">
                     {push.title}
                   </p>
-                  <p className="mt-2 text-sm text-slate-600">{push.trigger}</p>
+                  <p className="mt-2 text-sm text-slate-600 lg:text-[11px]">{push.trigger}</p>
 
-                  <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-3">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-3 lg:rounded-xl lg:mt-3">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 lg:text-[9px]">
                       Objective
                     </p>
-                    <p className="mt-2 text-sm text-slate-700">
+                    <p className="mt-2 text-sm text-slate-700 lg:text-[11px]">
                       {push.objective}
                     </p>
                   </div>
 
-                  <div className="mt-4 space-y-2">
+                  <div className="mt-4 space-y-2 lg:mt-3">
                     {push.actions.map((actionLine, actionIndex) => (
                       <div
                         key={`${push.id}-${actionIndex}-${actionLine}`}
-                        className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600"
+                        className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 lg:text-[11px]"
                       >
                         {actionLine}
                       </div>
                     ))}
                   </div>
 
-                  <div className="mt-5 flex gap-2">
+                  <div className="mt-5 flex gap-2 lg:mt-4">
                     <button
                       type="button"
                       onClick={() => {
                         setActivePushId(push.id);
                         setActiveBucket(push.bucket);
                       }}
-                      className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-slate-900 bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
+                      className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-slate-900 bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
                     >
                       {isActivePush ? "Push Active" : "Activate Push"}
-                      <Zap className="h-4 w-4" />
+                      <Zap className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                     </button>
 
                     {isActivePush ? (
                       <button
                         type="button"
                         onClick={() => setActivePushId(null)}
-                        className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+                        className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
                       >
                         Clear
                       </button>
@@ -1122,13 +1122,13 @@ export default function FocusModePage() {
           </div>
         </div>
 
-        <div className="rounded-3xl border-2 border-slate-900 bg-white p-8 shadow-lg">
-          <div className="mb-6 flex items-center justify-between gap-4">
+        <div className="rounded-3xl border-2 border-slate-900 bg-white p-8 shadow-lg lg:rounded-2xl lg:p-6">
+          <div className="mb-6 flex items-center justify-between gap-4 lg:gap-3 lg:mb-4">
             <div>
-              <h2 className="text-xl font-semibold text-slate-900">
+              <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">
                 Execution Surface
               </h2>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
                 {activePush
                   ? "This execution surface is scoped to the active strategic push."
                   : "Select a strategic push to begin coordinated work."}
@@ -1136,7 +1136,7 @@ export default function FocusModePage() {
             </div>
 
             {activePush ? (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-500 lg:rounded-xl lg:text-[9px]">
                 {executionQueue.length} actions
               </div>
             ) : null}
@@ -1144,21 +1144,21 @@ export default function FocusModePage() {
 
           {activePush ? (
             <>
-              <div className="mb-6 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <div className="mb-6 rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3 lg:mb-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 lg:text-[9px]">
                   Active Push
                 </p>
-                <p className="mt-2 text-lg font-semibold text-slate-900">
+                <p className="mt-2 text-lg font-semibold text-slate-900 lg:text-base">
                   {activePush.title}
                 </p>
-                <p className="mt-1 text-sm text-slate-600">
+                <p className="mt-1 text-sm text-slate-600 lg:text-[11px]">
                   {activePush.objective}
                 </p>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-4 lg:space-y-3">
                 {executionQueue.length === 0 ? (
-                  <div className="rounded-2xl border border-slate-300 bg-slate-50 p-6 text-slate-500">
+                  <div className="rounded-2xl border border-slate-300 bg-slate-50 p-6 text-slate-500 lg:rounded-xl lg:p-[18px]">
                     No actions are available in this execution surface right now.
                   </div>
                 ) : (
@@ -1171,17 +1171,17 @@ export default function FocusModePage() {
                     return (
                       <div
                         key={action.id}
-                        className="rounded-2xl border border-slate-300 bg-slate-50 p-6"
+                        className="rounded-2xl border border-slate-300 bg-slate-50 p-6 lg:rounded-xl lg:p-[18px]"
                       >
-                        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                          <div className="space-y-3">
+                        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between lg:gap-3">
+                          <div className="space-y-3 lg:space-y-2">
                             <div className="flex flex-wrap items-center gap-2">
                               <span
                                 className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${formatPriorityTone(
                                   action.level ??
                                     action.brain_tier ??
                                     action.priority
-                                )}`}
+                                )} lg:text-[9px]`}
                               >
                                 {action.level ??
                                   action.brain_tier ??
@@ -1192,7 +1192,7 @@ export default function FocusModePage() {
                               <span
                                 className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${formatBucketTone(
                                   action.bucket ?? "immediate"
-                                )}`}
+                                )} lg:text-[9px]`}
                               >
                                 {String(action.bucket ?? "immediate").replace(
                                   "_",
@@ -1200,7 +1200,7 @@ export default function FocusModePage() {
                                 )}
                               </span>
 
-                              <span className="inline-flex rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-600">
+                              <span className="inline-flex rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-600 lg:text-[9px]">
                                 {itemDepartment === "system"
                                   ? "system"
                                   : getFocusDepartmentLabel(itemDepartment)}
@@ -1208,10 +1208,10 @@ export default function FocusModePage() {
                             </div>
 
                             <div>
-                              <p className="text-lg font-semibold text-slate-900">
+                              <p className="text-lg font-semibold text-slate-900 lg:text-base">
                                 {action.title}
                               </p>
-                              <p className="mt-1 text-sm text-slate-600">
+                              <p className="mt-1 text-sm text-slate-600 lg:text-[11px]">
                                 {action.summary ??
                                   action.recommendedAction ??
                                   reasonLines[0] ??
@@ -1220,14 +1220,14 @@ export default function FocusModePage() {
                             </div>
 
                             <div className="space-y-2">
-                              <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                              <div className="text-xs font-semibold uppercase tracking-wide text-slate-400 lg:text-[9px]">
                                 Why this now
                               </div>
 
                               {reasonLines.map((reason) => (
                                 <div
                                   key={`${action.id}-${reason}`}
-                                  className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-600"
+                                  className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-600 lg:text-[9px]"
                                 >
                                   {reason}
                                 </div>
@@ -1235,8 +1235,8 @@ export default function FocusModePage() {
                             </div>
                           </div>
 
-                          <div className="space-y-3 lg:w-[300px]">
-                            <div className="rounded-2xl border border-slate-300 bg-white p-4 text-sm font-medium text-slate-700">
+                          <div className="space-y-3 lg:w-[225px] lg:space-y-2">
+                            <div className="rounded-2xl border border-slate-300 bg-white p-4 text-sm font-medium text-slate-700 lg:rounded-xl lg:p-3 lg:text-[11px]">
                               {action.recommendedAction ??
                                 reasonLines[0] ??
                                 "Review this action before execution."}
@@ -1251,17 +1251,17 @@ export default function FocusModePage() {
                                       handlePreviewAction(action as ActionItem)
                                     }
                                     disabled={isExecuting || isPreviewing}
-                                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+                                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
                                   >
                                     {isPreviewing ? (
                                       <>
-                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                        <Loader2 className="h-4 w-4 animate-spin lg:h-3.5 lg:w-3.5" />
                                         Previewing
                                       </>
                                     ) : (
                                       <>
                                         Preview
-                                        <ArrowRight className="h-4 w-4" />
+                                        <ArrowRight className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                                       </>
                                     )}
                                   </button>
@@ -1271,11 +1271,11 @@ export default function FocusModePage() {
                                       handleExecuteAction(action as ActionItem)
                                     }
                                     disabled={isExecuting || isPreviewing}
-                                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-slate-900 bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-slate-900 bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
                                   >
                                     {isExecuting ? (
                                       <>
-                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                        <Loader2 className="h-4 w-4 animate-spin lg:h-3.5 lg:w-3.5" />
                                         Working
                                       </>
                                     ) : (
@@ -1283,13 +1283,13 @@ export default function FocusModePage() {
                                         {demoRole === "general_user"
                                           ? "Do this next"
                                           : "Work this action"}
-                                        <Zap className="h-4 w-4" />
+                                        <Zap className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                                       </>
                                     )}
                                   </button>
                                 </>
                               ) : (
-                                <div className="w-full rounded-2xl border border-slate-200 bg-slate-100 px-4 py-3 text-center text-sm font-medium text-slate-500">
+                                <div className="w-full rounded-2xl border border-slate-200 bg-slate-100 px-4 py-3 text-center text-sm font-medium text-slate-500 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]">
                                   Brain-ranked task view only
                                 </div>
                               )}
@@ -1303,11 +1303,11 @@ export default function FocusModePage() {
               </div>
             </>
           ) : (
-            <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center">
-              <p className="text-lg font-semibold text-slate-900">
+            <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center lg:rounded-2xl lg:p-7">
+              <p className="text-lg font-semibold text-slate-900 lg:text-base">
                 Select a strategic push to begin coordinated work.
               </p>
-              <p className="mt-2 text-sm text-slate-500">
+              <p className="mt-2 text-sm text-slate-500 lg:text-[11px]">
                 Dashboard Focus should start with campaign direction, then open into execution.
               </p>
             </div>

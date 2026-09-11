@@ -469,21 +469,21 @@ function IngestPageContent() {
       : "Upload contact data, verify how Aether understands it, then import it into the system.";
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-6 lg:space-y-4 lg:p-[18px]">
       <div className="space-y-2">
-        <h1 className="text-2xl font-semibold text-slate-900">
+        <h1 className="text-2xl font-semibold text-slate-900 lg:text-xl">
           {pageTitle}
         </h1>
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-slate-600 lg:text-[11px]">
           {pageDescription}
         </p>
       </div>
 
-      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="space-y-4">
+      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+        <div className="space-y-4 lg:space-y-3">
           <div>
-            <p className="text-sm font-medium text-slate-900">Upload CSV</p>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="text-sm font-medium text-slate-900 lg:text-[11px]">Upload CSV</p>
+            <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
               {source === "fec"
                 ? "Upload FEC-style donor contribution files for matching and anomaly detection."
                 : source === "field"
@@ -494,7 +494,7 @@ function IngestPageContent() {
             </p>
           </div>
 
-          <label className="group flex cursor-pointer flex-col items-center justify-center rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center transition hover:border-slate-400 hover:bg-slate-100">
+          <label className="group flex cursor-pointer flex-col items-center justify-center rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center transition hover:border-slate-400 hover:bg-slate-100 lg:rounded-2xl lg:p-6">
             <input
               type="file"
               accept=".csv"
@@ -502,17 +502,17 @@ function IngestPageContent() {
               className="sr-only"
             />
 
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-sm transition group-hover:bg-slate-800">
-              <Upload className="h-5 w-5" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-sm transition group-hover:bg-slate-800 lg:rounded-xl lg:h-9 lg:w-9">
+              <Upload className="h-5 w-5 lg:h-4 lg:w-4" />
             </div>
 
-            <p className="mt-4 text-sm font-semibold text-slate-900">
+            <p className="mt-4 text-sm font-semibold text-slate-900 lg:mt-3 lg:text-[11px]">
               {source === "fec"
                 ? "Click here to upload FEC CSV"
                 : "Click here to upload contact CSV"}
             </p>
 
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-slate-500 lg:text-[9px]">
               {source === "fec"
                 ? "Select a .csv file containing donor contribution records."
                 : "Select a .csv file containing voter, donor, volunteer, or outreach contacts."}
@@ -522,66 +522,66 @@ function IngestPageContent() {
       </div>
 
       {importSuccess ? (
-        <section className="rounded-3xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+        <section className="rounded-3xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between lg:gap-4">
             <div className="space-y-2">
-              <p className="text-sm font-medium text-emerald-800">
+              <p className="text-sm font-medium text-emerald-800 lg:text-[11px]">
                 Import Complete
               </p>
-              <h2 className="text-2xl font-semibold text-emerald-900">
+              <h2 className="text-2xl font-semibold text-emerald-900 lg:text-xl">
                 {source === "fec"
                   ? `${importCount} FEC record${importCount === 1 ? "" : "s"} imported successfully`
                   : `${importCount} contact${importCount === 1 ? "" : "s"} saved successfully`}
               </h2>
-              <p className="max-w-3xl text-sm text-emerald-900/80">
+              <p className="max-w-3xl text-sm text-emerald-900/80 lg:text-[11px]">
                 {successBody}
               </p>
 
-              <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                <div className="rounded-2xl border border-emerald-200 bg-white p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+              <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4 lg:gap-2 lg:mt-3">
+                <div className="rounded-2xl border border-emerald-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 lg:text-[9px]">
                     {source === "fec" ? "FEC Records Imported" : "Contacts Saved"}
                   </p>
-                  <p className="mt-2 text-3xl font-semibold text-slate-900">
+                  <p className="mt-2 text-3xl font-semibold text-slate-900 lg:text-2xl">
                     {importCount}
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-emerald-200 bg-white p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                <div className="rounded-2xl border border-emerald-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 lg:text-[9px]">
                     {source === "fec" ? "Contacts Matched" : "Lists Ready"}
                   </p>
-                  <p className="mt-2 text-3xl font-semibold text-slate-900">
+                  <p className="mt-2 text-3xl font-semibold text-slate-900 lg:text-2xl">
                     {source === "fec" ? systemImpact?.matchedCount || 0 : listsCreated}
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-emerald-200 bg-white p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                <div className="rounded-2xl border border-emerald-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 lg:text-[9px]">
                     High Value Signals
                   </p>
-                  <p className="mt-2 text-3xl font-semibold text-slate-900">
+                  <p className="mt-2 text-3xl font-semibold text-slate-900 lg:text-2xl">
                     {systemImpact?.highValueTargets || 0}
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-emerald-200 bg-white p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                <div className="rounded-2xl border border-emerald-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 lg:text-[9px]">
                     Data Issues Flagged
                   </p>
-                  <p className="mt-2 text-3xl font-semibold text-slate-900">
+                  <p className="mt-2 text-3xl font-semibold text-slate-900 lg:text-2xl">
                     {systemImpact?.issueHighlights.length || 0}
                   </p>
                 </div>
               </div>
 
               {systemImpact ? (
-                <div className="mt-4 grid gap-3 lg:grid-cols-[1fr_1fr]">
-                  <div className="rounded-2xl border border-emerald-200 bg-white p-4">
-                    <p className="text-sm font-medium text-slate-900">
+                <div className="mt-4 grid gap-3 lg:grid-cols-[1fr_1fr] lg:gap-2 lg:mt-3">
+                  <div className="rounded-2xl border border-emerald-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                    <p className="text-sm font-medium text-slate-900 lg:text-[11px]">
                       System Impact
                     </p>
-                    <div className="mt-3 space-y-2 text-sm text-slate-700">
+                    <div className="mt-3 space-y-2 text-sm text-slate-700 lg:mt-2 lg:text-[11px]">
                       <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
                         {source === "fec"
                           ? `${systemImpact.updatedContacts} contact${
@@ -610,27 +610,27 @@ function IngestPageContent() {
                     </div>
                   </div>
 
-                  <div className="rounded-2xl border border-emerald-200 bg-white p-4">
-                    <p className="text-sm font-medium text-slate-900">
+                  <div className="rounded-2xl border border-emerald-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                    <p className="text-sm font-medium text-slate-900 lg:text-[11px]">
                       Recommended Next Move
                     </p>
-                    <p className="mt-2 text-sm text-slate-600">
+                    <p className="mt-2 text-sm text-slate-600 lg:text-[11px]">
                       Start by reviewing {systemImpact.recommendedListName}. That is the cleanest place to verify the import before tomorrow’s full pressure test.
                     </p>
 
                     {systemImpact.issueHighlights.length > 0 ? (
-                      <div className="mt-4 space-y-2">
+                      <div className="mt-4 space-y-2 lg:mt-3">
                         {systemImpact.issueHighlights.slice(0, 3).map((issue) => (
                           <div
                             key={issue}
-                            className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900"
+                            className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900 lg:text-[11px]"
                           >
                             {issue}
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900">
+                      <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900 lg:mt-3 lg:text-[11px]">
                         No obvious cleanup flags surfaced from this upload.
                       </div>
                     )}
@@ -639,17 +639,17 @@ function IngestPageContent() {
               ) : null}
 
               {listSummary.length > 0 ? (
-                <div className="mt-4 rounded-2xl border border-emerald-200 bg-white p-4">
-                  <p className="text-sm font-medium text-slate-900">
+                <div className="mt-4 rounded-2xl border border-emerald-200 bg-white p-4 lg:rounded-xl lg:p-3 lg:mt-3">
+                  <p className="text-sm font-medium text-slate-900 lg:text-[11px]">
                     Smart Assignment Summary
                   </p>
 
-                  <div className="mt-3 space-y-2">
+                  <div className="mt-3 space-y-2 lg:mt-2">
                     {listSummary.map((item) => (
                       <Link
                         key={item.name}
                         href={`/dashboard/lists?name=${encodeURIComponent(item.name)}`}
-                        className="flex cursor-pointer items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm transition hover:bg-slate-100"
+                        className="flex cursor-pointer items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm transition hover:bg-slate-100 lg:text-[11px]"
                       >
                         <span className="font-medium text-slate-800">
                           {item.name}
@@ -664,24 +664,24 @@ function IngestPageContent() {
               ) : null}
             </div>
 
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-3 lg:gap-2">
               <Link
                 href={primaryActionHref}
-                className="inline-flex cursor-pointer items-center gap-2 rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-emerald-700"
+                className="inline-flex cursor-pointer items-center gap-2 rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-emerald-700 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
               >
                 {primaryActionLabel}
               </Link>
 
               <Link
                 href="/dashboard/contacts"
-                className="inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-emerald-200 bg-white px-4 py-3 text-sm font-medium text-emerald-900 transition hover:bg-emerald-100"
+                className="inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-emerald-200 bg-white px-4 py-3 text-sm font-medium text-emerald-900 transition hover:bg-emerald-100 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
               >
                 View Contacts
               </Link>
 
               <Link
                 href="/dashboard/lists"
-                className="inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-emerald-200 bg-white px-4 py-3 text-sm font-medium text-emerald-900 transition hover:bg-emerald-100"
+                className="inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-emerald-200 bg-white px-4 py-3 text-sm font-medium text-emerald-900 transition hover:bg-emerald-100 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
               >
                 Review Lists
               </Link>
@@ -691,72 +691,72 @@ function IngestPageContent() {
       ) : null}
 
       {errorMessage ? (
-        <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">
+        <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800 lg:rounded-xl lg:p-3 lg:text-[11px]">
           {errorMessage}
         </div>
       ) : null}
 
       {interpretation ? (
-        <section className="rounded-3xl border border-fuchsia-200 bg-fuchsia-50 p-6 shadow-sm">
-          <div className="space-y-5">
+        <section className="rounded-3xl border border-fuchsia-200 bg-fuchsia-50 p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <div className="space-y-5 lg:space-y-4">
             <div>
-              <p className="text-sm font-medium text-fuchsia-800">
+              <p className="text-sm font-medium text-fuchsia-800 lg:text-[11px]">
                 Aether Interpretation
               </p>
-              <h2 className="mt-1 text-2xl font-semibold text-fuchsia-900">
+              <h2 className="mt-1 text-2xl font-semibold text-fuchsia-900 lg:text-xl">
                 Here’s what Aether sees in this upload
               </h2>
-              <p className="mt-2 max-w-3xl text-sm text-fuchsia-900/80">
+              <p className="mt-2 max-w-3xl text-sm text-fuchsia-900/80 lg:text-[11px]">
                 Before import, Aether interprets the data structure, highlights
                 likely issues, and suggests how this upload should be organized.
               </p>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              <div className="rounded-2xl border border-fuchsia-200 bg-white p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4 lg:gap-3">
+              <div className="rounded-2xl border border-fuchsia-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 lg:text-[9px]">
                   Contacts detected
                 </p>
-                <p className="mt-2 text-3xl font-semibold text-slate-900">
+                <p className="mt-2 text-3xl font-semibold text-slate-900 lg:text-2xl">
                   {interpretation.totalContacts}
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-fuchsia-200 bg-white p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+              <div className="rounded-2xl border border-fuchsia-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 lg:text-[9px]">
                   With phone
                 </p>
-                <p className="mt-2 text-3xl font-semibold text-slate-900">
+                <p className="mt-2 text-3xl font-semibold text-slate-900 lg:text-2xl">
                   {interpretation.contactsWithPhone}
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-fuchsia-200 bg-white p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+              <div className="rounded-2xl border border-fuchsia-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 lg:text-[9px]">
                   With email
                 </p>
-                <p className="mt-2 text-3xl font-semibold text-slate-900">
+                <p className="mt-2 text-3xl font-semibold text-slate-900 lg:text-2xl">
                   {interpretation.contactsWithEmail}
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-fuchsia-200 bg-white p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+              <div className="rounded-2xl border border-fuchsia-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 lg:text-[9px]">
                   High value targets
                 </p>
-                <p className="mt-2 text-3xl font-semibold text-slate-900">
+                <p className="mt-2 text-3xl font-semibold text-slate-900 lg:text-2xl">
                   {interpretation.highValueTargets}
                 </p>
               </div>
             </div>
 
-            <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-              <div className="rounded-2xl border border-fuchsia-200 bg-white p-5">
-                <p className="text-sm font-medium text-slate-900">
+            <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr] lg:gap-3">
+              <div className="rounded-2xl border border-fuchsia-200 bg-white p-5 lg:rounded-xl lg:p-4">
+                <p className="text-sm font-medium text-slate-900 lg:text-[11px]">
                   Signal readout
                 </p>
 
-                <div className="mt-4 space-y-3 text-sm text-slate-700">
+                <div className="mt-4 space-y-3 text-sm text-slate-700 lg:space-y-2 lg:mt-3 lg:text-[11px]">
                   <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
                     {interpretation.hasPhoneHeader
                       ? `${interpretation.contactsMissingPhone} contact${
@@ -791,19 +791,19 @@ function IngestPageContent() {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-fuchsia-200 bg-white p-5">
-                <p className="text-sm font-medium text-slate-900">
+              <div className="rounded-2xl border border-fuchsia-200 bg-white p-5 lg:rounded-xl lg:p-4">
+                <p className="text-sm font-medium text-slate-900 lg:text-[11px]">
                   Suggested lists
                 </p>
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
                   Based on the uploaded structure and detected signals.
                 </p>
 
-                <div className="mt-4 space-y-2">
+                <div className="mt-4 space-y-2 lg:mt-3">
                   {interpretation.suggestedLists.map((listName) => (
                     <div
                       key={listName}
-                      className="rounded-xl border border-fuchsia-200 bg-fuchsia-50 px-3 py-2 text-sm font-medium text-fuchsia-900"
+                      className="rounded-xl border border-fuchsia-200 bg-fuchsia-50 px-3 py-2 text-sm font-medium text-fuchsia-900 lg:text-[11px]"
                     >
                       {listName}
                     </div>
@@ -817,30 +817,30 @@ function IngestPageContent() {
 
       {data ? (
         <>
-          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-slate-900">Preview</h2>
-            <pre className="mt-4 rounded-2xl bg-slate-100 p-4 text-xs text-slate-700">
+          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+            <h2 className="text-lg font-semibold text-slate-900 lg:text-base">Preview</h2>
+            <pre className="mt-4 rounded-2xl bg-slate-100 p-4 text-xs text-slate-700 lg:rounded-xl lg:p-3 lg:mt-3 lg:text-[9px]">
               {JSON.stringify(data.rows.slice(0, 5), null, 2)}
             </pre>
           </section>
 
-          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-slate-900">
+          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+            <h2 className="text-lg font-semibold text-slate-900 lg:text-base">
               Field Mapping
             </h2>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
               Review these before import. Blank fields will be ignored.
             </p>
 
-            <div className="mt-5 space-y-3">
+            <div className="mt-5 space-y-3 lg:space-y-2 lg:mt-4">
               {data.headers.map((header: string) => (
-                <div key={header} className="flex items-center gap-3">
-                  <span className="w-44 text-sm font-medium text-slate-700">
+                <div key={header} className="flex items-center gap-3 lg:gap-2">
+                  <span className="w-44 text-sm font-medium text-slate-700 lg:text-[11px] lg:w-36">
                     {header}
                   </span>
 
                   <input
-                    className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                    className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm lg:text-[11px]"
                     value={mapping[header] || ""}
                     onChange={(e) =>
                       setMapping({
@@ -854,17 +854,17 @@ function IngestPageContent() {
             </div>
           </section>
 
-          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-slate-900">
+          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+            <h2 className="text-lg font-semibold text-slate-900 lg:text-base">
               Owner Assignment
             </h2>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
               Assign imported contacts to an owner before they enter the system.
             </p>
 
-            <div className="mt-5">
+            <div className="mt-5 lg:mt-4">
               <input
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm lg:text-[11px]"
                 value={ownerAssignment}
                 onChange={(e) => setOwnerAssignment(e.target.value)}
                 placeholder="e.g. Finance Director, Outreach Lead, Tyler"
@@ -873,29 +873,29 @@ function IngestPageContent() {
           </section>
 
           {source !== "fec" ? (
-            <section className="rounded-3xl border border-sky-200 bg-sky-50 p-6 shadow-sm">
+            <section className="rounded-3xl border border-sky-200 bg-sky-50 p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
               <div className="space-y-2">
-                <p className="text-sm font-medium text-sky-800">
+                <p className="text-sm font-medium text-sky-800 lg:text-[11px]">
                   Operational Routing
                 </p>
-                <h2 className="text-2xl font-semibold text-sky-950">
+                <h2 className="text-2xl font-semibold text-sky-950 lg:text-xl">
                   Segment this upload before it enters Aether
                 </h2>
-                <p className="max-w-3xl text-sm text-sky-900/80">
+                <p className="max-w-3xl text-sm text-sky-900/80 lg:text-[11px]">
                   Choose the operational container this upload should create.
                   Field Focus and future Print routing can consume these list
                   names without needing a separate data path.
                 </p>
               </div>
 
-              <div className="mt-6 grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
-                <div className="rounded-2xl border border-sky-200 bg-white p-5">
-                  <label className="text-sm font-medium text-slate-900">
+              <div className="mt-6 grid gap-5 lg:grid-cols-[0.9fr_1.1fr] lg:gap-4 lg:mt-4">
+                <div className="rounded-2xl border border-sky-200 bg-white p-5 lg:rounded-xl lg:p-4">
+                  <label className="text-sm font-medium text-slate-900 lg:text-[11px]">
                     Operational Type
                   </label>
 
                   <select
-                    className="mt-2 w-full cursor-pointer rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                    className="mt-2 w-full cursor-pointer rounded-xl border border-slate-200 px-3 py-2 text-sm lg:text-[11px]"
                     value={operationalType}
                     onChange={(e) =>
                       setOperationalType(e.target.value as OperationalRoutingType)
@@ -908,37 +908,37 @@ function IngestPageContent() {
                     ))}
                   </select>
 
-                  <p className="mt-3 text-sm text-slate-600">
+                  <p className="mt-3 text-sm text-slate-600 lg:mt-2 lg:text-[11px]">
                     {selectedOperationalOption.description}
                   </p>
 
-                  <div className="mt-5">
-                    <label className="text-sm font-medium text-slate-900">
+                  <div className="mt-5 lg:mt-4">
+                    <label className="text-sm font-medium text-slate-900 lg:text-[11px]">
                       Operational List Name
                     </label>
                     <input
-                      className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                      className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm lg:text-[11px]"
                       value={customListName}
                       onChange={(e) => setCustomListName(e.target.value)}
                       placeholder={selectedOperationalOption.defaultListName}
                     />
-                    <p className="mt-2 text-xs text-slate-500">
+                    <p className="mt-2 text-xs text-slate-500 lg:text-[9px]">
                       Leave blank to use Aether’s recommended list name.
                     </p>
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-sky-200 bg-white p-5">
-                  <p className="text-sm font-medium text-slate-900">
+                <div className="rounded-2xl border border-sky-200 bg-white p-5 lg:rounded-xl lg:p-4">
+                  <p className="text-sm font-medium text-slate-900 lg:text-[11px]">
                     Routing Tags
                   </p>
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
                     Optional lightweight segments for demo seeding and launch
                     cleanup. Each selected tag also creates a usable list
                     container.
                   </p>
 
-                  <div className="mt-4 flex flex-wrap gap-2">
+                  <div className="mt-4 flex flex-wrap gap-2 lg:mt-3">
                     {operationalTagOptions.map((tag) => {
                       const selected = routingTags.includes(tag);
 
@@ -951,7 +951,7 @@ function IngestPageContent() {
                             selected
                               ? "border-sky-600 bg-sky-600 text-white"
                               : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
-                          }`}
+                          } lg:text-[9px]`}
                         >
                           {tag}
                         </button>
@@ -959,26 +959,26 @@ function IngestPageContent() {
                     })}
                   </div>
 
-                  <div className="mt-5 rounded-2xl border border-sky-200 bg-sky-50 p-4">
-                    <p className="text-sm font-medium text-sky-950">
+                  <div className="mt-5 rounded-2xl border border-sky-200 bg-sky-50 p-4 lg:rounded-xl lg:p-3 lg:mt-4">
+                    <p className="text-sm font-medium text-sky-950 lg:text-[11px]">
                       Routing Preview
                     </p>
-                    <p className="mt-2 text-sm text-sky-900">
+                    <p className="mt-2 text-sm text-sky-900 lg:text-[11px]">
                       This upload will seed into:
                     </p>
 
-                    <div className="mt-3 flex flex-wrap gap-2">
+                    <div className="mt-3 flex flex-wrap gap-2 lg:mt-2">
                       {routingListPayload.map((listName) => (
                         <span
                           key={listName}
-                          className="rounded-full border border-sky-200 bg-white px-3 py-1 text-xs font-semibold text-sky-900"
+                          className="rounded-full border border-sky-200 bg-white px-3 py-1 text-xs font-semibold text-sky-900 lg:text-[9px]"
                         >
                           {listName}
                         </span>
                       ))}
                     </div>
 
-                    <p className="mt-3 text-xs text-sky-700">
+                    <p className="mt-3 text-xs text-sky-700 lg:mt-2 lg:text-[9px]">
                       Primary route: {selectedOperationalOption.routeLabel}
                     </p>
                   </div>
@@ -990,7 +990,7 @@ function IngestPageContent() {
           <div className="flex justify-end">
             <button
               onClick={handleImport}
-              className="cursor-pointer rounded-2xl bg-slate-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
+              className="cursor-pointer rounded-2xl bg-slate-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800 lg:rounded-xl lg:px-4 lg:py-2 lg:text-[11px]"
             >
               {source === "fec" ? "Import FEC Records" : "Import Data"}
             </button>
@@ -1003,7 +1003,7 @@ function IngestPageContent() {
 
 export default function IngestPage() {
   return (
-    <Suspense fallback={<div className="p-6">Loading ingest...</div>}>
+    <Suspense fallback={<div className="p-6 lg:p-[18px]">Loading ingest...</div>}>
       <IngestPageContent />
     </Suspense>
   );

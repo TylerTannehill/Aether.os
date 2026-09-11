@@ -71,7 +71,7 @@ function canShowToolsWorkspaceLink(tier: AetherTier) {
 }
 
 const CARD_STYLE =
-  "rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md";
+  "rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md lg:rounded-2xl lg:p-4";
 
 const DIGITAL_INTEGRATIONS: IntegrationCard[] = [
   {
@@ -305,17 +305,17 @@ function statusClasses(status: IntegrationStatus) {
 
 function BrandLogo({ integration }: { integration: IntegrationCard }) {
   return (
-    <div className="flex items-center gap-3">
-      <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-2xl font-black tracking-tight text-slate-950 shadow-sm">
+    <div className="flex items-center gap-3 lg:gap-2">
+      <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-2xl font-black tracking-tight text-slate-950 shadow-sm lg:rounded-xl lg:text-xl lg:h-12 lg:w-12">
         {integration.logoText}
       </div>
 
       <div className="hidden min-w-0 sm:block">
-        <p className="truncate text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+        <p className="truncate text-xs font-semibold uppercase tracking-[0.16em] text-slate-400 lg:text-[9px]">
           {integration.logoSubtext || integration.name}
         </p>
 
-        <p className="truncate text-sm font-semibold text-slate-700">
+        <p className="truncate text-sm font-semibold text-slate-700 lg:text-[11px]">
           {integration.credentialHint || "Campaign account"}
         </p>
       </div>
@@ -325,14 +325,14 @@ function BrandLogo({ integration }: { integration: IntegrationCard }) {
 
 function ConnectionProgress() {
   return (
-    <div className="mt-8 rounded-3xl border border-slate-200 bg-slate-50 p-5">
+    <div className="mt-8 rounded-3xl border border-slate-200 bg-slate-50 p-5 lg:rounded-2xl lg:p-4 lg:mt-6">
       <div className="flex items-center">
         <div className="flex flex-col items-center gap-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-700 text-sm font-bold text-white">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-700 text-sm font-bold text-white lg:text-[11px] lg:h-8 lg:w-8">
             1
           </div>
 
-          <p className="text-xs font-semibold text-blue-700">
+          <p className="text-xs font-semibold text-blue-700 lg:text-[9px]">
             Login
           </p>
         </div>
@@ -340,11 +340,11 @@ function ConnectionProgress() {
         <div className="mx-3 h-px flex-1 bg-slate-200" />
 
         <div className="flex flex-col items-center gap-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-sm font-bold text-slate-500">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-sm font-bold text-slate-500 lg:text-[11px] lg:h-8 lg:w-8">
             2
           </div>
 
-          <p className="text-xs font-semibold text-slate-500">
+          <p className="text-xs font-semibold text-slate-500 lg:text-[9px]">
             Review
           </p>
         </div>
@@ -352,11 +352,11 @@ function ConnectionProgress() {
         <div className="mx-3 h-px flex-1 bg-slate-200" />
 
         <div className="flex flex-col items-center gap-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-sm font-bold text-slate-500">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-sm font-bold text-slate-500 lg:text-[11px] lg:h-8 lg:w-8">
             3
           </div>
 
-          <p className="text-xs font-semibold text-slate-500">
+          <p className="text-xs font-semibold text-slate-500 lg:text-[9px]">
             Finish
           </p>
         </div>
@@ -379,25 +379,25 @@ function IntegrationSection({
   onOpenConnection: (integration: IntegrationCard) => void;
 }) {
   return (
-    <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between lg:gap-2 lg:mb-4">
         <div>
-          <h2 className="text-2xl font-semibold text-slate-900">
+          <h2 className="text-2xl font-semibold text-slate-900 lg:text-xl">
             {title}
           </h2>
 
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 lg:text-[11px]">
             {description}
           </p>
         </div>
 
-        <div className="inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600">
+        <div className="inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600 lg:text-[9px]">
           <PlugZap className="h-3.5 w-3.5" />
           {integrations.length} available
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3 lg:gap-3">
         {integrations.map((integration: IntegrationCard) => {
           const configured =
             integration.id === "gmail" ||
@@ -414,13 +414,13 @@ function IntegrationSection({
 
           return (
             <div key={integration.id} className={CARD_STYLE}>
-              <div className="mb-5 flex items-start justify-between gap-3">
+              <div className="mb-5 flex items-start justify-between gap-3 lg:gap-2 lg:mb-4">
                 <BrandLogo integration={integration} />
 
                 <span
                   className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${statusClasses(
                     effectiveStatus
-                  )}`}
+                  )} lg:text-[9px]`}
                 >
                   {effectiveStatus === "connected" ? (
                     <CheckCircle2 className="h-3.5 w-3.5" />
@@ -432,35 +432,35 @@ function IntegrationSection({
                 </span>
               </div>
 
-              <h3 className="text-lg font-semibold text-slate-950">
+              <h3 className="text-lg font-semibold text-slate-950 lg:text-base">
                 {integration.name}
               </h3>
 
-              <p className="mt-1 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+              <p className="mt-1 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 lg:text-[9px]">
                 {integration.category}
               </p>
 
-              <p className="mt-3 min-h-[72px] text-sm leading-6 text-slate-600">
+              <p className="mt-3 min-h-[72px] text-sm leading-6 text-slate-600 lg:mt-2 lg:text-[11px]">
                 {integration.description}
               </p>
 
-              <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <p className="text-sm leading-6 text-slate-700">
+              <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3 lg:mt-3">
+                <p className="text-sm leading-6 text-slate-700 lg:text-[11px]">
                   {configured
                     ? `${integration.name} is connected for this campaign.`
                     : integration.setupNote}
                 </p>
 
-                <div className="mt-3 flex items-start gap-2">
-                  <Clock3 className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
+                <div className="mt-3 flex items-start gap-2 lg:mt-2">
+                  <Clock3 className="mt-0.5 h-4 w-4 shrink-0 text-slate-400 lg:h-3.5 lg:w-3.5" />
 
-                  <p className="text-xs leading-5 text-slate-500">
+                  <p className="text-xs leading-5 text-slate-500 lg:text-[9px]">
                     {configured ? "Last update: connected" : "Last update: not connected yet"}
                   </p>
                 </div>
               </div>
 
-              <div className="mt-5 grid gap-2">
+              <div className="mt-5 grid gap-2 lg:mt-4">
                 <button
                   type="button"
                   onClick={() =>
@@ -496,16 +496,16 @@ function IntegrationSection({
                     configured
                       ? "border border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
                       : "bg-slate-950 text-white hover:bg-slate-800"
-                  }`}
+                  } lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]`}
                 >
                   {configured ? (
                     <>
-                      <Settings2 className="h-4 w-4" />
+                      <Settings2 className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                       Manage Connection
                     </>
                   ) : (
                     <>
-                      <PlugZap className="h-4 w-4" />
+                      <PlugZap className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                       Connect
                     </>
                   )}
@@ -583,9 +583,9 @@ function ConnectionPanel({
         className="hidden flex-1 cursor-default lg:block"
       />
 
-      <aside className="flex h-full w-full max-w-xl flex-col overflow-y-auto bg-white shadow-2xl">
-        <div className="border-b border-slate-200 p-6">
-          <div className="flex items-start justify-between gap-4">
+      <aside className="flex h-full w-full max-w-xl flex-col overflow-y-auto bg-white shadow-2xl lg:max-w-[30rem]">
+        <div className="border-b border-slate-200 p-6 lg:p-[18px]">
+          <div className="flex items-start justify-between gap-4 lg:gap-3">
             <BrandLogo integration={integration} />
 
             <button
@@ -593,18 +593,18 @@ function ConnectionPanel({
               onClick={onClose}
               className="rounded-xl border border-slate-200 p-2 text-slate-500 transition hover:bg-slate-100"
             >
-              <X className="h-4 w-4" />
+              <X className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
             </button>
           </div>
 
-          <div className="mt-6">
-            <h3 className="text-3xl font-semibold tracking-tight text-slate-950">
+          <div className="mt-6 lg:mt-4">
+            <h3 className="text-3xl font-semibold tracking-tight text-slate-950 lg:text-2xl">
               {connected
                 ? `${integration.name} Connection`
                 : `Connect ${integration.name}`}
             </h3>
 
-            <p className="mt-2 text-sm leading-6 text-slate-600">
+            <p className="mt-2 text-sm leading-6 text-slate-600 lg:text-[11px]">
               {connected
                 ? `${integration.name} is connected for this campaign.`
                 : integration.id === "google"
@@ -626,16 +626,16 @@ function ConnectionPanel({
           </div>
 
           {connected ? (
-            <div className="mt-8 rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
-              <div className="flex items-start gap-3">
-                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700" />
+            <div className="mt-8 rounded-3xl border border-emerald-200 bg-emerald-50 p-5 lg:rounded-2xl lg:p-4 lg:mt-6">
+              <div className="flex items-start gap-3 lg:gap-2">
+                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700 lg:h-4 lg:w-4" />
 
                 <div>
-                  <p className="text-sm font-semibold text-emerald-950">
+                  <p className="text-sm font-semibold text-emerald-950 lg:text-[11px]">
                     Connected
                   </p>
 
-                  <p className="mt-1 text-sm leading-6 text-emerald-800">
+                  <p className="mt-1 text-sm leading-6 text-emerald-800 lg:text-[11px]">
                     This provider is available for analytics sync.
                   </p>
                 </div>
@@ -646,46 +646,46 @@ function ConnectionPanel({
           )}
         </div>
 
-        <div className="flex-1 space-y-5 p-6">
-          <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-semibold text-slate-900">
+        <div className="flex-1 space-y-5 p-6 lg:space-y-4 lg:p-[18px]">
+          <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5 lg:rounded-2xl lg:p-4">
+            <p className="text-sm font-semibold text-slate-900 lg:text-[11px]">
               What this connects
             </p>
 
-            <p className="mt-2 text-sm leading-6 text-slate-600">
+            <p className="mt-2 text-sm leading-6 text-slate-600 lg:text-[11px]">
               {integration.description}
             </p>
           </div>
 
           {integration.id === "website" && connected && websiteTrackerId ? (
             <>
-              <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
-                <div className="flex items-start gap-3">
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700" />
+              <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 lg:rounded-2xl lg:p-4">
+                <div className="flex items-start gap-3 lg:gap-2">
+                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700 lg:h-4 lg:w-4" />
                   <div>
-                    <p className="text-sm font-semibold text-emerald-950">
+                    <p className="text-sm font-semibold text-emerald-950 lg:text-[11px]">
                       Campaign Website tracker ready
                     </p>
-                    <p className="mt-1 text-sm leading-6 text-emerald-800/80">
+                    <p className="mt-1 text-sm leading-6 text-emerald-800/80 lg:text-[11px]">
                       Copy the installation code below and add it once to the campaign website. Aether will begin tracking page views, clicks, and form submissions automatically.
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-slate-200 bg-white p-5">
-                <div className="flex items-start justify-between gap-4">
+              <div className="rounded-3xl border border-slate-200 bg-white p-5 lg:rounded-2xl lg:p-4">
+                <div className="flex items-start justify-between gap-4 lg:gap-3">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 lg:text-[9px]">
                       Installation Code
                     </p>
-                    <p className="mt-2 text-sm leading-6 text-slate-600">
+                    <p className="mt-2 text-sm leading-6 text-slate-600 lg:text-[11px]">
                       Paste this before the closing &lt;/body&gt; tag on the campaign website.
                     </p>
                   </div>
                 </div>
 
-                <pre className="mt-4 overflow-x-auto whitespace-pre-wrap break-all rounded-2xl border border-slate-200 bg-slate-950 p-4 text-xs leading-6 text-slate-100">
+                <pre className="mt-4 overflow-x-auto whitespace-pre-wrap break-all rounded-2xl border border-slate-200 bg-slate-950 p-4 text-xs leading-6 text-slate-100 lg:rounded-xl lg:p-3 lg:mt-3 lg:text-[9px]">
                   {`<script src="https://aetheros.pro/aether-tracker.js" data-aether-tracker="${websiteTrackerId}" defer></script>`}
                 </pre>
 
@@ -696,21 +696,21 @@ function ConnectionPanel({
                       `<script src="https://aetheros.pro/aether-tracker.js" data-aether-tracker="${websiteTrackerId}" defer></script>`
                     )
                   }
-                  className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+                  className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 lg:rounded-xl lg:px-3 lg:py-2 lg:mt-2 lg:text-[11px]"
                 >
-                  <Copy className="h-4 w-4" />
+                  <Copy className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                   Copy Installation Code
                 </button>
               </div>
 
-              <div className="rounded-3xl border border-blue-200 bg-blue-50 p-5">
-                <div className="flex items-start gap-3">
-                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-blue-700" />
+              <div className="rounded-3xl border border-blue-200 bg-blue-50 p-5 lg:rounded-2xl lg:p-4">
+                <div className="flex items-start gap-3 lg:gap-2">
+                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-blue-700 lg:h-4 lg:w-4" />
                   <div>
-                    <p className="text-sm font-semibold text-blue-950">
+                    <p className="text-sm font-semibold text-blue-950 lg:text-[11px]">
                       Safe for the campaign website
                     </p>
-                    <p className="mt-1 text-sm leading-6 text-blue-800/80">
+                    <p className="mt-1 text-sm leading-6 text-blue-800/80 lg:text-[11px]">
                       This installation code uses the campaign&apos;s public tracker ID. It does not expose the private Website API key.
                     </p>
                   </div>
@@ -718,61 +718,61 @@ function ConnectionPanel({
               </div>
 
               {websiteApiKey ? (
-                <details className="rounded-3xl border border-slate-200 bg-white p-5">
-                  <summary className="cursor-pointer text-sm font-semibold text-slate-900">
+                <details className="rounded-3xl border border-slate-200 bg-white p-5 lg:rounded-2xl lg:p-4">
+                  <summary className="cursor-pointer text-sm font-semibold text-slate-900 lg:text-[11px]">
                     Advanced API access
                   </summary>
-                  <p className="mt-3 text-sm leading-6 text-slate-600">
+                  <p className="mt-3 text-sm leading-6 text-slate-600 lg:mt-2 lg:text-[11px]">
                     Only use this private API key for a server-side or custom integration. Never place it in browser code.
                   </p>
 
-                  <div className="mt-4">
-                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                  <div className="mt-4 lg:mt-3">
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 lg:text-[9px]">
                       Private API Key
                     </p>
                     <div className="mt-2 flex gap-2">
                       <input
                         readOnly
                         value={websiteApiKey}
-                        className="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 font-mono text-xs text-slate-900 outline-none"
+                        className="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 font-mono text-xs text-slate-900 outline-none lg:rounded-xl lg:px-3 lg:py-2 lg:text-[9px]"
                       />
                       <button
                         type="button"
                         onClick={() => navigator.clipboard.writeText(websiteApiKey)}
-                        className="inline-flex shrink-0 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                        className="inline-flex shrink-0 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
                       >
-                        <Copy className="h-4 w-4" />
+                        <Copy className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                         Copy
                       </button>
                     </div>
                   </div>
 
-                  <div className="mt-4">
-                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                  <div className="mt-4 lg:mt-3">
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 lg:text-[9px]">
                       Ingest Endpoint
                     </p>
                     <div className="mt-2 flex gap-2">
                       <input
                         readOnly
                         value={websiteEndpoint}
-                        className="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 font-mono text-xs text-slate-900 outline-none"
+                        className="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 font-mono text-xs text-slate-900 outline-none lg:rounded-xl lg:px-3 lg:py-2 lg:text-[9px]"
                       />
                       <button
                         type="button"
                         onClick={() => navigator.clipboard.writeText(websiteEndpoint)}
-                        className="inline-flex shrink-0 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                        className="inline-flex shrink-0 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
                       >
-                        <Copy className="h-4 w-4" />
+                        <Copy className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                         Copy
                       </button>
                     </div>
                   </div>
 
-                  <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4">
-                    <p className="text-sm font-semibold text-amber-950">
+                  <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 lg:rounded-xl lg:p-3 lg:mt-3">
+                    <p className="text-sm font-semibold text-amber-950 lg:text-[11px]">
                       Save the private key now if you need custom API access.
                     </p>
-                    <p className="mt-1 text-sm leading-6 text-amber-800/80">
+                    <p className="mt-1 text-sm leading-6 text-amber-800/80 lg:text-[11px]">
                       Aether will not display the full private API key again after this panel is closed.
                     </p>
                   </div>
@@ -781,14 +781,14 @@ function ConnectionPanel({
             </>
           ) : integration.id === "winred" && connected ? (
             <>
-              <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
-                <div className="flex items-start gap-3">
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700" />
+              <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 lg:rounded-2xl lg:p-4">
+                <div className="flex items-start gap-3 lg:gap-2">
+                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700 lg:h-4 lg:w-4" />
                   <div>
-                    <p className="text-sm font-semibold text-emerald-950">
+                    <p className="text-sm font-semibold text-emerald-950 lg:text-[11px]">
                       WinRed webhook ready
                     </p>
-                    <p className="mt-1 text-sm leading-6 text-emerald-800/80">
+                    <p className="mt-1 text-sm leading-6 text-emerald-800/80 lg:text-[11px]">
                       WinRed donor activity can flow into this campaign&apos;s Aether Contacts through the campaign-specific webhook below.
                     </p>
                   </div>
@@ -796,38 +796,38 @@ function ConnectionPanel({
               </div>
 
               {winredWebhookUrl ? (
-                <div className="rounded-3xl border border-slate-200 bg-white p-5">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                <div className="rounded-3xl border border-slate-200 bg-white p-5 lg:rounded-2xl lg:p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 lg:text-[9px]">
                     WinRed Webhook URL
                   </p>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                  <p className="mt-2 text-sm leading-6 text-slate-600 lg:text-[11px]">
                     Copy this URL into the campaign&apos;s WinRed webhook configuration.
                   </p>
-                  <div className="mt-4 flex gap-2">
+                  <div className="mt-4 flex gap-2 lg:mt-3">
                     <input
                       readOnly
                       value={winredWebhookUrl}
-                      className="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 font-mono text-xs text-slate-900 outline-none"
+                      className="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 font-mono text-xs text-slate-900 outline-none lg:rounded-xl lg:px-3 lg:py-2 lg:text-[9px]"
                     />
                     <button
                       type="button"
                       onClick={() => navigator.clipboard.writeText(winredWebhookUrl)}
-                      className="inline-flex shrink-0 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                      className="inline-flex shrink-0 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
                     >
-                      <Copy className="h-4 w-4" />
+                      <Copy className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                       Copy
                     </button>
                   </div>
                 </div>
               ) : (
-                <div className="rounded-3xl border border-blue-200 bg-blue-50 p-5">
-                  <div className="flex items-start gap-3">
-                    <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-blue-700" />
+                <div className="rounded-3xl border border-blue-200 bg-blue-50 p-5 lg:rounded-2xl lg:p-4">
+                  <div className="flex items-start gap-3 lg:gap-2">
+                    <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-blue-700 lg:h-4 lg:w-4" />
                     <div>
-                      <p className="text-sm font-semibold text-blue-950">
+                      <p className="text-sm font-semibold text-blue-950 lg:text-[11px]">
                         Webhook credential protected
                       </p>
-                      <p className="mt-1 text-sm leading-6 text-blue-800/80">
+                      <p className="mt-1 text-sm leading-6 text-blue-800/80 lg:text-[11px]">
                         The connection is active. For security, Aether does not redisplay a previously generated webhook token after the page is reloaded.
                       </p>
                     </div>
@@ -837,14 +837,14 @@ function ConnectionPanel({
             </>
           ) : integration.id === "actblue" && connected ? (
             <>
-              <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
-                <div className="flex items-start gap-3">
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700" />
+              <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 lg:rounded-2xl lg:p-4">
+                <div className="flex items-start gap-3 lg:gap-2">
+                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700 lg:h-4 lg:w-4" />
                   <div>
-                    <p className="text-sm font-semibold text-emerald-950">
+                    <p className="text-sm font-semibold text-emerald-950 lg:text-[11px]">
                       ActBlue webhook ready
                     </p>
-                    <p className="mt-1 text-sm leading-6 text-emerald-800/80">
+                    <p className="mt-1 text-sm leading-6 text-emerald-800/80 lg:text-[11px]">
                       ActBlue contribution activity can flow into this campaign&apos;s Aether Contacts through the campaign-specific webhook below.
                     </p>
                   </div>
@@ -852,38 +852,38 @@ function ConnectionPanel({
               </div>
 
               {actblueWebhookUrl ? (
-                <div className="rounded-3xl border border-slate-200 bg-white p-5">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                <div className="rounded-3xl border border-slate-200 bg-white p-5 lg:rounded-2xl lg:p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 lg:text-[9px]">
                     ActBlue Webhook URL
                   </p>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                  <p className="mt-2 text-sm leading-6 text-slate-600 lg:text-[11px]">
                     Copy this URL into the campaign&apos;s ActBlue webhook configuration.
                   </p>
-                  <div className="mt-4 flex gap-2">
+                  <div className="mt-4 flex gap-2 lg:mt-3">
                     <input
                       readOnly
                       value={actblueWebhookUrl}
-                      className="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 font-mono text-xs text-slate-900 outline-none"
+                      className="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 font-mono text-xs text-slate-900 outline-none lg:rounded-xl lg:px-3 lg:py-2 lg:text-[9px]"
                     />
                     <button
                       type="button"
                       onClick={() => navigator.clipboard.writeText(actblueWebhookUrl)}
-                      className="inline-flex shrink-0 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                      className="inline-flex shrink-0 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
                     >
-                      <Copy className="h-4 w-4" />
+                      <Copy className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                       Copy
                     </button>
                   </div>
                 </div>
               ) : (
-                <div className="rounded-3xl border border-blue-200 bg-blue-50 p-5">
-                  <div className="flex items-start gap-3">
-                    <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-blue-700" />
+                <div className="rounded-3xl border border-blue-200 bg-blue-50 p-5 lg:rounded-2xl lg:p-4">
+                  <div className="flex items-start gap-3 lg:gap-2">
+                    <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-blue-700 lg:h-4 lg:w-4" />
                     <div>
-                      <p className="text-sm font-semibold text-blue-950">
+                      <p className="text-sm font-semibold text-blue-950 lg:text-[11px]">
                         Webhook credential protected
                       </p>
-                      <p className="mt-1 text-sm leading-6 text-blue-800/80">
+                      <p className="mt-1 text-sm leading-6 text-blue-800/80 lg:text-[11px]">
                         The connection is active. For security, Aether does not redisplay a previously generated webhook token after the page is reloaded.
                       </p>
                     </div>
@@ -893,24 +893,24 @@ function ConnectionPanel({
             </>
           ) : connected ? (
             <>
-              <div className="rounded-3xl border border-slate-200 bg-white p-5">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+              <div className="rounded-3xl border border-slate-200 bg-white p-5 lg:rounded-2xl lg:p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 lg:text-[9px]">
                   Provider
                 </p>
-                <p className="mt-2 text-lg font-semibold text-slate-950">
+                <p className="mt-2 text-lg font-semibold text-slate-950 lg:text-base">
                   {integration.name}
                 </p>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
+                <p className="mt-2 text-sm leading-6 text-slate-600 lg:text-[11px]">
                   Connection status is stored for the active campaign.
                 </p>
               </div>
 
-              <div className="rounded-3xl border border-blue-200 bg-blue-50 p-5">
-                <div className="flex items-start gap-3">
-                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-blue-700" />
+              <div className="rounded-3xl border border-blue-200 bg-blue-50 p-5 lg:rounded-2xl lg:p-4">
+                <div className="flex items-start gap-3 lg:gap-2">
+                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-blue-700 lg:h-4 lg:w-4" />
                   <div>
-                    <p className="text-sm font-semibold text-blue-950">Credentials protected</p>
-                    <p className="mt-1 text-sm leading-6 text-blue-800/80">
+                    <p className="text-sm font-semibold text-blue-950 lg:text-[11px]">Credentials protected</p>
+                    <p className="mt-1 text-sm leading-6 text-blue-800/80 lg:text-[11px]">
                       Saved tokens are never displayed in Aether.
                     </p>
                   </div>
@@ -919,19 +919,19 @@ function ConnectionPanel({
             </>
           ) : integration.id === "google" ? (
             <>
-              <div className="rounded-3xl border border-slate-200 bg-white p-5">
-                <p className="text-sm font-semibold text-slate-900">Google Workspace</p>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
+              <div className="rounded-3xl border border-slate-200 bg-white p-5 lg:rounded-2xl lg:p-4">
+                <p className="text-sm font-semibold text-slate-900 lg:text-[11px]">Google Workspace</p>
+                <p className="mt-2 text-sm leading-6 text-slate-600 lg:text-[11px]">
                   One secure Google connection enables Gmail, Google Calendar, and Google Drive.
                 </p>
               </div>
 
-              <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
-                <div className="flex items-start gap-3">
-                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
+              <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 lg:rounded-2xl lg:p-4">
+                <div className="flex items-start gap-3 lg:gap-2">
+                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600 lg:h-4 lg:w-4" />
                   <div>
-                    <p className="text-sm font-semibold text-emerald-950">Secure OAuth</p>
-                    <p className="mt-1 text-sm leading-6 text-emerald-800/80">
+                    <p className="text-sm font-semibold text-emerald-950 lg:text-[11px]">Secure OAuth</p>
+                    <p className="mt-1 text-sm leading-6 text-emerald-800/80 lg:text-[11px]">
                       You'll be redirected to Google to approve access. Aether never asks for your Google password.
                     </p>
                   </div>
@@ -940,19 +940,19 @@ function ConnectionPanel({
             </>
           ) : integration.id === "meta" ? (
             <>
-              <div className="rounded-3xl border border-slate-200 bg-white p-5">
-                <p className="text-sm font-semibold text-slate-900">Meta Analytics</p>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
+              <div className="rounded-3xl border border-slate-200 bg-white p-5 lg:rounded-2xl lg:p-4">
+                <p className="text-sm font-semibold text-slate-900 lg:text-[11px]">Meta Analytics</p>
+                <p className="mt-2 text-sm leading-6 text-slate-600 lg:text-[11px]">
                   Connect the campaign&apos;s Meta Business account so Aether can read Facebook and Instagram advertising and performance analytics.
                 </p>
               </div>
 
-              <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
-                <div className="flex items-start gap-3">
-                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
+              <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 lg:rounded-2xl lg:p-4">
+                <div className="flex items-start gap-3 lg:gap-2">
+                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600 lg:h-4 lg:w-4" />
                   <div>
-                    <p className="text-sm font-semibold text-emerald-950">Secure Meta OAuth</p>
-                    <p className="mt-1 text-sm leading-6 text-emerald-800/80">
+                    <p className="text-sm font-semibold text-emerald-950 lg:text-[11px]">Secure Meta OAuth</p>
+                    <p className="mt-1 text-sm leading-6 text-emerald-800/80 lg:text-[11px]">
                       You&apos;ll be redirected to Meta to approve access. Aether never asks for your Meta password.
                     </p>
                   </div>
@@ -961,19 +961,19 @@ function ConnectionPanel({
             </>
           ) : integration.id === "youtube" ? (
             <>
-              <div className="rounded-3xl border border-slate-200 bg-white p-5">
-                <p className="text-sm font-semibold text-slate-900">YouTube Analytics</p>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
+              <div className="rounded-3xl border border-slate-200 bg-white p-5 lg:rounded-2xl lg:p-4">
+                <p className="text-sm font-semibold text-slate-900 lg:text-[11px]">YouTube Analytics</p>
+                <p className="mt-2 text-sm leading-6 text-slate-600 lg:text-[11px]">
                   Connect the campaign&apos;s YouTube channel so Aether can read channel and analytics performance through the YouTube APIs.
                 </p>
               </div>
 
-              <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
-                <div className="flex items-start gap-3">
-                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
+              <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 lg:rounded-2xl lg:p-4">
+                <div className="flex items-start gap-3 lg:gap-2">
+                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600 lg:h-4 lg:w-4" />
                   <div>
-                    <p className="text-sm font-semibold text-emerald-950">Secure Google OAuth</p>
-                    <p className="mt-1 text-sm leading-6 text-emerald-800/80">
+                    <p className="text-sm font-semibold text-emerald-950 lg:text-[11px]">Secure Google OAuth</p>
+                    <p className="mt-1 text-sm leading-6 text-emerald-800/80 lg:text-[11px]">
                       You&apos;ll be redirected to Google to approve YouTube access. Aether never asks for your Google password.
                     </p>
                   </div>
@@ -982,19 +982,19 @@ function ConnectionPanel({
             </>
           ) : integration.id === "x" ? (
             <>
-              <div className="rounded-3xl border border-slate-200 bg-white p-5">
-                <p className="text-sm font-semibold text-slate-900">X Analytics</p>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
+              <div className="rounded-3xl border border-slate-200 bg-white p-5 lg:rounded-2xl lg:p-4">
+                <p className="text-sm font-semibold text-slate-900 lg:text-[11px]">X Analytics</p>
+                <p className="mt-2 text-sm leading-6 text-slate-600 lg:text-[11px]">
                   Connect the campaign&apos;s X account so Aether can read profile, post, and engagement performance through the X API.
                 </p>
               </div>
 
-              <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
-                <div className="flex items-start gap-3">
-                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
+              <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 lg:rounded-2xl lg:p-4">
+                <div className="flex items-start gap-3 lg:gap-2">
+                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600 lg:h-4 lg:w-4" />
                   <div>
-                    <p className="text-sm font-semibold text-emerald-950">Secure X OAuth</p>
-                    <p className="mt-1 text-sm leading-6 text-emerald-800/80">
+                    <p className="text-sm font-semibold text-emerald-950 lg:text-[11px]">Secure X OAuth</p>
+                    <p className="mt-1 text-sm leading-6 text-emerald-800/80 lg:text-[11px]">
                       You&apos;ll be redirected to X to approve read-only access. Aether never asks for your X password.
                     </p>
                   </div>
@@ -1003,19 +1003,19 @@ function ConnectionPanel({
             </>
           ) : integration.id === "tiktok" ? (
             <>
-              <div className="rounded-3xl border border-slate-200 bg-white p-5">
-                <p className="text-sm font-semibold text-slate-900">TikTok Analytics</p>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
+              <div className="rounded-3xl border border-slate-200 bg-white p-5 lg:rounded-2xl lg:p-4">
+                <p className="text-sm font-semibold text-slate-900 lg:text-[11px]">TikTok Analytics</p>
+                <p className="mt-2 text-sm leading-6 text-slate-600 lg:text-[11px]">
                   Connect the campaign&apos;s TikTok account so Aether can read account statistics and public video performance through TikTok&apos;s API.
                 </p>
               </div>
 
-              <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
-                <div className="flex items-start gap-3">
-                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
+              <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 lg:rounded-2xl lg:p-4">
+                <div className="flex items-start gap-3 lg:gap-2">
+                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600 lg:h-4 lg:w-4" />
                   <div>
-                    <p className="text-sm font-semibold text-emerald-950">Secure TikTok OAuth</p>
-                    <p className="mt-1 text-sm leading-6 text-emerald-800/80">
+                    <p className="text-sm font-semibold text-emerald-950 lg:text-[11px]">Secure TikTok OAuth</p>
+                    <p className="mt-1 text-sm leading-6 text-emerald-800/80 lg:text-[11px]">
                       You&apos;ll be redirected to TikTok to approve read-only analytics access. Aether never asks for your TikTok password.
                     </p>
                   </div>
@@ -1024,18 +1024,18 @@ function ConnectionPanel({
             </>
           ) : integration.id === "actblue" ? (
             <>
-              <div className="rounded-3xl border border-slate-200 bg-white p-5">
-                <p className="text-sm font-semibold text-slate-900">ActBlue Donor Webhook</p>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
+              <div className="rounded-3xl border border-slate-200 bg-white p-5 lg:rounded-2xl lg:p-4">
+                <p className="text-sm font-semibold text-slate-900 lg:text-[11px]">ActBlue Donor Webhook</p>
+                <p className="mt-2 text-sm leading-6 text-slate-600 lg:text-[11px]">
                   Aether creates a secure webhook URL for this campaign. Add it to ActBlue once, and incoming contribution activity will be processed through Aether&apos;s Contacts ingestion engine.
                 </p>
               </div>
-              <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
-                <div className="flex items-start gap-3">
-                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
+              <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 lg:rounded-2xl lg:p-4">
+                <div className="flex items-start gap-3 lg:gap-2">
+                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600 lg:h-4 lg:w-4" />
                   <div>
-                    <p className="text-sm font-semibold text-emerald-950">No ActBlue password required</p>
-                    <p className="mt-1 text-sm leading-6 text-emerald-800/80">
+                    <p className="text-sm font-semibold text-emerald-950 lg:text-[11px]">No ActBlue password required</p>
+                    <p className="mt-1 text-sm leading-6 text-emerald-800/80 lg:text-[11px]">
                       Aether generates the campaign-specific webhook credential. You only need to copy the URL into ActBlue.
                     </p>
                   </div>
@@ -1044,18 +1044,18 @@ function ConnectionPanel({
             </>
           ) : integration.id === "winred" ? (
             <>
-              <div className="rounded-3xl border border-slate-200 bg-white p-5">
-                <p className="text-sm font-semibold text-slate-900">WinRed Donor Webhook</p>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
+              <div className="rounded-3xl border border-slate-200 bg-white p-5 lg:rounded-2xl lg:p-4">
+                <p className="text-sm font-semibold text-slate-900 lg:text-[11px]">WinRed Donor Webhook</p>
+                <p className="mt-2 text-sm leading-6 text-slate-600 lg:text-[11px]">
                   Aether creates a secure webhook URL for this campaign. Add it to WinRed once, and incoming donor activity will be processed through Aether&apos;s Contacts ingestion engine.
                 </p>
               </div>
-              <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
-                <div className="flex items-start gap-3">
-                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
+              <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 lg:rounded-2xl lg:p-4">
+                <div className="flex items-start gap-3 lg:gap-2">
+                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600 lg:h-4 lg:w-4" />
                   <div>
-                    <p className="text-sm font-semibold text-emerald-950">No WinRed password required</p>
-                    <p className="mt-1 text-sm leading-6 text-emerald-800/80">
+                    <p className="text-sm font-semibold text-emerald-950 lg:text-[11px]">No WinRed password required</p>
+                    <p className="mt-1 text-sm leading-6 text-emerald-800/80 lg:text-[11px]">
                       Aether generates the campaign-specific webhook credential. You only need to copy the URL into WinRed.
                     </p>
                   </div>
@@ -1064,18 +1064,18 @@ function ConnectionPanel({
             </>
           ) : integration.id === "routes" ? (
             <>
-              <div className="rounded-3xl border border-slate-200 bg-white p-5">
-                <p className="text-sm font-semibold text-slate-900">Aether-Managed Google Routes</p>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
+              <div className="rounded-3xl border border-slate-200 bg-white p-5 lg:rounded-2xl lg:p-4">
+                <p className="text-sm font-semibold text-slate-900 lg:text-[11px]">Aether-Managed Google Routes</p>
+                <p className="mt-2 text-sm leading-6 text-slate-600 lg:text-[11px]">
                   Aether uses its own Google Routes connection to optimize campaign field routes. No campaign Google account, API key, or billing setup is required.
                 </p>
               </div>
-              <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
-                <div className="flex items-start gap-3">
-                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
+              <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 lg:rounded-2xl lg:p-4">
+                <div className="flex items-start gap-3 lg:gap-2">
+                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600 lg:h-4 lg:w-4" />
                   <div>
-                    <p className="text-sm font-semibold text-emerald-950">Managed by Aether</p>
-                    <p className="mt-1 text-sm leading-6 text-emerald-800/80">
+                    <p className="text-sm font-semibold text-emerald-950 lg:text-[11px]">Managed by Aether</p>
+                    <p className="mt-1 text-sm leading-6 text-emerald-800/80 lg:text-[11px]">
                       Connect verifies the live Google Routes service before enabling route tools for the active campaign.
                     </p>
                   </div>
@@ -1084,18 +1084,18 @@ function ConnectionPanel({
             </>
           ) : integration.id === "website" ? (
             <>
-              <div className="rounded-3xl border border-slate-200 bg-white p-5">
-                <p className="text-sm font-semibold text-slate-900">Campaign Website API</p>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
+              <div className="rounded-3xl border border-slate-200 bg-white p-5 lg:rounded-2xl lg:p-4">
+                <p className="text-sm font-semibold text-slate-900 lg:text-[11px]">Campaign Website API</p>
+                <p className="mt-2 text-sm leading-6 text-slate-600 lg:text-[11px]">
                   Aether creates a campaign-specific website tracker. Copy one installation snippet into the campaign website and Aether will handle analytics automatically.
                 </p>
               </div>
-              <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
-                <div className="flex items-start gap-3">
-                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
+              <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 lg:rounded-2xl lg:p-4">
+                <div className="flex items-start gap-3 lg:gap-2">
+                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600 lg:h-4 lg:w-4" />
                   <div>
-                    <p className="text-sm font-semibold text-emerald-950">One-copy installation</p>
-                    <p className="mt-1 text-sm leading-6 text-emerald-800/80">
+                    <p className="text-sm font-semibold text-emerald-950 lg:text-[11px]">One-copy installation</p>
+                    <p className="mt-1 text-sm leading-6 text-emerald-800/80 lg:text-[11px]">
                       No third-party login is required. Aether generates a public tracker ID for the website and keeps the private API credential protected.
                     </p>
                   </div>
@@ -1105,40 +1105,40 @@ function ConnectionPanel({
           ) : (
             <>
               <div>
-                <label className="mb-2 block text-sm font-semibold text-slate-700">Account Email / Username</label>
-                <input value={currentCredentials.accountName} onChange={(e)=>updateField("accountName",e.target.value)} placeholder="campaign@example.com" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400"/>
+                <label className="mb-2 block text-sm font-semibold text-slate-700 lg:text-[11px]">Account Email / Username</label>
+                <input value={currentCredentials.accountName} onChange={(e)=>updateField("accountName",e.target.value)} placeholder="campaign@example.com" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"/>
               </div>
               <div>
-                <label className="mb-2 block text-sm font-semibold text-slate-700">Access Key / Token</label>
-                <input type="password" value={currentCredentials.accessToken} onChange={(e)=>updateField("accessToken",e.target.value)} placeholder="Paste access token" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400"/>
+                <label className="mb-2 block text-sm font-semibold text-slate-700 lg:text-[11px]">Access Key / Token</label>
+                <input type="password" value={currentCredentials.accessToken} onChange={(e)=>updateField("accessToken",e.target.value)} placeholder="Paste access token" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"/>
               </div>
               <div>
-                <label className="mb-2 block text-sm font-semibold text-slate-700">Account ID <span className="ml-1 font-normal text-slate-400">optional</span></label>
-                <input value={currentCredentials.accountId} onChange={(e)=>updateField("accountId",e.target.value)} placeholder="Enter account ID" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400"/>
+                <label className="mb-2 block text-sm font-semibold text-slate-700 lg:text-[11px]">Account ID <span className="ml-1 font-normal text-slate-400">optional</span></label>
+                <input value={currentCredentials.accountId} onChange={(e)=>updateField("accountId",e.target.value)} placeholder="Enter account ID" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"/>
               </div>
             </>
           )}
         </div>
 
         {actionError ? (
-          <div className="mx-6 mb-0 rounded-2xl border border-rose-200 bg-rose-50 p-4">
-            <p className="text-sm font-semibold text-rose-900">
+          <div className="mx-6 mb-0 rounded-2xl border border-rose-200 bg-rose-50 p-4 lg:rounded-xl lg:p-3">
+            <p className="text-sm font-semibold text-rose-900 lg:text-[11px]">
               Connection action failed
             </p>
 
-            <p className="mt-1 text-sm text-rose-800">
+            <p className="mt-1 text-sm text-rose-800 lg:text-[11px]">
               {actionError}
             </p>
           </div>
         ) : null}
 
-        <div className="border-t border-slate-200 bg-white p-6">
-          <div className="flex gap-3">
+        <div className="border-t border-slate-200 bg-white p-6 lg:p-[18px]">
+          <div className="flex gap-3 lg:gap-2">
             <button
               type="button"
               onClick={onClose}
               disabled={saving || disconnecting}
-              className="flex-1 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex-1 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
               {integration.id === "website" && connected && websiteTrackerId
                 ? "Done"
@@ -1157,7 +1157,7 @@ function ConnectionPanel({
                   type="button"
                   onClick={onDisconnect}
                   disabled={disconnecting}
-                  className="flex-1 rounded-2xl bg-rose-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="flex-1 rounded-2xl bg-rose-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
                 >
                   {disconnecting ? "Disconnecting..." : "Disconnect"}
                 </button>
@@ -1179,7 +1179,7 @@ function ConnectionPanel({
                     : onSave
                 }
                 disabled={saving}
-                className="flex-1 rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+                className="flex-1 rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
               >
                 {integration.id === "google"
                   ? "Connect with Google"
@@ -1669,40 +1669,40 @@ export default function IntegrationsPage() {
 
   return (
     <>
-      <div className="space-y-8">
+      <div className="space-y-8 lg:space-y-6">
         <section
-          className={`rounded-3xl border border-slate-200 bg-gradient-to-br p-6 text-white shadow-sm transition-colors duration-300 lg:p-8 ${orgTheme.heroGradient}`}
+          className={`rounded-3xl border border-slate-200 bg-gradient-to-br p-6 text-white shadow-sm transition-colors duration-300 lg:p-8 ${orgTheme.heroGradient} lg:rounded-2xl lg:p-[18px]`}
         >
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div className="space-y-4">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-4">
+            <div className="space-y-4 lg:space-y-3">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200 lg:text-[9px]">
                 <PlugZap className="h-3.5 w-3.5" />
                 Campaign Integrations
               </div>
 
-              <div className="space-y-3">
-                <h1 className="text-3xl font-semibold tracking-tight lg:text-4xl">
+              <div className="space-y-3 lg:space-y-2">
+                <h1 className="text-3xl font-semibold tracking-tight lg:text-4xl lg:text-2xl">
                   Connect the tools your campaign already uses.
                 </h1>
 
-                <p className="max-w-3xl text-sm text-slate-300 lg:text-base">
+                <p className="max-w-3xl text-sm text-slate-300 lg:text-base lg:text-[11px]">
                   Bring your campaign’s digital, finance, and workspace tools
                   into Aether so your team can work from one command center.
                 </p>
               </div>
 
               <div className="flex flex-wrap gap-2">
-                <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold text-slate-100">
+                <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold text-slate-100 lg:text-[9px]">
                   {loadingConnections
                     ? "Loading connections..."
                     : `${configuredCount} / ${totalVisibleIntegrations} connected`}
                 </span>
 
-                <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold text-slate-100">
+                <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold text-slate-100 lg:text-[9px]">
                   Context: {contextMode}
                 </span>
 
-                <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold text-slate-100">
+                <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold text-slate-100 lg:text-[9px]">
                   Connections available anytime
                 </span>
               </div>
@@ -1711,29 +1711,29 @@ export default function IntegrationsPage() {
             {showToolsWorkspaceLink ? (
               <Link
                 href="/dashboard/tools"
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15 lg:rounded-xl lg:px-4 lg:py-2 lg:text-[11px]"
               >
                 Open Tools Workspace
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               </Link>
             ) : null}
           </div>
         </section>
 
-        <section className="rounded-3xl border-2 border-emerald-300 bg-gradient-to-br from-emerald-50 to-white p-6 shadow-sm lg:p-8">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-            <div className="space-y-4">
-              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800">
+        <section className="rounded-3xl border-2 border-emerald-300 bg-gradient-to-br from-emerald-50 to-white p-6 shadow-sm lg:p-8 lg:rounded-2xl lg:p-[18px]">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between lg:gap-4">
+            <div className="space-y-4 lg:space-y-3">
+              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800 lg:text-[9px]">
                 <BarChart3 className="h-3.5 w-3.5" />
                 Live Analytics Import
               </div>
 
               <div>
-                <h2 className="text-2xl font-semibold tracking-tight text-emerald-950">
+                <h2 className="text-2xl font-semibold tracking-tight text-emerald-950 lg:text-xl">
                   Analytics CSV Import
                 </h2>
 
-                <p className="mt-2 max-w-3xl text-sm leading-6 text-emerald-900/80">
+                <p className="mt-2 max-w-3xl text-sm leading-6 text-emerald-900/80 lg:text-[11px]">
                   Import campaign analytics and reporting data directly into
                   Aether.
                 </p>
@@ -1742,10 +1742,10 @@ export default function IntegrationsPage() {
 
             <Link
               href="/dashboard/import/analytics"
-              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-2xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800"
+              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-2xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800 lg:rounded-xl lg:px-4 lg:py-2 lg:text-[11px]"
             >
               Open Analytics Import
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
             </Link>
           </div>
         </section>

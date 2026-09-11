@@ -1400,8 +1400,8 @@ export default function FinanceDashboardPage() {
 
   if (financeLoading) {
     return (
-      <div className="space-y-6">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="space-y-6 lg:space-y-4">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
           <p className="text-slate-600">Loading finance systems...</p>
         </div>
       </div>
@@ -1409,33 +1409,33 @@ export default function FinanceDashboardPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 lg:space-y-6">
       <section
-        className={`rounded-3xl border border-slate-800 bg-gradient-to-br p-6 text-white shadow-sm transition-colors duration-300 lg:p-8 ${orgTheme.heroGradient}`}
+        className={`rounded-3xl border border-slate-800 bg-gradient-to-br p-6 text-white shadow-sm transition-colors duration-300 lg:p-6 ${orgTheme.heroGradient} lg:rounded-2xl lg:p-[18px]`}
       >
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm text-slate-300">
-              <Landmark className="h-4 w-4" />
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-4">
+          <div className="space-y-3 lg:space-y-2">
+            <div className="flex items-center gap-2 text-sm text-slate-300 lg:text-[11px]">
+              <Landmark className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               Revenue + compliance engine
             </div>
 
             <div className="space-y-2">
-              <h1 className="text-3xl font-semibold tracking-tight text-white lg:text-4xl">
+              <h1 className="text-3xl font-semibold tracking-tight text-white lg:text-3xl lg:text-2xl">
                 {perspectiveHeadline}
               </h1>
-              <p className="max-w-3xl text-sm text-slate-300 lg:text-base">
+              <p className="max-w-3xl text-sm text-slate-300 lg:text-sm lg:text-[11px]">
                 {perspectiveSubheadline}
               </p>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-3 lg:justify-end">
+          <div className="flex flex-wrap gap-3 lg:justify-end lg:gap-2">
             <Link
               href="/dashboard/finance/focus"
-              className="inline-flex items-center gap-2 rounded-2xl border border-amber-300 bg-amber-100 px-4 py-3 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-amber-200"
+              className="inline-flex items-center gap-2 rounded-2xl border border-amber-300 bg-amber-100 px-4 py-3 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-amber-200 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
-              <Zap className="h-4 w-4 text-slate-950" />
+              <Zap className="h-4 w-4 text-slate-950 lg:h-3.5 lg:w-3.5" />
               <span className="text-slate-950">Open Focus Mode</span>
             </Link>
 
@@ -1444,16 +1444,16 @@ export default function FinanceDashboardPage() {
                 onClick={() => {
                   window.location.href = "/api/finance/export";
                 }}
-                className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+                className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
               >
-                <FileSpreadsheet className="h-4 w-4" />
+                <FileSpreadsheet className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                 Export Finance
               </button>
             ) : null}
 
             {demoRole !== "general_user" ? (
-              <button className="inline-flex items-center gap-2 rounded-2xl border border-amber-300 bg-amber-100 px-4 py-3 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-amber-200">
-                <AlertTriangle className="h-4 w-4 text-slate-950" />
+              <button className="inline-flex items-center gap-2 rounded-2xl border border-amber-300 bg-amber-100 px-4 py-3 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-amber-200 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]">
+                <AlertTriangle className="h-4 w-4 text-slate-950 lg:h-3.5 lg:w-3.5" />
                 <span className="text-slate-950">Compliance Review Needed</span>
               </button>
             ) : null}
@@ -1461,10 +1461,10 @@ export default function FinanceDashboardPage() {
         </div>
       </section>
 
-      {isDemoOrg && (<section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="grid gap-5 lg:grid-cols-[1fr_1fr]">
-          <div className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+      {isDemoOrg && (<section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+        <div className="grid gap-5 lg:grid-cols-[1fr_1fr] lg:gap-4">
+          <div className="space-y-3 lg:space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 lg:text-[9px]">
               Demo role perspective
             </p>
             <div className="flex flex-wrap gap-2">
@@ -1476,7 +1476,7 @@ export default function FinanceDashboardPage() {
                     demoRole === role
                       ? "bg-slate-900 text-white"
                       : "border border-slate-200 bg-white text-slate-700"
-                  }`}
+                  } lg:text-[9px]`}
                 >
                   {role}
                 </button>
@@ -1484,8 +1484,8 @@ export default function FinanceDashboardPage() {
             </div>
           </div>
 
-          <div className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+          <div className="space-y-3 lg:space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 lg:text-[9px]">
               Demo department perspective
             </p>
             <div className="flex flex-wrap gap-2">
@@ -1499,7 +1499,7 @@ export default function FinanceDashboardPage() {
                     demoDepartment === department
                       ? "bg-slate-900 text-white"
                       : "border border-slate-200 bg-white text-slate-700"
-                  }`}
+                  } lg:text-[9px]`}
                 >
                   {department}
                 </button>
@@ -1508,7 +1508,7 @@ export default function FinanceDashboardPage() {
           </div>
         </div>
 
-        <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+        <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700 lg:rounded-xl lg:p-3 lg:mt-4 lg:text-[11px]">
           <span className="font-medium text-slate-900">
             {getRoleLabel(demoRole)}:
           </span>{" "}
@@ -1518,20 +1518,20 @@ export default function FinanceDashboardPage() {
       </section>)}
 
       {showDepartmentAbe && financeAbeReady ? (
-      <section className="rounded-3xl border border-violet-200 bg-violet-50 p-6 shadow-sm">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm text-violet-800">
-              <Sparkles className="h-4 w-4" />
+      <section className="rounded-3xl border border-violet-200 bg-violet-50 p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between lg:gap-4">
+          <div className="space-y-3 lg:space-y-2">
+            <div className="flex items-center gap-2 text-sm text-violet-800 lg:text-[11px]">
+              <Sparkles className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               Honest Abe
             </div>
 
             <div className="space-y-2">
-              <p className="text-sm font-medium uppercase tracking-[0.18em] text-violet-700/80">
+              <p className="text-sm font-medium uppercase tracking-[0.18em] text-violet-700/80 lg:text-[11px]">
                 {getRoleLabel(demoRole)}
               </p>
 
-              <div className="flex flex-wrap gap-4 text-sm text-violet-900">
+              <div className="flex flex-wrap gap-4 text-sm text-violet-900 lg:gap-3 lg:text-[11px]">
                 <div>
                   <span className="font-medium text-violet-700">Health:</span>{" "}
                   {financeAbeBriefing.health}
@@ -1550,7 +1550,7 @@ export default function FinanceDashboardPage() {
                 </div>
               </div>
 
-              <h2 className="text-2xl font-semibold text-violet-900">
+              <h2 className="text-2xl font-semibold text-violet-900 lg:text-xl">
                 {financeAbeBriefing.primaryLane === "finance"
                   ? "Finance is the lane that needs tight control right now."
                   : `${departmentLabel(
@@ -1558,39 +1558,39 @@ export default function FinanceDashboardPage() {
                     )} is shaping what finance should do next.`}
               </h2>
 
-              <p className="max-w-3xl text-sm text-slate-700 lg:text-base">
+              <p className="max-w-3xl text-sm text-slate-700 lg:text-sm lg:text-[11px]">
                 {aiSummaryBody}
               </p>
 
-              <p className="max-w-3xl text-sm italic text-slate-600">
+              <p className="max-w-3xl text-sm italic text-slate-600 lg:text-[11px]">
                 Why now: {financeAbeInsight}
               </p>
 
               {financeAbeBriefing.crossDomainSignal ? (
-                <p className="max-w-3xl text-sm text-violet-900/80">
+                <p className="max-w-3xl text-sm text-violet-900/80 lg:text-[11px]">
                   {financeAbeBriefing.crossDomainSignal}
                 </p>
               ) : null}
 
-              <p className="max-w-3xl text-sm text-slate-600">
+              <p className="max-w-3xl text-sm text-slate-600 lg:text-[11px]">
                 {financeAbeBriefing.supportText}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="mt-5 rounded-2xl border border-violet-100 bg-white/80 p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-700">
+        <div className="mt-5 rounded-2xl border border-violet-100 bg-white/80 p-5 lg:rounded-xl lg:p-4 lg:mt-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-700 lg:text-[9px]">
             What Abe Would Do
           </p>
 
-          <div className="mt-3 space-y-3">
+          <div className="mt-3 space-y-3 lg:space-y-2 lg:mt-2">
             {financeAbeBriefing.actions.map((move, index) => (
               <div
                 key={`${move}-${index}`}
-                className="flex items-start gap-3 text-sm text-slate-700"
+                className="flex items-start gap-3 text-sm text-slate-700 lg:gap-2 lg:text-[11px]"
               >
-                <div className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-amber-200 bg-amber-100 text-xs font-semibold text-amber-800">
+                <div className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-amber-200 bg-amber-100 text-xs font-semibold text-amber-800 lg:text-[9px] lg:h-5 lg:w-5">
                   {index + 1}
                 </div>
                 <p>{move}</p>
@@ -1600,20 +1600,20 @@ export default function FinanceDashboardPage() {
         </div>
 
         {financePatternWatch.length > 0 ? (
-          <div className="mt-5 rounded-2xl border border-violet-100 bg-white/80 p-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-700">
+          <div className="mt-5 rounded-2xl border border-violet-100 bg-white/80 p-5 lg:rounded-xl lg:p-4 lg:mt-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-700 lg:text-[9px]">
               Pattern Watch
             </p>
-                        <div className="mt-3 space-y-3">
+                        <div className="mt-3 space-y-3 lg:space-y-2 lg:mt-2">
               {financePatternWatch.map((insight, index) => (
                 <div
                   key={`${insight.label}-${index}`}
                   className={`rounded-2xl border p-4 ${patternSeverityTone(
                     insight.severity
-                  )}`}
+                  )} lg:rounded-xl lg:p-3`}
                 >
-                  <p className="text-sm font-semibold">{insight.label}</p>
-                  <p className="mt-1 text-sm opacity-90">{insight.detail}</p>
+                  <p className="text-sm font-semibold lg:text-[11px]">{insight.label}</p>
+                  <p className="mt-1 text-sm opacity-90 lg:text-[11px]">{insight.detail}</p>
                 </div>
               ))}
             </div>
@@ -1630,44 +1630,44 @@ export default function FinanceDashboardPage() {
             : visibleMetrics.length === 3
             ? "md:grid-cols-3"
             : "md:grid-cols-2 xl:grid-cols-4"
-        }`}
+        } lg:gap-3`}
       >
         {visibleMetrics.map((metric) => (
           <div
             key={metric.id}
             className={`rounded-3xl border p-6 shadow-sm ${getFinanceMetricTone(
               metric
-            )}`}
+            )} lg:rounded-2xl lg:p-[18px]`}
           >
             <div className="flex items-center justify-between">
-              <p className={`text-sm font-medium ${getFinanceMetricMutedTone(metric)}`}>
+              <p className={`text-sm font-medium ${getFinanceMetricMutedTone(metric)} lg:text-[11px]`}>
                 {metric.label}
               </p>
               {metric.trend === "up" ? (
-                <TrendingUp className="h-4 w-4 text-emerald-500" />
+                <TrendingUp className="h-4 w-4 text-emerald-500 lg:h-3.5 lg:w-3.5" />
               ) : metric.trend === "down" ? (
-                <TrendingDown className="h-4 w-4 text-amber-500" />
+                <TrendingDown className="h-4 w-4 text-amber-500 lg:h-3.5 lg:w-3.5" />
               ) : null}
             </div>
 
-            <p className="mt-3 text-3xl font-semibold">
+            <p className="mt-3 text-3xl font-semibold lg:mt-2 lg:text-2xl">
               {metric.value}
             </p>
 
-            <p className={`mt-2 text-sm ${getFinanceMetricMutedTone(metric)}`}>
+            <p className={`mt-2 text-sm ${getFinanceMetricMutedTone(metric)} lg:text-[11px]`}>
               {metric.helper}
             </p>
           </div>
         ))}
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+        <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-3 lg:mb-4">
           <div>
-            <p className="text-sm font-medium text-slate-500">
+            <p className="text-sm font-medium text-slate-500 lg:text-[11px]">
               Finance Trend
             </p>
-            <h2 className="text-xl font-semibold text-slate-900">
+            <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">
               {getChartViewLabel(chartView)} · {getTimeframeLabel(chartTimeframe)}
             </h2>
           </div>
@@ -1683,7 +1683,7 @@ export default function FinanceDashboardPage() {
                   chartView === view
                     ? "bg-slate-900 text-white"
                     : "border border-slate-200 bg-white text-slate-700"
-                }`}
+                } lg:text-[9px]`}
               >
                 {getChartViewLabel(view)}
               </button>
@@ -1701,7 +1701,7 @@ export default function FinanceDashboardPage() {
                   chartTimeframe === timeframe
                     ? "bg-slate-900 text-white"
                     : "border border-slate-200 bg-white text-slate-700"
-                }`}
+                } lg:text-[9px]`}
               >
                 {getTimeframeLabel(timeframe)}
               </button>
@@ -1710,8 +1710,8 @@ export default function FinanceDashboardPage() {
         </div>
 
         {chartData.length > 0 && maxChartValue > 0 ? (
-          <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
-            <div className="relative h-72 w-full overflow-hidden rounded-2xl bg-white">
+          <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5 lg:rounded-2xl lg:p-4">
+            <div className="relative h-72 lg:h-56 lg:h-44 w-full overflow-hidden rounded-2xl bg-white lg:rounded-xl">
               <div className="absolute inset-x-0 top-1/3 border-t border-dotted border-slate-200" />
               <div className="absolute inset-x-0 top-1/2 border-t border-dotted border-slate-200" />
               <div className="absolute inset-x-0 top-2/3 border-t border-dotted border-slate-200" />
@@ -1747,10 +1747,10 @@ export default function FinanceDashboardPage() {
               <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-slate-50 to-transparent" />
             </div>
 
-            <div className="mt-5 grid grid-cols-4 gap-4 text-center text-sm">
+            <div className="mt-5 grid grid-cols-4 gap-4 text-center text-sm lg:gap-3 lg:mt-4 lg:text-[11px]">
               {chartData.slice(-4).map((point, index) => (
                 <div key={`${point.label}-${index}`}>
-                  <p className="text-xs font-medium text-sky-700">
+                  <p className="text-xs font-medium text-sky-700 lg:text-[9px]">
                     {point.label}
                   </p>
                   <p className="mt-1 font-semibold text-slate-900">
@@ -1761,7 +1761,7 @@ export default function FinanceDashboardPage() {
             </div>
           </div>
         ) : (
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-600">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-600 lg:rounded-xl lg:p-4 lg:text-[11px]">
             {financeLoading
               ? "Loading finance trend data..."
               : "No finance trend data available yet."}
@@ -1769,24 +1769,24 @@ export default function FinanceDashboardPage() {
         )}
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[1fr_1fr]">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="mb-6 flex items-center justify-between">
+      <section className="grid gap-6 xl:grid-cols-[1fr_1fr] lg:gap-4">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <div className="mb-6 flex items-center justify-between lg:mb-4">
             <div>
-              <p className="text-sm font-medium text-slate-500">
+              <p className="text-sm font-medium text-slate-500 lg:text-[11px]">
                 Finance Workflow
               </p>
-              <h2 className="text-xl font-semibold text-slate-900">
+              <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">
                 Active Tasks
               </h2>
             </div>
 
-            <BadgeDollarSign className="h-5 w-5 text-slate-500" />
+            <BadgeDollarSign className="h-5 w-5 text-slate-500 lg:h-4 lg:w-4" />
           </div>
 
-          <div className="max-h-[360px] space-y-3 overflow-y-auto pr-2">
+          <div className="max-h-[360px] space-y-3 overflow-y-auto pr-2 lg:space-y-2">
             {visibleWorkflowItems.length === 0 ? (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 lg:rounded-xl lg:p-3 lg:text-[11px]">
                 {financeLoading
                   ? "Loading finance workflow..."
                   : "No finance workflow items are available from live records yet."}
@@ -1796,26 +1796,26 @@ export default function FinanceDashboardPage() {
             {visibleWorkflowItems.map((item) => (
               <div
                 key={item.id}
-                className="rounded-2xl border border-slate-200 bg-slate-50 p-3"
+                className="rounded-2xl border border-slate-200 bg-slate-50 p-3 lg:rounded-xl"
               >
-                <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between lg:gap-2">
                   <div>
                     <p className="font-semibold text-slate-900">{item.title}</p>
-                    <p className="mt-1 text-sm text-slate-500">
+                    <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
                       Owner: {item.owner}
                     </p>
                   </div>
 
                   <div className="flex flex-wrap gap-2">
-                    <span className="inline-flex rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700">
+                    <span className="inline-flex rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 lg:text-[9px]">
                       {item.type}
                     </span>
 
-                    <span className="inline-flex rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700">
+                    <span className="inline-flex rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 lg:text-[9px]">
                       {item.priority}
                     </span>
 
-                    <span className="inline-flex rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700">
+                    <span className="inline-flex rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 lg:text-[9px]">
                       {item.status}
                     </span>
                   </div>
@@ -1824,7 +1824,7 @@ export default function FinanceDashboardPage() {
                 {item.status !== "done" ? (
                   <button
                     onClick={() => handleCompleteWorkflow(item.id)}
-                    className="mt-3 inline-flex items-center gap-2 rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white hover:bg-slate-800"
+                    className="mt-3 inline-flex items-center gap-2 rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white hover:bg-slate-800 lg:mt-2 lg:text-[9px]"
                   >
                     <CheckCircle2 className="h-3 w-3" />
                     Mark Complete
@@ -1835,23 +1835,23 @@ export default function FinanceDashboardPage() {
           </div>
         </div>
 
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="mb-6 flex items-center justify-between">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <div className="mb-6 flex items-center justify-between lg:mb-4">
             <div>
-              <p className="text-sm font-medium text-slate-500">
+              <p className="text-sm font-medium text-slate-500 lg:text-[11px]">
                 Call Time
               </p>
-              <h2 className="text-xl font-semibold text-slate-900">
+              <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">
                 Finance Outreach
               </h2>
             </div>
 
-            <Users className="h-5 w-5 text-slate-500" />
+            <Users className="h-5 w-5 text-slate-500 lg:h-4 lg:w-4" />
           </div>
 
-          <div className="max-h-[360px] space-y-3 overflow-y-auto pr-2">
+          <div className="max-h-[360px] space-y-3 overflow-y-auto pr-2 lg:space-y-2">
             {visibleCallRows.length === 0 ? (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 lg:rounded-xl lg:p-3 lg:text-[11px]">
                 {financeLoading
                   ? "Loading finance call targets..."
                   : "No finance call rows are available from live records yet."}
@@ -1861,28 +1861,28 @@ export default function FinanceDashboardPage() {
             {visibleCallRows.map((row) => (
               <div
                 key={row.id}
-                className="rounded-2xl border border-slate-200 bg-slate-50 p-3"
+                className="rounded-2xl border border-slate-200 bg-slate-50 p-3 lg:rounded-xl"
               >
                 <div className="flex items-center justify-between">
                   <p className="font-semibold text-slate-900">{row.caller}</p>
-                  <p className="text-sm text-slate-500">
+                  <p className="text-sm text-slate-500 lg:text-[11px]">
                     {row.calls} calls
                   </p>
                 </div>
 
-                <div className="mt-2 grid grid-cols-3 gap-2 text-sm text-slate-700">
+                <div className="mt-2 grid grid-cols-3 gap-2 text-sm text-slate-700 lg:text-[11px]">
                   <div>
-                    <p className="text-xs text-slate-500">Connects</p>
+                    <p className="text-xs text-slate-500 lg:text-[9px]">Connects</p>
                     <p className="font-semibold">{row.connects}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-slate-500">Pledged</p>
+                    <p className="text-xs text-slate-500 lg:text-[9px]">Pledged</p>
                     <p className="font-semibold">
                       {currency.format(row.pledged)}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-slate-500">Raised</p>
+                    <p className="text-xs text-slate-500 lg:text-[9px]">Raised</p>
                     <p className="font-semibold">
                       {currency.format(row.raised)}
                     </p>
@@ -1895,22 +1895,22 @@ export default function FinanceDashboardPage() {
       </section>
 
       <section className="hidden" aria-hidden="true">
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-6 flex items-center justify-between lg:mb-4">
           <div>
-            <p className="text-sm font-medium text-slate-500">
+            <p className="text-sm font-medium text-slate-500 lg:text-[11px]">
               Contacts
             </p>
-            <h2 className="text-xl font-semibold text-slate-900">
+            <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">
               Donor + Prospect Records
             </h2>
           </div>
 
-          <HandCoins className="h-5 w-5 text-slate-500" />
+          <HandCoins className="h-5 w-5 text-slate-500 lg:h-4 lg:w-4" />
         </div>
 
-        <div className="max-h-[420px] space-y-3 overflow-y-auto pr-2">
+        <div className="max-h-[420px] space-y-3 overflow-y-auto pr-2 lg:space-y-2">
           {contactRows.length === 0 ? (
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 lg:rounded-xl lg:p-3 lg:text-[11px]">
               {financeLoading
                 ? "Loading finance contacts..."
                 : "No donor or prospect finance records are available yet."}
@@ -1925,16 +1925,16 @@ export default function FinanceDashboardPage() {
                 selectedFinanceContactId === contact.id
                   ? "border-slate-900 bg-slate-100"
                   : "border-slate-200 bg-white hover:bg-slate-50"
-              }`}
+              } lg:rounded-xl`}
             >
               <p className="font-semibold text-slate-900">{contact.name}</p>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-slate-500 lg:text-[11px]">
                 {contact.city}, {contact.state}
               </p>
 
               {selectedFinanceContactId === contact.id &&
               selectedFinancePatternHint ? (
-                <p className="mt-2 text-xs font-medium text-amber-700">
+                <p className="mt-2 text-xs font-medium text-amber-700 lg:text-[9px]">
                   {selectedFinancePatternHint}
                 </p>
               ) : null}
@@ -1944,33 +1944,33 @@ export default function FinanceDashboardPage() {
       </section>
 
       {financeFocusMode && selectedContact ? (
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
-          <div className="mb-6">
-            <h2 className="text-xl font-semibold text-slate-900">
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-6 lg:rounded-2xl lg:p-[18px]">
+          <div className="mb-6 lg:mb-4">
+            <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">
               Finance Focus Mode
             </h2>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
               Execute the next finance action cleanly and move forward.
             </p>
           </div>
 
-          <div className="mb-4 rounded-2xl border border-blue-200 bg-blue-50 p-4">
-            <p className="text-sm text-blue-700">Selected Contact</p>
+          <div className="mb-4 rounded-2xl border border-blue-200 bg-blue-50 p-4 lg:rounded-xl lg:p-3 lg:mb-3">
+            <p className="text-sm text-blue-700 lg:text-[11px]">Selected Contact</p>
             <p className="mt-1 font-semibold text-slate-900">
               {selectedContact.name}
             </p>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-4 lg:space-y-3">
             {selectedContactOpenPledges.length > 0 ? (
               <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                <label className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 lg:text-[9px]">
                   Pledge to convert
                 </label>
                 <select
                   value={selectedPledgeId}
                   onChange={(e) => setSelectedPledgeId(e.target.value)}
-                  className="w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm"
+                  className="w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm lg:rounded-xl lg:text-[11px]"
                 >
                   {selectedContactOpenPledges.map((pledge) => (
                     <option key={pledge.id} value={pledge.id}>
@@ -1978,12 +1978,12 @@ export default function FinanceDashboardPage() {
                     </option>
                   ))}
                 </select>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-slate-500 lg:text-[9px]">
                   Only the selected pledge will be marked converted when this entry is saved.
                 </p>
               </div>
             ) : (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600 lg:rounded-xl lg:text-[11px]">
                 This contact has no open pledges. Saving will add a contribution without converting a pledge.
               </div>
             )}
@@ -1992,7 +1992,7 @@ export default function FinanceDashboardPage() {
               value={loopAmount}
               onChange={(e) => setLoopAmount(e.target.value)}
               placeholder="Amount"
-              className="w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm"
+              className="w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm lg:rounded-xl lg:text-[11px]"
             />
 
             <select
@@ -2000,7 +2000,7 @@ export default function FinanceDashboardPage() {
               onChange={(e) =>
                 setLoopMethod(e.target.value as "online" | "check" | "cash")
               }
-              className="w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm"
+              className="w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm lg:rounded-xl lg:text-[11px]"
             >
               <option value="online">Online</option>
               <option value="check">Check</option>
@@ -2011,14 +2011,14 @@ export default function FinanceDashboardPage() {
               value={loopEmployer}
               onChange={(e) => setLoopEmployer(e.target.value)}
               placeholder="Employer"
-              className="w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm"
+              className="w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm lg:rounded-xl lg:text-[11px]"
             />
 
             <input
               value={loopOccupation}
               onChange={(e) => setLoopOccupation(e.target.value)}
               placeholder="Occupation"
-              className="w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm"
+              className="w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm lg:rounded-xl lg:text-[11px]"
             />
 
             <textarea
@@ -2026,12 +2026,12 @@ export default function FinanceDashboardPage() {
               onChange={(e) => setLoopMessage(e.target.value)}
               placeholder="Notes..."
               rows={4}
-              className="w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm"
+              className="w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm lg:rounded-xl lg:text-[11px]"
             />
 
             <button
               onClick={handleFocusSave}
-              className="w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm text-white hover:bg-slate-800"
+              className="w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm text-white hover:bg-slate-800 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
               Save & Continue
             </button>

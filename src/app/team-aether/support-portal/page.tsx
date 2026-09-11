@@ -1,20 +1,20 @@
 export default function SupportPortalPage() {
   return (
-    <main className="min-h-screen bg-[#08111f] flex items-center justify-center px-6">
-      <div className="max-w-3xl w-full rounded-2xl border border-slate-700 bg-slate-900/70 p-12 text-center shadow-2xl">
-        <h1 className="text-5xl font-bold text-white mb-10">
+    <main className="min-h-screen bg-[#08111f] flex items-center justify-center px-6 lg:px-5">
+      <div className="max-w-3xl w-full rounded-2xl border border-slate-700 bg-slate-900/70 p-12 text-center shadow-2xl lg:max-w-2xl lg:p-8">
+        <h1 className="text-5xl font-bold text-white mb-10 lg:mb-6 lg:text-4xl">
           Need Support?
         </h1>
 
-        <p className="text-3xl font-bold text-red-400 mb-8">
+        <p className="text-3xl font-bold text-red-400 mb-8 lg:mb-5 lg:text-2xl">
           Call a fuckin&apos; therapist.
         </p>
 
-        <p className="text-2xl font-semibold text-white mb-12">
+        <p className="text-2xl font-semibold text-white mb-12 lg:mb-7 lg:text-xl">
           Just Kidding. 😄
         </p>
 
-        <p className="text-xl text-slate-300 leading-9">
+        <p className="text-xl text-slate-300 leading-9 lg:text-base lg:leading-7">
           If something&apos;s broken...
           <br />
           If something doesn&apos;t make sense...
@@ -24,12 +24,12 @@ export default function SupportPortalPage() {
           Or if you&apos;ve got an idea...
         </p>
 
-        <p className="mt-12 text-3xl font-bold text-purple-400">
+        <p className="mt-12 text-3xl font-bold text-purple-400 lg:mt-7 lg:text-2xl">
           Harass Tyler until the problem is resolved.
         </p>
 
-        <div className="mt-16 border-t border-slate-700 pt-6">
-          <p className="text-sm text-slate-500">
+        <div className="mt-16 border-t border-slate-700 pt-6 lg:mt-9 lg:pt-4">
+          <p className="text-sm text-slate-500 lg:text-xs">
             Team Aether Support Portal v1.0
             <br />
             Real support tools coming eventually...

@@ -456,29 +456,29 @@ export default function TeamManagementPage() {
   }
 
   return (
-    <div className="space-y-8">
-      <section className="rounded-3xl border border-slate-800 bg-slate-950 p-6 text-white shadow-sm lg:p-8">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="space-y-4">
+    <div className="space-y-8 lg:space-y-6">
+      <section className="rounded-3xl border border-slate-800 bg-slate-950 p-6 text-white shadow-sm lg:rounded-2xl lg:p-6">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-4">
+          <div className="space-y-4 lg:space-y-3">
             <Link
               href="/dashboard/admin"
-              className="inline-flex items-center gap-2 text-sm font-medium text-slate-300 transition hover:text-white"
+              className="inline-flex items-center gap-2 text-sm font-medium text-slate-300 transition hover:text-white lg:text-[11px]"
             >
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               Back to System Console
             </Link>
 
             <div className="space-y-2">
-              <div className="flex items-center gap-2 text-sm text-slate-300">
-                <Shield className="h-4 w-4" />
+              <div className="flex items-center gap-2 text-sm text-slate-300 lg:text-[11px]">
+                <Shield className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                 Organization admin
               </div>
 
-              <h1 className="text-3xl font-semibold tracking-tight text-white lg:text-4xl">
+              <h1 className="text-3xl font-semibold tracking-tight text-white lg:text-3xl">
                 Manage Team
               </h1>
 
-              <p className="max-w-3xl text-sm text-slate-300 lg:text-base">
+              <p className="max-w-3xl text-sm text-slate-300 lg:text-sm">
                 Add, review, and adjust the operating roles that control what each
                 team member can see, route, and execute across the campaign.
               </p>
@@ -488,48 +488,48 @@ export default function TeamManagementPage() {
           <button
             onClick={loadTeam}
             disabled={loading}
-            className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white px-4 py-3 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white px-4 py-3 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
           >
-            <RefreshCw className="h-4 w-4" />
+            <RefreshCw className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
             {loading ? "Refreshing..." : "Refresh Team"}
           </button>
         </div>
       </section>
 
       {message ? (
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-700 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-700 shadow-sm lg:rounded-xl lg:p-3 lg:text-[11px]">
           {message}
         </div>
       ) : null}
 
-      <section className="grid gap-6 xl:grid-cols-[0.8fr_1.2fr]">
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
-              <UserPlus className="h-5 w-5 text-slate-700" />
+      <section className="grid gap-6 xl:grid-cols-[0.8fr_1.2fr] lg:gap-4">
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <div className="flex items-center gap-3 lg:gap-2">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 lg:rounded-xl lg:p-2">
+              <UserPlus className="h-5 w-5 text-slate-700 lg:h-4 lg:w-4" />
             </div>
 
             <div>
-              <p className="text-sm font-medium text-slate-500">Access</p>
-              <h2 className="text-2xl font-semibold text-slate-900">
+              <p className="text-sm font-medium text-slate-500 lg:text-[11px]">Access</p>
+              <h2 className="text-2xl font-semibold text-slate-900 lg:text-xl">
                 Add team member
               </h2>
             </div>
           </div>
 
-          <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+          <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 lg:mt-4 lg:rounded-xl lg:p-3 lg:text-[11px]">
             Add a user to this organization, set a temporary password, and assign
             their starting operating lane. New users can log in immediately with
             the password you create here.
           </div>
 
-          <div className="mt-5 space-y-3">
+          <div className="mt-5 space-y-3 lg:mt-4 lg:space-y-2">
             <input
               type="email"
               placeholder="team.member@example.com"
               value={inviteEmail}
               onChange={(event) => setInviteEmail(event.target.value)}
-              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none"
+              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             />
 
             <input
@@ -537,16 +537,16 @@ export default function TeamManagementPage() {
               placeholder="Temporary password"
               value={invitePassword}
               onChange={(event) => setInvitePassword(event.target.value)}
-              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none"
+              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             />
 
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-3 sm:grid-cols-2 lg:gap-2">
               <select
                 value={inviteDepartment}
                 onChange={(event) =>
                   setInviteDepartment(event.target.value as OperatingDepartment)
                 }
-                className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none"
+                className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
               >
                 {inviteDepartmentOptions.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -560,7 +560,7 @@ export default function TeamManagementPage() {
                 onChange={(event) =>
                   setInviteRole(event.target.value as OperatingRoleLevel)
                 }
-                className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none"
+                className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
               >
                 {ROLE_LEVEL_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -573,30 +573,30 @@ export default function TeamManagementPage() {
             <button
               onClick={handleCreateMember}
               disabled={creatingMember}
-              className="w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
               {creatingMember ? "Adding Member..." : "Add Team Member"}
             </button>
           </div>
         </section>
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between lg:gap-3">
             <div>
-              <p className="text-sm font-medium text-slate-500">
+              <p className="text-sm font-medium text-slate-500 lg:text-[11px]">
                 Active operators
               </p>
-              <h2 className="text-2xl font-semibold text-slate-900">
+              <h2 className="text-2xl font-semibold text-slate-900 lg:text-xl">
                 Current team
               </h2>
-              <p className="mt-2 text-sm text-slate-600">
+              <p className="mt-2 text-sm text-slate-600 lg:mt-1.5 lg:text-[11px]">
                 Search members, assign department roles, set primary lanes, and
                 remove outdated access.
               </p>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
-              <Users className="mr-2 inline h-4 w-4" />
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]">
+              <Users className="mr-2 inline h-4 w-4 lg:h-3.5 lg:w-3.5" />
               {members.length} member{members.length === 1 ? "" : "s"}
             </div>
           </div>
@@ -606,18 +606,18 @@ export default function TeamManagementPage() {
             placeholder="Search by email, title, role, department, or member id..."
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            className="mt-5 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400"
+            className="mt-5 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 lg:mt-4 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
           />
 
-          <div className="mt-5 space-y-4">
+          <div className="mt-5 space-y-4 lg:mt-4 lg:space-y-3">
             {loading ? (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 lg:rounded-xl lg:p-3 lg:text-[11px]">
                 Loading team members...
               </div>
             ) : null}
 
             {!loading && filteredMembers.length === 0 ? (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 lg:rounded-xl lg:p-3 lg:text-[11px]">
                 No team members found.
               </div>
             ) : null}
@@ -633,26 +633,26 @@ export default function TeamManagementPage() {
               return (
                 <div
                   key={member.id}
-                  className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                  className="rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3"
                 >
-                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between lg:gap-3">
                     <div>
-                      <p className="text-sm font-semibold text-slate-900">
+                      <p className="text-sm font-semibold text-slate-900 lg:text-[11px]">
                         {getMemberDisplayName(member)}
                       </p>
 
-                      <p className="mt-1 text-xs text-slate-500">
+                      <p className="mt-1 text-xs text-slate-500 lg:text-[9px]">
                         Member ID: {member.id}
                       </p>
 
-                      <p className="mt-1 text-xs text-slate-500">
+                      <p className="mt-1 text-xs text-slate-500 lg:text-[9px]">
                         Base membership: {formatRoleText(member.role)} •{" "}
                         {member.department || "No department"}
                       </p>
                     </div>
 
-                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                      <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center lg:gap-1.5">
+                      <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]">
                         Primary:{" "}
                         {primaryRole
                           ? `${formatRoleText(
@@ -665,16 +665,16 @@ export default function TeamManagementPage() {
                         type="button"
                         onClick={() => handleRemoveMember(member)}
                         disabled={isSaving}
-                        className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-50 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
                       >
                         {isSaving ? "Removing..." : "Remove Member"}
                       </button>
                     </div>
                   </div>
 
-                  <div className="mt-4 flex flex-wrap gap-2">
+                  <div className="mt-4 flex flex-wrap gap-2 lg:mt-3 lg:gap-1.5">
                     {memberRoles.length === 0 ? (
-                      <span className="inline-flex rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600">
+                      <span className="inline-flex rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 lg:px-2.5 lg:py-0.5 lg:text-[9px]">
                         No operating roles assigned
                       </span>
                     ) : null}
@@ -685,7 +685,7 @@ export default function TeamManagementPage() {
                           role.id ||
                           `${role.organization_member_id}-${role.department}-${role.role_level}`
                         }
-                        className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${
+                        className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium lg:gap-1.5 lg:px-2.5 lg:py-0.5 lg:text-[9px] ${
                           role.is_primary
                             ? "border-indigo-200 bg-indigo-50 text-indigo-900"
                             : "border-slate-200 bg-white text-slate-700"
@@ -718,7 +718,7 @@ export default function TeamManagementPage() {
                     ))}
                   </div>
 
-                  <div className="mt-4 grid gap-3 md:grid-cols-[1fr_1fr_auto_auto]">
+                  <div className="mt-4 grid gap-3 md:grid-cols-[1fr_1fr_auto_auto] lg:mt-3 lg:gap-2">
                     <select
                       value={draft.department}
                       onChange={(event) =>
@@ -726,7 +726,7 @@ export default function TeamManagementPage() {
                           department: event.target.value as OperatingDepartment,
                         })
                       }
-                      className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none"
+                      className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
                     >
                       {DEPARTMENT_OPTIONS.map((option) => (
                         <option key={option.value} value={option.value}>
@@ -742,7 +742,7 @@ export default function TeamManagementPage() {
                           role_level: event.target.value as OperatingRoleLevel,
                         })
                       }
-                      className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none"
+                      className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
                     >
                       {ROLE_LEVEL_OPTIONS.map((option) => (
                         <option key={option.value} value={option.value}>
@@ -758,7 +758,7 @@ export default function TeamManagementPage() {
                           is_primary: !draft.is_primary,
                         })
                       }
-                      className={`rounded-2xl border px-4 py-3 text-sm font-medium transition ${
+                      className={`rounded-2xl border px-4 py-3 text-sm font-medium transition lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px] ${
                         draft.is_primary
                           ? "border-indigo-200 bg-indigo-50 text-indigo-900"
                           : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
@@ -770,7 +770,7 @@ export default function TeamManagementPage() {
                     <button
                       onClick={() => handleAddRole(member)}
                       disabled={isSaving}
-                      className="rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
                     >
                       {isSaving ? "Saving..." : "Add Role"}
                     </button>
@@ -782,25 +782,25 @@ export default function TeamManagementPage() {
         </section>
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between lg:gap-2">
           <div>
-            <p className="text-sm font-medium text-slate-500">Quick view</p>
-            <h2 className="text-2xl font-semibold text-slate-900">
+            <p className="text-sm font-medium text-slate-500 lg:text-[11px]">Quick view</p>
+            <h2 className="text-2xl font-semibold text-slate-900 lg:text-xl">
               Active members list
             </h2>
-            <p className="mt-2 text-sm text-slate-600">
+            <p className="mt-2 text-sm text-slate-600 lg:mt-1.5 lg:text-[11px]">
               Simple snapshot of everyone currently attached to this organization.
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]">
             {members.length} active member{members.length === 1 ? "" : "s"}
           </div>
         </div>
 
-        <div className="mt-5 overflow-hidden rounded-2xl border border-slate-200">
-          <div className="grid grid-cols-[1.2fr_0.8fr_0.8fr_0.8fr_0.7fr] bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <div className="mt-5 overflow-hidden rounded-2xl border border-slate-200 lg:mt-4 lg:rounded-xl">
+          <div className="grid grid-cols-[1.2fr_0.8fr_0.8fr_0.8fr_0.7fr] bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 lg:px-3 lg:py-2 lg:text-[9px]">
             <div>Member</div>
             <div>Base role</div>
             <div>Department</div>
@@ -809,7 +809,7 @@ export default function TeamManagementPage() {
           </div>
 
           {members.length === 0 ? (
-            <div className="px-4 py-4 text-sm text-slate-600">
+            <div className="px-4 py-4 text-sm text-slate-600 lg:px-3 lg:py-3 lg:text-[11px]">
               No active members found.
             </div>
           ) : null}
@@ -823,7 +823,7 @@ export default function TeamManagementPage() {
             return (
               <div
                 key={`quick-${member.id}`}
-                className="grid grid-cols-[1.2fr_0.8fr_0.8fr_0.8fr_0.7fr] items-center border-t border-slate-200 px-4 py-3 text-sm text-slate-700"
+                className="grid grid-cols-[1.2fr_0.8fr_0.8fr_0.8fr_0.7fr] items-center border-t border-slate-200 px-4 py-3 text-sm text-slate-700 lg:px-3 lg:py-2 lg:text-[11px]"
               >
                 <div className="font-medium text-slate-900">
                   {getMemberDisplayName(member)}
@@ -846,7 +846,7 @@ export default function TeamManagementPage() {
                     type="button"
                     onClick={() => handleRemoveMember(member)}
                     disabled={isSaving}
-                    className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-50 lg:rounded-lg lg:px-2.5 lg:py-1.5 lg:text-[9px]"
                   >
                     {isSaving ? "Removing..." : "Remove"}
                   </button>

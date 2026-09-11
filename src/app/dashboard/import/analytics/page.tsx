@@ -177,38 +177,38 @@ export default function AnalyticsImportPage() {
   }, [data]);
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-6 lg:space-y-4 lg:p-[18px]">
       <div className="space-y-2">
-        <div className="flex items-center gap-2 text-sm text-slate-500">
-          <BarChart3 className="h-4 w-4" />
+        <div className="flex items-center gap-2 text-sm text-slate-500 lg:text-[11px]">
+          <BarChart3 className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
           Analytics Signal Engine
         </div>
 
-        <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
+        <h1 className="text-3xl font-semibold tracking-tight text-slate-900 lg:text-2xl">
           Analytics Data Ingestion
         </h1>
 
-        <p className="max-w-3xl text-sm text-slate-600">
+        <p className="max-w-3xl text-sm text-slate-600 lg:text-[11px]">
           Import platform analytics, campaign metrics, engagement
           data, sentiment signals, or spend reports into Aether’s
           analytics intelligence layer.
         </p>
       </div>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="space-y-5">
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+        <div className="space-y-5 lg:space-y-4">
           <div>
-            <p className="text-sm font-medium text-slate-900">
+            <p className="text-sm font-medium text-slate-900 lg:text-[11px]">
               Upload analytics CSV
             </p>
 
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
               Meta, TikTok, X, Instagram, Google Ads, vendor exports,
               or internal reporting sheets.
             </p>
           </div>
 
-          <label className="group flex cursor-pointer flex-col items-center justify-center rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center transition hover:border-slate-400 hover:bg-slate-100">
+          <label className="group flex cursor-pointer flex-col items-center justify-center rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center transition hover:border-slate-400 hover:bg-slate-100 lg:rounded-2xl lg:p-6">
             <input
               type="file"
               accept=".csv"
@@ -216,21 +216,21 @@ export default function AnalyticsImportPage() {
               className="sr-only"
             />
 
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-sm transition group-hover:bg-slate-800">
-              <Upload className="h-5 w-5" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-sm transition group-hover:bg-slate-800 lg:rounded-xl lg:h-9 lg:w-9">
+              <Upload className="h-5 w-5 lg:h-4 lg:w-4" />
             </div>
 
-            <p className="mt-4 text-sm font-semibold text-slate-900">
+            <p className="mt-4 text-sm font-semibold text-slate-900 lg:mt-3 lg:text-[11px]">
               Click here to upload analytics CSV
             </p>
 
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-slate-500 lg:text-[9px]">
               Select a .csv file from your computer.
             </p>
           </label>
 
           <div>
-            <p className="mb-2 text-sm font-medium text-slate-900">
+            <p className="mb-2 text-sm font-medium text-slate-900 lg:text-[11px]">
               Department Destination
             </p>
 
@@ -241,7 +241,7 @@ export default function AnalyticsImportPage() {
                   e.target.value as (typeof DEPARTMENT_OPTIONS)[number]
                 )
               }
-              className="cursor-pointer rounded-xl border border-slate-200 px-3 py-2 text-sm"
+              className="cursor-pointer rounded-xl border border-slate-200 px-3 py-2 text-sm lg:text-[11px]"
             >
               {DEPARTMENT_OPTIONS.map((option) => (
                 <option key={option} value={option}>
@@ -254,55 +254,55 @@ export default function AnalyticsImportPage() {
       </section>
 
       {interpretation ? (
-        <section className="rounded-3xl border border-indigo-200 bg-indigo-50 p-6 shadow-sm">
-          <div className="space-y-5">
+        <section className="rounded-3xl border border-indigo-200 bg-indigo-50 p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <div className="space-y-5 lg:space-y-4">
             <div>
-              <p className="text-sm font-medium text-indigo-800">
+              <p className="text-sm font-medium text-indigo-800 lg:text-[11px]">
                 Signal Interpretation
               </p>
 
-              <h2 className="mt-1 text-2xl font-semibold text-indigo-900">
+              <h2 className="mt-1 text-2xl font-semibold text-indigo-900 lg:text-xl">
                 Here’s what Aether sees
               </h2>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              <div className="rounded-2xl border border-indigo-200 bg-white p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4 lg:gap-3">
+              <div className="rounded-2xl border border-indigo-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 lg:text-[9px]">
                   Rows detected
                 </p>
 
-                <p className="mt-2 text-3xl font-semibold text-slate-900">
+                <p className="mt-2 text-3xl font-semibold text-slate-900 lg:text-2xl">
                   {interpretation.totalRows}
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-indigo-200 bg-white p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+              <div className="rounded-2xl border border-indigo-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 lg:text-[9px]">
                   Impression data
                 </p>
 
-                <p className="mt-2 text-lg font-semibold text-slate-900">
+                <p className="mt-2 text-lg font-semibold text-slate-900 lg:text-base">
                   {interpretation.hasImpressions ? "Detected" : "Missing"}
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-indigo-200 bg-white p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+              <div className="rounded-2xl border border-indigo-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 lg:text-[9px]">
                   Engagement data
                 </p>
 
-                <p className="mt-2 text-lg font-semibold text-slate-900">
+                <p className="mt-2 text-lg font-semibold text-slate-900 lg:text-base">
                   {interpretation.hasEngagement ? "Detected" : "Missing"}
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-indigo-200 bg-white p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+              <div className="rounded-2xl border border-indigo-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 lg:text-[9px]">
                   Spend data
                 </p>
 
-                <p className="mt-2 text-lg font-semibold text-slate-900">
+                <p className="mt-2 text-lg font-semibold text-slate-900 lg:text-base">
                   {interpretation.hasSpend ? "Detected" : "Missing"}
                 </p>
               </div>
@@ -313,37 +313,37 @@ export default function AnalyticsImportPage() {
 
       {data ? (
         <>
-          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-slate-900">
+          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+            <h2 className="text-lg font-semibold text-slate-900 lg:text-base">
               Preview
             </h2>
 
-            <pre className="mt-4 overflow-auto rounded-2xl bg-slate-100 p-4 text-xs text-slate-700">
+            <pre className="mt-4 overflow-auto rounded-2xl bg-slate-100 p-4 text-xs text-slate-700 lg:rounded-xl lg:p-3 lg:mt-3 lg:text-[9px]">
               {JSON.stringify(data.rows.slice(0, 5), null, 2)}
             </pre>
           </section>
 
-          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-slate-900">
+          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+            <h2 className="text-lg font-semibold text-slate-900 lg:text-base">
               Field Mapping
             </h2>
 
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
               Blank mappings will be ignored.
             </p>
 
-            <div className="mt-5 space-y-3">
+            <div className="mt-5 space-y-3 lg:space-y-2 lg:mt-4">
               {data.headers.map((header: string) => (
                 <div
                   key={header}
-                  className="flex items-center gap-3"
+                  className="flex items-center gap-3 lg:gap-2"
                 >
-                  <span className="w-44 text-sm font-medium text-slate-700">
+                  <span className="w-44 text-sm font-medium text-slate-700 lg:text-[11px] lg:w-36">
                     {header}
                   </span>
 
                   <input
-                    className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                    className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm lg:text-[11px]"
                     value={mapping[header] || ""}
                     onChange={(e) =>
                       setMapping({
@@ -361,9 +361,9 @@ export default function AnalyticsImportPage() {
             <button
               onClick={handleImport}
               disabled={loading}
-              className="inline-flex cursor-pointer items-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex cursor-pointer items-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 lg:rounded-xl lg:px-4 lg:py-2 lg:text-[11px]"
             >
-              <Upload className="h-4 w-4" />
+              <Upload className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
 
               {loading
                 ? "Importing Analytics..."
@@ -374,39 +374,39 @@ export default function AnalyticsImportPage() {
       ) : null}
 
       {importSuccess ? (
-        <section className="rounded-3xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+        <section className="rounded-3xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between lg:gap-4">
             <div className="space-y-2">
-              <p className="text-sm font-medium text-emerald-800">
+              <p className="text-sm font-medium text-emerald-800 lg:text-[11px]">
                 Analytics Import Complete
               </p>
 
-              <h2 className="text-2xl font-semibold text-emerald-900">
+              <h2 className="text-2xl font-semibold text-emerald-900 lg:text-xl">
                 {importCount} analytics event
                 {importCount === 1 ? "" : "s"} imported
               </h2>
 
-              <p className="max-w-3xl text-sm text-emerald-900/80">
+              <p className="max-w-3xl text-sm text-emerald-900/80 lg:text-[11px]">
                 Aether added these analytics signals into the live
                 intelligence layer.
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-3 lg:gap-2">
               <Link
                 href="/dashboard/digital"
-                className="inline-flex cursor-pointer items-center gap-2 rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-emerald-700"
+                className="inline-flex cursor-pointer items-center gap-2 rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-emerald-700 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
               >
-                <Activity className="h-4 w-4" />
+                <Activity className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                 Open Digital
               </Link>
 
               <Link
                 href="/dashboard"
-                className="inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-emerald-200 bg-white px-4 py-3 text-sm font-medium text-emerald-900 transition hover:bg-emerald-100"
+                className="inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-emerald-200 bg-white px-4 py-3 text-sm font-medium text-emerald-900 transition hover:bg-emerald-100 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
               >
                 Dashboard
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               </Link>
             </div>
           </div>
@@ -414,16 +414,16 @@ export default function AnalyticsImportPage() {
       ) : null}
 
       {errorMessage ? (
-        <section className="rounded-3xl border border-rose-200 bg-rose-50 p-6 shadow-sm">
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="mt-0.5 h-5 w-5 text-rose-700" />
+        <section className="rounded-3xl border border-rose-200 bg-rose-50 p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <div className="flex items-start gap-3 lg:gap-2">
+            <AlertTriangle className="mt-0.5 h-5 w-5 text-rose-700 lg:h-4 lg:w-4" />
 
             <div>
-              <p className="text-sm font-medium text-rose-900">
+              <p className="text-sm font-medium text-rose-900 lg:text-[11px]">
                 Analytics import failed
               </p>
 
-              <p className="mt-1 text-sm text-rose-800">
+              <p className="mt-1 text-sm text-rose-800 lg:text-[11px]">
                 {errorMessage}
               </p>
             </div>

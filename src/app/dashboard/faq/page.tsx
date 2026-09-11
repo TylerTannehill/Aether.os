@@ -503,64 +503,64 @@ export default function FAQPage() {
 
   return (
     <main className="min-h-screen bg-slate-50">
-      <section className="relative overflow-hidden border-b border-slate-200 bg-slate-950 px-6 py-12 text-white sm:px-8 lg:px-12">
+      <section className="relative overflow-hidden border-b border-slate-200 bg-slate-950 px-6 py-12 text-white sm:px-8 lg:px-9 lg:py-9">
         <div className="absolute inset-0 opacity-30">
           <div className="absolute left-[-10%] top-[-40%] h-96 w-96 rounded-full bg-blue-500 blur-3xl" />
           <div className="absolute bottom-[-35%] right-[-10%] h-96 w-96 rounded-full bg-purple-500 blur-3xl" />
         </div>
 
-        <div className="relative mx-auto flex max-w-7xl flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+        <div className="relative mx-auto flex max-w-7xl flex-col gap-8 lg:flex-row lg:items-end lg:justify-between lg:gap-6">
           <div className="max-w-3xl">
-            <div className="mb-4 inline-flex rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-blue-100">
+            <div className="mb-4 inline-flex rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-blue-100 lg:mb-3 lg:px-2.5 lg:py-0.5 lg:text-[9px]">
               Aether Mission FAQ
             </div>
 
-            <h1 className="text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
+            <h1 className="text-4xl font-black tracking-tight sm:text-5xl lg:text-4xl">
               The Operating System for Coordinated Execution
             </h1>
 
-            <p className="mt-5 max-w-2xl text-base leading-7 text-slate-200 sm:text-lg">
+            <p className="mt-5 max-w-2xl text-base leading-7 text-slate-200 sm:text-lg lg:mt-4 lg:text-sm lg:leading-6">
               Aether is a governed operational intelligence platform designed
               to coordinate execution, interpret organizational pressure, and
               move work forward across interconnected lanes.
             </p>
 
-            <div className="mt-8 flex flex-wrap gap-4">
+            <div className="mt-8 flex flex-wrap gap-4 lg:mt-6 lg:gap-3">
               <a
                 href="/aether-academy"
-                className="inline-flex items-center justify-center rounded-xl border border-violet-400/40 bg-violet-400/10 px-6 py-3 font-semibold text-violet-300 transition hover:-translate-y-0.5 hover:border-violet-300"
+                className="inline-flex items-center justify-center rounded-xl border border-violet-400/40 bg-violet-400/10 px-6 py-3 font-semibold text-violet-300 transition hover:-translate-y-0.5 hover:border-violet-300 lg:px-4 lg:py-2 lg:text-sm"
               >
                 Explore Aether Academy →
               </a>
 
               <a
                 href="/support"
-                className="inline-flex items-center justify-center rounded-xl border border-blue-400/40 bg-blue-400/10 px-6 py-3 font-semibold text-blue-300 transition hover:-translate-y-0.5 hover:border-blue-300"
+                className="inline-flex items-center justify-center rounded-xl border border-blue-400/40 bg-blue-400/10 px-6 py-3 font-semibold text-blue-300 transition hover:-translate-y-0.5 hover:border-blue-300 lg:px-4 lg:py-2 lg:text-sm"
               >
                 Support →
               </a>
             </div>
           </div>
 
-          <div className="grid gap-3 rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur sm:grid-cols-3 lg:min-w-[420px]">
-            <div className="rounded-2xl bg-white/10 p-4">
-              <div className="text-3xl font-black">{faqSections.length}</div>
-              <div className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+          <div className="grid gap-3 rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur sm:grid-cols-3 lg:min-w-[315px] lg:gap-2 lg:rounded-2xl lg:p-3">
+            <div className="rounded-2xl bg-white/10 p-4 lg:rounded-xl lg:p-3">
+              <div className="text-3xl font-black lg:text-2xl">{faqSections.length}</div>
+              <div className="text-xs font-semibold uppercase tracking-wider text-slate-300 lg:text-[9px]">
                 Sections
               </div>
             </div>
-            <div className="rounded-2xl bg-white/10 p-4">
-              <div className="text-3xl font-black">{totalQuestions}</div>
-              <div className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+            <div className="rounded-2xl bg-white/10 p-4 lg:rounded-xl lg:p-3">
+              <div className="text-3xl font-black lg:text-2xl">{totalQuestions}</div>
+              <div className="text-xs font-semibold uppercase tracking-wider text-slate-300 lg:text-[9px]">
                 Questions
               </div>
             </div>
             <div
-              className="rounded-2xl bg-white/10 p-4"
+              className="rounded-2xl bg-white/10 p-4 lg:rounded-xl lg:p-3"
               onClick={handleDoctrineClick}
             >
-              <div className="text-3xl font-black">OS</div>
-              <div className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+              <div className="text-3xl font-black lg:text-2xl">OS</div>
+              <div className="text-xs font-semibold uppercase tracking-wider text-slate-300 lg:text-[9px]">
                 Doctrine
               </div>
             </div>
@@ -568,21 +568,21 @@ export default function FAQPage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 py-8 sm:px-8 lg:px-12">
-        <div className="grid gap-6 lg:grid-cols-[340px_1fr]">
+      <section className="mx-auto max-w-7xl px-6 py-8 sm:px-8 lg:px-9 lg:py-6">
+        <div className="grid gap-6 lg:grid-cols-[255px_1fr] lg:gap-4">
           <aside className="lg:sticky lg:top-6 lg:self-start">
-            <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
-              <label className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
+            <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm lg:rounded-2xl lg:p-3">
+              <label className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500 lg:text-[9px]">
                 Search FAQ
               </label>
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Search Aether..."
-                className="mt-3 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-blue-300 focus:bg-white focus:ring-4 focus:ring-blue-100"
+                className="mt-3 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-blue-300 focus:bg-white focus:ring-4 focus:ring-blue-100 lg:mt-2 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
               />
 
-              <div className="mt-5 space-y-2">
+              <div className="mt-5 space-y-2 lg:mt-4 lg:space-y-1.5">
                 {faqSections.map((section) => {
                   const tone = getToneClasses(section.tone);
 
@@ -590,11 +590,11 @@ export default function FAQPage() {
                     <a
                       key={section.id}
                       href={`#${section.id}`}
-                      className="group flex items-center justify-between rounded-2xl border border-slate-100 px-3 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-200 hover:bg-slate-50"
+                      className="group flex items-center justify-between rounded-2xl border border-slate-100 px-3 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-200 hover:bg-slate-50 lg:rounded-xl lg:px-2.5 lg:py-2 lg:text-[11px]"
                     >
                       <span>{section.title}</span>
                       <span
-                        className={`rounded-full border px-2 py-0.5 text-[10px] ${tone.chip}`}
+                        className={`rounded-full border px-2 py-0.5 text-[10px] lg:px-1.5 lg:text-[8px] ${tone.chip}`}
                       >
                         {section.items.length}
                       </span>
@@ -605,42 +605,42 @@ export default function FAQPage() {
             </div>
           </aside>
 
-          <div className="space-y-8">
-            <section className="grid gap-4 md:grid-cols-3">
-              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                <div className="text-sm font-bold uppercase tracking-[0.18em] text-slate-500">
+          <div className="space-y-8 lg:space-y-6">
+            <section className="grid gap-4 md:grid-cols-3 lg:gap-3">
+              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-4">
+                <div className="text-sm font-bold uppercase tracking-[0.18em] text-slate-500 lg:text-[10px]">
                   Doctrine
                 </div>
-                <h2 className="mt-3 text-xl font-black text-slate-950">
+                <h2 className="mt-3 text-xl font-black text-slate-950 lg:mt-2 lg:text-lg">
                   Coordination over isolated activity.
                 </h2>
-                <p className="mt-3 text-sm leading-6 text-slate-600">
+                <p className="mt-3 text-sm leading-6 text-slate-600 lg:mt-2 lg:text-[11px] lg:leading-5">
                   Aether is built to help organizations understand what should
                   move together, not just what exists in separate tools.
                 </p>
               </div>
 
-              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                <div className="text-sm font-bold uppercase tracking-[0.18em] text-slate-500">
+              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-4">
+                <div className="text-sm font-bold uppercase tracking-[0.18em] text-slate-500 lg:text-[10px]">
                   Trust
                 </div>
-                <h2 className="mt-3 text-xl font-black text-slate-950">
+                <h2 className="mt-3 text-xl font-black text-slate-950 lg:mt-2 lg:text-lg">
                   Governed autonomy, not blind automation.
                 </h2>
-                <p className="mt-3 text-sm leading-6 text-slate-600">
+                <p className="mt-3 text-sm leading-6 text-slate-600 lg:mt-2 lg:text-[11px] lg:leading-5">
                   Execution can be reviewed, blocked, previewed, audited, and
                   governed before operational changes occur.
                 </p>
               </div>
 
-              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                <div className="text-sm font-bold uppercase tracking-[0.18em] text-slate-500">
+              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-4">
+                <div className="text-sm font-bold uppercase tracking-[0.18em] text-slate-500 lg:text-[10px]">
                   Identity
                 </div>
-                <h2 className="mt-3 text-xl font-black text-slate-950">
+                <h2 className="mt-3 text-xl font-black text-slate-950 lg:mt-2 lg:text-lg">
                   Operators inside a living system.
                 </h2>
-                <p className="mt-3 text-sm leading-6 text-slate-600">
+                <p className="mt-3 text-sm leading-6 text-slate-600 lg:mt-2 lg:text-[11px] lg:leading-5">
                   Aether treats people, lanes, lists, and execution context as
                   connected parts of one operational environment.
                 </p>
@@ -648,11 +648,11 @@ export default function FAQPage() {
             </section>
 
             {filteredSections.length === 0 ? (
-              <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center">
-                <h2 className="text-2xl font-black text-slate-950">
+              <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center lg:rounded-2xl lg:p-7">
+                <h2 className="text-2xl font-black text-slate-950 lg:text-xl">
                   No FAQ results found.
                 </h2>
-                <p className="mt-2 text-slate-600">
+                <p className="mt-2 text-slate-600 lg:text-sm">
                   Try searching for Abe, Focus, governance, contacts, lists, or
                   ingestion.
                 </p>
@@ -665,48 +665,48 @@ export default function FAQPage() {
                   <section
                     key={section.id}
                     id={section.id}
-                    className={`scroll-mt-8 rounded-3xl border p-5 shadow-sm sm:p-6 ${tone.card}`}
+                    className={`scroll-mt-8 rounded-3xl border p-5 shadow-sm sm:p-6 lg:rounded-2xl lg:p-[18px] ${tone.card}`}
                   >
-                    <div className="mb-6 flex flex-col gap-4 border-b border-slate-200/70 pb-6 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="mb-6 flex flex-col gap-4 border-b border-slate-200/70 pb-6 sm:flex-row sm:items-start sm:justify-between lg:mb-4 lg:gap-3 lg:pb-4">
                       <div>
                         <div
-                          className={`inline-flex rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] ${tone.chip}`}
+                          className={`inline-flex rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] lg:px-2.5 lg:py-0.5 lg:text-[9px] ${tone.chip}`}
                         >
                           {section.eyebrow}
                         </div>
-                        <h2 className="mt-3 text-3xl font-black tracking-tight text-slate-950">
+                        <h2 className="mt-3 text-3xl font-black tracking-tight text-slate-950 lg:mt-2 lg:text-2xl">
                           {section.title}
                         </h2>
-                        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+                        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 lg:text-[11px] lg:leading-5">
                           {section.description}
                         </p>
                       </div>
 
                       <div
-                        className={`h-14 w-14 shrink-0 rounded-2xl bg-gradient-to-br ${tone.accent} shadow-sm`}
+                        className={`h-14 w-14 shrink-0 rounded-2xl bg-gradient-to-br lg:h-10 lg:w-10 lg:rounded-xl ${tone.accent} shadow-sm`}
                       />
                     </div>
 
-                    <div className="space-y-4">
+                    <div className="space-y-4 lg:space-y-3">
                       {section.items.map((item) => (
                         <details
                           key={item.question}
-                          className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm open:border-slate-300"
+                          className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm open:border-slate-300 lg:rounded-xl lg:p-4"
                         >
-                          <summary className="flex cursor-pointer list-none items-start justify-between gap-4">
-                            <h3 className="text-base font-black text-slate-950 sm:text-lg">
+                          <summary className="flex cursor-pointer list-none items-start justify-between gap-4 lg:gap-3">
+                            <h3 className="text-base font-black text-slate-950 sm:text-lg lg:text-base">
                               {item.question}
                             </h3>
-                            <span className="mt-0.5 rounded-full border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-bold text-slate-500 transition group-open:rotate-45">
+                            <span className="mt-0.5 rounded-full border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-bold text-slate-500 transition group-open:rotate-45 lg:px-1.5 lg:py-0.5 lg:text-[9px]">
                               +
                             </span>
                           </summary>
 
-                          <div className="mt-4 space-y-3 border-t border-slate-100 pt-4">
+                          <div className="mt-4 space-y-3 border-t border-slate-100 pt-4 lg:mt-3 lg:space-y-2 lg:pt-3">
                             {item.answer.map((line) => (
                               <p
                                 key={line}
-                                className="text-sm leading-7 text-slate-700"
+                                className="text-sm leading-7 text-slate-700 lg:text-[11px] lg:leading-5"
                               >
                                 {line}
                               </p>
@@ -731,23 +731,23 @@ export default function FAQPage() {
           <div
             role="dialog"
             aria-modal="true"
-            className="w-full max-w-lg rounded-[2rem] border border-red-500/30 bg-[#0B1629] p-8 text-center shadow-2xl"
+            className="w-full max-w-lg rounded-[2rem] border border-red-500/30 bg-[#0B1629] p-8 text-center shadow-2xl lg:max-w-md lg:rounded-2xl lg:p-6"
             onClick={(event) => event.stopPropagation()}
           >
             {warningStage === 1 && (
               <>
-                <h2 className="text-3xl font-black text-white">Don't click this.</h2>
+                <h2 className="text-3xl font-black text-white lg:text-2xl">Don't click this.</h2>
                 <button
                   type="button"
                   onClick={() => setWarningStage(2)}
-                  className="mt-8 w-full rounded-2xl border border-red-400 bg-red-600 px-6 py-4 text-lg font-black uppercase tracking-[0.18em] text-white shadow-lg transition hover:bg-red-500"
+                  className="mt-8 w-full rounded-2xl border border-red-400 bg-red-600 px-6 py-4 text-lg font-black uppercase tracking-[0.18em] text-white shadow-lg transition hover:bg-red-500 lg:mt-6 lg:rounded-xl lg:px-4 lg:py-3 lg:text-base"
                 >
                   DON'T
                 </button>
                 <button
                   type="button"
                   onClick={closeWarning}
-                  className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 transition hover:text-slate-300"
+                  className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 transition hover:text-slate-300 lg:mt-4 lg:text-[9px]"
                 >
                   Close
                 </button>
@@ -756,18 +756,18 @@ export default function FAQPage() {
 
             {warningStage === 2 && (
               <>
-                <h2 className="text-3xl font-black text-white">Seriously...? Final Warning...</h2>
+                <h2 className="text-3xl font-black text-white lg:text-2xl">Seriously...? Final Warning...</h2>
                 <button
                   type="button"
                   onClick={() => setWarningStage(3)}
-                  className="mt-8 w-full rounded-2xl border border-red-400 bg-red-600 px-6 py-4 text-lg font-black uppercase tracking-[0.18em] text-white shadow-lg transition hover:bg-red-500"
+                  className="mt-8 w-full rounded-2xl border border-red-400 bg-red-600 px-6 py-4 text-lg font-black uppercase tracking-[0.18em] text-white shadow-lg transition hover:bg-red-500 lg:mt-6 lg:rounded-xl lg:px-4 lg:py-3 lg:text-base"
                 >
                   DON'T
                 </button>
                 <button
                   type="button"
                   onClick={closeWarning}
-                  className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 transition hover:text-slate-300"
+                  className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 transition hover:text-slate-300 lg:mt-4 lg:text-[9px]"
                 >
                   Close
                 </button>
@@ -776,21 +776,21 @@ export default function FAQPage() {
 
             {warningStage === 3 && (
               <>
-                <div className="text-5xl" aria-hidden="true">⚠️ ⚠️ ⚠️</div>
-                <h2 className="mt-5 text-3xl font-black uppercase tracking-wide text-red-400">
+                <div className="text-5xl lg:text-4xl" aria-hidden="true">⚠️ ⚠️ ⚠️</div>
+                <h2 className="mt-5 text-3xl font-black uppercase tracking-wide text-red-400 lg:mt-4 lg:text-2xl">
                   Warning
                 </h2>
                 <button
                   type="button"
                   onClick={() => setWarningStage(4)}
-                  className="mt-8 w-full rounded-2xl border border-red-400 bg-red-600 px-6 py-4 text-lg font-black uppercase tracking-[0.18em] text-white shadow-lg transition hover:bg-red-500"
+                  className="mt-8 w-full rounded-2xl border border-red-400 bg-red-600 px-6 py-4 text-lg font-black uppercase tracking-[0.18em] text-white shadow-lg transition hover:bg-red-500 lg:mt-6 lg:rounded-xl lg:px-4 lg:py-3 lg:text-base"
                 >
                   Delete Org
                 </button>
                 <button
                   type="button"
                   onClick={closeWarning}
-                  className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 transition hover:text-slate-300"
+                  className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 transition hover:text-slate-300 lg:mt-4 lg:text-[9px]"
                 >
                   Close
                 </button>
@@ -799,9 +799,9 @@ export default function FAQPage() {
 
             {warningStage === 4 && (
               <>
-                <h2 className="text-3xl font-black text-white">You've been warned...</h2>
+                <h2 className="text-3xl font-black text-white lg:text-2xl">You've been warned...</h2>
                 <audio
-                  className="mx-auto mt-8 w-full"
+                  className="mx-auto mt-8 w-full lg:mt-6"
                   controls
                   preload="metadata"
                   src="/audio/dont-click-this.m4a"
@@ -811,7 +811,7 @@ export default function FAQPage() {
                 <button
                   type="button"
                   onClick={closeWarning}
-                  className="mt-7 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 transition hover:text-slate-300"
+                  className="mt-7 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 transition hover:text-slate-300 lg:mt-5 lg:text-[9px]"
                 >
                   Close
                 </button>

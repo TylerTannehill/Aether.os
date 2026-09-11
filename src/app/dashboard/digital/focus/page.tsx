@@ -450,8 +450,8 @@ export default function DigitalFocusModePage() {
 
   if (roleLoading) {
     return (
-      <div className="space-y-8">
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="space-y-8 lg:space-y-6">
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
           <p className="text-slate-600">Loading digital context...</p>
         </section>
       </div>
@@ -460,8 +460,8 @@ export default function DigitalFocusModePage() {
 
   if (!hasDigitalAccess) {
     return (
-      <div className="space-y-8">
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-sm">
+      <div className="space-y-8 lg:space-y-6">
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-sm lg:rounded-2xl lg:p-[18px]">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-600">
             <Zap className="h-5 w-5" />
           </div>
@@ -486,36 +486,36 @@ export default function DigitalFocusModePage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 lg:space-y-6">
       <section
-        className={`rounded-3xl border border-slate-200 bg-gradient-to-br p-6 text-white shadow-sm transition-colors duration-300 lg:p-8 ${orgTheme.heroGradient}`}
+        className={`rounded-3xl border border-slate-200 bg-gradient-to-br p-6 text-white shadow-sm transition-colors duration-300 lg:rounded-2xl lg:p-6 ${orgTheme.heroGradient}`}
       >
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-4">
+          <div className="space-y-4 lg:space-y-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200 lg:px-2.5 lg:py-0.5 lg:text-[9px]">
               <Zap className="h-3.5 w-3.5" />
               Digital Focus Mode
             </div>
 
-            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-sky-300/30 bg-sky-400/10 px-3 py-1 text-xs font-semibold text-sky-100">
+            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-sky-300/30 bg-sky-400/10 px-3 py-1 text-xs font-semibold text-sky-100 lg:px-2.5 lg:py-0.5 lg:text-[9px]">
               {hasDigitalDirector ? "Digital Director Access" : "Digital User Access"}
             </div>
 
-            <div className="space-y-3">
-              <h1 className="text-3xl font-semibold tracking-tight lg:text-4xl">
+            <div className="space-y-3 lg:space-y-2">
+              <h1 className="text-3xl font-semibold tracking-tight lg:text-3xl">
                 {nowLine.headline}
               </h1>
-              <p className="max-w-3xl text-sm text-slate-300 lg:text-base">
+              <p className="max-w-3xl text-sm text-slate-300 lg:text-sm">
                 {hasDigitalDirector ? nowLine.body : "Create content. Respond clearly. Keep the digital queue moving."}
               </p>
               
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 lg:gap-2">
             <Link
               href="/dashboard/digital"
-              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
               Back to Digital
               <ArrowRight className="h-4 w-4" />
@@ -529,18 +529,18 @@ export default function DigitalFocusModePage() {
       {(contentDrops.length > 0 ||
         engagementSpikes.length > 0 ||
         sentimentShifts.length > 0) && (
-        <section className="rounded-3xl border border-indigo-200 bg-indigo-50 p-6 shadow-sm">
-          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <section className="rounded-3xl border border-indigo-200 bg-indigo-50 p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:mb-4 lg:gap-3">
             <div>
-              <p className="text-sm font-medium text-indigo-800">
+              <p className="text-sm font-medium text-indigo-800 lg:text-[11px]">
                 Digital Activation
               </p>
-              <h2 className="text-xl font-semibold text-indigo-950">
+              <h2 className="text-xl font-semibold text-indigo-950 lg:text-lg">
                 Digital → Campaign output
               </h2>
             </div>
 
-            <div className="rounded-2xl border border-indigo-200 bg-white px-4 py-2 text-sm font-medium text-indigo-800">
+            <div className="rounded-2xl border border-indigo-200 bg-white px-4 py-2 text-sm font-medium text-indigo-800 lg:rounded-xl lg:px-3 lg:py-1.5 lg:text-[11px]">
               {activationSummary.contentDrops} content drop
               {activationSummary.contentDrops === 1 ? "" : "s"} •{" "}
               {activationSummary.engagementSpikes} spend move
@@ -550,19 +550,19 @@ export default function DigitalFocusModePage() {
             </div>
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-3">
-            <div className="rounded-2xl border border-indigo-200 bg-white p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700">
+          <div className="grid gap-4 lg:grid-cols-3 lg:gap-3">
+            <div className="rounded-2xl border border-indigo-200 bg-white p-4 lg:rounded-xl lg:p-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700 lg:text-[9px]">
                 Content Drops
               </p>
-              <div className="mt-3 space-y-3">
+              <div className="mt-3 space-y-3 lg:mt-2 lg:space-y-2">
                 {contentDrops.length === 0 ? (
                   <p className="text-sm text-slate-500">No content outputs yet.</p>
                 ) : (
                   contentDrops.map((drop) => (
-                    <div key={drop.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                    <div key={drop.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-3 lg:rounded-xl lg:p-2.5">
                       <p className="font-medium text-slate-900">{drop.title}</p>
-                      <p className="mt-1 text-xs text-slate-500">
+                      <p className="mt-1 text-xs text-slate-500 lg:text-[9px]">
                         {drop.platform} • {drop.goal || "No goal"}
                       </p>
                     </div>
@@ -571,20 +571,20 @@ export default function DigitalFocusModePage() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-indigo-200 bg-white p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700">
+            <div className="rounded-2xl border border-indigo-200 bg-white p-4 lg:rounded-xl lg:p-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700 lg:text-[9px]">
                 Amplify what’s working
               </p>
-              <div className="mt-3 space-y-3">
+              <div className="mt-3 space-y-3 lg:mt-2 lg:space-y-2">
                 {engagementSpikes.length === 0 ? (
                   <p className="text-sm text-slate-500">No spend moves yet.</p>
                 ) : (
                   engagementSpikes.map((spike) => (
-                    <div key={spike.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                    <div key={spike.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-3 lg:rounded-xl lg:p-2.5">
                       <p className="font-medium text-slate-900">
                         {spike.platform} · {spike.budgetShift}
                       </p>
-                      <p className="mt-1 text-xs text-slate-500">
+                      <p className="mt-1 text-xs text-slate-500 lg:text-[9px]">
                         {spike.goal || "No goal"} • {spike.audience || "No audience"}
                       </p>
                     </div>
@@ -593,20 +593,20 @@ export default function DigitalFocusModePage() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-indigo-200 bg-white p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700">
+            <div className="rounded-2xl border border-indigo-200 bg-white p-4 lg:rounded-xl lg:p-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700 lg:text-[9px]">
                 Sentiment Shifts
               </p>
-              <div className="mt-3 space-y-3">
+              <div className="mt-3 space-y-3 lg:mt-2 lg:space-y-2">
                 {sentimentShifts.length === 0 ? (
                   <p className="text-sm text-slate-500">No response shifts yet.</p>
                 ) : (
                   sentimentShifts.map((shift) => (
-                    <div key={shift.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                    <div key={shift.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-3 lg:rounded-xl lg:p-2.5">
                       <p className="font-medium text-slate-900">
                         {shift.platform} · {shift.tone}
                       </p>
-                      <p className="mt-1 text-xs text-slate-500">
+                      <p className="mt-1 text-xs text-slate-500 lg:text-[9px]">
                         {shift.narrative || "No narrative"}
                       </p>
                     </div>
@@ -618,32 +618,32 @@ export default function DigitalFocusModePage() {
         </section>
       )}
 
-      <section className="grid gap-6 xl:grid-cols-[1.45fr_0.55fr]">
-        <div className="rounded-3xl border-2 border-sky-300 bg-white p-6 shadow-md">
-          <div className="mb-5 flex items-center justify-between">
+      <section className="grid gap-6 xl:grid-cols-[1.45fr_0.55fr] lg:gap-4">
+        <div className="rounded-3xl border-2 border-sky-300 bg-white p-6 shadow-md lg:rounded-2xl lg:p-[18px]">
+          <div className="mb-5 flex items-center justify-between lg:mb-4">
             <div>
               <p className="text-sm font-medium text-sky-700"></p>
-              <h2 className="text-2xl font-semibold text-slate-900">
+              <h2 className="text-2xl font-semibold text-slate-900 lg:text-xl">
                 Content Lane · Create + Ship
               </h2>
             </div>
             <PenSquare className="h-6 w-6 text-sky-600" />
           </div>
 
-          <div className="mb-5 rounded-2xl border border-sky-200 bg-sky-50 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-sky-700">
+          <div className="mb-5 rounded-2xl border border-sky-200 bg-sky-50 p-4 lg:mb-4 lg:rounded-xl lg:p-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-sky-700 lg:text-[9px]">
               Digital Operating Pattern
             </p>
-            <p className="mt-2 text-sm font-medium text-slate-900">
+            <p className="mt-2 text-sm font-medium text-slate-900 lg:mt-1.5 lg:text-[11px]">
               {hasDigitalDirector
                 ? "Content creates momentum. Spend amplifies what works. Responses shape the conversation."
                 : "Content creates momentum. Responses shape the conversation. Keep execution clean."}
             </p>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-4 lg:space-y-3">
             {grouped.content.length === 0 ? (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 lg:rounded-xl lg:p-3 lg:text-[11px]">
                 No live digital content actions are available yet.
               </div>
             ) : null}
@@ -655,52 +655,52 @@ export default function DigitalFocusModePage() {
                 return (
                   <div
                     key={item.id}
-                    className="rounded-3xl border border-sky-300 bg-sky-50 p-5 shadow-sm"
+                    className="rounded-3xl border border-sky-300 bg-sky-50 p-5 shadow-sm lg:rounded-2xl lg:p-4"
                   >
                     <div className="flex flex-wrap gap-2">
                       <span
-                        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${priorityTone(
+                        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold lg:px-2.5 lg:py-0.5 lg:text-[9px] ${priorityTone(
                           item.priority
                         )}`}
                       >
                         {item.priority}
                       </span>
                       <span
-                        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${typeTone(
+                        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold lg:px-2.5 lg:py-0.5 lg:text-[9px] ${typeTone(
                           item.type
                         )}`}
                       >
                         {item.type}
                       </span>
                       {isConfirmed && (
-                        <span className="inline-flex rounded-full border border-sky-300 bg-white px-3 py-1 text-xs font-semibold text-sky-700">
+                        <span className="inline-flex rounded-full border border-sky-300 bg-white px-3 py-1 text-xs font-semibold text-sky-700 lg:px-2.5 lg:py-0.5 lg:text-[9px]">
                           created
                         </span>
                       )}
                     </div>
 
-                    <p className="mt-4 text-lg font-semibold text-slate-900">
+                    <p className="mt-4 text-lg font-semibold text-slate-900 lg:mt-3 lg:text-base">
                       {activeContent.title}
                     </p>
-                    <p className="mt-2 text-sm text-slate-600">
+                    <p className="mt-2 text-sm text-slate-600 lg:mt-1.5 lg:text-[11px]">
                       {activeContent.summary}
                     </p>
 
-                    <div className="mt-3 rounded-2xl border border-slate-200 bg-white p-3 text-xs text-slate-500">
+                    <div className="mt-3 rounded-2xl border border-slate-200 bg-white p-3 text-xs text-slate-500 lg:mt-2 lg:rounded-xl lg:p-2.5 lg:text-[9px]">
                       {activeContent.linkedAudience || "No audience"} •{" "}
                       {activeContent.linkedGoal || "No goal"} •{" "}
                       {activeContent.linkedNarrative || "No narrative"}
                     </div>
 
-                    <div className="mt-4 rounded-2xl border border-sky-200 bg-white p-4">
-                      <p className="text-xs uppercase tracking-wide text-sky-700">
+                    <div className="mt-4 rounded-2xl border border-sky-200 bg-white p-4 lg:mt-3 lg:rounded-xl lg:p-3">
+                      <p className="text-xs uppercase tracking-wide text-sky-700 lg:text-[9px]">
                         Content Panel
                       </p>
 
-                      <div className="mt-3 space-y-3">
+                      <div className="mt-3 space-y-3 lg:mt-2 lg:space-y-2">
                         <div>
                           <p className="text-sm font-medium text-slate-900">Owner</p>
-                          <p className="mt-1 text-sm text-slate-600">
+                          <p className="mt-1 text-sm text-slate-600 lg:text-[11px]">
                             {activeContent.owner}
                           </p>
                         </div>
@@ -712,7 +712,7 @@ export default function DigitalFocusModePage() {
                           <select
                             value={contentPlatform}
                             onChange={(e) => setContentPlatform(e.target.value)}
-                            className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none"
+                            className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none lg:px-2.5 lg:py-1.5 lg:text-[11px]"
                           >
                             <option>Meta</option>
                             <option>Instagram</option>
@@ -720,16 +720,16 @@ export default function DigitalFocusModePage() {
                           </select>
                         </div>
 
-                        <div className="flex flex-wrap gap-3">
+                        <div className="flex flex-wrap gap-3 lg:gap-2">
                           <button
                             onClick={confirmContentAction}
-                            className="rounded-xl bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
+                            className="rounded-xl bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 lg:px-3 lg:py-1.5 lg:text-[11px]"
                           >
                             Create Content
                           </button>
                           <button
                             onClick={clearContentPanel}
-                            className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+                            className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100 lg:px-2.5 lg:py-1.5 lg:text-[9px]"
                           >
                             Clear
                           </button>
@@ -749,18 +749,18 @@ export default function DigitalFocusModePage() {
               return (
                 <div
                   key={item.id}
-                  className="rounded-3xl border border-slate-200 bg-slate-50 p-5 shadow-sm"
+                  className="rounded-3xl border border-slate-200 bg-slate-50 p-5 shadow-sm lg:rounded-2xl lg:p-4"
                 >
                   <div className="flex flex-wrap gap-2">
                     <span
-                      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${priorityTone(
+                      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold lg:px-2.5 lg:py-0.5 lg:text-[9px] ${priorityTone(
                         item.priority
                       )}`}
                     >
                       {item.priority}
                     </span>
                     <span
-                      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${typeTone(
+                      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold lg:px-2.5 lg:py-0.5 lg:text-[9px] ${typeTone(
                         item.type
                       )}`}
                     >
@@ -768,25 +768,25 @@ export default function DigitalFocusModePage() {
                     </span>
                   </div>
 
-                  <p className="mt-4 text-lg font-semibold text-slate-900">{item.title}</p>
-                  <p className="mt-2 text-sm text-slate-600">{item.summary}</p>
+                  <p className="mt-4 text-lg font-semibold text-slate-900 lg:mt-3 lg:text-base">{item.title}</p>
+                  <p className="mt-2 text-sm text-slate-600 lg:mt-1.5 lg:text-[11px]">{item.summary}</p>
 
-                  <div className="mt-3 text-xs text-slate-500">
+                  <div className="mt-3 text-xs text-slate-500 lg:mt-2 lg:text-[9px]">
                     {item.linkedAudience || "No audience"} •{" "}
                     {item.linkedGoal || "No goal"} •{" "}
                     {item.linkedNarrative || "No narrative"}
                   </div>
 
-                  <div className="mt-4 flex flex-wrap gap-3">
+                  <div className="mt-4 flex flex-wrap gap-3 lg:mt-3 lg:gap-2">
                     <button
                       onClick={() => openContentPanel(item)}
-                      className="rounded-xl bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
+                      className="rounded-xl bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 lg:px-3 lg:py-1.5 lg:text-[11px]"
                     >
                       {item.id === "focus-1" ? "Open Creator" : "Finish Creative"}
                     </button>
                     <button
                       onClick={() => openContentPanel(item)}
-                      className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+                      className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100 lg:px-2.5 lg:py-1.5 lg:text-[9px]"
                     >
                       Review Content
                     </button>
@@ -797,22 +797,22 @@ export default function DigitalFocusModePage() {
           </div>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-6 lg:space-y-4">
           {hasDigitalDirector ? (
-          <div className="rounded-3xl border border-emerald-200 bg-white p-5 shadow-sm">
-            <div className="mb-4 flex items-center justify-between">
+          <div className="rounded-3xl border border-emerald-200 bg-white p-5 shadow-sm lg:rounded-2xl lg:p-4">
+            <div className="mb-4 flex items-center justify-between lg:mb-3">
               <div>
-                <p className="text-sm font-medium text-emerald-700">Secondary Lane</p>
-                <h2 className="text-xl font-semibold text-slate-900">
+                <p className="text-sm font-medium text-emerald-700 lg:text-[11px]">Secondary Lane</p>
+                <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">
                   Amplify what’s working
                 </h2>
               </div>
               <CircleDollarSign className="h-5 w-5 text-emerald-700" />
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-4 lg:space-y-3">
               {grouped.spend.length === 0 ? (
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 lg:rounded-xl lg:p-3 lg:text-[11px]">
                   No live spend optimization actions are available yet.
                 </div>
               ) : null}
@@ -825,59 +825,59 @@ export default function DigitalFocusModePage() {
                   return (
                     <div
                       key={item.id}
-                      className="rounded-2xl border border-emerald-300 bg-emerald-50 p-4"
+                      className="rounded-2xl border border-emerald-300 bg-emerald-50 p-4 lg:rounded-xl lg:p-3"
                     >
                       <div className="flex flex-wrap gap-2">
                         <span
-                          className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${priorityTone(
+                          className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold lg:px-2.5 lg:py-0.5 lg:text-[9px] ${priorityTone(
                             item.priority
                           )}`}
                         >
                           {item.priority}
                         </span>
                         <span
-                          className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${typeTone(
+                          className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold lg:px-2.5 lg:py-0.5 lg:text-[9px] ${typeTone(
                             item.type
                           )}`}
                         >
                           {item.type}
                         </span>
                         {isConfirmed && (
-                          <span className="inline-flex rounded-full border border-emerald-300 bg-white px-3 py-1 text-xs font-semibold text-emerald-700">
+                          <span className="inline-flex rounded-full border border-emerald-300 bg-white px-3 py-1 text-xs font-semibold text-emerald-700 lg:px-2.5 lg:py-0.5 lg:text-[9px]">
                             adjusted
                           </span>
                         )}
                       </div>
 
-                      <p className="mt-3 font-semibold text-slate-900">
+                      <p className="mt-3 font-semibold text-slate-900 lg:mt-2 lg:text-sm">
                         {activeSpend.title}
                       </p>
-                      <p className="mt-2 text-sm text-slate-600">
+                      <p className="mt-2 text-sm text-slate-600 lg:mt-1.5 lg:text-[11px]">
                         {activeSpend.summary}
                       </p>
 
-                      <div className="mt-2 rounded-2xl border border-slate-200 bg-white p-3 text-xs text-slate-500">
+                      <div className="mt-2 rounded-2xl border border-slate-200 bg-white p-3 text-xs text-slate-500 lg:rounded-xl lg:p-2.5 lg:text-[9px]">
                         {activeSpend.linkedAudience || "No audience"} •{" "}
                         {activeSpend.linkedGoal || "No goal"} •{" "}
                         {activeSpend.linkedNarrative || "No narrative"}
                       </div>
 
-                      <div className="mt-4 rounded-2xl border border-emerald-200 bg-white p-4">
-                        <p className="text-xs uppercase tracking-wide text-emerald-700">
+                      <div className="mt-4 rounded-2xl border border-emerald-200 bg-white p-4 lg:mt-3 lg:rounded-xl lg:p-3">
+                        <p className="text-xs uppercase tracking-wide text-emerald-700 lg:text-[9px]">
                           Spend Panel
                         </p>
 
-                        <div className="mt-3 space-y-3">
+                        <div className="mt-3 space-y-3 lg:mt-2 lg:space-y-2">
                           <div>
                             <p className="text-sm font-medium text-slate-900">Platform</p>
-                            <p className="mt-1 text-sm text-slate-600">
+                            <p className="mt-1 text-sm text-slate-600 lg:text-[11px]">
                               {activeSpend.platform}
                             </p>
                           </div>
 
                           <div>
                             <p className="text-sm font-medium text-slate-900">Why</p>
-                            <p className="mt-1 text-sm text-slate-600">
+                            <p className="mt-1 text-sm text-slate-600 lg:text-[11px]">
                               {activeSpend.note}
                             </p>
                           </div>
@@ -889,7 +889,7 @@ export default function DigitalFocusModePage() {
                             <select
                               value={spendAdjustment}
                               onChange={(e) => setSpendAdjustment(e.target.value)}
-                              className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none"
+                              className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none lg:px-2.5 lg:py-1.5 lg:text-[11px]"
                             >
                               <option>10%</option>
                               <option>15%</option>
@@ -901,20 +901,20 @@ export default function DigitalFocusModePage() {
                           <div className="flex flex-wrap gap-2">
                             <button
                               onClick={confirmSpendAction}
-                              className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-emerald-700"
+                              className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-emerald-700 lg:px-2.5 lg:py-1.5 lg:text-[9px]"
                             >
                               Confirm Shift
                             </button>
                             <button
                               onClick={clearSpendPanel}
-                              className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+                              className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100 lg:px-2.5 lg:py-1.5 lg:text-[9px]"
                             >
                               Clear
                             </button>
                           </div>
 
                           {isConfirmed && (
-                            <p className="text-sm font-medium text-emerald-700">
+                            <p className="text-sm font-medium text-emerald-700 lg:text-[11px]">
                               Spend shift confirmed: {spendAdjustment} to {activeSpend.platform}.
                             </p>
                           )}
@@ -927,18 +927,18 @@ export default function DigitalFocusModePage() {
                 return (
                   <div
                     key={item.id}
-                    className="rounded-2xl border border-slate-200 bg-emerald-50/50 p-4"
+                    className="rounded-2xl border border-slate-200 bg-emerald-50/50 p-4 lg:rounded-xl lg:p-3"
                   >
                     <div className="flex flex-wrap gap-2">
                       <span
-                        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${priorityTone(
+                        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold lg:px-2.5 lg:py-0.5 lg:text-[9px] ${priorityTone(
                           item.priority
                         )}`}
                       >
                         {item.priority}
                       </span>
                       <span
-                        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${typeTone(
+                        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold lg:px-2.5 lg:py-0.5 lg:text-[9px] ${typeTone(
                           item.type
                         )}`}
                       >
@@ -946,13 +946,13 @@ export default function DigitalFocusModePage() {
                       </span>
                     </div>
 
-                    <p className="mt-3 font-semibold text-slate-900">{item.title}</p>
-                    <p className="mt-2 text-sm text-slate-600">{item.summary}</p>
+                    <p className="mt-3 font-semibold text-slate-900 lg:mt-2 lg:text-sm">{item.title}</p>
+                    <p className="mt-2 text-sm text-slate-600 lg:mt-1.5 lg:text-[11px]">{item.summary}</p>
 
                     <div className="mt-4 flex flex-wrap gap-2">
                       <button
                         onClick={() => openSpendPanel(item)}
-                        className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-emerald-700"
+                        className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-emerald-700 lg:px-2.5 lg:py-1.5 lg:text-[9px]"
                       >
                         Open Spend Panel
                       </button>
@@ -964,20 +964,20 @@ export default function DigitalFocusModePage() {
           </div>
           ) : null}
 
-          <div className="rounded-3xl border border-purple-200 bg-white p-5 shadow-sm">
-            <div className="mb-4 flex items-center justify-between">
+          <div className="rounded-3xl border border-purple-200 bg-white p-5 shadow-sm lg:rounded-2xl lg:p-4">
+            <div className="mb-4 flex items-center justify-between lg:mb-3">
               <div>
-                <p className="text-sm font-medium text-purple-700">Tertiary Lane</p>
-                <h2 className="text-xl font-semibold text-slate-900">
+                <p className="text-sm font-medium text-purple-700 lg:text-[11px]">Tertiary Lane</p>
+                <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">
                   Shape the conversation
                 </h2>
               </div>
               <MessageSquare className="h-5 w-5 text-purple-700" />
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-4 lg:space-y-3">
               {grouped.reply.length === 0 ? (
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 lg:rounded-xl lg:p-3 lg:text-[11px]">
                   No live sentiment or reply actions are available yet.
                 </div>
               ) : null}
@@ -990,52 +990,52 @@ export default function DigitalFocusModePage() {
                   return (
                     <div
                       key={item.id}
-                      className="rounded-2xl border border-purple-300 bg-purple-50 p-4"
+                      className="rounded-2xl border border-purple-300 bg-purple-50 p-4 lg:rounded-xl lg:p-3"
                     >
                       <div className="flex flex-wrap gap-2">
                         <span
-                          className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${priorityTone(
+                          className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold lg:px-2.5 lg:py-0.5 lg:text-[9px] ${priorityTone(
                             item.priority
                           )}`}
                         >
                           {item.priority}
                         </span>
                         <span
-                          className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${typeTone(
+                          className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold lg:px-2.5 lg:py-0.5 lg:text-[9px] ${typeTone(
                             item.type
                           )}`}
                         >
                           {item.type}
                         </span>
                         {isConfirmed && (
-                          <span className="inline-flex rounded-full border border-purple-300 bg-white px-3 py-1 text-xs font-semibold text-purple-700">
+                          <span className="inline-flex rounded-full border border-purple-300 bg-white px-3 py-1 text-xs font-semibold text-purple-700 lg:px-2.5 lg:py-0.5 lg:text-[9px]">
                             queued
                           </span>
                         )}
                       </div>
 
-                      <p className="mt-3 font-semibold text-slate-900">
+                      <p className="mt-3 font-semibold text-slate-900 lg:mt-2 lg:text-sm">
                         {activeReply.title}
                       </p>
-                      <p className="mt-2 text-sm text-slate-600">
+                      <p className="mt-2 text-sm text-slate-600 lg:mt-1.5 lg:text-[11px]">
                         {activeReply.summary}
                       </p>
 
-                      <div className="mt-2 rounded-2xl border border-slate-200 bg-white p-3 text-xs text-slate-500">
+                      <div className="mt-2 rounded-2xl border border-slate-200 bg-white p-3 text-xs text-slate-500 lg:rounded-xl lg:p-2.5 lg:text-[9px]">
                         {activeReply.linkedAudience || "No audience"} •{" "}
                         {activeReply.linkedGoal || "No goal"} •{" "}
                         {activeReply.linkedNarrative || "No narrative"}
                       </div>
 
-                      <div className="mt-4 rounded-2xl border border-purple-200 bg-white p-4">
-                        <p className="text-xs uppercase tracking-wide text-purple-700">
+                      <div className="mt-4 rounded-2xl border border-purple-200 bg-white p-4 lg:mt-3 lg:rounded-xl lg:p-3">
+                        <p className="text-xs uppercase tracking-wide text-purple-700 lg:text-[9px]">
                           Reply Panel
                         </p>
 
-                        <div className="mt-3 space-y-3">
+                        <div className="mt-3 space-y-3 lg:mt-2 lg:space-y-2">
                           <div>
                             <p className="text-sm font-medium text-slate-900">Thread</p>
-                            <p className="mt-1 text-sm text-slate-600">
+                            <p className="mt-1 text-sm text-slate-600 lg:text-[11px]">
                               {activeReply.threadName}
                             </p>
                           </div>
@@ -1047,7 +1047,7 @@ export default function DigitalFocusModePage() {
                             <select
                               value={replyTone}
                               onChange={(e) => setReplyTone(e.target.value)}
-                              className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none"
+                              className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none lg:px-2.5 lg:py-1.5 lg:text-[11px]"
                             >
                               <option>Professional</option>
                               <option>Calm</option>
@@ -1058,20 +1058,20 @@ export default function DigitalFocusModePage() {
                           <div className="flex flex-wrap gap-2">
                             <button
                               onClick={confirmReplyAction}
-                              className="rounded-xl bg-purple-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-purple-700"
+                              className="rounded-xl bg-purple-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-purple-700 lg:px-2.5 lg:py-1.5 lg:text-[9px]"
                             >
                               Queue Reply
                             </button>
                             <button
                               onClick={clearReplyPanel}
-                              className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+                              className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100 lg:px-2.5 lg:py-1.5 lg:text-[9px]"
                             >
                               Clear
                             </button>
                           </div>
 
                           {isConfirmed && (
-                            <p className="text-sm font-medium text-purple-700">
+                            <p className="text-sm font-medium text-purple-700 lg:text-[11px]">
                               Reply queued with {replyTone} tone.
                             </p>
                           )}
@@ -1084,18 +1084,18 @@ export default function DigitalFocusModePage() {
                 return (
                   <div
                     key={item.id}
-                    className="rounded-2xl border border-slate-200 bg-purple-50/50 p-4"
+                    className="rounded-2xl border border-slate-200 bg-purple-50/50 p-4 lg:rounded-xl lg:p-3"
                   >
                     <div className="flex flex-wrap gap-2">
                       <span
-                        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${priorityTone(
+                        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold lg:px-2.5 lg:py-0.5 lg:text-[9px] ${priorityTone(
                           item.priority
                         )}`}
                       >
                         {item.priority}
                       </span>
                       <span
-                        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${typeTone(
+                        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold lg:px-2.5 lg:py-0.5 lg:text-[9px] ${typeTone(
                           item.type
                         )}`}
                       >
@@ -1103,13 +1103,13 @@ export default function DigitalFocusModePage() {
                       </span>
                     </div>
 
-                    <p className="mt-3 font-semibold text-slate-900">{item.title}</p>
-                    <p className="mt-2 text-sm text-slate-600">{item.summary}</p>
+                    <p className="mt-3 font-semibold text-slate-900 lg:mt-2 lg:text-sm">{item.title}</p>
+                    <p className="mt-2 text-sm text-slate-600 lg:mt-1.5 lg:text-[11px]">{item.summary}</p>
 
                     <div className="mt-4 flex flex-wrap gap-2">
                       <button
                         onClick={() => openReplyPanel(item)}
-                        className="rounded-xl bg-purple-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-purple-700"
+                        className="rounded-xl bg-purple-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-purple-700 lg:px-2.5 lg:py-1.5 lg:text-[9px]"
                       >
                         Open Reply Panel
                       </button>
@@ -1123,12 +1123,12 @@ export default function DigitalFocusModePage() {
       </section>
 
 <section
-        className={`grid gap-3 ${
+        className={`grid gap-3 lg:gap-2.5 ${
           hasDigitalDirector ? "md:grid-cols-3" : "md:grid-cols-2"
         }`}
       >
         <div
-          className={`rounded-3xl border p-4 shadow-sm ${
+          className={`rounded-3xl border p-4 shadow-sm lg:rounded-2xl lg:p-3 ${
             grouped.content.length > 0
               ? "border-rose-200 bg-rose-50"
               : "border-slate-200 bg-white"
@@ -1136,7 +1136,7 @@ export default function DigitalFocusModePage() {
         >
           <div className="flex items-center justify-between">
             <p
-              className={`text-sm font-medium ${
+              className={`text-sm font-medium lg:text-[11px] ${
                 grouped.content.length > 0 ? "text-rose-800" : "text-slate-700"
               }`}
             >
@@ -1149,14 +1149,14 @@ export default function DigitalFocusModePage() {
             />
           </div>
           <p
-            className={`mt-3 text-2xl font-semibold ${
+            className={`mt-3 text-2xl font-semibold lg:mt-2 lg:text-xl ${
               grouped.content.length > 0 ? "text-rose-900" : "text-slate-900"
             }`}
           >
             {grouped.content.length}
           </p>
           <p
-            className={`mt-2 text-sm ${
+            className={`mt-2 text-sm lg:mt-1.5 lg:text-[11px] ${
               grouped.content.length > 0 ? "text-rose-800" : "text-slate-600"
             }`}
           >
@@ -1166,7 +1166,7 @@ export default function DigitalFocusModePage() {
 
         {hasDigitalDirector ? (
           <div
-            className={`rounded-3xl border p-4 shadow-sm ${
+            className={`rounded-3xl border p-4 shadow-sm lg:rounded-2xl lg:p-3 ${
               grouped.spend.length > 0
                 ? "border-emerald-200 bg-emerald-50"
                 : "border-slate-200 bg-white"
@@ -1174,7 +1174,7 @@ export default function DigitalFocusModePage() {
           >
             <div className="flex items-center justify-between">
               <p
-                className={`text-sm font-medium ${
+                className={`text-sm font-medium lg:text-[11px] ${
                   grouped.spend.length > 0
                     ? "text-emerald-800"
                     : "text-slate-700"
@@ -1191,7 +1191,7 @@ export default function DigitalFocusModePage() {
               />
             </div>
             <p
-              className={`mt-3 text-2xl font-semibold ${
+              className={`mt-3 text-2xl font-semibold lg:mt-2 lg:text-xl ${
                 grouped.spend.length > 0
                   ? "text-emerald-900"
                   : "text-slate-900"
@@ -1200,7 +1200,7 @@ export default function DigitalFocusModePage() {
               {grouped.spend.length}
             </p>
             <p
-              className={`mt-2 text-sm ${
+              className={`mt-2 text-sm lg:mt-1.5 lg:text-[11px] ${
                 grouped.spend.length > 0
                   ? "text-emerald-800"
                   : "text-slate-600"
@@ -1212,7 +1212,7 @@ export default function DigitalFocusModePage() {
         ) : null}
 
         <div
-          className={`rounded-3xl border p-4 shadow-sm ${
+          className={`rounded-3xl border p-4 shadow-sm lg:rounded-2xl lg:p-3 ${
             grouped.reply.length > 0
               ? "border-rose-200 bg-rose-50"
               : "border-slate-200 bg-white"
@@ -1220,7 +1220,7 @@ export default function DigitalFocusModePage() {
         >
           <div className="flex items-center justify-between">
             <p
-              className={`text-sm font-medium ${
+              className={`text-sm font-medium lg:text-[11px] ${
                 grouped.reply.length > 0 ? "text-rose-800" : "text-slate-700"
               }`}
             >
@@ -1233,14 +1233,14 @@ export default function DigitalFocusModePage() {
             />
           </div>
           <p
-            className={`mt-3 text-2xl font-semibold ${
+            className={`mt-3 text-2xl font-semibold lg:mt-2 lg:text-xl ${
               grouped.reply.length > 0 ? "text-rose-900" : "text-slate-900"
             }`}
           >
             {grouped.reply.length}
           </p>
           <p
-            className={`mt-2 text-sm ${
+            className={`mt-2 text-sm lg:mt-1.5 lg:text-[11px] ${
               grouped.reply.length > 0 ? "text-rose-800" : "text-slate-600"
             }`}
           >

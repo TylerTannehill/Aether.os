@@ -2501,8 +2501,8 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="space-y-6 lg:space-y-4">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
           <p className="text-slate-600">Loading command center...</p>
         </div>
       </div>
@@ -2510,26 +2510,26 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 lg:space-y-6">
       <section
-        className={`rounded-3xl border border-slate-800 bg-gradient-to-br p-6 text-white shadow-sm transition-colors duration-300 lg:p-8 ${orgTheme.heroGradient}`}
+        className={`rounded-3xl border border-slate-800 bg-gradient-to-br p-6 text-white shadow-sm transition-colors duration-300 lg:p-6 ${orgTheme.heroGradient} lg:rounded-2xl lg:p-[18px]`}
       >
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm text-slate-300">
-              <Activity className="h-4 w-4" />
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-4">
+          <div className="space-y-3 lg:space-y-2">
+            <div className="flex items-center gap-2 text-sm text-slate-300 lg:text-[11px]">
+              <Activity className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               Executive campaign hub
             </div>
 
             <div className="space-y-2">
-              <h1 className="text-3xl font-semibold tracking-tight text-white lg:text-4xl">
+              <h1 className="text-3xl font-semibold tracking-tight text-white lg:text-3xl lg:text-2xl">
                 Campaign Hub
               </h1>
-              <p className="max-w-3xl text-sm text-slate-300 lg:text-base">
+              <p className="max-w-3xl text-sm text-slate-300 lg:text-sm lg:text-[11px]">
                 See org health, spot pressure fast, and understand where attention is
                 needed before moving into execution.
               </p>
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-medium text-slate-200">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-medium text-slate-200 lg:px-2.5 lg:text-[9px]">
                 <Users className="h-3.5 w-3.5" />
                 {userContextLoading
                   ? "Loading org context..."
@@ -2538,13 +2538,13 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3 lg:gap-2">
             <button
               onClick={() => {
                 applyMyDashboard();
                 router.push("/dashboard/profile");
               }}
-              className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-900 transition hover:bg-emerald-100"
+              className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-900 transition hover:bg-emerald-100 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
               My Profile
             </button>
@@ -2552,9 +2552,9 @@ export default function DashboardPage() {
             {canAccessAdmin ? (
               <Link
                 href="/dashboard/admin"
-                className="inline-flex items-center gap-2 rounded-2xl border border-slate-700 bg-slate-800 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
+                className="inline-flex items-center gap-2 rounded-2xl border border-slate-700 bg-slate-800 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-700 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
               >
-                <Settings className="h-4 w-4" />
+                <Settings className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                 Admin Control
               </Link>
             ) : null}
@@ -2565,9 +2565,9 @@ export default function DashboardPage() {
               onClick={() =>
                 openFocusBucket("immediate", undefined, "overview_focus_entry")
               }
-              className="inline-flex items-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900 transition hover:bg-amber-100"
+              className="inline-flex items-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900 transition hover:bg-amber-100 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
-              <Zap className="h-4 w-4" />
+              <Zap className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               Open Focus Mode
             </button>
 
@@ -2577,20 +2577,20 @@ export default function DashboardPage() {
               onClick={loadData}
               aria-label="Refresh dashboard"
               title="Refresh dashboard"
-              className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-slate-300 transition hover:bg-white/10 hover:text-white"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-slate-300 transition hover:bg-white/10 hover:text-white lg:rounded-xl"
             >
-              <Activity className="h-4 w-4" />
+              <Activity className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
             </button>
           </div>
         </div>
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
         {canAccessAdmin && isDemoOrg ? (
           <>
-            <div className="grid gap-5 lg:grid-cols-[1fr_1fr]">
-              <div className="space-y-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+            <div className="grid gap-5 lg:grid-cols-[1fr_1fr] lg:gap-4">
+              <div className="space-y-3 lg:space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 lg:text-[9px]">
                   Demo role perspective
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -2602,7 +2602,7 @@ export default function DashboardPage() {
                         demoRole === role
                           ? "bg-slate-900 text-white"
                           : "border border-slate-200 bg-white text-slate-700"
-                      }`}
+                      } lg:px-2.5 lg:text-[9px]`}
                     >
                       {role}
                     </button>
@@ -2610,8 +2610,8 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {isDemoOrg && <div className="space-y-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+              {isDemoOrg && <div className="space-y-3 lg:space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 lg:text-[9px]">
                   Demo department perspective
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -2625,7 +2625,7 @@ export default function DashboardPage() {
                         demoDepartment === department
                           ? "bg-slate-900 text-white"
                           : "border border-slate-200 bg-white text-slate-700"
-                      }`}
+                      } lg:px-2.5 lg:text-[9px]`}
                     >
                       {department}
                     </button>
@@ -2634,7 +2634,7 @@ export default function DashboardPage() {
               </div>}
             </div>
 
-            <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+            <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700 lg:rounded-xl lg:p-3 lg:mt-4 lg:text-[11px]">
               <span className="font-medium text-slate-900">
                 {userContextLoading ? "Loading user context..." : "Live user context:"}
               </span>{" "}
@@ -2645,13 +2645,13 @@ export default function DashboardPage() {
                   }${
                     actualDepartment ? ` • ${actualDepartment}` : ""
                   }`}
-              <div className="mt-2 text-xs text-slate-500">
+              <div className="mt-2 text-xs text-slate-500 lg:mt-1.5 lg:text-[9px]">
                 Demo controls below show how the dashboard can shift based on who is inside Aether.
               </div>
             </div>
           </>
         ) : (
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700 lg:rounded-xl lg:p-3 lg:text-[11px]">
             <span className="font-medium text-slate-900">
               {userContextLoading ? "Loading user context..." : "Live user context:"}
             </span>{" "}
@@ -2662,7 +2662,7 @@ export default function DashboardPage() {
                 }${
                   actualDepartment ? ` • ${actualDepartment}` : ""
                 }`}
-            <div className="mt-2 text-xs text-slate-500">
+            <div className="mt-2 text-xs text-slate-500 lg:mt-1.5 lg:text-[9px]">
               Demo controls are only available to admins. Your dashboard is using your real role and department context.
             </div>
           </div>
@@ -2671,65 +2671,65 @@ export default function DashboardPage() {
 
       {showDashboardAbe ? (
         <>
-      <section className="rounded-3xl border border-fuchsia-200 bg-fuchsia-50 p-6 shadow-sm">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm text-fuchsia-800">
-              <Sparkles className="h-4 w-4" />
+      <section className="rounded-3xl border border-fuchsia-200 bg-fuchsia-50 p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between lg:gap-4">
+          <div className="space-y-3 lg:space-y-2">
+            <div className="flex items-center gap-2 text-sm text-fuchsia-800 lg:text-[11px]">
+              <Sparkles className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               Honest Abe
             </div>
 
-            <div className="space-y-4">
-              <p className="text-sm font-medium uppercase tracking-[0.2em] text-fuchsia-700/80">
+            <div className="space-y-4 lg:space-y-3">
+              <p className="text-sm font-medium uppercase tracking-[0.2em] text-fuchsia-700/80 lg:text-[11px]">
                 {abeRoleLabel}
               </p>
 
-              <h2 className="text-3xl font-semibold text-fuchsia-900">
+              <h2 className="text-3xl font-semibold text-fuchsia-900 lg:text-2xl">
                 {abeRoleHeadline}
               </h2>
 
-              <p className="max-w-3xl text-sm text-slate-700 lg:text-base">
+              <p className="max-w-3xl text-sm text-slate-700 lg:text-sm lg:text-[11px]">
                 {abeRoleBody}
               </p>
 
-              <p className="max-w-3xl text-lg font-semibold text-fuchsia-950">
+              <p className="max-w-3xl text-lg font-semibold text-fuchsia-950 lg:text-base">
                 {abeStickyLine}
               </p>
 
               {effectiveRole === "admin" && campaignBriefing.crossDomainSignal ? (
-                <div className="max-w-3xl rounded-2xl border border-fuchsia-200 bg-white/80 px-4 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-fuchsia-700">
+                <div className="max-w-3xl rounded-2xl border border-fuchsia-200 bg-white/80 px-4 py-3 lg:rounded-xl lg:px-3 lg:py-2">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-fuchsia-700 lg:text-[9px]">
                     Cross-domain signal
                   </p>
-                  <p className="mt-2 text-sm text-fuchsia-950">
+                  <p className="mt-2 text-sm text-fuchsia-950 lg:mt-1.5 lg:text-[11px]">
                     {campaignBriefing.crossDomainSignal}
                   </p>
                 </div>
               ) : null}
 
-              <p className="max-w-3xl text-xs text-slate-500">
+              <p className="max-w-3xl text-xs text-slate-500 lg:text-[9px]">
                 Dashboard shows signal. Abe’s Brief carries judgment. Explore Abe opens reasoning.
               </p>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 lg:gap-2">
             <button
               type="button"
               onClick={() => router.push("/dashboard/abe/brief")}
-              className="inline-flex items-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900 transition hover:bg-amber-100"
+              className="inline-flex items-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900 transition hover:bg-amber-100 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
-              <Zap className="h-4 w-4" />
+              <Zap className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               Abe’s Brief
             </button>
 
             <button
               type="button"
               onClick={() => router.push("/dashboard/abe/explore")}
-              className="inline-flex items-center gap-2 rounded-2xl border border-fuchsia-200 bg-white px-4 py-3 text-sm font-medium text-fuchsia-900 transition hover:bg-fuchsia-100"
+              className="inline-flex items-center gap-2 rounded-2xl border border-fuchsia-200 bg-white px-4 py-3 text-sm font-medium text-fuchsia-900 transition hover:bg-fuchsia-100 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
               Explore Abe
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
             </button>
           </div>
         </div>
@@ -2739,30 +2739,30 @@ export default function DashboardPage() {
         
       </section>
 
-      <section className="space-y-4">
-        <div className="flex items-center gap-2 text-sm text-slate-500">
-          <BarChart3 className="h-4 w-4" />
+      <section className="space-y-4 lg:space-y-3">
+        <div className="flex items-center gap-2 text-sm text-slate-500 lg:text-[11px]">
+          <BarChart3 className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
           Key Signals Right Now
         </div>
 
-        <section className="grid gap-4 xl:grid-cols-3">
+        <section className="grid gap-4 xl:grid-cols-3 lg:gap-3">
           {visibleAbeSignals.map((signal, index) => (
             <button
               key={`${signal.label}-${index}`}
               type="button"
               onClick={() => router.push(signal.route)}
-              className="rounded-3xl border border-slate-200 bg-white p-6 text-left shadow-sm transition hover:bg-slate-50"
+              className="rounded-3xl border border-slate-200 bg-white p-6 text-left shadow-sm transition hover:bg-slate-50 lg:rounded-2xl lg:p-[18px]"
             >
-              <p className="text-sm font-medium text-slate-600">
+              <p className="text-sm font-medium text-slate-600 lg:text-[11px]">
                 {signal.label}
               </p>
-              <p className="mt-2 text-3xl font-semibold text-slate-900">
+              <p className="mt-2 text-3xl font-semibold text-slate-900 lg:mt-1.5 lg:text-2xl">
                 {signal.value}
               </p>
-              <p className="mt-2 text-sm text-slate-600">{signal.sub}</p>
-              <div className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-fuchsia-700">
+              <p className="mt-2 text-sm text-slate-600 lg:mt-1.5 lg:text-[11px]">{signal.sub}</p>
+              <div className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-fuchsia-700 lg:mt-3 lg:text-[11px]">
                 Open overview
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               </div>
             </button>
           ))}
@@ -2814,15 +2814,15 @@ export default function DashboardPage() {
             : visibleSnapshotCards.length === 3
             ? "xl:grid-cols-3"
             : "xl:grid-cols-4"
-        }`}
+        } lg:gap-3`}
       >
         {visibleSnapshotCards.map((card) => (
           <div
             key={card.id}
-            className={`rounded-3xl border p-6 shadow-sm ${card.tone}`}
+            className={`rounded-3xl border p-6 shadow-sm ${card.tone} lg:rounded-2xl lg:p-[18px]`}
           >
             <p className="font-semibold">{card.label}</p>
-            <p className="mt-2 text-sm">{card.body}</p>
+            <p className="mt-2 text-sm lg:mt-1.5 lg:text-[11px]">{card.body}</p>
             <Link href={card.href}>Open →</Link>
           </div>
         ))}
@@ -2837,7 +2837,7 @@ export default function DashboardPage() {
             : visibleLaneIds.length === 3
             ? "xl:grid-cols-3"
             : "xl:grid-cols-4"
-        }`}
+        } lg:gap-3`}
       >
         {visibleLaneIds.includes("digital") ? (
           <>
@@ -2847,15 +2847,15 @@ export default function DashboardPage() {
               }
               className={`flex min-h-[176px] flex-col rounded-3xl border p-6 text-left shadow-sm transition ${getDashboardStateTone(
                 dashboardTeamStates.digital
-              )}`}
+              )} lg:rounded-2xl lg:p-[18px]`}
             >
-              <p className={`text-sm font-medium ${getDashboardStateTextTone(dashboardTeamStates.digital)}`}>
+              <p className={`text-sm font-medium ${getDashboardStateTextTone(dashboardTeamStates.digital)} lg:text-[11px]`}>
                 Digital Reach
               </p>
-              <p className="mt-4 text-2xl font-semibold text-slate-950">
+              <p className="mt-4 text-2xl font-semibold text-slate-950 lg:mt-3 lg:text-xl">
                 {digitalSnapshot.impressions.toLocaleString()}
               </p>
-              <p className={`mt-5 max-w-[18rem] text-sm leading-7 ${getDashboardStateTextTone(dashboardTeamStates.digital)}`}>
+              <p className={`mt-5 max-w-[18rem] text-sm leading-7 ${getDashboardStateTextTone(dashboardTeamStates.digital)} lg:mt-4 lg:text-[11px]`}>
                 Reach volume shaping digital opportunity
               </p>
             </button>
@@ -2866,15 +2866,15 @@ export default function DashboardPage() {
               }
               className={`flex min-h-[176px] flex-col rounded-3xl border p-6 text-left shadow-sm transition ${getDashboardStateTone(
                 dashboardTeamStates.digital
-              )}`}
+              )} lg:rounded-2xl lg:p-[18px]`}
             >
-              <p className={`text-sm font-medium ${getDashboardStateTextTone(dashboardTeamStates.digital)}`}>
+              <p className={`text-sm font-medium ${getDashboardStateTextTone(dashboardTeamStates.digital)} lg:text-[11px]`}>
                 Digital Sentiment
               </p>
-              <p className="mt-4 text-2xl font-semibold text-slate-950">
+              <p className="mt-4 text-2xl font-semibold text-slate-950 lg:mt-3 lg:text-xl">
                 {digitalSentimentRatio.positive}% / {digitalSentimentRatio.negative}%
               </p>
-              <p className={`mt-5 max-w-[18rem] text-sm leading-7 ${getDashboardStateTextTone(dashboardTeamStates.digital)}`}>
+              <p className={`mt-5 max-w-[18rem] text-sm leading-7 ${getDashboardStateTextTone(dashboardTeamStates.digital)} lg:mt-4 lg:text-[11px]`}>
                 Negative signal that may need intervention
               </p>
             </button>
@@ -2889,15 +2889,15 @@ export default function DashboardPage() {
               }
               className={`flex min-h-[176px] flex-col rounded-3xl border p-6 text-left shadow-sm transition ${getDashboardStateTone(
                 dashboardTeamStates.field
-              )}`}
+              )} lg:rounded-2xl lg:p-[18px]`}
             >
-              <p className={`text-sm font-medium ${getDashboardStateTextTone(dashboardTeamStates.field)}`}>
+              <p className={`text-sm font-medium ${getDashboardStateTextTone(dashboardTeamStates.field)} lg:text-[11px]`}>
                 Field Contact Rate
               </p>
-              <p className="mt-4 text-2xl font-semibold text-slate-950">
+              <p className="mt-4 text-2xl font-semibold text-slate-950 lg:mt-3 lg:text-xl">
                 {fieldSnapshot.doors.toLocaleString()}
               </p>
-              <p className={`mt-5 max-w-[18rem] text-sm leading-7 ${getDashboardStateTextTone(dashboardTeamStates.field)}`}>
+              <p className={`mt-5 max-w-[18rem] text-sm leading-7 ${getDashboardStateTextTone(dashboardTeamStates.field)} lg:mt-4 lg:text-[11px]`}>
                 Active turf volume pushing field progress
               </p>
             </button>
@@ -2908,15 +2908,15 @@ export default function DashboardPage() {
               }
               className={`flex min-h-[176px] flex-col rounded-3xl border p-6 text-left shadow-sm transition ${getDashboardStateTone(
                 dashboardTeamStates.field
-              )}`}
+              )} lg:rounded-2xl lg:p-[18px]`}
             >
-              <p className={`text-sm font-medium ${getDashboardStateTextTone(dashboardTeamStates.field)}`}>
+              <p className={`text-sm font-medium ${getDashboardStateTextTone(dashboardTeamStates.field)} lg:text-[11px]`}>
                 Turf Completion
               </p>
-              <p className="mt-4 text-2xl font-semibold text-slate-950">
+              <p className="mt-4 text-2xl font-semibold text-slate-950 lg:mt-3 lg:text-xl">
                 {fieldAverageCompletion}%
               </p>
-              <p className={`mt-5 max-w-[18rem] text-sm leading-7 ${getDashboardStateTextTone(dashboardTeamStates.field)}`}>
+              <p className={`mt-5 max-w-[18rem] text-sm leading-7 ${getDashboardStateTextTone(dashboardTeamStates.field)} lg:mt-4 lg:text-[11px]`}>
                 Coverage pace that may require rebalancing
               </p>
             </button>
@@ -2931,15 +2931,15 @@ export default function DashboardPage() {
               }
               className={`flex min-h-[176px] flex-col rounded-3xl border p-6 text-left shadow-sm transition ${getDashboardStateTone(
                 dashboardTeamStates.print
-              )}`}
+              )} lg:rounded-2xl lg:p-[18px]`}
             >
-              <p className={`text-sm font-medium ${getDashboardStateTextTone(dashboardTeamStates.print)}`}>
+              <p className={`text-sm font-medium ${getDashboardStateTextTone(dashboardTeamStates.print)} lg:text-[11px]`}>
                 Inventory Pressure
               </p>
-              <p className="mt-4 text-2xl font-semibold text-slate-950">
+              <p className="mt-4 text-2xl font-semibold text-slate-950 lg:mt-3 lg:text-xl">
                 {printSnapshot.onHand.toLocaleString()}
               </p>
-              <p className={`mt-5 max-w-[18rem] text-sm leading-7 ${getDashboardStateTextTone(dashboardTeamStates.print)}`}>
+              <p className={`mt-5 max-w-[18rem] text-sm leading-7 ${getDashboardStateTextTone(dashboardTeamStates.print)} lg:mt-4 lg:text-[11px]`}>
                 Materials currently available on hand
               </p>
             </button>
@@ -2950,15 +2950,15 @@ export default function DashboardPage() {
               }
               className={`flex min-h-[176px] flex-col rounded-3xl border p-6 text-left shadow-sm transition ${getDashboardStateTone(
                 dashboardTeamStates.print
-              )}`}
+              )} lg:rounded-2xl lg:p-[18px]`}
             >
-              <p className={`text-sm font-medium ${getDashboardStateTextTone(dashboardTeamStates.print)}`}>
+              <p className={`text-sm font-medium ${getDashboardStateTextTone(dashboardTeamStates.print)} lg:text-[11px]`}>
                 Delivery Risk
               </p>
-              <p className="mt-4 text-2xl font-semibold text-slate-950">
+              <p className="mt-4 text-2xl font-semibold text-slate-950 lg:mt-3 lg:text-xl">
                 {printSnapshot.orders}
               </p>
-              <p className={`mt-5 max-w-[18rem] text-sm leading-7 ${getDashboardStateTextTone(dashboardTeamStates.print)}`}>
+              <p className={`mt-5 max-w-[18rem] text-sm leading-7 ${getDashboardStateTextTone(dashboardTeamStates.print)} lg:mt-4 lg:text-[11px]`}>
                 Orders that may impact timelines
               </p>
             </button>
@@ -2973,13 +2973,13 @@ export default function DashboardPage() {
               }
               className={`flex min-h-[176px] flex-col rounded-3xl border p-6 text-left shadow-sm transition ${getDashboardStateTone(
                 dashboardTeamStates.finance
-              )}`}
+              )} lg:rounded-2xl lg:p-[18px]`}
             >
-              <p className={`text-sm font-medium ${getDashboardStateTextTone(dashboardTeamStates.finance)}`}>Net Position</p>
-              <p className="mt-4 text-2xl font-semibold text-slate-950">
+              <p className={`text-sm font-medium ${getDashboardStateTextTone(dashboardTeamStates.finance)} lg:text-[11px]`}>Net Position</p>
+              <p className="mt-4 text-2xl font-semibold text-slate-950 lg:mt-3 lg:text-xl">
                 ${financeSnapshot.net.toLocaleString()}
               </p>
-              <p className={`mt-5 max-w-[18rem] text-sm leading-7 ${getDashboardStateTextTone(dashboardTeamStates.finance)}`}>
+              <p className={`mt-5 max-w-[18rem] text-sm leading-7 ${getDashboardStateTextTone(dashboardTeamStates.finance)} lg:mt-4 lg:text-[11px]`}>
                 Balance between incoming and outgoing cash
               </p>
             </button>
@@ -2990,15 +2990,15 @@ export default function DashboardPage() {
               }
               className={`flex min-h-[176px] flex-col rounded-3xl border p-6 text-left shadow-sm transition ${getDashboardStateTone(
                 dashboardTeamStates.finance
-              )}`}
+              )} lg:rounded-2xl lg:p-[18px]`}
             >
-              <p className={`text-sm font-medium ${getDashboardStateTextTone(dashboardTeamStates.finance)}`}>
+              <p className={`text-sm font-medium ${getDashboardStateTextTone(dashboardTeamStates.finance)} lg:text-[11px]`}>
                 Pledge Follow-Up
               </p>
-              <p className="mt-4 text-2xl font-semibold text-slate-950">
+              <p className="mt-4 text-2xl font-semibold text-slate-950 lg:mt-3 lg:text-xl">
                 ${financeSnapshot.pledges.toLocaleString()}
               </p>
-              <p className={`mt-5 max-w-[18rem] text-sm leading-7 ${getDashboardStateTextTone(dashboardTeamStates.finance)}`}>
+              <p className={`mt-5 max-w-[18rem] text-sm leading-7 ${getDashboardStateTextTone(dashboardTeamStates.finance)} lg:mt-4 lg:text-[11px]`}>
                 Dollars still waiting to be collected
               </p>
             </button>

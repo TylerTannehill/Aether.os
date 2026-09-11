@@ -1055,9 +1055,9 @@ export default function FinanceFocusModePage() {
 
   if (roleLoading) {
     return (
-      <div className="space-y-6">
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <p className="text-sm text-slate-600">Loading finance context...</p>
+      <div className="space-y-6 lg:space-y-4">
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <p className="text-sm text-slate-600 lg:text-[11px]">Loading finance context...</p>
         </section>
       </div>
     );
@@ -1065,33 +1065,33 @@ export default function FinanceFocusModePage() {
 
   if (!hasFinanceAccess) {
     return (
-      <div className="space-y-6">
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="space-y-6 lg:space-y-4">
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-6 lg:rounded-2xl lg:p-[18px]">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-3">
             <div>
-              <p className="text-sm font-medium text-slate-500">Finance Focus Mode</p>
-              <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+              <p className="text-sm font-medium text-slate-500 lg:text-[11px]">Finance Focus Mode</p>
+              <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900 lg:text-2xl">
                 No Finance Role Assigned
               </h1>
-              <p className="mt-2 max-w-2xl text-sm text-slate-600">
+              <p className="mt-2 max-w-2xl text-sm text-slate-600 lg:text-[11px]">
                 You are not currently assigned to Finance. Ask your campaign admin
                 to add a Finance Director or Finance User role before working this
                 lane.
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-3 lg:gap-2">
               <Link
                 href="/dashboard"
-                className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
               >
                 Back to Dashboard
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               </Link>
 
               <Link
                 href="/dashboard/profile"
-                className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+                className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
               >
                 View Profile
               </Link>
@@ -1103,53 +1103,53 @@ export default function FinanceFocusModePage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 lg:space-y-6">
       <section
-        className={`rounded-3xl border border-slate-200 bg-gradient-to-br p-6 text-white shadow-sm transition-colors duration-300 lg:p-8 ${orgTheme.heroGradient}`}
+        className={`rounded-3xl border border-slate-200 bg-gradient-to-br p-6 text-white shadow-sm transition-colors duration-300 lg:p-6 ${orgTheme.heroGradient} lg:rounded-2xl lg:p-[18px]`}
       >
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-4">
+          <div className="space-y-4 lg:space-y-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200 lg:text-[9px]">
               <Zap className="h-3.5 w-3.5" />
               Finance Focus Mode
             </div>
 
-            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-emerald-900">
+            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-emerald-900 lg:text-[9px]">
               {financeRoleLabel}
             </div>
 
-            <div className="space-y-3">
-              <h1 className="text-3xl font-semibold tracking-tight lg:text-4xl">
+            <div className="space-y-3 lg:space-y-2">
+              <h1 className="text-3xl font-semibold tracking-tight lg:text-3xl lg:text-2xl">
                 {nowLine.headline}
               </h1>
-              <p className="max-w-3xl text-sm text-slate-300 lg:text-base">
+              <p className="max-w-3xl text-sm text-slate-300 lg:text-sm lg:text-[11px]">
                 {nowLine.body}
               </p>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 lg:gap-2">
             <Link
               href="/dashboard/finance"
-              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
               Back to Finance
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
             </Link>
 
             <Link
               href="/dashboard/lists"
-              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
-              <ListChecks className="h-4 w-4" />
+              <ListChecks className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               Lists
             </Link>
 
             <Link
               href="/dashboard/contacts"
-              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
-              <ContactRound className="h-4 w-4" />
+              <ContactRound className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               Contacts
             </Link>
           </div>
@@ -1157,46 +1157,46 @@ export default function FinanceFocusModePage() {
       </section>
 
       {hasFinanceDirector && callTargets.length > 0 ? (
-        <section className="rounded-3xl border-2 border-amber-300 bg-gradient-to-br from-amber-50 via-yellow-50 to-white p-6 shadow-md">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+        <section className="rounded-3xl border-2 border-amber-300 bg-gradient-to-br from-amber-50 via-yellow-50 to-white p-6 shadow-md lg:rounded-2xl lg:p-[18px]">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between lg:gap-4">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-amber-300 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-amber-800">
+              <div className="inline-flex items-center gap-2 rounded-full border border-amber-300 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-amber-800 lg:text-[9px]">
                 <Sparkles className="h-3.5 w-3.5" />
                 Jackpot Priority Bridge
               </div>
-              <h2 className="mt-4 text-2xl font-semibold text-slate-900">
+              <h2 className="mt-4 text-2xl font-semibold text-slate-900 lg:mt-3 lg:text-xl">
                 Neglected opportunity detected
               </h2>
-              <p className="mt-2 max-w-3xl text-sm text-slate-700">
+              <p className="mt-2 max-w-3xl text-sm text-slate-700 lg:text-[11px]">
                 Aether is routing live pledge pressure and donor opportunity into execution before normal call flow.
               </p>
 
-              <div className="mt-4">
+              <div className="mt-4 lg:mt-3">
                 <Link
                   href="/dashboard/finance/jackpot"
-                  className="inline-flex items-center gap-2 rounded-xl border border-amber-300 bg-white px-4 py-2 text-sm font-medium text-amber-800 transition hover:bg-amber-100"
+                  className="inline-flex items-center gap-2 rounded-xl border border-amber-300 bg-white px-4 py-2 text-sm font-medium text-amber-800 transition hover:bg-amber-100 lg:px-3 lg:text-[11px]"
                 >
                   Open Jackpot Queue
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                 </Link>
               </div>
             </div>
-            <div className="grid gap-3 sm:grid-cols-3">
-              <div className="rounded-2xl border border-amber-200 bg-white p-4">
-                <p className="text-xs text-slate-500">Latent Value</p>
-                <p className="mt-2 text-xl font-semibold text-amber-800">
+            <div className="grid gap-3 sm:grid-cols-3 lg:gap-2">
+              <div className="rounded-2xl border border-amber-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                <p className="text-xs text-slate-500 lg:text-[9px]">Latent Value</p>
+                <p className="mt-2 text-xl font-semibold text-amber-800 lg:text-lg">
                   {currency.format(callTargets.reduce((sum, target) => sum + target.amount, 0))}
                 </p>
               </div>
-              <div className="rounded-2xl border border-amber-200 bg-white p-4">
-                <p className="text-xs text-slate-500">Priority Donors</p>
-                <p className="mt-2 text-xl font-semibold text-slate-900">
+              <div className="rounded-2xl border border-amber-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                <p className="text-xs text-slate-500 lg:text-[9px]">Priority Donors</p>
+                <p className="mt-2 text-xl font-semibold text-slate-900 lg:text-lg">
                   {callTargets.filter((target) => target.priority === "high").length}
                 </p>
               </div>
-              <div className="rounded-2xl border border-amber-200 bg-white p-4">
-                <p className="text-xs text-slate-500">Open Pledges</p>
-                <p className="mt-2 text-xl font-semibold text-rose-700">
+              <div className="rounded-2xl border border-amber-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                <p className="text-xs text-slate-500 lg:text-[9px]">Open Pledges</p>
+                <p className="mt-2 text-xl font-semibold text-rose-700 lg:text-lg">
                   {openPledges.length}
                 </p>
               </div>
@@ -1205,34 +1205,34 @@ export default function FinanceFocusModePage() {
         </section>
       ) : null}
 
-      <section id="finance-call-time" className="rounded-3xl border-2 border-emerald-300 bg-emerald-50 p-6 shadow-md">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <section id="finance-call-time" className="rounded-3xl border-2 border-emerald-300 bg-emerald-50 p-6 shadow-md lg:rounded-2xl lg:p-[18px]">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-3">
           <div>
-            <p className="text-xs font-medium text-emerald-800">
+            <p className="text-xs font-medium text-emerald-800 lg:text-[9px]">
               Finance Call Time
             </p>
-            <h2 className="text-xl font-semibold text-emerald-900">
+            <h2 className="text-xl font-semibold text-emerald-900 lg:text-lg">
               Run Donor Calls Inside Aether
             </h2>
-            <p className="mt-1 text-sm text-emerald-800">
+            <p className="mt-1 text-sm text-emerald-800 lg:text-[11px]">
               Call, log outcomes, and record payments directly back to contact profiles.
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 lg:gap-2">
             <Link
               href="/dashboard/lists"
-              className="inline-flex items-center gap-2 rounded-2xl border border-emerald-300 bg-white px-4 py-3 text-sm font-medium text-emerald-800 transition hover:bg-emerald-100"
+              className="inline-flex items-center gap-2 rounded-2xl border border-emerald-300 bg-white px-4 py-3 text-sm font-medium text-emerald-800 transition hover:bg-emerald-100 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
-              <ListChecks className="h-4 w-4" />
+              <ListChecks className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               View Lists
             </Link>
 
             <Link
               href="/dashboard/contacts"
-              className="inline-flex items-center gap-2 rounded-2xl border border-emerald-300 bg-white px-4 py-3 text-sm font-medium text-emerald-800 transition hover:bg-emerald-100"
+              className="inline-flex items-center gap-2 rounded-2xl border border-emerald-300 bg-white px-4 py-3 text-sm font-medium text-emerald-800 transition hover:bg-emerald-100 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
-              <ContactRound className="h-4 w-4" />
+              <ContactRound className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               View Contacts
             </Link>
 
@@ -1240,9 +1240,9 @@ export default function FinanceFocusModePage() {
               <button
                 onClick={startCallSession}
                 disabled={loadingTargets || callTargets.length === 0}
-                className="inline-flex items-center gap-2 rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex items-center gap-2 rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
               >
-                <PhoneCall className="h-4 w-4" />
+                <PhoneCall className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                 {loadingTargets
                   ? "Loading Targets..."
                   : callTargets.length === 0
@@ -1252,7 +1252,7 @@ export default function FinanceFocusModePage() {
             ) : (
               <button
                 onClick={resetCallSession}
-                className="inline-flex items-center gap-2 rounded-2xl border border-emerald-300 bg-white px-4 py-3 text-sm font-medium text-emerald-800 transition hover:bg-emerald-100"
+                className="inline-flex items-center gap-2 rounded-2xl border border-emerald-300 bg-white px-4 py-3 text-sm font-medium text-emerald-800 transition hover:bg-emerald-100 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
               >
                 Reset Session
               </button>
@@ -1261,107 +1261,107 @@ export default function FinanceFocusModePage() {
         </div>
 
         {callSessionStarted ? (
-          <div className="mt-6 grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-            <div className="space-y-4">
+          <div className="mt-6 grid gap-6 xl:grid-cols-[1.1fr_0.9fr] lg:gap-4 lg:gap-4 lg:mt-4">
+            <div className="space-y-4 lg:space-y-3">
               {!callSessionComplete ? (
                 <>
                   {activeCallTarget ? (
-                    <div className="rounded-2xl border border-emerald-300 bg-white p-5">
+                    <div className="rounded-2xl border border-emerald-300 bg-white p-5 lg:rounded-xl lg:p-4">
                       <div className="flex flex-wrap items-center gap-2">
                         <span
                           className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${priorityTone(
                             activeCallTarget.priority,
-                          )}`}
+                          )} lg:text-[9px]`}
                         >
                           {activeCallTarget.priority}
                         </span>
-                        <span className="inline-flex rounded-full border border-emerald-200 bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
+                        <span className="inline-flex rounded-full border border-emerald-200 bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800 lg:text-[9px]">
                           call target
                         </span>
                       </div>
 
-                      <p className="mt-3 text-lg font-semibold text-slate-900">
+                      <p className="mt-3 text-lg font-semibold text-slate-900 lg:mt-2 lg:text-base">
                         {activeCallTarget.contactName}
                       </p>
-                      <p className="text-sm text-slate-500">
+                      <p className="text-sm text-slate-500 lg:text-[11px]">
                         {activeCallTarget.city}, {activeCallTarget.state}
                       </p>
 
-                      <div className="mt-4 grid grid-cols-2 gap-3">
+                      <div className="mt-4 grid grid-cols-2 gap-3 lg:gap-2 lg:mt-3">
                         <div className="rounded-xl border border-slate-200 p-3">
-                          <p className="text-xs text-slate-400">Phone</p>
+                          <p className="text-xs text-slate-400 lg:text-[9px]">Phone</p>
                           <p className="mt-1 font-medium text-slate-900">
                             {activeCallTarget.phone}
                           </p>
                         </div>
 
                         <div className="rounded-xl border border-slate-200 p-3">
-                          <p className="text-xs text-slate-400">Last Contact</p>
+                          <p className="text-xs text-slate-400 lg:text-[9px]">Last Contact</p>
                           <p className="mt-1 font-medium text-slate-900">
                             {activeCallTarget.lastContact}
                           </p>
                         </div>
 
                         <div className="rounded-xl border border-slate-200 p-3 col-span-2">
-                          <p className="text-xs text-slate-400">Suggested Ask</p>
+                          <p className="text-xs text-slate-400 lg:text-[9px]">Suggested Ask</p>
                           <p className="mt-1 font-medium text-slate-900">
                             {activeCallTarget.suggestedAsk}
                           </p>
                         </div>
 
                         <div className="rounded-xl border border-slate-200 p-3 col-span-2">
-                          <p className="text-xs text-slate-400">Reason</p>
-                          <p className="mt-1 text-sm text-slate-700">
+                          <p className="text-xs text-slate-400 lg:text-[9px]">Reason</p>
+                          <p className="mt-1 text-sm text-slate-700 lg:text-[11px]">
                             {activeCallTarget.reason}
                           </p>
                         </div>
                       </div>
 
-                      <div className="mt-4 grid gap-3 md:grid-cols-3">
+                      <div className="mt-4 grid gap-3 md:grid-cols-3 lg:gap-2 lg:mt-3">
                         <Link
                           href={activeCallContactHref}
-                          className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                          className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 lg:text-[11px]"
                         >
-                          <ContactRound className="h-4 w-4" />
+                          <ContactRound className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                           Open Contact
                         </Link>
 
                         <Link
                           href="/dashboard/lists"
-                          className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                          className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 lg:text-[11px]"
                         >
-                          <ListChecks className="h-4 w-4" />
+                          <ListChecks className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                           View Lists
                         </Link>
 
                         <Link
                           href="/dashboard/lists"
-                          className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                          className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 lg:text-[11px]"
                         >
-                          <PhoneForwarded className="h-4 w-4" />
+                          <PhoneForwarded className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                           Add to List
                         </Link>
                       </div>
 
-                      <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
-                        <p className="text-xs uppercase tracking-wide text-slate-500">
+                      <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4 lg:p-3 lg:mt-3">
+                        <p className="text-xs uppercase tracking-wide text-slate-500 lg:text-[9px]">
                           Script
                         </p>
-                        <p className="mt-2 text-sm text-slate-700">
+                        <p className="mt-2 text-sm text-slate-700 lg:text-[11px]">
                           {activeCallTarget.script}
                         </p>
                       </div>
 
-                      <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-                        <p className="text-xs font-semibold uppercase tracking-wide text-emerald-800">
+                      <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 lg:rounded-xl lg:p-3 lg:mt-3">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-emerald-800 lg:text-[9px]">
                           Record Payment
                         </p>
-                        <div className="mt-3 grid gap-3 md:grid-cols-[1fr_1fr_1fr_auto]">
+                        <div className="mt-3 grid gap-3 md:grid-cols-[1fr_1fr_1fr_auto] lg:gap-2 lg:gap-2 lg:mt-2">
                           <input
                             value={paymentAmount}
                             onChange={(e) => setPaymentAmount(e.target.value)}
                             placeholder={String(activeCallTarget.amount)}
-                            className="rounded-xl border border-emerald-200 bg-white px-3 py-2 text-sm"
+                            className="rounded-xl border border-emerald-200 bg-white px-3 py-2 text-sm lg:text-[11px]"
                           />
 
                           <select
@@ -1369,7 +1369,7 @@ export default function FinanceFocusModePage() {
                             onChange={(e) =>
                               setPaymentMethod(e.target.value as PaymentMethod)
                             }
-                            className="rounded-xl border border-emerald-200 bg-white px-3 py-2 text-sm"
+                            className="rounded-xl border border-emerald-200 bg-white px-3 py-2 text-sm lg:text-[11px]"
                           >
                             <option value="check">Check</option>
                             <option value="cash">Cash</option>
@@ -1380,29 +1380,29 @@ export default function FinanceFocusModePage() {
                             type="date"
                             value={paymentDate}
                             onChange={(e) => setPaymentDate(e.target.value)}
-                            className="rounded-xl border border-emerald-200 bg-white px-3 py-2 text-sm"
+                            className="rounded-xl border border-emerald-200 bg-white px-3 py-2 text-sm lg:text-[11px]"
                           />
 
                           <button
                             onClick={recordActiveCallPayment}
-                            className="rounded-xl bg-emerald-700 px-3 py-2 text-xs font-medium text-white hover:bg-emerald-800"
+                            className="rounded-xl bg-emerald-700 px-3 py-2 text-xs font-medium text-white hover:bg-emerald-800 lg:text-[9px]"
                           >
                             Save Payment
                           </button>
                         </div>
                         {paymentMessage ? (
-                          <p className="mt-3 text-sm font-medium text-emerald-800">
+                          <p className="mt-3 text-sm font-medium text-emerald-800 lg:mt-2 lg:text-[11px]">
                             {paymentMessage}
                           </p>
                         ) : null}
                       </div>
 
-                      <div className="mt-4 space-y-3">
+                      <div className="mt-4 space-y-3 lg:space-y-2 lg:mt-3">
                         <input
                           value={callNote}
                           onChange={(e) => setCallNote(e.target.value)}
                           placeholder="Optional call note..."
-                          className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                          className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm lg:text-[11px]"
                         />
 
                         <div className="flex flex-wrap gap-2">
@@ -1410,7 +1410,7 @@ export default function FinanceFocusModePage() {
                             onClick={() =>
                               advanceCallSession("pledged", "Pledge confirmed")
                             }
-                            className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-medium text-white hover:bg-emerald-700"
+                            className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-medium text-white hover:bg-emerald-700 lg:text-[9px]"
                           >
                             Pledged
                           </button>
@@ -1422,7 +1422,7 @@ export default function FinanceFocusModePage() {
                                 "Follow-up scheduled",
                               )
                             }
-                            className="rounded-xl bg-amber-500 px-3 py-2 text-xs font-medium text-white hover:bg-amber-600"
+                            className="rounded-xl bg-amber-500 px-3 py-2 text-xs font-medium text-white hover:bg-amber-600 lg:text-[9px]"
                           >
                             Follow-Up
                           </button>
@@ -1434,7 +1434,7 @@ export default function FinanceFocusModePage() {
                                 "Requested better time",
                               )
                             }
-                            className="rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-medium text-sky-800"
+                            className="rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-medium text-sky-800 lg:text-[9px]"
                           >
                             Wrong Time
                           </button>
@@ -1443,42 +1443,42 @@ export default function FinanceFocusModePage() {
                             onClick={() =>
                               advanceCallSession("no_answer", "No answer")
                             }
-                            className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700"
+                            className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700 lg:text-[9px]"
                           >
                             No Answer
                           </button>
                         </div>
 
                         <div>
-                          <label className="text-xs text-slate-500">
+                          <label className="text-xs text-slate-500 lg:text-[9px]">
                             Follow-Up Date
                           </label>
                           <input
                             type="date"
                             value={followUpDate}
                             onChange={(e) => setFollowUpDate(e.target.value)}
-                            className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                            className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm lg:text-[11px]"
                           />
                         </div>
                       </div>
                     </div>
                   ) : (
-                    <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center">
-                      <p className="text-lg font-semibold text-slate-900">
+                    <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center lg:rounded-xl lg:p-[18px]">
+                      <p className="text-lg font-semibold text-slate-900 lg:text-base">
                         No Call Targets Available
                       </p>
-                      <p className="mt-1 text-xs text-slate-600">
+                      <p className="mt-1 text-xs text-slate-600 lg:text-[9px]">
                         Aether could not find finance call targets right now.
                       </p>
                     </div>
                   )}
                 </>
               ) : (
-                <div className="rounded-2xl border border-emerald-300 bg-white p-6 text-center">
-                  <p className="text-lg font-semibold text-emerald-900">
+                <div className="rounded-2xl border border-emerald-300 bg-white p-6 text-center lg:rounded-xl lg:p-[18px]">
+                  <p className="text-lg font-semibold text-emerald-900 lg:text-base">
                     Call Session Complete
                   </p>
-                  <p className="mt-2 text-sm text-slate-600">
+                  <p className="mt-2 text-sm text-slate-600 lg:text-[11px]">
                     You worked through all finance call targets. Review results
                     and start another session if needed.
                   </p>
@@ -1486,37 +1486,37 @@ export default function FinanceFocusModePage() {
               )}
             </div>
 
-            <div className="space-y-4">
-              <div className="rounded-2xl border border-emerald-200 bg-white p-4">
-                <p className="text-sm font-medium text-slate-500">
+            <div className="space-y-4 lg:space-y-3">
+              <div className="rounded-2xl border border-emerald-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                <p className="text-sm font-medium text-slate-500 lg:text-[11px]">
                   Session Progress
                 </p>
 
-                <div className="mt-3 grid grid-cols-2 gap-3">
+                <div className="mt-3 grid grid-cols-2 gap-3 lg:gap-2 lg:mt-2">
                   <div>
-                    <p className="text-xs text-slate-400">Completed</p>
-                    <p className="text-lg font-semibold text-slate-900">
+                    <p className="text-xs text-slate-400 lg:text-[9px]">Completed</p>
+                    <p className="text-lg font-semibold text-slate-900 lg:text-base">
                       {callSessionStats.completed}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-xs text-slate-400">Remaining</p>
-                    <p className="text-lg font-semibold text-slate-900">
+                    <p className="text-xs text-slate-400 lg:text-[9px]">Remaining</p>
+                    <p className="text-lg font-semibold text-slate-900 lg:text-base">
                       {callSessionStats.remaining}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-xs text-slate-400">Pledged</p>
-                    <p className="text-lg font-semibold text-emerald-700">
+                    <p className="text-xs text-slate-400 lg:text-[9px]">Pledged</p>
+                    <p className="text-lg font-semibold text-emerald-700 lg:text-base">
                       {currency.format(callSessionStats.pledgedTotal)}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-xs text-slate-400">Follow-Ups</p>
-                    <p className="text-lg font-semibold text-amber-700">
+                    <p className="text-xs text-slate-400 lg:text-[9px]">Follow-Ups</p>
+                    <p className="text-lg font-semibold text-amber-700 lg:text-base">
                       {callSessionStats.followUps}
                     </p>
                   </div>
@@ -1524,7 +1524,7 @@ export default function FinanceFocusModePage() {
               </div>
 
               {lastCallMessage ? (
-                <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-700">
+                <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-700 lg:rounded-xl lg:p-3 lg:text-[11px]">
                   {lastCallMessage}
                 </div>
               ) : null}
@@ -1533,44 +1533,44 @@ export default function FinanceFocusModePage() {
                 <div
                   className={`rounded-2xl border p-4 ${nextActionCategoryTone(
                     nextAction.category,
-                  )}`}
+                  )} lg:rounded-xl lg:p-3`}
                 >
                   <div className="flex flex-wrap items-center gap-2">
                     <span
                       className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${priorityTone(
                         nextAction.priority,
-                      )}`}
+                      )} lg:text-[9px]`}
                     >
                       {nextAction.priority}
                     </span>
-                    <span className="inline-flex rounded-full border border-current/20 bg-white/70 px-3 py-1 text-xs font-semibold">
+                    <span className="inline-flex rounded-full border border-current/20 bg-white/70 px-3 py-1 text-xs font-semibold lg:text-[9px]">
                       {nextAction.category}
                     </span>
-                    <span className="inline-flex rounded-full border border-current/20 bg-white/70 px-3 py-1 text-xs font-semibold">
+                    <span className="inline-flex rounded-full border border-current/20 bg-white/70 px-3 py-1 text-xs font-semibold lg:text-[9px]">
                       {nextAction.autoReady ? "auto-ready" : "manual review"}
                     </span>
                   </div>
 
-                  <p className="mt-3 text-sm font-semibold">
+                  <p className="mt-3 text-sm font-semibold lg:mt-2 lg:text-[11px]">
                     {nextAction.title}
                   </p>
-                  <p className="mt-1 text-sm">{nextAction.summary}</p>
+                  <p className="mt-1 text-sm lg:text-[11px]">{nextAction.summary}</p>
                 </div>
               ) : null}
 
-              <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                <p className="text-sm font-medium text-slate-500">Call Log</p>
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                <p className="text-sm font-medium text-slate-500 lg:text-[11px]">Call Log</p>
 
-                <div className="mt-3 space-y-2">
+                <div className="mt-3 space-y-2 lg:mt-2">
                   {callLog.length === 0 ? (
-                    <p className="text-sm text-slate-500">No calls logged yet.</p>
+                    <p className="text-sm text-slate-500 lg:text-[11px]">No calls logged yet.</p>
                   ) : (
                     callLog.map((entry) => (
                       <div
                         key={entry.targetId + entry.outcome}
                         className={`rounded-xl border px-3 py-2 text-xs ${callOutcomeTone(
                           entry.outcome,
-                        )}`}
+                        )} lg:text-[9px]`}
                       >
                         <p className="font-medium">
                           {entry.contactName} — {entry.outcome}
@@ -1588,21 +1588,21 @@ export default function FinanceFocusModePage() {
         ) : null}
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[1.2fr_1fr]">
-        <div className="rounded-3xl border-2 border-emerald-300 bg-white p-6 shadow-md">
-          <div className="mb-5 flex items-center justify-between">
+      <section className="grid gap-6 xl:grid-cols-[1.2fr_1fr] lg:gap-4">
+        <div className="rounded-3xl border-2 border-emerald-300 bg-white p-6 shadow-md lg:rounded-2xl lg:p-[18px]">
+          <div className="mb-5 flex items-center justify-between lg:mb-4">
             <div>
-              <p className="text-sm font-medium text-slate-500">Pledge Lane</p>
-              <h2 className="text-xl font-semibold text-slate-900">
+              <p className="text-sm font-medium text-slate-500 lg:text-[11px]">Pledge Lane</p>
+              <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">
                 Collect + Convert
               </h2>
             </div>
-            <BadgeDollarSign className="h-5 w-5 text-emerald-600" />
+            <BadgeDollarSign className="h-5 w-5 text-emerald-600 lg:h-4 lg:w-4" />
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-4 lg:space-y-3">
             {openPledges.length === 0 ? (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 lg:rounded-xl lg:p-3 lg:text-[11px]">
                 {loadingTargets
                   ? "Loading finance pledge actions..."
                   : "No open pledges are available yet."}
@@ -1619,41 +1619,41 @@ export default function FinanceFocusModePage() {
                     isActive
                       ? "border-emerald-300 bg-emerald-50"
                       : "border-slate-200 bg-slate-50"
-                  }`}
+                  } lg:rounded-xl lg:p-3`}
                 >
                   <div className="flex flex-wrap gap-2">
                     <span
                       className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${priorityTone(
                         pledge.priority,
-                      )}`}
+                      )} lg:text-[9px]`}
                     >
                       {pledge.priority}
                     </span>
-                    <span className="inline-flex rounded-full border border-emerald-200 bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
+                    <span className="inline-flex rounded-full border border-emerald-200 bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800 lg:text-[9px]">
                       pledge
                     </span>
                   </div>
 
-                  <p className="mt-3 font-semibold text-slate-900">
+                  <p className="mt-3 font-semibold text-slate-900 lg:mt-2">
                     Collect {pledge.contactName} pledge
                   </p>
-                  <p className="mt-2 text-sm text-slate-600">
+                  <p className="mt-2 text-sm text-slate-600 lg:text-[11px]">
                     {currency.format(pledge.remaining)} remaining from{" "}
                     {currency.format(pledge.amount)} pledged.
                   </p>
 
                   {isActive ? (
-                    <div className="mt-4 rounded-2xl border border-emerald-200 bg-white p-4">
-                      <p className="text-xs uppercase tracking-wide text-emerald-700">
+                    <div className="mt-4 rounded-2xl border border-emerald-200 bg-white p-4 lg:rounded-xl lg:p-3 lg:mt-3">
+                      <p className="text-xs uppercase tracking-wide text-emerald-700 lg:text-[9px]">
                         Pledge Payment
                       </p>
 
-                      <div className="mt-3 grid gap-3 md:grid-cols-3">
+                      <div className="mt-3 grid gap-3 md:grid-cols-3 lg:gap-2 lg:mt-2">
                         <input
                           value={pledgePaymentAmount}
                           onChange={(e) => setPledgePaymentAmount(e.target.value)}
                           placeholder={String(pledge.remaining)}
-                          className="rounded-xl border border-emerald-200 px-3 py-2 text-sm"
+                          className="rounded-xl border border-emerald-200 px-3 py-2 text-sm lg:text-[11px]"
                         />
 
                         <select
@@ -1661,7 +1661,7 @@ export default function FinanceFocusModePage() {
                           onChange={(e) =>
                             setPledgePaymentMethod(e.target.value as PaymentMethod)
                           }
-                          className="rounded-xl border border-emerald-200 px-3 py-2 text-sm"
+                          className="rounded-xl border border-emerald-200 px-3 py-2 text-sm lg:text-[11px]"
                         >
                           <option value="check">Check</option>
                           <option value="cash">Cash</option>
@@ -1672,48 +1672,48 @@ export default function FinanceFocusModePage() {
                           type="date"
                           value={pledgePaymentDate}
                           onChange={(e) => setPledgePaymentDate(e.target.value)}
-                          className="rounded-xl border border-emerald-200 px-3 py-2 text-sm"
+                          className="rounded-xl border border-emerald-200 px-3 py-2 text-sm lg:text-[11px]"
                         />
                       </div>
 
-                      <div className="mt-3 flex flex-wrap gap-2">
+                      <div className="mt-3 flex flex-wrap gap-2 lg:mt-2">
                         <button
                           onClick={recordPledgePayment}
-                          className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-emerald-700"
+                          className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-emerald-700 lg:text-[9px]"
                         >
                           Save + Apply to Pledge
                         </button>
                         <Link
                           href={`/dashboard/contacts/${pledge.contactId}`}
-                          className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+                          className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100 lg:text-[9px]"
                         >
                           Open Contact
                         </Link>
                         <button
                           onClick={() => setActivePledgeId(null)}
-                          className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+                          className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100 lg:text-[9px]"
                         >
                           Clear
                         </button>
                       </div>
 
                       {pledgeMessage ? (
-                        <p className="mt-3 text-sm font-medium text-emerald-700">
+                        <p className="mt-3 text-sm font-medium text-emerald-700 lg:mt-2 lg:text-[11px]">
                           {pledgeMessage}
                         </p>
                       ) : null}
                     </div>
                   ) : (
-                    <div className="mt-4 flex flex-wrap gap-2">
+                    <div className="mt-4 flex flex-wrap gap-2 lg:mt-3">
                       <button
                         onClick={() => openPledge(pledge)}
-                        className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white transition hover:bg-slate-800"
+                        className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white transition hover:bg-slate-800 lg:text-[9px]"
                       >
                         Collect Pledge
                       </button>
                       <Link
                         href={`/dashboard/contacts/${pledge.contactId}`}
-                        className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+                        className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100 lg:text-[9px]"
                       >
                         View Record
                       </Link>
@@ -1725,22 +1725,22 @@ export default function FinanceFocusModePage() {
           </div>
         </div>
 
-        <div className="rounded-3xl border border-amber-200 bg-amber-50 p-6 shadow-sm">
-          <div className="mb-5 flex items-center justify-between">
+        <div className="rounded-3xl border border-amber-200 bg-amber-50 p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <div className="mb-5 flex items-center justify-between lg:mb-4">
             <div>
-              <p className="text-sm font-medium text-amber-800">
+              <p className="text-sm font-medium text-amber-800 lg:text-[11px]">
                 Compliance Lane
               </p>
-              <h2 className="text-xl font-semibold text-slate-900">
+              <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">
                 Clear Export Fields
               </h2>
             </div>
-            <Landmark className="h-5 w-5 text-amber-600" />
+            <Landmark className="h-5 w-5 text-amber-600 lg:h-4 lg:w-4" />
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-4 lg:space-y-3">
             {complianceItems.length === 0 ? (
-              <div className="rounded-2xl border border-amber-200 bg-white p-4 text-sm text-slate-600">
+              <div className="rounded-2xl border border-amber-200 bg-white p-4 text-sm text-slate-600 lg:rounded-xl lg:p-3 lg:text-[11px]">
                 No live finance compliance actions are available yet.
               </div>
             ) : null}
@@ -1755,36 +1755,36 @@ export default function FinanceFocusModePage() {
                     isActive
                       ? "border-amber-300 bg-white"
                       : "border-amber-200 bg-white/80"
-                  }`}
+                  } lg:rounded-xl lg:p-3`}
                 >
                   <div className="flex flex-wrap gap-2">
                     <span
                       className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${priorityTone(
                         item.priority,
-                      )}`}
+                      )} lg:text-[9px]`}
                     >
                       {item.priority}
                     </span>
-                    <span className="inline-flex rounded-full border border-amber-200 bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
+                    <span className="inline-flex rounded-full border border-amber-200 bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800 lg:text-[9px]">
                       compliance
                     </span>
                   </div>
 
-                  <p className="mt-3 font-semibold text-slate-900">
+                  <p className="mt-3 font-semibold text-slate-900 lg:mt-2">
                     Fix {item.contactName} compliance data
                   </p>
-                  <p className="mt-2 text-sm text-slate-600">
+                  <p className="mt-2 text-sm text-slate-600 lg:text-[11px]">
                     {currency.format(item.amount)} contributed. Missing:{" "}
                     {item.missingFields.join(", ")}.
                   </p>
 
                   {isActive ? (
-                    <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4">
-                      <p className="text-xs uppercase tracking-wide text-amber-700">
+                    <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 lg:rounded-xl lg:p-3 lg:mt-3">
+                      <p className="text-xs uppercase tracking-wide text-amber-700 lg:text-[9px]">
                         Compliance Editor
                       </p>
 
-                      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                      <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:gap-2 lg:mt-2">
                         <input
                           value={complianceDraft.first_name}
                           onChange={(e) =>
@@ -1794,7 +1794,7 @@ export default function FinanceFocusModePage() {
                             }))
                           }
                           placeholder="First name"
-                          className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm"
+                          className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm lg:text-[11px]"
                         />
 
                         <input
@@ -1806,7 +1806,7 @@ export default function FinanceFocusModePage() {
                             }))
                           }
                           placeholder="Last name"
-                          className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm"
+                          className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm lg:text-[11px]"
                         />
 
                         <input
@@ -1818,7 +1818,7 @@ export default function FinanceFocusModePage() {
                             }))
                           }
                           placeholder="Street / full address line"
-                          className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm sm:col-span-2"
+                          className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm sm:col-span-2 lg:text-[11px]"
                         />
 
                         <input
@@ -1830,7 +1830,7 @@ export default function FinanceFocusModePage() {
                             }))
                           }
                           placeholder="City"
-                          className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm"
+                          className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm lg:text-[11px]"
                         />
 
                         <input
@@ -1842,7 +1842,7 @@ export default function FinanceFocusModePage() {
                             }))
                           }
                           placeholder="State"
-                          className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm"
+                          className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm lg:text-[11px]"
                         />
 
                         <input
@@ -1854,7 +1854,7 @@ export default function FinanceFocusModePage() {
                             }))
                           }
                           placeholder="Zip"
-                          className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm"
+                          className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm lg:text-[11px]"
                         />
 
                         <input
@@ -1866,7 +1866,7 @@ export default function FinanceFocusModePage() {
                             }))
                           }
                           placeholder="Employer"
-                          className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm"
+                          className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm lg:text-[11px]"
                         />
 
                         <input
@@ -1878,48 +1878,48 @@ export default function FinanceFocusModePage() {
                             }))
                           }
                           placeholder="Occupation"
-                          className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm sm:col-span-2"
+                          className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm sm:col-span-2 lg:text-[11px]"
                         />
                       </div>
 
-                      <div className="mt-3 flex flex-wrap gap-2">
+                      <div className="mt-3 flex flex-wrap gap-2 lg:mt-2">
                         <button
                           onClick={saveComplianceDraft}
-                          className="rounded-xl bg-amber-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-amber-700"
+                          className="rounded-xl bg-amber-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-amber-700 lg:text-[9px]"
                         >
                           Save Compliance Fields
                         </button>
                         <Link
                           href={`/dashboard/contacts/${item.contactId}`}
-                          className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+                          className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100 lg:text-[9px]"
                         >
                           Open Contact
                         </Link>
                         <button
                           onClick={() => setActiveComplianceId(null)}
-                          className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+                          className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100 lg:text-[9px]"
                         >
                           Clear
                         </button>
                       </div>
 
                       {complianceMessage ? (
-                        <p className="mt-3 text-sm font-medium text-amber-800">
+                        <p className="mt-3 text-sm font-medium text-amber-800 lg:mt-2 lg:text-[11px]">
                           {complianceMessage}
                         </p>
                       ) : null}
                     </div>
                   ) : (
-                    <div className="mt-4 flex flex-wrap gap-2">
+                    <div className="mt-4 flex flex-wrap gap-2 lg:mt-3">
                       <button
                         onClick={() => openCompliance(item)}
-                        className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white transition hover:bg-slate-800"
+                        className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white transition hover:bg-slate-800 lg:text-[9px]"
                       >
                         Fix Compliance
                       </button>
                       <Link
                         href={`/dashboard/contacts/${item.contactId}`}
-                        className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+                        className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100 lg:text-[9px]"
                       >
                         Review Record
                       </Link>
@@ -1932,22 +1932,22 @@ export default function FinanceFocusModePage() {
         </div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-4">
+      <section className="grid gap-4 md:grid-cols-4 lg:gap-3">
         <div
           className={`rounded-2xl border p-4 shadow-sm ${
             openPledges.length > 0
               ? "border-emerald-200 bg-emerald-50"
               : "border-slate-200 bg-white"
-          }`}
+          } lg:rounded-xl lg:p-3`}
         >
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-emerald-800">Pledge</p>
-            <HandCoins className="h-5 w-5 text-emerald-700" />
+            <p className="text-sm font-medium text-emerald-800 lg:text-[11px]">Pledge</p>
+            <HandCoins className="h-5 w-5 text-emerald-700 lg:h-4 lg:w-4" />
           </div>
-          <p className="mt-2 text-xl font-semibold text-emerald-900">
+          <p className="mt-2 text-xl font-semibold text-emerald-900 lg:text-lg">
             {openPledges.length}
           </p>
-          <p className="mt-1 text-xs text-emerald-800">
+          <p className="mt-1 text-xs text-emerald-800 lg:text-[9px]">
             Collection and follow-up actions
           </p>
         </div>
@@ -1957,29 +1957,29 @@ export default function FinanceFocusModePage() {
             complianceItems.length > 0
               ? "border-rose-200 bg-rose-50"
               : "border-slate-200 bg-white"
-          }`}
+          } lg:rounded-xl lg:p-3`}
         >
           <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-rose-800">Compliance</p>
-            <CheckCircle2 className="h-5 w-5 text-rose-700" />
+            <p className="text-xs font-medium text-rose-800 lg:text-[9px]">Compliance</p>
+            <CheckCircle2 className="h-5 w-5 text-rose-700 lg:h-4 lg:w-4" />
           </div>
-          <p className="mt-2 text-xl font-semibold text-rose-900">
+          <p className="mt-2 text-xl font-semibold text-rose-900 lg:text-lg">
             {complianceItems.length}
           </p>
-          <p className="mt-1 text-xs text-rose-800">
+          <p className="mt-1 text-xs text-rose-800 lg:text-[9px]">
             Missing data and export-readiness work
           </p>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:rounded-xl lg:p-3">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-slate-700">Payments</p>
-            <FileSpreadsheet className="h-5 w-5 text-slate-500" />
+            <p className="text-xs font-medium text-slate-700 lg:text-[9px]">Payments</p>
+            <FileSpreadsheet className="h-5 w-5 text-slate-500 lg:h-4 lg:w-4" />
           </div>
-          <p className="mt-2 text-xl font-semibold text-slate-900">
+          <p className="mt-2 text-xl font-semibold text-slate-900 lg:text-lg">
             {contributions.length}
           </p>
-          <p className="mt-1 text-xs text-slate-600">
+          <p className="mt-1 text-xs text-slate-600 lg:text-[9px]">
             Saved contribution records
           </p>
         </div>
@@ -1989,18 +1989,18 @@ export default function FinanceFocusModePage() {
             callTargets.length > 0
               ? "border-emerald-200 bg-emerald-50"
               : "border-slate-200 bg-white"
-          }`}
+          } lg:rounded-xl lg:p-3`}
         >
           <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-emerald-800">
+            <p className="text-xs font-medium text-emerald-800 lg:text-[9px]">
               Call Targets
             </p>
-            <Phone className="h-5 w-5 text-emerald-700" />
+            <Phone className="h-5 w-5 text-emerald-700 lg:h-4 lg:w-4" />
           </div>
-          <p className="mt-2 text-xl font-semibold text-emerald-900">
+          <p className="mt-2 text-xl font-semibold text-emerald-900 lg:text-lg">
             {callTargets.length}
           </p>
-          <p className="mt-2 text-sm text-emerald-800">
+          <p className="mt-2 text-sm text-emerald-800 lg:text-[11px]">
             {loadingTargets
               ? "Loading live finance targets"
               : "Native finance call session queue"}

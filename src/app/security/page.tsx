@@ -72,43 +72,43 @@ export default function SecurityPage() {
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#07111f] text-white">
-      <section className="relative px-6 py-8 lg:px-10">
+      <section className="relative px-6 py-8 lg:px-8 lg:px-[18px] lg:py-6">
         <div className="absolute inset-0 opacity-50">
           <div className="absolute left-[-12rem] top-[-14rem] h-[32rem] w-[32rem] rounded-full bg-violet-700/30 blur-3xl" />
           <div className="absolute right-[-12rem] top-[22rem] h-[34rem] w-[34rem] rounded-full bg-blue-700/20 blur-3xl" />
         </div>
 
-        <div className="relative mx-auto flex max-w-7xl flex-col gap-8">
+        <div className="relative mx-auto flex max-w-7xl flex-col gap-8 lg:gap-6">
           <Link
             href="/"
-            className="inline-flex w-fit items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-violet-400/40 hover:bg-white/10"
+            className="inline-flex w-fit items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-violet-400/40 hover:bg-white/10 lg:px-4 lg:py-2.5 lg:text-[12px] lg:rounded-xl"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
             Back to Landing Page
           </Link>
 
-          <section className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-8 lg:p-12">
-            <p className="text-xs font-bold uppercase tracking-[0.22em] text-violet-200">
+          <section className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-8 lg:p-9 lg:p-6 lg:rounded-2xl">
+            <p className="text-xs font-bold uppercase tracking-[0.22em] text-violet-200 lg:text-[10px]">
               Security
             </p>
 
-            <h1 className="mt-4 max-w-4xl text-5xl font-black leading-tight lg:text-7xl">
+            <h1 className="mt-4 max-w-4xl text-5xl font-black leading-tight lg:text-5xl lg:mt-3 lg:text-4xl">
               Protecting Campaign Data Through Secure Infrastructure,
               Transparent Practices, and Role-Based Access.
             </h1>
 
-            <p className="mt-8 max-w-3xl text-lg leading-8 text-slate-300">
+            <p className="mt-8 max-w-3xl text-lg leading-8 text-slate-300 lg:text-sm lg:leading-6 lg:text-base lg:leading-7 lg:mt-6 lg:text-base">
               Campaigns trust Aether with operational information every day. We
               believe that trust is earned through secure design, transparent
               practices, and clear communication—not exaggerated claims or
               marketing buzzwords.
             </p>
 
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className="mt-8 flex flex-wrap gap-3 lg:gap-2 lg:mt-6">
               {principles.map((item) => (
                 <span
                   key={item}
-                  className="rounded-full border border-violet-400/30 bg-violet-400/10 px-4 py-2 text-sm font-semibold text-violet-100"
+                  className="rounded-full border border-violet-400/30 bg-violet-400/10 px-4 py-2 text-sm font-semibold text-violet-100 lg:px-3 lg:py-1.5 lg:text-[12px]"
                 >
                   {item}
                 </span>
@@ -116,21 +116,21 @@ export default function SecurityPage() {
             </div>
           </section>
 
-          <section className="grid gap-6 lg:grid-cols-2">
-            <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-8">
-              <Database className="h-10 w-10 text-violet-300" />
-              <h2 className="mt-5 text-3xl font-black">Campaign Isolation</h2>
-              <p className="mt-4 leading-8 text-slate-300">
+          <section className="grid gap-6 lg:grid-cols-2 lg:gap-4">
+            <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-8 lg:p-6 lg:rounded-2xl">
+              <Database className="h-10 w-10 text-violet-300 lg:h-8 lg:w-8" />
+              <h2 className="mt-5 text-3xl font-black lg:mt-4 lg:text-2xl">Campaign Isolation</h2>
+              <p className="mt-4 leading-8 text-slate-300 lg:text-sm lg:leading-6 lg:mt-3">
                 Every campaign operates inside its own organization. Campaign
                 data is isolated and cannot be accessed by other organizations
                 using Aether.
               </p>
             </div>
 
-            <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-8">
-              <KeyRound className="h-10 w-10 text-violet-300" />
-              <h2 className="mt-5 text-3xl font-black">Authentication</h2>
-              <p className="mt-4 leading-8 text-slate-300">
+            <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-8 lg:p-6 lg:rounded-2xl">
+              <KeyRound className="h-10 w-10 text-violet-300 lg:h-8 lg:w-8" />
+              <h2 className="mt-5 text-3xl font-black lg:mt-4 lg:text-2xl">Authentication</h2>
+              <p className="mt-4 leading-8 text-slate-300 lg:text-sm lg:leading-6 lg:mt-3">
                 Secure authentication protects every account. Access requires an
                 authenticated user account, and passwords are securely managed
                 through modern identity services.
@@ -138,41 +138,41 @@ export default function SecurityPage() {
             </div>
           </section>
 
-          <section className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-8 lg:p-10">
-            <div className="flex items-center gap-3">
-              <Users className="h-8 w-8 text-violet-300" />
-              <h2 className="text-4xl font-black">Role-Based Access</h2>
+          <section className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-8 lg:p-7 lg:p-6 lg:rounded-2xl">
+            <div className="flex items-center gap-3 lg:gap-2">
+              <Users className="h-8 w-8 text-violet-300 lg:h-6 lg:w-6" />
+              <h2 className="text-4xl font-black lg:text-3xl">Role-Based Access</h2>
             </div>
 
-            <div className="mt-8 grid gap-5 md:grid-cols-3">
+            <div className="mt-8 grid gap-5 md:grid-cols-3 lg:gap-4 lg:mt-6">
               {roles.map((role) => (
-                <div key={role.title} className="rounded-3xl border border-white/10 bg-white/[0.05] p-6">
-                  <h3 className="text-2xl font-black">{role.title}</h3>
-                  <p className="mt-3 leading-7 text-slate-300">{role.description}</p>
+                <div key={role.title} className="rounded-3xl border border-white/10 bg-white/[0.05] p-6 lg:p-[18px] lg:rounded-2xl">
+                  <h3 className="text-2xl font-black lg:text-xl">{role.title}</h3>
+                  <p className="mt-3 leading-7 text-slate-300 lg:text-sm lg:leading-6 lg:mt-2">{role.description}</p>
                 </div>
               ))}
             </div>
           </section>
 
-          <section className="grid gap-6 lg:grid-cols-2">
-            <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-8">
-              <UserCog className="h-10 w-10 text-violet-300" />
-              <h2 className="mt-5 text-3xl font-black">Team Aether Administrative Access</h2>
-              <p className="mt-4 leading-8 text-slate-300">
+          <section className="grid gap-6 lg:grid-cols-2 lg:gap-4">
+            <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-8 lg:p-6 lg:rounded-2xl">
+              <UserCog className="h-10 w-10 text-violet-300 lg:h-8 lg:w-8" />
+              <h2 className="mt-5 text-3xl font-black lg:mt-4 lg:text-2xl">Team Aether Administrative Access</h2>
+              <p className="mt-4 leading-8 text-slate-300 lg:text-sm lg:leading-6 lg:mt-3">
                 Authorized Team Aether personnel may retain administrative access for legitimate
                 account-management purposes including provisioning, onboarding, troubleshooting,
                 integration support, security response, and customer-requested assistance.
               </p>
-              <p className="mt-4 leading-8 text-slate-300">
+              <p className="mt-4 leading-8 text-slate-300 lg:text-sm lg:leading-6 lg:mt-3">
                 That access does not transfer ownership of campaign data to Aether and is not
                 intended for unrelated inspection or modification of a campaign&apos;s information.
               </p>
             </div>
 
-            <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-8">
-              <EyeOff className="h-10 w-10 text-violet-300" />
-              <h2 className="mt-5 text-3xl font-black">Data Use &amp; Campaign Separation</h2>
-              <p className="mt-4 leading-8 text-slate-300">
+            <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-8 lg:p-6 lg:rounded-2xl">
+              <EyeOff className="h-10 w-10 text-violet-300 lg:h-8 lg:w-8" />
+              <h2 className="mt-5 text-3xl font-black lg:mt-4 lg:text-2xl">Data Use &amp; Campaign Separation</h2>
+              <p className="mt-4 leading-8 text-slate-300 lg:text-sm lg:leading-6 lg:mt-3">
                 Aether does not sell campaign data or use customer campaign data as an advertising
                 product. Data belonging to one campaign is not provided to another campaign simply
                 because both organizations use Aether.
@@ -180,23 +180,23 @@ export default function SecurityPage() {
             </div>
           </section>
 
-          <section className="grid gap-6 lg:grid-cols-2">
-            <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-8">
-              <Lock className="h-10 w-10 text-violet-300" />
-              <h2 className="mt-5 text-3xl font-black">Encryption</h2>
-              <p className="mt-4 leading-8 text-slate-300">
+          <section className="grid gap-6 lg:grid-cols-2 lg:gap-4">
+            <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-8 lg:p-6 lg:rounded-2xl">
+              <Lock className="h-10 w-10 text-violet-300 lg:h-8 lg:w-8" />
+              <h2 className="mt-5 text-3xl font-black lg:mt-4 lg:text-2xl">Encryption</h2>
+              <p className="mt-4 leading-8 text-slate-300 lg:text-sm lg:leading-6 lg:mt-3">
                 All communication between your browser, mobile device, and
                 Aether is encrypted in transit using modern industry-standard
                 security protocols.
               </p>
             </div>
 
-            <div className="rounded-[2rem] border border-violet-300/20 bg-[#efe7ff] p-8 text-[#32106b]">
-              <Shield className="h-10 w-10" />
-              <h2 className="mt-5 text-3xl font-black">
+            <div className="rounded-[2rem] border border-violet-300/20 bg-[#efe7ff] p-8 text-[#32106b] lg:p-6 lg:rounded-2xl">
+              <Shield className="h-10 w-10 lg:h-8 lg:w-8" />
+              <h2 className="mt-5 text-3xl font-black lg:mt-4 lg:text-2xl">
                 Your campaign owns your campaign's data.
               </h2>
-              <p className="mt-4 leading-8">
+              <p className="mt-4 leading-8 lg:mt-3">
                 Aether exists to help campaigns organize, understand, and
                 execute—not to claim ownership of the information entrusted to
                 the platform.
@@ -204,17 +204,17 @@ export default function SecurityPage() {
             </div>
           </section>
 
-          <section className="grid gap-6 lg:grid-cols-2">
-            <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-8">
-              <KeyRound className="h-10 w-10 text-violet-300" />
-              <h2 className="mt-5 text-3xl font-black">Connected Integrations</h2>
-              <p className="mt-4 leading-8 text-slate-300">
+          <section className="grid gap-6 lg:grid-cols-2 lg:gap-4">
+            <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-8 lg:p-6 lg:rounded-2xl">
+              <KeyRound className="h-10 w-10 text-violet-300 lg:h-8 lg:w-8" />
+              <h2 className="mt-5 text-3xl font-black lg:mt-4 lg:text-2xl">Connected Integrations</h2>
+              <p className="mt-4 leading-8 text-slate-300 lg:text-sm lg:leading-6 lg:mt-3">
                 When a campaign connects a supported third-party service to Aether, Aether uses
                 provider-supported authorization mechanisms, including OAuth where implemented.
                 Aether accesses the information and capabilities authorized through that connection
                 to provide the integration features requested by the campaign.
               </p>
-              <p className="mt-4 leading-8 text-slate-300">
+              <p className="mt-4 leading-8 text-slate-300 lg:text-sm lg:leading-6 lg:mt-3">
                 Connected services remain subject to the permissions, security
                 practices, and policies of their respective providers. Campaign
                 leadership controls which supported integrations are connected to
@@ -222,21 +222,21 @@ export default function SecurityPage() {
               </p>
             </div>
 
-            <div className="rounded-[2rem] border border-violet-300/20 bg-[#efe7ff] p-8 text-[#32106b]">
-              <Database className="h-10 w-10" />
-              <h2 className="mt-5 text-3xl font-black">Your Data. Your Exit.</h2>
-              <p className="mt-4 leading-8">
+            <div className="rounded-[2rem] border border-violet-300/20 bg-[#efe7ff] p-8 text-[#32106b] lg:p-6 lg:rounded-2xl">
+              <Database className="h-10 w-10 lg:h-8 lg:w-8" />
+              <h2 className="mt-5 text-3xl font-black lg:mt-4 lg:text-2xl">Your Data. Your Exit.</h2>
+              <p className="mt-4 leading-8 lg:mt-3">
                 Your campaign data remains your data. Full means full: Aether&apos;s Full Data Export
                 provides the organization&apos;s saved Aether records in portable CSV form rather than
                 limiting the campaign to a simplified contacts export. The goal is portability, not
                 vendor lock-in.
               </p>
-              <p className="mt-4 leading-8">
+              <p className="mt-4 leading-8 lg:mt-3">
                 Following cancellation or completion of yearly usage, Aether may
                 retain campaign data for up to 60 days. We recommend exporting your
                 full data set before that grace period expires.
               </p>
-              <p className="mt-4 leading-8">
+              <p className="mt-4 leading-8 lg:mt-3">
                 Campaigns that want to preserve their Aether data between campaign
                 cycles may keep their data stored in Aether for $5 per month until
                 the next campaign rather than allowing the post-subscription
@@ -245,27 +245,27 @@ export default function SecurityPage() {
             </div>
           </section>
 
-          <section className="grid gap-6 lg:grid-cols-2">
-            <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-8">
-              <Siren className="h-10 w-10 text-violet-300" />
-              <h2 className="mt-5 text-3xl font-black">Security Incident Response</h2>
-              <p className="mt-4 leading-8 text-slate-300">
+          <section className="grid gap-6 lg:grid-cols-2 lg:gap-4">
+            <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-8 lg:p-6 lg:rounded-2xl">
+              <Siren className="h-10 w-10 text-violet-300 lg:h-8 lg:w-8" />
+              <h2 className="mt-5 text-3xl font-black lg:mt-4 lg:text-2xl">Security Incident Response</h2>
+              <p className="mt-4 leading-8 text-slate-300 lg:text-sm lg:leading-6 lg:mt-3">
                 If Team Aether becomes aware of a security incident affecting Aether systems or
                 customer data, we investigate the issue, take reasonable steps to contain and
                 remediate it, determine the affected systems and organizations, preserve relevant
                 information for review, and communicate with affected customers as appropriate to
                 the incident and applicable obligations.
               </p>
-              <p className="mt-4 leading-8 text-slate-300">
+              <p className="mt-4 leading-8 text-slate-300 lg:text-sm lg:leading-6 lg:mt-3">
                 We do not promise that security incidents are impossible. We commit to responding
                 to them responsibly.
               </p>
             </div>
 
-            <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-8">
-              <ServerCog className="h-10 w-10 text-violet-300" />
-              <h2 className="mt-5 text-3xl font-black">Shared Responsibility</h2>
-              <p className="mt-4 leading-8 text-slate-300">
+            <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-8 lg:p-6 lg:rounded-2xl">
+              <ServerCog className="h-10 w-10 text-violet-300 lg:h-8 lg:w-8" />
+              <h2 className="mt-5 text-3xl font-black lg:mt-4 lg:text-2xl">Shared Responsibility</h2>
+              <p className="mt-4 leading-8 text-slate-300 lg:text-sm lg:leading-6 lg:mt-3">
                 Campaign security also depends on campaign practices. Organizations should protect
                 account credentials, remove users who no longer require access, assign roles
                 appropriately, secure connected third-party accounts, maintain independent data
@@ -274,10 +274,10 @@ export default function SecurityPage() {
             </div>
           </section>
 
-          <section className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-8 lg:p-10">
-            <FileDown className="h-10 w-10 text-violet-300" />
-            <h2 className="mt-5 text-4xl font-black">Security Without Lock-In</h2>
-            <p className="mt-6 max-w-4xl leading-8 text-slate-300">
+          <section className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-8 lg:p-7 lg:p-6 lg:rounded-2xl">
+            <FileDown className="h-10 w-10 text-violet-300 lg:h-8 lg:w-8" />
+            <h2 className="mt-5 text-4xl font-black lg:mt-4 lg:text-3xl">Security Without Lock-In</h2>
+            <p className="mt-6 max-w-4xl leading-8 text-slate-300 lg:text-sm lg:leading-6 lg:mt-4">
               Security should not require a campaign to surrender control of its own information.
               Aether combines organization isolation, authenticated access, role-based permissions,
               supported integration controls, administrative accountability, and full data export
@@ -285,10 +285,10 @@ export default function SecurityPage() {
             </p>
           </section>
 
-          <section className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-8 lg:p-10">
-            <CheckCircle2 className="h-10 w-10 text-violet-300" />
-            <h2 className="mt-5 text-4xl font-black">Built on Transparency</h2>
-            <p className="mt-6 max-w-4xl leading-8 text-slate-300">
+          <section className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-8 lg:p-7 lg:p-6 lg:rounded-2xl">
+            <CheckCircle2 className="h-10 w-10 text-violet-300 lg:h-8 lg:w-8" />
+            <h2 className="mt-5 text-4xl font-black lg:mt-4 lg:text-3xl">Built on Transparency</h2>
+            <p className="mt-6 max-w-4xl leading-8 text-slate-300 lg:text-sm lg:leading-6 lg:mt-4">
               We won't claim certifications we haven't earned. We won't make
               promises no software can honestly guarantee. As Aether grows,
               we'll continue strengthening security while remaining transparent
@@ -296,30 +296,30 @@ export default function SecurityPage() {
             </p>
           </section>
 
-          <section className="rounded-[2rem] border border-white/10 bg-[#111827] p-8 lg:p-10">
-            <h2 className="text-4xl font-black">Report a Security Concern</h2>
-            <p className="mt-5 max-w-3xl text-slate-300">
+          <section className="rounded-[2rem] border border-white/10 bg-[#111827] p-8 lg:p-7 lg:p-6 lg:rounded-2xl">
+            <h2 className="text-4xl font-black lg:text-3xl">Report a Security Concern</h2>
+            <p className="mt-5 max-w-3xl text-slate-300 lg:mt-4">
               If you've identified a security concern or believe you've found a vulnerability, please let us know. Team Aether reviews every report.
             </p>
 
             {submitted ? (
-              <div className="mt-8 rounded-2xl border border-green-500/30 bg-green-500/10 p-5 text-green-200">
+              <div className="mt-8 rounded-2xl border border-green-500/30 bg-green-500/10 p-5 text-green-200 lg:p-4 lg:mt-6 lg:rounded-xl">
                 <h3 className="font-bold">Security Report Received</h3>
-                <p className="mt-2">Thank you. Team Aether will be in touch.</p>
+                <p className="mt-2 lg:mt-1.5">Thank you. Team Aether will be in touch.</p>
               </div>
             ) : (
-            <form onSubmit={handleSubmit} className="mt-8 grid gap-4 md:grid-cols-2">
-              <input required name="name" value={form.name} onChange={handleChange} placeholder="Name *" className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3"/>
-              <input required type="email" name="email" value={form.email} onChange={handleChange} placeholder="Email *" className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3"/>
-              <input name="organization" value={form.organization} onChange={handleChange} placeholder="Organization" className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3"/>
-              <input name="phone" value={form.phone} onChange={handleChange} placeholder="Phone" className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3"/>
-              <textarea name="message" value={form.message} onChange={handleChange} placeholder="Message" rows={5} className="md:col-span-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3"/>
+            <form onSubmit={handleSubmit} className="mt-8 grid gap-4 md:grid-cols-2 lg:gap-3 lg:mt-6">
+              <input required name="name" value={form.name} onChange={handleChange} placeholder="Name *" className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 lg:px-3 lg:py-2.5 lg:rounded-xl"/>
+              <input required type="email" name="email" value={form.email} onChange={handleChange} placeholder="Email *" className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 lg:px-3 lg:py-2.5 lg:rounded-xl"/>
+              <input name="organization" value={form.organization} onChange={handleChange} placeholder="Organization" className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 lg:px-3 lg:py-2.5 lg:rounded-xl"/>
+              <input name="phone" value={form.phone} onChange={handleChange} placeholder="Phone" className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 lg:px-3 lg:py-2.5 lg:rounded-xl"/>
+              <textarea name="message" value={form.message} onChange={handleChange} placeholder="Message" rows={5} className="md:col-span-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 lg:px-3 lg:py-2.5 lg:rounded-xl"/>
               {error && <p className="md:col-span-2 text-red-300">{error}</p>}
               <div className="md:col-span-2">
-                <button type="submit" disabled={sending} className="cursor-pointer rounded-2xl bg-white px-6 py-4 font-bold text-slate-900 disabled:cursor-not-allowed disabled:opacity-60">
+                <button type="submit" disabled={sending} className="cursor-pointer rounded-2xl bg-white px-6 py-4 font-bold text-slate-900 disabled:cursor-not-allowed disabled:opacity-60 lg:px-[18px] lg:py-3 lg:rounded-xl">
                   {sending?"Sending...":"Submit Security Report"}
                 </button>
-                <p className="mt-3 text-xs text-slate-400">* Required fields</p>
+                <p className="mt-3 text-xs text-slate-400 lg:mt-2 lg:text-[10px]">* Required fields</p>
               </div>
             </form>)}
           </section>

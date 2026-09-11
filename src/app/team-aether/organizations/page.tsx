@@ -377,87 +377,87 @@ export default function TeamAetherOrganizationsPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-slate-100 p-4 text-slate-950 lg:p-8">
-      <div className="mx-auto max-w-6xl space-y-8">
+    <main className="min-h-screen bg-slate-100 p-4 text-slate-950 lg:p-6 lg:p-3">
+      <div className="mx-auto max-w-6xl space-y-8 lg:space-y-6">
         {/* HERO */}
-        <section className="overflow-hidden rounded-[2rem] border border-slate-200 bg-slate-950 p-8 text-white shadow-sm lg:p-10">
-          <div className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
+        <section className="overflow-hidden rounded-[2rem] border border-slate-200 bg-slate-950 p-8 text-white shadow-sm lg:p-7 lg:rounded-2xl lg:p-6">
+          <div className="grid gap-8 lg:grid-cols-[1.25fr_0.75fr] lg:items-start lg:gap-6">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-200">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-200 lg:text-[10px]">
                 <ShieldCheck className="h-3.5 w-3.5" />
                 Team Aether
               </div>
 
-              <h1 className="mt-4 text-3xl font-semibold tracking-tight lg:text-5xl">
+              <h1 className="mt-4 text-3xl font-semibold tracking-tight lg:text-4xl lg:mt-3 lg:text-2xl">
                 Organization Management
               </h1>
 
-              <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300 lg:text-base">
+              <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300 lg:text-sm lg:mt-2 lg:text-[12px]">
                 Search, review, and manage every organization provisioned
                 through Aether.
               </p>
             </div>
 
-            <div className="grid gap-6 lg:grid-cols-[170px_1fr]">
-              <div className="flex flex-col items-start gap-3 pt-6">
+            <div className="grid gap-6 lg:grid-cols-[140px_1fr] lg:gap-4">
+              <div className="flex flex-col items-start gap-3 pt-6 lg:gap-2 lg:pt-4">
                 <a
                   href="/team-aether/sales-help"
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/15"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/15 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[12px]"
                 >
-                  <Sparkles className="h-4 w-4" />
+                  <Sparkles className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                   Sales Help
                 </a>
 
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/15"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/15 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[12px]"
                 >
-                  <LogOut className="h-4 w-4" />
+                  <LogOut className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                   Logout
                 </button>
               </div>
 
-              <div className="border-t border-white/10 pt-6">
-                <div className="flex flex-wrap gap-3">
+              <div className="border-t border-white/10 pt-6 lg:pt-4">
+                <div className="flex flex-wrap gap-3 lg:gap-2">
                   <a
                     href="/team-aether/dashboard"
-                    className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/15"
+                    className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/15 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[12px]"
                   >
-                    <LayoutDashboard className="h-4 w-4" />
+                    <LayoutDashboard className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                     Dashboard
                   </a>
 
                   <a
                     href="/team-aether/organizations"
                     aria-current="page"
-                    className="inline-flex items-center gap-2 rounded-2xl border border-white bg-white/10 px-4 py-2.5 text-sm font-semibold text-white"
+                    className="inline-flex items-center gap-2 rounded-2xl border border-white bg-white/10 px-4 py-2.5 text-sm font-semibold text-white lg:rounded-xl lg:px-3 lg:py-2 lg:text-[12px]"
                   >
-                    <Building2 className="h-4 w-4" />
+                    <Building2 className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                     Organizations
                   </a>
 
                   <a
                     href="/team-aether"
-                    className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/15"
+                    className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/15 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[12px]"
                   >
-                    <Sparkles className="h-4 w-4" />
+                    <Sparkles className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                     Provisioning
                   </a>
 
                   <a
                     href="/team-aether/sales-pipeline"
-                    className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/15"
+                    className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/15 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[12px]"
                   >
-                    <BarChart3 className="h-4 w-4" />
+                    <BarChart3 className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                     Sales Pipeline
                   </a>
 
                   <a
                     href="/team-aether/support-portal"
-                    className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/15"
+                    className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/15 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[12px]"
                   >
-                    <Headset className="h-4 w-4" />
+                    <Headset className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                     Support
                   </a>
                 </div>
@@ -467,58 +467,58 @@ export default function TeamAetherOrganizationsPage() {
         </section>
 
         {/* SUMMARY */}
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-3">
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm lg:rounded-xl lg:p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 lg:text-[10px]">
               All Organizations
             </p>
-            <p className="mt-3 text-3xl font-semibold">
+            <p className="mt-3 text-3xl font-semibold lg:mt-2 lg:text-2xl">
               {statusCounts.all}
             </p>
           </div>
 
-          <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">
+          <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm lg:rounded-xl lg:p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700 lg:text-[10px]">
               Active
             </p>
-            <p className="mt-3 text-3xl font-semibold text-emerald-950">
+            <p className="mt-3 text-3xl font-semibold text-emerald-950 lg:mt-2 lg:text-2xl">
               {statusCounts.active}
             </p>
           </div>
 
-          <div className="rounded-3xl border border-rose-200 bg-rose-50 p-5 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-rose-700">
+          <div className="rounded-3xl border border-rose-200 bg-rose-50 p-5 shadow-sm lg:rounded-xl lg:p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-rose-700 lg:text-[10px]">
               Suspended
             </p>
-            <p className="mt-3 text-3xl font-semibold text-rose-950">
+            <p className="mt-3 text-3xl font-semibold text-rose-950 lg:mt-2 lg:text-2xl">
               {statusCounts.suspended}
             </p>
           </div>
 
-          <div className="rounded-3xl border border-amber-200 bg-amber-50 p-5 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-700">
+          <div className="rounded-3xl border border-amber-200 bg-amber-50 p-5 shadow-sm lg:rounded-xl lg:p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-700 lg:text-[10px]">
               Pending Deletion
             </p>
-            <p className="mt-3 text-3xl font-semibold text-amber-950">
+            <p className="mt-3 text-3xl font-semibold text-amber-950 lg:mt-2 lg:text-2xl">
               {statusCounts.scheduled_deletion}
             </p>
           </div>
         </section>
 
         {/* ORGANIZATION LIST */}
-        <section className="rounded-[2rem] border-2 border-slate-900 bg-white p-6 shadow-md lg:p-8">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <section className="rounded-[2rem] border-2 border-slate-900 bg-white p-6 shadow-md lg:p-6 lg:rounded-2xl lg:p-[18px]">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between lg:gap-3">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-slate-600">
+              <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-slate-600 lg:text-[10px]">
                 <Building2 className="h-3.5 w-3.5" />
                 Organizations
               </div>
 
-              <h2 className="mt-3 text-2xl font-semibold">
+              <h2 className="mt-3 text-2xl font-semibold lg:mt-2 lg:text-xl">
                 Manage Organizations
               </h2>
 
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-slate-500 lg:text-[12px]">
                 Live organization records loaded from Supabase.
               </p>
             </div>
@@ -527,7 +527,7 @@ export default function TeamAetherOrganizationsPage() {
               type="button"
               onClick={() => void loadOrganizations(true)}
               disabled={refreshing}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 disabled:opacity-60"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 disabled:opacity-60 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[12px]"
             >
               <RefreshCw
                 className={`h-4 w-4 ${
@@ -538,14 +538,14 @@ export default function TeamAetherOrganizationsPage() {
             </button>
           </div>
 
-          <div className="mt-6 grid gap-4 lg:grid-cols-[1fr_auto]">
+          <div className="mt-6 grid gap-4 lg:grid-cols-[1fr_auto] lg:gap-3 lg:mt-4">
             <label className="relative block">
-              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 lg:h-3.5 lg:w-3.5" />
               <input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="Search by organization name, slug, or ID"
-                className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm outline-none transition focus:border-slate-400"
+                className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm outline-none transition focus:border-slate-400 lg:rounded-xl lg:py-2.5 lg:text-[12px]"
               />
             </label>
 
@@ -565,7 +565,7 @@ export default function TeamAetherOrganizationsPage() {
                     key={value}
                     type="button"
                     onClick={() => setStatusFilter(value)}
-                    className={`rounded-2xl border px-4 py-2.5 text-sm font-medium transition ${
+                    className={`rounded-2xl border px-4 py-2.5 text-sm font-medium transition lg:rounded-xl lg:px-3 lg:py-2 lg:text-xs ${
                       active
                         ? "border-slate-900 bg-slate-900 text-white"
                         : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
@@ -579,24 +579,24 @@ export default function TeamAetherOrganizationsPage() {
           </div>
 
           {error ? (
-            <div className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">
+            <div className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800 lg:rounded-xl lg:p-3 lg:mt-4 lg:text-[12px]">
               {error}
             </div>
           ) : null}
 
           {loading ? (
-            <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-8 text-center text-sm text-slate-500">
+            <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-8 text-center text-sm text-slate-500 lg:rounded-xl lg:p-6 lg:mt-4 lg:text-[12px]">
               Loading organizations...
             </div>
           ) : null}
 
           {!loading && !error && organizations.length === 0 ? (
-            <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-8 text-center">
+            <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-8 text-center lg:rounded-xl lg:p-6 lg:mt-4">
               <Building2 className="mx-auto h-8 w-8 text-slate-400" />
-              <p className="mt-3 font-semibold text-slate-900">
+              <p className="mt-3 font-semibold text-slate-900 lg:mt-2">
                 No organizations found
               </p>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-slate-500 lg:text-[12px]">
                 Organizations will appear here after they are provisioned.
               </p>
             </div>
@@ -606,23 +606,23 @@ export default function TeamAetherOrganizationsPage() {
           !error &&
           organizations.length > 0 &&
           filteredOrganizations.length === 0 ? (
-            <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-8 text-center text-sm text-slate-500">
+            <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-8 text-center text-sm text-slate-500 lg:rounded-xl lg:p-6 lg:mt-4 lg:text-[12px]">
               No organizations match the current search and filter.
             </div>
           ) : null}
 
           {!loading && !error && filteredOrganizations.length > 0 ? (
-            <div className="mt-6 overflow-hidden rounded-3xl border border-slate-200">
+            <div className="mt-6 overflow-hidden rounded-3xl border border-slate-200 lg:rounded-xl lg:mt-4">
               <div className="overflow-x-auto">
-                <table className="min-w-full text-left text-sm">
-                  <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+                <table className="min-w-full text-left text-sm lg:text-[12px]">
+                  <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 lg:text-[10px]">
                     <tr>
-                      <th className="px-5 py-4">Organization</th>
-                      <th className="px-5 py-4">Tier</th>
-                      <th className="px-5 py-4">Context</th>
-                      <th className="px-5 py-4">Abe Stage</th>
-                      <th className="px-5 py-4">Status</th>
-                      <th className="px-5 py-4">Created</th>
+                      <th className="px-5 py-4 lg:px-3.5 lg:py-2.5">Organization</th>
+                      <th className="px-5 py-4 lg:px-3.5 lg:py-2.5">Tier</th>
+                      <th className="px-5 py-4 lg:px-3.5 lg:py-2.5">Context</th>
+                      <th className="px-5 py-4 lg:px-3.5 lg:py-2.5">Abe Stage</th>
+                      <th className="px-5 py-4 lg:px-3.5 lg:py-2.5">Status</th>
+                      <th className="px-5 py-4 lg:px-3.5 lg:py-2.5">Created</th>
                     </tr>
                   </thead>
 
@@ -648,30 +648,30 @@ export default function TeamAetherOrganizationsPage() {
                               : "hover:bg-slate-50"
                           }`}
                         >
-                          <td className="px-5 py-4">
+                          <td className="px-5 py-4 lg:px-3.5 lg:py-2.5">
                             <p className="font-semibold text-slate-950">
                               {organization.name}
                             </p>
-                            <p className="mt-1 text-xs text-slate-500">
+                            <p className="mt-1 text-xs text-slate-500 lg:text-[10px]">
                               {organization.slug}
                             </p>
                           </td>
 
-                          <td className="px-5 py-4 font-medium">
+                          <td className="px-5 py-4 font-medium lg:px-3.5 lg:py-2.5">
                             {formatLabel(organization.aether_tier)}
                           </td>
 
-                          <td className="px-5 py-4">
+                          <td className="px-5 py-4 lg:px-3.5 lg:py-2.5">
                             {formatLabel(organization.context_mode)}
                           </td>
 
-                          <td className="px-5 py-4">
+                          <td className="px-5 py-4 lg:px-3.5 lg:py-2.5">
                             {formatLabel(organization.abe_stage)}
                           </td>
 
-                          <td className="px-5 py-4">
+                          <td className="px-5 py-4 lg:px-3.5 lg:py-2.5">
                             <span
-                              className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${statusStyles(
+                              className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold lg:px-2.5 lg:py-1 lg:text-[10px] ${statusStyles(
                                 organization
                               )}`}
                             >
@@ -679,7 +679,7 @@ export default function TeamAetherOrganizationsPage() {
                             </span>
                           </td>
 
-                          <td className="whitespace-nowrap px-5 py-4 text-slate-600">
+                          <td className="whitespace-nowrap px-5 py-4 text-slate-600 lg:px-3.5 lg:py-2.5">
                             {formatDate(organization.created_at)}
                           </td>
                         </tr>
@@ -694,27 +694,27 @@ export default function TeamAetherOrganizationsPage() {
 
         {/* SELECTED ORGANIZATION */}
         {selectedOrganization ? (
-          <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm lg:p-6 lg:rounded-2xl lg:p-[18px]">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between lg:gap-3">
               <div>
-                <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-slate-600">
+                <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-slate-600 lg:text-[10px]">
                   <CircleDot className="h-3.5 w-3.5" />
                   Selected Organization
                 </div>
 
-                <h2 className="mt-3 text-2xl font-semibold">
+                <h2 className="mt-3 text-2xl font-semibold lg:mt-2 lg:text-xl">
                   {selectedOrganization.name}
                 </h2>
 
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="mt-1 text-sm text-slate-500 lg:text-[12px]">
                   Review the live organization record before making
                   management changes.
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3 lg:gap-2">
                 <span
-                  className={`inline-flex w-fit rounded-full border px-3 py-1 text-xs font-semibold ${statusStyles(
+                  className={`inline-flex w-fit rounded-full border px-3 py-1 text-xs font-semibold lg:px-2.5 lg:py-1 lg:text-[10px] ${statusStyles(
                     selectedOrganization
                   )}`}
                 >
@@ -725,97 +725,97 @@ export default function TeamAetherOrganizationsPage() {
                   <button
                     type="button"
                     onClick={beginEditing}
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[12px]"
                   >
-                    <Pencil className="h-4 w-4" />
+                    <Pencil className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                     Edit Organization
                   </button>
                 ) : null}
               </div>
             </div>
 
-            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
-                  <Hash className="h-4 w-4" />
+            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-3 lg:mt-4">
+              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 lg:text-[10px]">
+                  <Hash className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                   Organization ID
                 </div>
-                <p className="mt-3 break-all text-sm font-semibold">
+                <p className="mt-3 break-all text-sm font-semibold lg:mt-2 lg:text-[12px]">
                   {selectedOrganization.id}
                 </p>
               </div>
 
-              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
-                  <Tag className="h-4 w-4" />
+              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 lg:text-[10px]">
+                  <Tag className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                   Slug
                 </div>
-                <p className="mt-3 break-all text-sm font-semibold">
+                <p className="mt-3 break-all text-sm font-semibold lg:mt-2 lg:text-[12px]">
                   {selectedOrganization.slug}
                 </p>
               </div>
 
-              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
-                  <CalendarDays className="h-4 w-4" />
+              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 lg:text-[10px]">
+                  <CalendarDays className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                   Created
                 </div>
-                <p className="mt-3 text-sm font-semibold">
+                <p className="mt-3 text-sm font-semibold lg:mt-2 lg:text-[12px]">
                   {formatDate(selectedOrganization.created_at)}
                 </p>
               </div>
 
-              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
-                  <Building2 className="h-4 w-4" />
+              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 lg:text-[10px]">
+                  <Building2 className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                   Aether Tier
                 </div>
-                <p className="mt-3 text-sm font-semibold">
+                <p className="mt-3 text-sm font-semibold lg:mt-2 lg:text-[12px]">
                   {formatLabel(selectedOrganization.aether_tier)}
                 </p>
               </div>
 
-              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
-                  <Flag className="h-4 w-4" />
+              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 lg:text-[10px]">
+                  <Flag className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                   Context
                 </div>
-                <p className="mt-3 text-sm font-semibold">
+                <p className="mt-3 text-sm font-semibold lg:mt-2 lg:text-[12px]">
                   {formatLabel(selectedOrganization.context_mode)}
                 </p>
               </div>
 
-              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
-                  <Sparkles className="h-4 w-4" />
+              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 lg:text-[10px]">
+                  <Sparkles className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                   Abe Stage
                 </div>
-                <p className="mt-3 text-sm font-semibold">
+                <p className="mt-3 text-sm font-semibold lg:mt-2 lg:text-[12px]">
                   {formatLabel(selectedOrganization.abe_stage)}
                 </p>
               </div>
             </div>
 
             {editing ? (
-              <div className="mt-8 border-t border-slate-200 pt-8">
+              <div className="mt-8 border-t border-slate-200 pt-8 lg:mt-6 lg:pt-6">
                 <div>
-                  <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-slate-600">
+                  <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-slate-600 lg:text-[10px]">
                     <Pencil className="h-3.5 w-3.5" />
                     Edit Organization
                   </div>
 
-                  <h3 className="mt-3 text-xl font-semibold">
+                  <h3 className="mt-3 text-xl font-semibold lg:mt-2 lg:text-lg">
                     Organization Settings
                   </h3>
 
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="mt-1 text-sm text-slate-500 lg:text-[12px]">
                     These controls are visual only until the update API is connected.
                   </p>
                 </div>
 
-                <div className="mt-6 grid gap-5 md:grid-cols-2">
+                <div className="mt-6 grid gap-5 md:grid-cols-2 lg:gap-4 lg:mt-4">
                   <label className="block">
-                    <span className="text-sm font-semibold text-slate-900">
+                    <span className="text-sm font-semibold text-slate-900 lg:text-[12px]">
                       Organization Name
                     </span>
                     <input
@@ -826,12 +826,12 @@ export default function TeamAetherOrganizationsPage() {
                           name: event.target.value,
                         }))
                       }
-                      className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-400"
+                      className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-400 lg:mt-1.5 lg:rounded-xl lg:px-3 lg:py-2.5 lg:text-[12px] lg:rounded-xl lg:px-3 lg:py-2.5 lg:mt-1.5 lg:text-[12px]"
                     />
                   </label>
 
                   <label className="block">
-                    <span className="text-sm font-semibold text-slate-900">
+                    <span className="text-sm font-semibold text-slate-900 lg:text-[12px]">
                       Slug
                     </span>
                     <input
@@ -842,12 +842,12 @@ export default function TeamAetherOrganizationsPage() {
                           slug: event.target.value,
                         }))
                       }
-                      className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-400"
+                      className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-400 lg:mt-1.5 lg:rounded-xl lg:px-3 lg:py-2.5 lg:text-[12px] lg:rounded-xl lg:px-3 lg:py-2.5 lg:mt-1.5 lg:text-[12px]"
                     />
                   </label>
 
                   <label className="block">
-                    <span className="text-sm font-semibold text-slate-900">
+                    <span className="text-sm font-semibold text-slate-900 lg:text-[12px]">
                       Political / Design Context
                     </span>
                     <select
@@ -858,7 +858,7 @@ export default function TeamAetherOrganizationsPage() {
                           context_mode: event.target.value,
                         }))
                       }
-                      className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-400"
+                      className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-400 lg:mt-1.5 lg:rounded-xl lg:px-3 lg:py-2.5 lg:text-[12px] lg:rounded-xl lg:px-3 lg:py-2.5 lg:mt-1.5 lg:text-[12px]"
                     >
                       <option value="default">Default</option>
                       <option value="democrat">Democrat</option>
@@ -867,7 +867,7 @@ export default function TeamAetherOrganizationsPage() {
                   </label>
 
                   <label className="block">
-                    <span className="text-sm font-semibold text-slate-900">
+                    <span className="text-sm font-semibold text-slate-900 lg:text-[12px]">
                       Aether Tier
                     </span>
                     <select
@@ -878,7 +878,7 @@ export default function TeamAetherOrganizationsPage() {
                           aether_tier: event.target.value,
                         }))
                       }
-                      className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-400"
+                      className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-400 lg:mt-1.5 lg:rounded-xl lg:px-3 lg:py-2.5 lg:text-[12px] lg:rounded-xl lg:px-3 lg:py-2.5 lg:mt-1.5 lg:text-[12px]"
                     >
                       <option value="t1">T1</option>
                       <option value="t2">T2</option>
@@ -887,7 +887,7 @@ export default function TeamAetherOrganizationsPage() {
                   </label>
 
                   <label className="block">
-                    <span className="text-sm font-semibold text-slate-900">
+                    <span className="text-sm font-semibold text-slate-900 lg:text-[12px]">
                       Abe Stage
                     </span>
                     <select
@@ -898,7 +898,7 @@ export default function TeamAetherOrganizationsPage() {
                           abe_stage: event.target.value,
                         }))
                       }
-                      className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-400"
+                      className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-400 lg:mt-1.5 lg:rounded-xl lg:px-3 lg:py-2.5 lg:text-[12px] lg:rounded-xl lg:px-3 lg:py-2.5 lg:mt-1.5 lg:text-[12px]"
                     >
                       <option value="early">Early</option>
                       <option value="mid">Mid</option>
@@ -907,7 +907,7 @@ export default function TeamAetherOrganizationsPage() {
                   </label>
 
                   <label className="block">
-                    <span className="text-sm font-semibold text-slate-900">
+                    <span className="text-sm font-semibold text-slate-900 lg:text-[12px]">
                       Organization Status
                     </span>
                     <select
@@ -918,7 +918,7 @@ export default function TeamAetherOrganizationsPage() {
                           status: event.target.value,
                         }))
                       }
-                      className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-400"
+                      className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-400 lg:mt-1.5 lg:rounded-xl lg:px-3 lg:py-2.5 lg:text-[12px] lg:rounded-xl lg:px-3 lg:py-2.5 lg:mt-1.5 lg:text-[12px]"
                     >
                       <option value="active">Active</option>
                       <option value="suspended">Suspended</option>
@@ -926,48 +926,48 @@ export default function TeamAetherOrganizationsPage() {
                   </label>
                 </div>
 
-                <div className="mt-6 flex flex-wrap gap-3">
+                <div className="mt-6 flex flex-wrap gap-3 lg:gap-2 lg:mt-4">
                   <button
                     type="button"
                     onClick={() => void handleVisualSave()}
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 lg:rounded-xl lg:px-3.5 lg:py-2.5 lg:text-[12px]"
                   >
-                    <Save className="h-4 w-4" />
+                    <Save className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                     Save Changes
                   </button>
 
                   <button
                     type="button"
                     onClick={cancelEditing}
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 lg:rounded-xl lg:px-3.5 lg:py-2.5 lg:text-[12px]"
                   >
-                    <X className="h-4 w-4" />
+                    <X className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                     Cancel
                   </button>
                 </div>
               </div>
             ) : null}
 
-            <div className="mt-8 border-t border-slate-200 pt-8">
+            <div className="mt-8 border-t border-slate-200 pt-8 lg:mt-6 lg:pt-6">
               <div>
-                <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-slate-600">
+                <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-slate-600 lg:text-[10px]">
                   <AlertTriangle className="h-3.5 w-3.5" />
                   Organization Lifecycle
                 </div>
 
-                <h3 className="mt-3 text-xl font-semibold">
+                <h3 className="mt-3 text-xl font-semibold lg:mt-2 lg:text-lg">
                   Deletion Management
                 </h3>
               </div>
 
               {selectedOrganization.scheduled_deletion_at ? (
-                <div className="mt-5 rounded-3xl border border-amber-200 bg-amber-50 p-5">
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="mt-5 rounded-3xl border border-amber-200 bg-amber-50 p-5 lg:rounded-xl lg:p-4 lg:mt-4">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between lg:gap-3">
                     <div>
                       <p className="font-semibold text-amber-950">
                         Deletion scheduled
                       </p>
-                      <p className="mt-1 text-sm text-amber-800">
+                      <p className="mt-1 text-sm text-amber-800 lg:text-[12px]">
                         Permanent deletion is scheduled for{" "}
                         {formatDate(
                           selectedOrganization.scheduled_deletion_at
@@ -979,21 +979,21 @@ export default function TeamAetherOrganizationsPage() {
                     <button
                       type="button"
                       onClick={handleVisualCancelDeletion}
-                      className="inline-flex items-center justify-center gap-2 rounded-2xl border border-amber-300 bg-white px-4 py-2.5 text-sm font-semibold text-amber-900 transition hover:bg-amber-100"
+                      className="inline-flex items-center justify-center gap-2 rounded-2xl border border-amber-300 bg-white px-4 py-2.5 text-sm font-semibold text-amber-900 transition hover:bg-amber-100 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[12px]"
                     >
-                      <RotateCcw className="h-4 w-4" />
+                      <RotateCcw className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                       Cancel Scheduled Deletion
                     </button>
                   </div>
                 </div>
               ) : (
-                <div className="mt-5 rounded-3xl border border-slate-200 bg-slate-50 p-5">
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="mt-5 rounded-3xl border border-slate-200 bg-slate-50 p-5 lg:rounded-xl lg:p-4 lg:mt-4">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between lg:gap-3">
                     <div>
                       <p className="font-semibold text-slate-900">
                         No deletion scheduled
                       </p>
-                      <p className="mt-1 text-sm text-slate-500">
+                      <p className="mt-1 text-sm text-slate-500 lg:text-[12px]">
                         Scheduling deletion will suspend access immediately and retain data for 60 days.
                       </p>
                     </div>
@@ -1005,22 +1005,22 @@ export default function TeamAetherOrganizationsPage() {
                           setShowDeletionForm(true);
                           setEditing(false);
                         }}
-                        className="inline-flex items-center justify-center gap-2 rounded-2xl border border-rose-200 bg-white px-4 py-2.5 text-sm font-semibold text-rose-700 transition hover:bg-rose-50"
+                        className="inline-flex items-center justify-center gap-2 rounded-2xl border border-rose-200 bg-white px-4 py-2.5 text-sm font-semibold text-rose-700 transition hover:bg-rose-50 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[12px]"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                         Schedule Deletion
                       </button>
                     ) : null}
                   </div>
 
                   {showDeletionForm ? (
-                    <div className="mt-5 border-t border-slate-200 pt-5">
-                      <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">
+                    <div className="mt-5 border-t border-slate-200 pt-5 lg:mt-4 lg:pt-4">
+                      <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800 lg:rounded-xl lg:p-3 lg:text-[12px]">
                         This organization will be suspended immediately. Its data will remain recoverable for 60 days before permanent deletion.
                       </div>
 
-                      <label className="mt-5 block">
-                        <span className="text-sm font-semibold text-slate-900">
+                      <label className="mt-5 block lg:mt-4">
+                        <span className="text-sm font-semibold text-slate-900 lg:text-[12px]">
                           Reason
                         </span>
                         <textarea
@@ -1030,17 +1030,17 @@ export default function TeamAetherOrganizationsPage() {
                           }
                           placeholder="Example: Subscription ended and payment was not restored."
                           rows={4}
-                          className="mt-2 w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-400"
+                          className="mt-2 w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-400 lg:rounded-xl lg:px-3 lg:py-2.5 lg:mt-1.5 lg:text-[12px]"
                         />
                       </label>
 
-                      <div className="mt-5 flex flex-wrap gap-3">
+                      <div className="mt-5 flex flex-wrap gap-3 lg:gap-2 lg:mt-4">
                         <button
                           type="button"
                           onClick={handleVisualScheduleDeletion}
-                          className="inline-flex items-center justify-center gap-2 rounded-2xl bg-rose-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-rose-600"
+                          className="inline-flex items-center justify-center gap-2 rounded-2xl bg-rose-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-rose-600 lg:rounded-xl lg:px-3.5 lg:py-2.5 lg:text-[12px]"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                           Confirm 60-Day Deletion
                         </button>
 
@@ -1050,9 +1050,9 @@ export default function TeamAetherOrganizationsPage() {
                             setShowDeletionForm(false);
                             setDeletionReason("");
                           }}
-                          className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+                          className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 lg:rounded-xl lg:px-3.5 lg:py-2.5 lg:text-[12px]"
                         >
-                          <X className="h-4 w-4" />
+                          <X className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                           Cancel
                         </button>
                       </div>

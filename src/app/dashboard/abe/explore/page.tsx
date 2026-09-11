@@ -688,8 +688,8 @@ export default function ExploreAbePage() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="space-y-6 lg:space-y-4">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
           <p className="text-slate-600">Loading Explore Abe...</p>
         </div>
       </div>
@@ -697,101 +697,101 @@ export default function ExploreAbePage() {
   }
 
   return (
-    <div className="space-y-8">
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm text-slate-500">
-              <Sparkles className="h-4 w-4" />
+    <div className="space-y-8 lg:space-y-6">
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-6 lg:rounded-2xl lg:p-[18px]">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-4">
+          <div className="space-y-3 lg:space-y-2">
+            <div className="flex items-center gap-2 text-sm text-slate-500 lg:text-[11px]">
+              <Sparkles className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               Explore Abe
             </div>
             <div className="space-y-2">
-              <h1 className="text-3xl font-semibold tracking-tight text-slate-900 lg:text-4xl">
+              <h1 className="text-3xl font-semibold tracking-tight text-slate-900 lg:text-3xl lg:text-2xl">
                 Deeper campaign intelligence
               </h1>
-              <p className="max-w-3xl text-sm text-slate-600 lg:text-base">
+              <p className="max-w-3xl text-sm text-slate-600 lg:text-sm lg:text-[11px]">
                 This expands on Abe’s Brief — same campaign-stage strategic read, deeper interpretation of how the campaign is behaving across lanes. When the campaign is empty, Abe stays quiet instead of inventing motion.
               </p>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 lg:gap-2">
             <Link
               href="/dashboard/abe/brief"
-              className="inline-flex items-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900 transition hover:bg-amber-100"
+              className="inline-flex items-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900 transition hover:bg-amber-100 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               Back to Abe’s Brief
             </Link>
             <Link
               href="/dashboard"
-              className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+              className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
               Dashboard
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
             </Link>
           </div>
         </div>
       </section>
 
       {message ? (
-        <section className="rounded-3xl border border-rose-200 bg-rose-50 p-6 shadow-sm text-sm text-rose-900">
+        <section className="rounded-3xl border border-rose-200 bg-rose-50 p-6 shadow-sm text-sm text-rose-900 lg:rounded-2xl lg:p-[18px] lg:text-[11px]">
           {message}
         </section>
       ) : null}
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="flex items-center gap-2 text-sm text-slate-500">
-          <BarChart3 className="h-4 w-4" />
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+        <div className="flex items-center gap-2 text-sm text-slate-500 lg:text-[11px]">
+          <BarChart3 className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
           Strategic Read
         </div>
-        <h2 className="mt-3 text-2xl font-semibold text-slate-900">
+        <h2 className="mt-3 text-2xl font-semibold text-slate-900 lg:mt-2 lg:text-xl">
           {hasLiveSignal ? campaignBriefing.headline : "No live campaign signal is available yet."}
         </h2>
-        <p className="mt-3 text-lg font-semibold text-slate-900">
+        <p className="mt-3 text-lg font-semibold text-slate-900 lg:mt-2 lg:text-base">
           {hasLiveSignal
             ? campaignBriefing.stickyLine
             : "Abe will stay quiet until real campaign data exists."}
         </p>
-        <p className="mt-3 max-w-4xl text-base leading-7 text-slate-800">
+        <p className="mt-3 max-w-4xl text-base leading-7 text-slate-800 lg:mt-2 lg:text-sm lg:leading-6 lg:mt-2 lg:text-sm">
           {deeperRead}
         </p>
-        <p className="mt-3 max-w-4xl text-sm italic text-slate-600">
+        <p className="mt-3 max-w-4xl text-sm italic text-slate-600 lg:mt-2 lg:text-[11px]">
           Why Abe thinks this: {hasLiveSignal ? abeBriefing.whyNow : "No live data is strong enough to justify a deeper strategic read yet."}
         </p>
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center gap-2 text-sm text-slate-500">
-            <Layers className="h-4 w-4" />
+      <section className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:gap-4">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <div className="flex items-center gap-2 text-sm text-slate-500 lg:text-[11px]">
+            <Layers className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
             Lane-by-Lane Interpretation
           </div>
-          <div className="mt-4 space-y-4">
+          <div className="mt-4 space-y-4 lg:space-y-3 lg:mt-3">
             {laneReads.map((lane) => (
-              <div key={lane.lane} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <div key={lane.lane} className="rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
                 <p className="font-semibold text-slate-900">{lane.lane}</p>
-                <p className="mt-1 text-sm text-slate-600">{lane.read}</p>
+                <p className="mt-1 text-sm text-slate-600 lg:text-[11px]">{lane.read}</p>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center gap-2 text-sm text-slate-500">
-            <AlertTriangle className="h-4 w-4" />
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <div className="flex items-center gap-2 text-sm text-slate-500 lg:text-[11px]">
+            <AlertTriangle className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
             Pattern Watch
           </div>
-          <div className="mt-4 space-y-4">
+          <div className="mt-4 space-y-4 lg:space-y-3 lg:mt-3">
             {patternWatch.length > 0 ? (
               patternWatch.map((insight, index) => (
-                <div key={`${insight.label}-${index}`} className={`rounded-2xl border p-4 ${getPatternSeverityTone(insight.severity)}`}>
-                  <p className="text-sm font-semibold">{insight.label}</p>
-                  <p className="mt-1 text-sm opacity-90">{insight.detail}</p>
+                <div key={`${insight.label}-${index}`} className={`rounded-2xl border p-4 ${getPatternSeverityTone(insight.severity)} lg:rounded-xl lg:p-3`}>
+                  <p className="text-sm font-semibold lg:text-[11px]">{insight.label}</p>
+                  <p className="mt-1 text-sm opacity-90 lg:text-[11px]">{insight.detail}</p>
                 </div>
               ))
             ) : (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 lg:rounded-xl lg:p-3 lg:text-[11px]">
                 No major pattern clusters are dominating the read right now.
               </div>
             )}
@@ -799,11 +799,11 @@ export default function ExploreAbePage() {
         </div>
       </section>
 
-      <section className="rounded-3xl border border-indigo-200 bg-indigo-50 p-6 shadow-sm">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-700">
+      <section className="rounded-3xl border border-indigo-200 bg-indigo-50 p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-700 lg:text-[9px]">
           Cross-Domain Signal
         </p>
-        <p className="mt-3 text-base font-medium text-indigo-950">
+        <p className="mt-3 text-base font-medium text-indigo-950 lg:mt-2 lg:text-sm">
           {hasLiveSignal
             ? abeBriefing.crossDomainSignal || "No single cross-domain dependency is overpowering the read right now."
             : "No cross-domain signal is available yet."}

@@ -163,69 +163,69 @@ export default function EmailTemplatesPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-100 p-6 lg:p-8">
-      <div className="mx-auto max-w-7xl space-y-6">
-        <section className="rounded-[2rem] bg-slate-950 p-8 text-white">
-          <div className="flex flex-col gap-8 lg:flex-row lg:justify-between">
+    <main className="min-h-screen bg-slate-100 p-6 lg:p-6">
+      <div className="mx-auto max-w-7xl space-y-6 lg:space-y-4">
+        <section className="rounded-[2rem] bg-slate-950 p-8 text-white lg:rounded-2xl lg:p-6">
+          <div className="flex flex-col gap-8 lg:flex-row lg:justify-between lg:gap-6">
             <div>
               <div className="inline-flex rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em]">Team Aether</div>
-              <h1 className="mt-4 text-5xl font-bold">Email Templates</h1>
-              <p className="mt-3 max-w-2xl text-slate-300">Copy polished, Aether-branded outreach directly into Gmail.</p>
+              <h1 className="mt-4 text-5xl font-bold lg:mt-3 lg:text-3xl">Email Templates</h1>
+              <p className="mt-3 max-w-2xl text-slate-300 lg:mt-2 lg:text-sm">Copy polished, Aether-branded outreach directly into Gmail.</p>
             </div>
-            <div className="grid grid-cols-2 gap-3 lg:w-[430px]">
-              <Link href="/team-aether/dashboard" className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-center">Dashboard</Link>
-              <Link href="/team-aether" className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-center">Provisioning</Link>
-              <Link href="/team-aether/sales-pipeline" className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-center">Sales Pipeline</Link>
-              <Link href="/team-aether/support" className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-center">Support</Link>
-              <Link href="/logout" className="col-span-2 rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-center">Logout</Link>
+            <div className="grid grid-cols-2 gap-3 lg:w-[340px] lg:gap-2">
+              <Link href="/team-aether/dashboard" className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-center lg:rounded-xl lg:px-3 lg:py-2 lg:text-sm">Dashboard</Link>
+              <Link href="/team-aether" className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-center lg:rounded-xl lg:px-3 lg:py-2 lg:text-sm">Provisioning</Link>
+              <Link href="/team-aether/sales-pipeline" className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-center lg:rounded-xl lg:px-3 lg:py-2 lg:text-sm">Sales Pipeline</Link>
+              <Link href="/team-aether/support" className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-center lg:rounded-xl lg:px-3 lg:py-2 lg:text-sm">Support</Link>
+              <Link href="/logout" className="col-span-2 rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-center lg:rounded-xl lg:px-3 lg:py-2 lg:text-sm">Logout</Link>
             </div>
           </div>
         </section>
 
-        <section className="rounded-[2rem] border border-slate-200 bg-white p-6">
-          <h2 className="text-xl font-bold">Available Variables</h2>
+        <section className="rounded-[2rem] border border-slate-200 bg-white p-6 lg:rounded-2xl lg:p-4">
+          <h2 className="text-xl font-bold lg:text-lg">Available Variables</h2>
           <p className="mt-2 text-sm text-slate-500">Replace these values after pasting into Gmail.</p>
-          <div className="mt-4 flex flex-wrap gap-2">
+          <div className="mt-4 flex flex-wrap gap-2 lg:mt-3 lg:gap-1.5">
             {["{{First Name}}","{{Your Name}}","{{Campaign}}","{{Organization}}","{{Username}}","{{Password}}","{{Demo Date}}","{{Demo Time}}"].map(v =>
-              <span key={v} className="rounded-xl border bg-slate-50 px-3 py-2 text-sm">{v}</span>
+              <span key={v} className="rounded-xl border bg-slate-50 px-3 py-2 text-sm lg:px-2.5 lg:py-1.5 lg:text-xs">{v}</span>
             )}
           </div>
         </section>
 
         {templates.map((t, i) => (
-          <section key={t.title} className="rounded-[2rem] border border-slate-200 bg-white p-6">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <section key={t.title} className="rounded-[2rem] border border-slate-200 bg-white p-6 lg:rounded-2xl lg:p-4">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between lg:gap-3">
               <div>
-                <h2 className="text-2xl font-bold">{t.title}</h2>
+                <h2 className="text-2xl font-bold lg:text-xl">{t.title}</h2>
                 <p className="mt-2 text-sm text-slate-500">Rich HTML with a plain-text fallback.</p>
               </div>
-              <button onClick={() => copyEmail(t)} className="rounded-2xl bg-slate-950 px-5 py-3 font-semibold text-white">
+              <button onClick={() => copyEmail(t)} className="rounded-2xl bg-slate-950 px-5 py-3 font-semibold text-white lg:rounded-xl lg:px-4 lg:py-2 lg:text-sm">
                 {copied === t.title ? "Copied!" : "Copy Branded Email"}
               </button>
             </div>
 
-            <label className="mt-6 block text-sm font-semibold uppercase tracking-wide text-slate-500">Subject</label>
-            <div className="mt-2 flex flex-col gap-2 sm:flex-row">
-              <div className="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">{t.subject}</div>
-              <button onClick={() => copyText(t.subject, `${t.title}-subject`)} className="rounded-2xl border border-slate-200 px-4 py-3 font-semibold">
+            <label className="mt-6 block text-sm font-semibold uppercase tracking-wide text-slate-500 lg:mt-4 lg:text-xs">Subject</label>
+            <div className="mt-2 flex flex-col gap-2 sm:flex-row lg:mt-1.5">
+              <div className="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 lg:rounded-xl lg:px-3 lg:py-2 lg:text-sm">{t.subject}</div>
+              <button onClick={() => copyText(t.subject, `${t.title}-subject`)} className="rounded-2xl border border-slate-200 px-4 py-3 font-semibold lg:rounded-xl lg:px-3 lg:py-2 lg:text-sm">
                 {copied === `${t.title}-subject` ? "Copied!" : "Copy Subject"}
               </button>
             </div>
 
-            <label className="mt-6 block text-sm font-semibold uppercase tracking-wide text-slate-500">Plain Text</label>
-            <div className="mt-2 whitespace-pre-wrap rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-7 text-slate-700">{plainText(t)}</div>
+            <label className="mt-6 block text-sm font-semibold uppercase tracking-wide text-slate-500 lg:mt-4 lg:text-xs">Plain Text</label>
+            <div className="mt-2 whitespace-pre-wrap rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-7 text-slate-700 lg:mt-1.5 lg:rounded-xl lg:p-3 lg:text-xs lg:leading-5">{plainText(t)}</div>
 
-            <div className="mt-4 flex flex-wrap gap-3">
-              <button onClick={() => setPreview(preview === i ? null : i)} className="rounded-xl border border-slate-200 px-4 py-2 font-semibold">
+            <div className="mt-4 flex flex-wrap gap-3 lg:mt-3 lg:gap-2">
+              <button onClick={() => setPreview(preview === i ? null : i)} className="rounded-xl border border-slate-200 px-4 py-2 font-semibold lg:px-3 lg:py-1.5 lg:text-sm">
                 {preview === i ? "Hide Preview" : "Preview Branded Email"}
               </button>
-              <button onClick={() => copyText(plainText(t), `${t.title}-plain`)} className="rounded-xl border border-slate-200 px-4 py-2 font-semibold">
+              <button onClick={() => copyText(plainText(t), `${t.title}-plain`)} className="rounded-xl border border-slate-200 px-4 py-2 font-semibold lg:px-3 lg:py-1.5 lg:text-sm">
                 {copied === `${t.title}-plain` ? "Copied!" : "Copy Plain Text"}
               </button>
             </div>
 
             {preview === i && (
-              <div className="mt-6 overflow-hidden rounded-[1.5rem] border border-slate-200 bg-slate-100 p-3 sm:p-6">
+              <div className="mt-6 overflow-hidden rounded-[1.5rem] border border-slate-200 bg-slate-100 p-3 sm:p-6 lg:mt-4 lg:rounded-xl lg:p-4">
                 <iframe title={`${t.title} preview`} srcDoc={emailHtml(t)} className="h-[760px] w-full rounded-2xl bg-white" />
               </div>
             )}

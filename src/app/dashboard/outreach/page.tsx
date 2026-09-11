@@ -1104,8 +1104,8 @@ function OutreachPageContent() {
 
   if (loading || contactsLoading || logsLoading) {
     return (
-      <div className="space-y-6">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="space-y-6 lg:space-y-4">
+        <div className="min-w-0 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
           <p className="text-slate-600">Preparing outreach operations...</p>
         </div>
       </div>
@@ -1190,43 +1190,43 @@ function OutreachPageContent() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 lg:space-y-6">
       <section
-        className={`rounded-3xl border border-slate-800 bg-gradient-to-br p-6 text-white shadow-sm transition-colors duration-300 lg:p-8 ${orgTheme.heroGradient}`}
+        className={`rounded-3xl border border-slate-800 bg-gradient-to-br p-6 text-white shadow-sm transition-colors duration-300 lg:p-6 ${orgTheme.heroGradient} lg:rounded-2xl lg:p-[18px]`}
       >
-        <div className="flex flex-col gap-6">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 text-sm text-slate-300">
-                <Megaphone className="h-4 w-4" />
+        <div className="flex flex-col gap-6 lg:gap-4">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-4">
+            <div className="space-y-3 lg:space-y-2">
+              <div className="flex items-center gap-2 text-sm text-slate-300 lg:text-[11px]">
+                <Megaphone className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                 Voter + contact engagement engine
               </div>
 
               <div className="space-y-2">
-                <h1 className="text-3xl font-semibold tracking-tight text-white lg:text-4xl">
+                <h1 className="text-3xl font-semibold tracking-tight text-white lg:text-3xl lg:text-2xl">
                   {perspectiveHeadline}
                 </h1>
-                <p className="max-w-3xl text-sm text-slate-300 lg:text-base">
+                <p className="max-w-3xl text-sm text-slate-300 lg:text-sm lg:text-[11px]">
                   {perspectiveSubheadline}
                 </p>
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-3 lg:justify-end">
+            <div className="flex flex-wrap gap-3 lg:justify-end lg:gap-2">
               <Link
                 href="/dashboard/contacts"
-                className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+                className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
               >
-                <ContactRound className="h-4 w-4" />
+                <ContactRound className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                 Contacts
               </Link>
 
               {demoRole !== "general_user" ? (
                 <Link
                   href="/dashboard/lists"
-                  className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+                  className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
                 >
-                  <ListChecks className="h-4 w-4" />
+                  <ListChecks className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                   Lists
                 </Link>
               ) : null}
@@ -1234,18 +1234,18 @@ function OutreachPageContent() {
               {demoRole === "admin" ? (
                 <Link
                   href="/dashboard/ingest?source=outreach"
-                  className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+                  className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
                 >
-                  <Users className="h-4 w-4" />
+                  <Users className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                   Import Contacts
                 </Link>
               ) : null}
 
               <Link
                 href="/dashboard/outreach/focus"
-                className="inline-flex items-center gap-2 rounded-2xl border border-amber-300 bg-amber-100 px-4 py-3 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-amber-200"
+                className="inline-flex items-center gap-2 rounded-2xl border border-amber-300 bg-amber-100 px-4 py-3 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-amber-200 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
               >
-                <Zap className="h-4 w-4 text-slate-950" />
+                <Zap className="h-4 w-4 text-slate-950 lg:h-3.5 lg:w-3.5" />
                 <span className="text-slate-950">Open Focus Mode</span>
               </Link>
             </div>
@@ -1253,10 +1253,10 @@ function OutreachPageContent() {
         </div>
       </section>
 
-      {isDemoOrg && (<section className="rounded-3xl border border-slate-200 bg-white p-6 text-slate-950 shadow-sm">
-            <div className="grid gap-5 lg:grid-cols-[1fr_1fr]">
-              <div className="space-y-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+      {isDemoOrg && (<section className="rounded-3xl border border-slate-200 bg-white p-6 text-slate-950 shadow-sm lg:rounded-2xl lg:p-[18px]">
+            <div className="grid gap-5 lg:grid-cols-[1fr_1fr] lg:gap-4">
+              <div className="space-y-3 lg:space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 lg:text-[9px]">
                   Demo role perspective
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -1269,7 +1269,7 @@ function OutreachPageContent() {
                           demoRole === role
                             ? "bg-slate-900 text-white"
                             : "border border-slate-200 bg-white text-slate-700"
-                        }`}
+                        } lg:px-2.5 lg:text-[9px]`}
                       >
                         {role}
                       </button>
@@ -1278,8 +1278,8 @@ function OutreachPageContent() {
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+              <div className="space-y-3 lg:space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 lg:text-[9px]">
                   Demo department perspective
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -1293,7 +1293,7 @@ function OutreachPageContent() {
                         demoDepartment === department
                           ? "bg-slate-900 text-white"
                           : "border border-slate-200 bg-white text-slate-700"
-                      }`}
+                      } lg:px-2.5 lg:text-[9px]`}
                     >
                       {department}
                     </button>
@@ -1302,7 +1302,7 @@ function OutreachPageContent() {
               </div>
             </div>
 
-            <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+            <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700 lg:rounded-xl lg:p-3 lg:mt-4 lg:text-[11px]">
               <span className="font-medium text-slate-900">
                 {getRoleLabel(demoRole)}:
               </span>{" "}
@@ -1312,20 +1312,20 @@ function OutreachPageContent() {
           </section>)}
 
           {showDepartmentAbe && outreachAbeReady ? (
-          <section className="rounded-3xl border border-violet-200 bg-violet-50 p-6 shadow-sm">
-            <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 text-sm text-violet-800">
-                  <Sparkles className="h-4 w-4" />
+          <section className="rounded-3xl border border-violet-200 bg-violet-50 p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between lg:gap-4">
+              <div className="space-y-3 lg:space-y-2">
+                <div className="flex items-center gap-2 text-sm text-violet-800 lg:text-[11px]">
+                  <Sparkles className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                   Honest Abe
                 </div>
 
                 <div className="space-y-2">
-                  <p className="text-sm font-medium uppercase tracking-[0.18em] text-violet-700/80">
+                  <p className="text-sm font-medium uppercase tracking-[0.18em] text-violet-700/80 lg:text-[11px]">
                     {getRoleLabel(demoRole)}
                   </p>
 
-                  <div className="flex flex-wrap gap-4 text-sm text-violet-900">
+                  <div className="flex flex-wrap gap-4 text-sm text-violet-900 lg:gap-3 lg:text-[11px]">
                     <div>
                       <span className="font-medium text-violet-700">Health:</span>{" "}
                       {outreachAbeDisplayBriefing.health}
@@ -1344,7 +1344,7 @@ function OutreachPageContent() {
                     </div>
                   </div>
 
-                  <h2 className="text-2xl font-semibold text-violet-900">
+                  <h2 className="text-2xl font-semibold text-violet-900 lg:text-xl">
                     {outreachAbeDisplayBriefing.primaryLane === "outreach"
                       ? "Outreach is the lane that needs tight execution right now."
                       : `${departmentLabel(
@@ -1352,39 +1352,39 @@ function OutreachPageContent() {
                         )} is shaping what outreach should do next.`}
                   </h2>
 
-                  <p className="max-w-3xl text-sm text-slate-700 lg:text-base">
+                  <p className="max-w-3xl text-sm text-slate-700 lg:text-sm lg:text-[11px]">
                     {outreachCommandSignal.detail}
                   </p>
 
-                  <p className="max-w-3xl text-sm italic text-slate-600">
+                  <p className="max-w-3xl text-sm italic text-slate-600 lg:text-[11px]">
                     Why now: {outreachAbeInsight}
                   </p>
 
                   {outreachAbeDisplayBriefing.crossDomainSignal ? (
-                    <p className="max-w-3xl text-sm text-violet-900/80">
+                    <p className="max-w-3xl text-sm text-violet-900/80 lg:text-[11px]">
                       {outreachAbeDisplayBriefing.crossDomainSignal}
                     </p>
                   ) : null}
 
-                  <p className="max-w-3xl text-sm text-slate-600">
+                  <p className="max-w-3xl text-sm text-slate-600 lg:text-[11px]">
                     {outreachAbeDisplayBriefing.supportText}
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="mt-5 rounded-2xl border border-violet-100 bg-white/80 p-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-700">
+            <div className="mt-5 rounded-2xl border border-violet-100 bg-white/80 p-5 lg:rounded-xl lg:p-4 lg:mt-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-700 lg:text-[9px]">
                 What Abe Would Do
               </p>
 
-              <div className="mt-3 space-y-3">
+              <div className="mt-3 space-y-3 lg:space-y-2 lg:mt-2">
                 {outreachAbeDisplayBriefing.actions.map((move, index) => (
                   <div
                     key={`${move}-${index}`}
-                    className="flex items-start gap-3 text-sm text-slate-700"
+                    className="flex items-start gap-3 text-sm text-slate-700 lg:gap-2 lg:text-[11px]"
                   >
-                    <div className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-amber-200 bg-amber-100 text-xs font-semibold text-amber-800">
+                    <div className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-amber-200 bg-amber-100 text-xs font-semibold text-amber-800 lg:text-[9px] lg:h-4.5 lg:w-4.5">
                       {index + 1}
                     </div>
                     <p>{move}</p>
@@ -1394,20 +1394,20 @@ function OutreachPageContent() {
             </div>
 
             {outreachPatternWatch.length > 0 ? (
-              <div className="mt-5 rounded-2xl border border-violet-100 bg-white/80 p-5">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-700">
+              <div className="mt-5 rounded-2xl border border-violet-100 bg-white/80 p-5 lg:rounded-xl lg:p-4 lg:mt-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-700 lg:text-[9px]">
                   Pattern Watch
                 </p>
-                                <div className="mt-3 space-y-3">
+                                <div className="mt-3 space-y-3 lg:space-y-2 lg:mt-2">
                   {outreachPatternWatch.map((insight, index) => (
                     <div
                       key={`${insight.label}-${index}`}
                       className={`rounded-2xl border p-4 ${patternSeverityTone(
                         insight.severity
-                      )}`}
+                      )} lg:rounded-xl lg:p-3`}
                     >
-                      <p className="text-sm font-semibold">{insight.label}</p>
-                      <p className="mt-1 text-sm opacity-90">{insight.detail}</p>
+                      <p className="text-sm font-semibold lg:text-[11px]">{insight.label}</p>
+                      <p className="mt-1 text-sm opacity-90 lg:text-[11px]">{insight.detail}</p>
                     </div>
                   ))}
                 </div>
@@ -1419,46 +1419,46 @@ function OutreachPageContent() {
 
           <div className="hidden" aria-hidden="true">
           <div
-            className={`rounded-3xl border p-5 shadow-sm ${outreachCommandTone.card}`}
+            className={`rounded-3xl border p-5 shadow-sm ${outreachCommandTone.card} lg:rounded-2xl lg:p-4`}
           >
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-3">
               <div>
                 <div
-                  className={`flex items-center gap-2 text-sm font-medium ${outreachCommandTone.eyebrow}`}
+                  className={`flex items-center gap-2 text-sm font-medium ${outreachCommandTone.eyebrow} lg:text-[11px]`}
                 >
-                  <outreachCommandTone.Icon className="h-4 w-4" />
+                  <outreachCommandTone.Icon className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                   Aether Command Signal
                 </div>
 
-                <h2 className={`text-xl font-semibold ${outreachCommandTone.title}`}>
+                <h2 className={`text-xl font-semibold ${outreachCommandTone.title} lg:text-lg`}>
                   {outreachCommandSignal.title}
                 </h2>
 
-                <p className={`mt-1 text-sm ${outreachCommandTone.body}`}>
+                <p className={`mt-1 text-sm ${outreachCommandTone.body} lg:text-[11px]`}>
                   {outreachCommandSignal.detail}
                 </p>
 
                 <p
-                  className={`mt-3 text-sm font-medium ${outreachCommandTone.instruction}`}
+                  className={`mt-3 text-sm font-medium ${outreachCommandTone.instruction} lg:mt-2 lg:text-[11px]`}
                 >
                   {outreachCommandSignal.instruction}
                 </p>
 
                 <div className="mt-2 flex flex-wrap gap-2">
                   <span
-                    className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${outreachCommandTone.chip}`}
+                    className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${outreachCommandTone.chip} lg:px-2.5 lg:text-[9px]`}
                   >
                     {outreachCommandSignal.priority} priority
                   </span>
 
                   <span
-                    className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${outreachCommandTone.chip}`}
+                    className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${outreachCommandTone.chip} lg:px-2.5 lg:text-[9px]`}
                   >
                     {outreachCommandSignal.category}
                   </span>
 
                   <span
-                    className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${outreachCommandTone.chip}`}
+                    className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${outreachCommandTone.chip} lg:px-2.5 lg:text-[9px]`}
                   >
                     {outreachCommandSignal.autoReady
                       ? "auto-ready"
@@ -1475,43 +1475,43 @@ function OutreachPageContent() {
           {(demoRole === "admin" ||
             demoDepartment === "outreach" ||
             demoDepartment === "finance") && (
-            <section className="rounded-3xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm">
-              <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <section className="rounded-3xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+              <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between lg:gap-3 lg:mb-4">
                 <div>
-                  <p className="text-sm font-medium text-emerald-800">
+                  <p className="text-sm font-medium text-emerald-800 lg:text-[11px]">
                     Finance-Triggered Follow-Up Queue
                   </p>
-                  <h2 className="text-2xl font-semibold text-emerald-900">
+                  <h2 className="text-2xl font-semibold text-emerald-900 lg:text-xl">
                     Donor Follow-Ups Surfaced by Aether
                   </h2>
-                  <p className="mt-2 max-w-3xl text-sm text-emerald-900/80">
+                  <p className="mt-2 max-w-3xl text-sm text-emerald-900/80 lg:text-[11px]">
                     These contacts were surfaced by finance intelligence because they
                     are high-value and appear stale for outreach follow-up.
                   </p>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="rounded-2xl border border-emerald-200 bg-white px-4 py-2 text-sm text-emerald-900">
+                <div className="flex items-center gap-3 lg:gap-2">
+                  <div className="rounded-2xl border border-emerald-200 bg-white px-4 py-2 text-sm text-emerald-900 lg:rounded-xl lg:px-3 lg:text-[11px]">
                     {visibleFinanceTriggeredDraftTasks.length} signal
                     {visibleFinanceTriggeredDraftTasks.length === 1 ? "" : "s"}
                   </div>
                 </div>
               </div>
 
-              <div className="grid gap-3 md:grid-cols-2">
+              <div className="grid gap-3 md:grid-cols-2 lg:gap-2">
                 {visibleFinanceTriggeredDraftTasks.slice(0, 6).map((task) => (
                   <div
                     key={task.id}
-                    className="rounded-2xl border border-emerald-200 bg-white p-4"
+                    className="rounded-2xl border border-emerald-200 bg-white p-4 lg:rounded-xl lg:p-3"
                   >
                     <p className="font-semibold text-slate-900">{task.title}</p>
-                    <p className="mt-1 text-sm text-slate-600">
+                    <p className="mt-1 text-sm text-slate-600 lg:text-[11px]">
                       {task.description}
                     </p>
 
-                    <div className="mt-3 flex items-center gap-2">
+                    <div className="mt-3 flex items-center gap-2 lg:mt-2">
                       <Link
                         href={`/dashboard/outreach?contactId=${task.contactId}`}
-                        className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+                        className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100 lg:px-2.5 lg:text-[9px]"
                       >
                         View Contact
                       </Link>
@@ -1520,7 +1520,7 @@ function OutreachPageContent() {
                 ))}
 
                 {visibleFinanceTriggeredDraftTasks.length === 0 && (
-                  <div className="rounded-2xl border border-emerald-200 bg-white p-4 text-sm text-emerald-900">
+                  <div className="rounded-2xl border border-emerald-200 bg-white p-4 text-sm text-emerald-900 lg:rounded-xl lg:p-3 lg:text-[11px]">
                     No finance-triggered follow-ups right now.
                   </div>
                 )}
@@ -1537,29 +1537,29 @@ function OutreachPageContent() {
             : visibleStats.length === 3
             ? "md:grid-cols-3"
             : "md:grid-cols-2 xl:grid-cols-4"
-        }`}
+        } lg:gap-3`}
       >
         {visibleStats.map((stat) => (
           <div
             key={stat.id}
-            className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
+            className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]"
           >
-            <p className="text-sm font-medium text-slate-500">{stat.label}</p>
-            <p className="mt-3 text-4xl font-semibold tracking-tight text-slate-900">
+            <p className="text-sm font-medium text-slate-500 lg:text-[11px]">{stat.label}</p>
+            <p className="mt-3 text-4xl font-semibold tracking-tight text-slate-900 lg:mt-2 lg:text-3xl">
               {stat.value}
             </p>
           </div>
         ))}
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
-          <div className="flex items-center gap-3">
-            <ListFilter className="h-4 w-4 text-slate-500" />
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+        <div className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr] lg:gap-3">
+          <div className="flex items-center gap-3 lg:gap-2">
+            <ListFilter className="h-4 w-4 text-slate-500 lg:h-3.5 lg:w-3.5" />
             <select
               value={selectedListId}
               onChange={(e) => setSelectedListId(e.target.value)}
-              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900"
+              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
               <option value="">All Contacts</option>
               {visibleTaggedLists.map((list) => (
@@ -1570,36 +1570,36 @@ function OutreachPageContent() {
             </select>
           </div>
 
-          <div className="flex items-center gap-3">
-            <Search className="h-4 w-4 text-slate-500" />
+          <div className="flex items-center gap-3 lg:gap-2">
+            <Search className="h-4 w-4 text-slate-500 lg:h-3.5 lg:w-3.5" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search contacts..."
-              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900"
+              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             />
           </div>
 
         </div>
       </section>
 
-      <section className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="mb-4 flex items-center justify-between gap-4">
+      <section className="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(280px,0.65fr)] lg:gap-4">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <div className="mb-4 flex items-center justify-between gap-4 lg:gap-3 lg:mb-3">
             <div>
-              <p className="text-sm font-medium text-slate-500">
+              <p className="text-sm font-medium text-slate-500 lg:text-[11px]">
                 Engagement Workspace
               </p>
-              <h2 className="text-lg font-semibold text-slate-900">
+              <h2 className="text-lg font-semibold text-slate-900 lg:text-base">
                 Contact View
               </h2>
             </div>
-            <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-sm text-slate-500">
+            <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-sm text-slate-500 lg:px-2.5 lg:text-[11px]">
               {visibleFilteredContacts.length} contacts
             </span>
           </div>
 
-          <div className="space-y-2 max-h-[600px] overflow-y-auto pr-2">
+          <div className="space-y-2 max-h-[600px] lg:max-h-[450px] overflow-y-auto pr-2">
             {visibleFilteredContacts.map((contact) => {
               const intel = intelligenceByContact.get(contact.id);
               const isSelected = contact.id === selectedContactId;
@@ -1612,9 +1612,9 @@ function OutreachPageContent() {
                     isSelected
                       ? "border-slate-900 bg-slate-100"
                       : "border-slate-200 bg-white hover:bg-slate-50"
-                  }`}
+                  } lg:rounded-xl lg:p-3`}
                 >
-                  <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start justify-between gap-3 lg:gap-2">
                     <button
                       type="button"
                       onClick={() => setSelectedContactId(contact.id)}
@@ -1623,14 +1623,14 @@ function OutreachPageContent() {
                       <p className="font-medium text-slate-900">
                         {fullName(contact)}
                       </p>
-                      <p className="mt-1 text-xs text-slate-500">
+                      <p className="mt-1 text-xs text-slate-500 lg:text-[9px]">
                         {contact.phone || contact.email || "No contact method"}
                       </p>
                     </button>
 
                     <Link
                       href={`/contacts/${contact.id}`}
-                      className="shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-100"
+                      className="shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-100 lg:px-2.5 lg:text-[9px]"
                     >
                       Open Profile
                     </Link>
@@ -1645,7 +1645,7 @@ function OutreachPageContent() {
                       <span
                         className={`rounded-full px-3 py-1 text-xs font-semibold ${
                           intel?.statusClasses || "bg-slate-100 text-slate-600"
-                        }`}
+                        } lg:px-2.5 lg:text-[9px]`}
                       >
                         {intel?.statusLabel || "Unknown"}
                       </span>
@@ -1654,20 +1654,20 @@ function OutreachPageContent() {
                         className={`rounded-full px-3 py-1 text-xs font-semibold ${
                           intel?.nextActionClasses ||
                           "bg-slate-100 text-slate-600"
-                        }`}
+                        } lg:px-2.5 lg:text-[9px]`}
                       >
                         {intel?.nextAction || "—"}
                       </span>
                     </div>
 
                     {financeTriggeredContactIds.has(contact.id) ? (
-                      <p className="mt-2 text-xs font-medium text-emerald-700">
+                      <p className="mt-2 text-xs font-medium text-emerald-700 lg:text-[9px]">
                         Finance-triggered outreach priority
                       </p>
                     ) : null}
 
                     {selectedContactId === contact.id && selectedContactPatternHint ? (
-                      <p className="mt-2 text-xs font-medium text-violet-700">
+                      <p className="mt-2 text-xs font-medium text-violet-700 lg:text-[9px]">
                         {selectedContactPatternHint}
                       </p>
                     ) : null}
@@ -1677,29 +1677,29 @@ function OutreachPageContent() {
             })}
 
             {visibleFilteredContacts.length === 0 && (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 text-center text-slate-500">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 text-center text-slate-500 lg:rounded-xl lg:p-[18px]">
                 No contacts available.
               </div>
             )}
           </div>
         </div>
 
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="mb-4 flex items-center justify-between gap-4">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <div className="mb-4 flex items-center justify-between gap-4 lg:gap-3 lg:mb-3">
             <div>
-              <p className="text-sm font-medium text-slate-500">
+              <p className="text-sm font-medium text-slate-500 lg:text-[11px]">
                 Lists + Segments
               </p>
-              <h2 className="text-lg font-semibold text-slate-900">
+              <h2 className="text-lg font-semibold text-slate-900 lg:text-base">
                 Outreach Universes
               </h2>
             </div>
-            <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-sm text-slate-500">
+            <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-sm text-slate-500 lg:px-2.5 lg:text-[11px]">
               {visibleTaggedLists.length} lists
             </span>
           </div>
 
-          <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
+          <div className="space-y-3 max-h-[600px] lg:max-h-[450px] overflow-y-auto pr-2 lg:space-y-2">
             {visibleTaggedLists.slice(0, 12).map((list) => (
               <button
                 key={list.id}
@@ -1709,19 +1709,19 @@ function OutreachPageContent() {
                   selectedListId === list.id
                     ? "border-slate-900 bg-slate-100"
                     : "border-slate-200 bg-white hover:bg-slate-50"
-                }`}
+                } lg:rounded-xl lg:p-3`}
               >
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start justify-between gap-3 lg:gap-2">
                   <div>
                     <p className="font-medium text-slate-900">{list.name}</p>
-                    <p className="mt-1 text-sm text-slate-500">
+                    <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
                       Owner: {list.default_owner_name || "Unassigned"}
                     </p>
                   </div>
                   <span
                     className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${listTagTone(
                       list.tag
-                    )}`}
+                    )} lg:px-2.5 lg:text-[9px]`}
                   >
                     {list.tag}
                   </span>
@@ -1730,7 +1730,7 @@ function OutreachPageContent() {
             ))}
 
             {visibleTaggedLists.length === 0 ? (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 text-center text-slate-500">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 text-center text-slate-500 lg:rounded-xl lg:p-[18px]">
                 No lists available for this view.
               </div>
             ) : null}
@@ -1740,35 +1740,35 @@ function OutreachPageContent() {
 
       <section className="hidden" aria-hidden="true">
         <div>
-          <div className="mb-4 flex items-center gap-2">
-            <Headphones className="h-4 w-4 text-slate-500" />
-            <h2 className="text-lg font-semibold text-slate-900">
+          <div className="mb-4 flex items-center gap-2 lg:mb-3">
+            <Headphones className="h-4 w-4 text-slate-500 lg:h-3.5 lg:w-3.5" />
+            <h2 className="text-lg font-semibold text-slate-900 lg:text-base">
               {demoRole === "general_user" ? "Work Panel" : "Action Panel"}
             </h2>
           </div>
 
           {!currentFocusContact ? (
-            <div className="text-sm text-slate-500">
+            <div className="text-sm text-slate-500 lg:text-[11px]">
               Select a contact to begin.
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-4 lg:space-y-3">
               <p className="font-medium text-slate-900">
                 {fullName(currentFocusContact)}
               </p>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-slate-500 lg:text-[11px]">
                 {currentFocusContact.phone || "No phone"} ·{" "}
                 {currentFocusContact.owner_name || "Unassigned"}
               </p>
 
               {selectedContactPatternHint ? (
-                <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-violet-900">
+                <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-violet-900 lg:rounded-xl lg:p-3 lg:text-[11px]">
                   {selectedContactPatternHint}
                 </div>
               ) : null}
 
               {message ? (
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700 lg:rounded-xl lg:p-3 lg:text-[11px]">
                   {message}
                 </div>
               ) : null}
@@ -1780,7 +1780,7 @@ function OutreachPageContent() {
                     channel === "call"
                       ? "bg-slate-900 text-white"
                       : "border border-slate-200"
-                  }`}
+                  } lg:rounded-xl lg:px-3 lg:text-[11px]`}
                 >
                   Call
                 </button>
@@ -1791,7 +1791,7 @@ function OutreachPageContent() {
                     channel === "text"
                       ? "bg-slate-900 text-white"
                       : "border border-slate-200"
-                  }`}
+                  } lg:rounded-xl lg:px-3 lg:text-[11px]`}
                 >
                   Text
                 </button>
@@ -1800,7 +1800,7 @@ function OutreachPageContent() {
               <select
                 value={result}
                 onChange={(e) => setResult(e.target.value)}
-                className="w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm"
+                className="w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm lg:rounded-xl lg:px-2.5 lg:text-[11px]"
               >
                 <option value="">Select result</option>
                 {(channel === "call" ? callResults : textResults).map((option) => (
@@ -1815,13 +1815,13 @@ function OutreachPageContent() {
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Notes..."
                 rows={5}
-                className="w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm"
+                className="w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm lg:rounded-xl lg:px-2.5 lg:text-[11px]"
               />
 
               <button
                 onClick={handleLog}
                 disabled={saving}
-                className="w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm text-white hover:bg-slate-800 disabled:opacity-60"
+                className="w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm text-white hover:bg-slate-800 disabled:opacity-60 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
               >
                 {saving
                   ? "Saving..."
@@ -1835,18 +1835,18 @@ function OutreachPageContent() {
       </section>
 
       <section className="hidden" aria-hidden="true">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between lg:gap-2">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 lg:text-[9px]">
               Active Owner Lane
             </p>
-            <p className="mt-1 text-sm text-slate-700">
+            <p className="mt-1 text-sm text-slate-700 lg:text-[11px]">
               Viewing outreach for{" "}
               <span className="font-semibold">{ownerFilter || "All Owners"}</span>
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-600">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-600 lg:rounded-xl lg:px-3 lg:text-[11px]">
             {ownerScopedContacts.length} contact
             {ownerScopedContacts.length === 1 ? "" : "s"} in current lane
           </div>
@@ -1856,23 +1856,23 @@ function OutreachPageContent() {
       {focusMode && (
         <section
           ref={focusSectionRef}
-          className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8"
+          className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-6 lg:rounded-2xl lg:p-[18px]"
         >
-          <div className="mb-4">
-            <h2 className="text-xl font-semibold text-slate-900">
+          <div className="mb-4 lg:mb-3">
+            <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">
               {demoRole === "general_user" ? "Active Work Lane" : "Focus Mode"}
             </h2>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
               {demoRole === "general_user"
                 ? "Stay in execution with the currently selected contact."
                 : "Stay in execution with the currently selected contact."}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4">
-            <p className="text-sm text-blue-700">Active Contact</p>
+          <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4 lg:rounded-xl lg:p-3">
+            <p className="text-sm text-blue-700 lg:text-[11px]">Active Contact</p>
             <div className="mt-2 flex flex-wrap items-center gap-2">
-              <p className="text-lg font-semibold text-slate-900">
+              <p className="text-lg font-semibold text-slate-900 lg:text-base">
                 {currentFocusContact
                   ? fullName(currentFocusContact)
                   : "No contact selected"}
@@ -1880,19 +1880,19 @@ function OutreachPageContent() {
 
               {currentFocusContact &&
               financeTriggeredContactIds.has(currentFocusContact.id) ? (
-                <span className="inline-flex rounded-full border border-emerald-200 bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+                <span className="inline-flex rounded-full border border-emerald-200 bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 lg:px-2.5 lg:text-[9px]">
                   Finance Trigger
                 </span>
               ) : null}
             </div>
 
-            <p className="mt-1 text-sm text-slate-600">
+            <p className="mt-1 text-sm text-slate-600 lg:text-[11px]">
               {currentFocusContact?.phone || "No phone"} ·{" "}
               {currentFocusContact?.owner_name || "Unassigned"}
             </p>
 
             {selectedContactPatternHint ? (
-              <p className="mt-2 text-xs font-medium text-violet-700">
+              <p className="mt-2 text-xs font-medium text-violet-700 lg:text-[9px]">
                 {selectedContactPatternHint}
               </p>
             ) : null}
@@ -1901,35 +1901,35 @@ function OutreachPageContent() {
           <div
             className={`mt-4 grid gap-4 ${
               demoRole === "general_user" ? "md:grid-cols-2" : "md:grid-cols-3"
-            }`}
+            } lg:gap-3 lg:mt-3`}
           >
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <div className="flex items-center gap-2 text-sm font-medium text-slate-500">
-                <Zap className="h-4 w-4" />
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
+              <div className="flex items-center gap-2 text-sm font-medium text-slate-500 lg:text-[11px]">
+                <Zap className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                 Call Streak
               </div>
-              <p className="mt-2 text-3xl font-semibold text-slate-900">
+              <p className="mt-2 text-3xl font-semibold text-slate-900 lg:text-2xl">
                 {callStreak}
               </p>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-sm font-medium text-slate-500">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
+              <p className="text-sm font-medium text-slate-500 lg:text-[11px]">
                 Completed This Session
               </p>
-              <p className="mt-2 text-3xl font-semibold text-slate-900">
+              <p className="mt-2 text-3xl font-semibold text-slate-900 lg:text-2xl">
                 {completedCount}
               </p>
             </div>
 
             {demoRole !== "general_user" ? (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <p className="text-sm font-medium text-slate-500">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
+                <p className="text-sm font-medium text-slate-500 lg:text-[11px]">
                   Focus Progress
                 </p>
-                <p className="mt-2 text-3xl font-semibold text-slate-900">
+                <p className="mt-2 text-3xl font-semibold text-slate-900 lg:text-2xl">
                   {currentFocusIndex >= 0 ? currentFocusIndex + 1 : 0}
-                  <span className="text-base font-medium text-slate-500">
+                  <span className="text-base font-medium text-slate-500 lg:text-sm">
                     {" "}
                     / {financePrioritizedFocusContacts.length}
                   </span>
@@ -1945,7 +1945,7 @@ function OutreachPageContent() {
 
 export default function OutreachPage() {
   return (
-    <Suspense fallback={<div className="p-6">Loading outreach...</div>}>
+    <Suspense fallback={<div className="p-6 lg:p-[18px]">Loading outreach...</div>}>
       <OutreachPageContent />
     </Suspense>
   );

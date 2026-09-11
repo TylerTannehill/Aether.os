@@ -3,30 +3,30 @@ import Link from "next/link";
 export default function BlogPage() {
   return (
     <main className="min-h-screen bg-[linear-gradient(180deg,#10233e_0%,#0a1728_45%,#07111f_100%)] text-white">
-      <div className="mx-auto max-w-4xl px-6 py-16">
+      <div className="mx-auto max-w-4xl px-6 py-16 lg:py-10">
         <Link
           href="/aether-academy"
-          className="mb-8 inline-flex items-center rounded-xl border border-violet-400/40 bg-violet-400/10 px-6 py-3 font-semibold text-violet-300 transition hover:-translate-y-0.5 hover:border-violet-300"
+          className="mb-8 inline-flex items-center rounded-xl border border-violet-400/40 bg-violet-400/10 px-6 py-3 font-semibold text-violet-300 transition hover:-translate-y-0.5 hover:border-violet-300 lg:mb-6 lg:px-5 lg:py-2.5 lg:text-sm"
         >
           ← Back to Aether Academy
         </Link>
 
-        <details className="group mt-10 rounded-2xl border border-white/10 bg-[#10233e]/75 shadow-xl shadow-black/20">
-          <summary className="cursor-pointer list-none px-10 py-7 text-lg font-semibold text-white [&::-webkit-details-marker]:hidden">
-            <span className="flex items-center justify-between gap-4">
+        <details className="group mt-10 rounded-2xl border border-white/10 bg-[#10233e]/75 shadow-xl shadow-black/20 lg:mt-7 lg:rounded-xl">
+          <summary className="cursor-pointer list-none px-10 py-7 text-lg font-semibold text-white [&::-webkit-details-marker]:hidden lg:px-7 lg:py-5 lg:text-base">
+            <span className="flex items-center justify-between gap-4 lg:gap-3">
               <span>September 1st 2026 - Note from Team Aether</span>
               <span aria-hidden="true" className="text-violet-300 transition group-open:rotate-180">⌄</span>
             </span>
           </summary>
-          <div className="border-t border-white/10 px-10 pb-10 pt-8">
-            <div className="space-y-6 text-slate-300 leading-8">
-              <h1 className="text-5xl font-bold text-white">Today, Aether Launches.</h1>
+          <div className="border-t border-white/10 px-10 pb-10 pt-8 lg:px-7 lg:pb-7 lg:pt-6">
+            <div className="space-y-6 text-slate-300 leading-8 lg:space-y-4 lg:text-sm lg:leading-6">
+              <h1 className="text-5xl font-bold text-white lg:text-4xl">Today, Aether Launches.</h1>
 
               <p>
                 And Team Aether is celebrating exactly how you might expect a software company to celebrate its first day in the world:
               </p>
 
-              <p className="text-xl font-semibold text-white">We're getting breakfast.</p>
+              <p className="text-xl font-semibold text-white lg:text-lg">We're getting breakfast.</p>
 
               <p>
                 Three people. An architect, an operator, and a mystic, sitting around a table together after spending months turning an idea into something real.
@@ -36,7 +36,7 @@ export default function BlogPage() {
                 Getting here has been strange, exhausting, occasionally ridiculous, and one of the most rewarding things we've ever done together.
               </p>
 
-              <h2 className="pt-6 text-3xl font-semibold text-white">Three Very Different People</h2>
+              <h2 className="pt-6 text-3xl font-semibold text-white lg:pt-4 lg:text-2xl">Three Very Different People</h2>
 
               <p>
                 Aether has always been the product of three very different ways of looking at a problem.
@@ -66,9 +66,9 @@ export default function BlogPage() {
                 None of those three approaches could have built Aether alone.
               </p>
 
-              <p className="text-xl font-semibold text-white">Together, they did.</p>
+              <p className="text-xl font-semibold text-white lg:text-lg">Together, they did.</p>
 
-              <h2 className="pt-6 text-3xl font-semibold text-white">Why We Built It</h2>
+              <h2 className="pt-6 text-3xl font-semibold text-white lg:pt-4 lg:text-2xl">Why We Built It</h2>
 
               <p>But today isn't really about us.</p>
 
@@ -80,13 +80,13 @@ export default function BlogPage() {
 
               <p>Somewhere along the way, complexity became normal.</p>
 
-              <p className="text-xl font-semibold text-white">We don't think it has to be.</p>
+              <p className="text-xl font-semibold text-white lg:text-lg">We don't think it has to be.</p>
 
               <p>
                 We built Aether around a simple idea: campaign technology should make the lives of campaign workers easier.
               </p>
 
-              <div className="rounded-2xl border border-violet-400/20 bg-violet-400/5 p-6 text-lg font-semibold text-white">
+              <div className="rounded-2xl border border-violet-400/20 bg-violet-400/5 p-6 text-lg font-semibold text-white lg:rounded-xl lg:p-[18px] lg:text-base">
                 <p>Not more complicated.</p>
                 <p>Not more fragmented.</p>
                 <p>Not another system demanding attention.</p>
@@ -94,7 +94,7 @@ export default function BlogPage() {
 
               <p>Something that quietly helps people do their jobs.</p>
 
-              <h2 className="pt-6 text-3xl font-semibold text-white">What We Hope Comes Next</h2>
+              <h2 className="pt-6 text-3xl font-semibold text-white lg:pt-4 lg:text-2xl">What We Hope Comes Next</h2>
 
               <p>We don't know what Aether becomes from here.</p>
 
@@ -130,7 +130,7 @@ export default function BlogPage() {
 
               <p>Maybe we can contribute a small piece to that brighter future.</p>
 
-              <h2 className="pt-6 text-3xl font-semibold text-white">Today</h2>
+              <h2 className="pt-6 text-3xl font-semibold text-white lg:pt-4 lg:text-2xl">Today</h2>
 
               <p>There will be plenty of time tomorrow to think about what comes next.</p>
 
@@ -140,9 +140,9 @@ export default function BlogPage() {
 
               <p>Then, knowing us, somebody will probably open a laptop.</p>
 
-              <div className="rounded-2xl border border-violet-400/20 bg-gradient-to-r from-violet-400/10 to-transparent p-6">
-                <p className="text-2xl font-black text-white">Aether is live.</p>
-                <p className="mt-4 text-xl font-semibold text-white">Clarity. Focus. Execution.</p>
+              <div className="rounded-2xl border border-violet-400/20 bg-gradient-to-r from-violet-400/10 to-transparent p-6 lg:rounded-xl lg:p-[18px]">
+                <p className="text-2xl font-black text-white lg:text-xl">Aether is live.</p>
+                <p className="mt-4 text-xl font-semibold text-white lg:mt-3 lg:text-lg">Clarity. Focus. Execution.</p>
               </div>
 
               <p className="font-semibold text-white">— Team Aether</p>
@@ -150,17 +150,17 @@ export default function BlogPage() {
           </div>
         </details>
 
-        <details className="group mt-10 rounded-2xl border border-white/10 bg-[#10233e]/75 shadow-xl shadow-black/20">
-          <summary className="cursor-pointer list-none px-10 py-7 text-lg font-semibold text-white [&::-webkit-details-marker]:hidden">
-            <span className="flex items-center justify-between gap-4">
+        <details className="group mt-10 rounded-2xl border border-white/10 bg-[#10233e]/75 shadow-xl shadow-black/20 lg:mt-7 lg:rounded-xl">
+          <summary className="cursor-pointer list-none px-10 py-7 text-lg font-semibold text-white [&::-webkit-details-marker]:hidden lg:px-7 lg:py-5 lg:text-base">
+            <span className="flex items-center justify-between gap-4 lg:gap-3">
               <span>August 1st 2026 - Note from Team Aether</span>
               <span aria-hidden="true" className="text-violet-300 transition group-open:rotate-180">⌄</span>
             </span>
           </summary>
-          <div className="border-t border-white/10 px-10 pb-10 pt-8">
-            <div className="space-y-6 text-slate-300 leading-8">
-              <h1 className="text-5xl font-bold text-white">30 Days Until Launch</h1>
-              <p className="text-xl text-slate-300">
+          <div className="border-t border-white/10 px-10 pb-10 pt-8 lg:px-7 lg:pb-7 lg:pt-6">
+            <div className="space-y-6 text-slate-300 leading-8 lg:space-y-4 lg:text-sm lg:leading-6">
+              <h1 className="text-5xl font-bold text-white lg:text-4xl">30 Days Until Launch</h1>
+              <p className="text-xl text-slate-300 lg:text-lg">
                 Thirty days from now, if everything goes according to plan, Aether will officially launch.
               </p>
             <p>That's exciting.</p>
@@ -187,7 +187,7 @@ export default function BlogPage() {
               about trying to make campaigns just a little easier to run.
             </p>
 
-            <h2 className="pt-6 text-3xl font-semibold text-white">What Happens Next?</h2>
+            <h2 className="pt-6 text-3xl font-semibold text-white lg:pt-4 lg:text-2xl">What Happens Next?</h2>
 
             <p>
               The next thirty days won't be spent adding dozens of new features.
@@ -203,7 +203,7 @@ export default function BlogPage() {
               feel stable, thoughtful, and honest.
             </p>
 
-            <h2 className="pt-6 text-3xl font-semibold text-white">Building in Public</h2>
+            <h2 className="pt-6 text-3xl font-semibold text-white lg:pt-4 lg:text-2xl">Building in Public</h2>
 
             <p>
               One decision we've made is to avoid pretending we're bigger than we
@@ -217,7 +217,7 @@ export default function BlogPage() {
               we'll keep building instead.
             </p>
 
-            <h2 className="pt-6 text-3xl font-semibold text-white">Thank You</h2>
+            <h2 className="pt-6 text-3xl font-semibold text-white lg:pt-4 lg:text-2xl">Thank You</h2>
 
             <p>
               Whether you're reading this because you're curious, considering

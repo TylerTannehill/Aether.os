@@ -729,8 +729,8 @@ export default function AbeBriefPage() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="space-y-6 lg:space-y-4">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
           <p className="text-slate-600">Loading Abe’s brief...</p>
         </div>
       </div>
@@ -738,187 +738,187 @@ export default function AbeBriefPage() {
   }
 
   return (
-    <div className="space-y-8">
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm text-slate-500">
-              <Sparkles className="h-4 w-4" />
+    <div className="space-y-8 lg:space-y-6">
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-6 lg:rounded-2xl lg:p-[18px]">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-4">
+          <div className="space-y-3 lg:space-y-2">
+            <div className="flex items-center gap-2 text-sm text-slate-500 lg:text-[11px]">
+              <Sparkles className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               Abe’s Brief
             </div>
             <div className="space-y-2">
-              <h1 className="text-3xl font-semibold tracking-tight text-slate-900 lg:text-4xl">
+              <h1 className="text-3xl font-semibold tracking-tight text-slate-900 lg:text-3xl lg:text-2xl">
                 {hasLiveSignal
                   ? strategicRead.headline
                   : "Abe is waiting for live campaign signal."}
               </h1>
-              <p className="max-w-3xl text-sm text-slate-600 lg:text-base">
+              <p className="max-w-3xl text-sm text-slate-600 lg:text-sm lg:text-[11px]">
                 This is Abe’s morning brief — a live strategic read built from the shared Abe strategy layer. When there is no live data, Abe stays quiet instead of inventing pressure.
               </p>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 lg:gap-2">
             <Link
               href="/dashboard"
-              className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+              className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               Back to Dashboard
             </Link>
             <Link
               href="/dashboard/abe/explore"
-              className="inline-flex items-center gap-2 rounded-2xl border border-fuchsia-200 bg-fuchsia-50 px-4 py-3 text-sm font-medium text-fuchsia-900 transition hover:bg-fuchsia-100"
+              className="inline-flex items-center gap-2 rounded-2xl border border-fuchsia-200 bg-fuchsia-50 px-4 py-3 text-sm font-medium text-fuchsia-900 transition hover:bg-fuchsia-100 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
               Explore Abe
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
             </Link>
           </div>
         </div>
       </section>
 
       {message ? (
-        <section className="rounded-3xl border border-rose-200 bg-rose-50 p-6 text-sm text-rose-900 shadow-sm">
+        <section className="rounded-3xl border border-rose-200 bg-rose-50 p-6 text-sm text-rose-900 shadow-sm lg:rounded-2xl lg:p-[18px] lg:text-[11px]">
           {message}
         </section>
       ) : null}
 
-      <section className="rounded-3xl border border-fuchsia-200 bg-fuchsia-50 p-6 shadow-sm">
-        <div className="space-y-4">
-          <div className="flex flex-wrap gap-3 text-sm">
+      <section className="rounded-3xl border border-fuchsia-200 bg-fuchsia-50 p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+        <div className="space-y-4 lg:space-y-3">
+          <div className="flex flex-wrap gap-3 text-sm lg:gap-2 lg:text-[11px]">
             <span
               className={`inline-flex rounded-full border px-3 py-1 font-medium ${getTone(
                 abeBriefing.health
-              )}`}
+              )} lg:px-2.5`}
             >
               {abeBriefing.health}
             </span>
-            <span className="inline-flex rounded-full border border-white/70 bg-white/80 px-3 py-1 font-medium text-fuchsia-900">
+            <span className="inline-flex rounded-full border border-white/70 bg-white/80 px-3 py-1 font-medium text-fuchsia-900 lg:px-2.5">
               Primary Lane: {departmentLabel(abeBriefing.primaryLane)}
             </span>
-            <span className="inline-flex rounded-full border border-white/70 bg-white/80 px-3 py-1 font-medium text-fuchsia-900">
+            <span className="inline-flex rounded-full border border-white/70 bg-white/80 px-3 py-1 font-medium text-fuchsia-900 lg:px-2.5">
               Opportunity: {departmentLabel(abeBriefing.opportunityLane)}
             </span>
           </div>
 
-          <h2 className="text-2xl font-semibold text-fuchsia-950">
+          <h2 className="text-2xl font-semibold text-fuchsia-950 lg:text-xl">
             {hasLiveSignal ? strategicRead.headline : "No live campaign signal is available yet."}
           </h2>
 
-          <p className="text-lg font-semibold text-fuchsia-950">
+          <p className="text-lg font-semibold text-fuchsia-950 lg:text-base">
             {hasLiveSignal
               ? strategicRead.stickyLine
               : "Abe will wait for real data before making a strategic claim."}
           </p>
 
-          <div className="max-w-4xl space-y-4 text-base leading-7 text-slate-800">
+          <div className="max-w-4xl space-y-4 text-base leading-7 lg:space-y-3 lg:text-sm lg:leading-6 text-slate-800 lg:space-y-3 lg:text-sm">
             {strategistRead.map((paragraph, index) => (
               <p key={`${paragraph}-${index}`}>{paragraph}</p>
             ))}
           </div>
 
-          <p className="max-w-4xl text-sm italic text-slate-600">
+          <p className="max-w-4xl text-sm italic text-slate-600 lg:text-[11px]">
             Why now: {hasLiveSignal ? abeBriefing.whyNow : "No live data is strong enough to justify a strategic read yet."}
           </p>
         </div>
       </section>
 
-      <section className="grid gap-4 xl:grid-cols-4">
+      <section className="grid gap-4 xl:grid-cols-4 lg:gap-3">
         {keyNumbers.map((item) => (
           <div
             key={item.label}
-            className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
+            className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]"
           >
-            <p className="text-sm font-medium text-slate-500">{item.label}</p>
-            <p className="mt-3 text-2xl font-semibold text-slate-900">
+            <p className="text-sm font-medium text-slate-500 lg:text-[11px]">{item.label}</p>
+            <p className="mt-3 text-2xl font-semibold text-slate-900 lg:mt-2 lg:text-xl">
               {item.value}
             </p>
-            <p className="mt-2 text-sm text-slate-600">{item.helper}</p>
+            <p className="mt-2 text-sm text-slate-600 lg:mt-1.5 lg:text-[11px]">{item.helper}</p>
           </div>
         ))}
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+      <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr] lg:gap-4">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 lg:text-[9px]">
             What Abe Would Do This Morning
           </p>
 
-          <div className="mt-4 space-y-4">
+          <div className="mt-4 space-y-4 lg:space-y-3 lg:mt-3">
             {abeBriefing.actions.map((move, index) => (
               <div
                 key={`${move}-${index}`}
-                className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:gap-2 lg:rounded-xl lg:p-3"
               >
-                <div className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-fuchsia-200 bg-fuchsia-100 text-xs font-semibold text-fuchsia-800">
+                <div className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-fuchsia-200 bg-fuchsia-100 text-xs font-semibold text-fuchsia-800 lg:text-[9px] lg:h-5 lg:w-5">
                   {index + 1}
                 </div>
-                <p className="text-sm text-slate-700">{move}</p>
+                <p className="text-sm text-slate-700 lg:text-[11px]">{move}</p>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 lg:text-[9px]">
             Morning Checklist
           </p>
 
-          <div className="mt-4 space-y-4">
+          <div className="mt-4 space-y-4 lg:space-y-3 lg:mt-3">
             {morningChecklist.map((item, index) => (
-              <div key={`${item}-${index}`} className="flex items-start gap-3">
-                <Zap className="mt-0.5 h-4 w-4 text-amber-600" />
-                <p className="text-sm text-slate-700">{item}</p>
+              <div key={`${item}-${index}`} className="flex items-start gap-3 lg:gap-2">
+                <Zap className="mt-0.5 h-4 w-4 text-amber-600 lg:h-3.5 lg:w-3.5" />
+                <p className="text-sm text-slate-700 lg:text-[11px]">{item}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-3">
-        <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm">
-          <div className="flex items-center gap-2 text-sm text-emerald-800">
-            <TrendingUp className="h-4 w-4" />
+      <section className="grid gap-6 xl:grid-cols-3 lg:gap-4">
+        <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <div className="flex items-center gap-2 text-sm text-emerald-800 lg:text-[11px]">
+            <TrendingUp className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
             Opportunity Lane
           </div>
-          <p className="mt-3 text-xl font-semibold text-emerald-950">
+          <p className="mt-3 text-xl font-semibold text-emerald-950 lg:mt-2 lg:text-lg">
             {departmentLabel(abeBriefing.opportunityLane)}
           </p>
-          <p className="mt-2 text-sm text-emerald-900/90">
+          <p className="mt-2 text-sm text-emerald-900/90 lg:mt-1.5 lg:text-[11px]">
             This lane has the cleanest campaign-stage opportunity signal. Protect it so momentum turns into capacity instead of noise.
           </p>
         </div>
 
-        <div className="rounded-3xl border border-rose-200 bg-rose-50 p-6 shadow-sm">
-          <div className="flex items-center gap-2 text-sm text-rose-800">
-            <TrendingDown className="h-4 w-4" />
+        <div className="rounded-3xl border border-rose-200 bg-rose-50 p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <div className="flex items-center gap-2 text-sm text-rose-800 lg:text-[11px]">
+            <TrendingDown className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
             Pressure Lane
           </div>
-          <p className="mt-3 text-xl font-semibold text-rose-950">
+          <p className="mt-3 text-xl font-semibold text-rose-950 lg:mt-2 lg:text-lg">
             {departmentLabel(abeBriefing.weakest)}
           </p>
-          <p className="mt-2 text-sm text-rose-900/90">
+          <p className="mt-2 text-sm text-rose-900/90 lg:mt-1.5 lg:text-[11px]">
             This is the lane most likely to create drag if it is left unmanaged through the day.
           </p>
         </div>
 
-        <div className="rounded-3xl border border-amber-200 bg-amber-50 p-6 shadow-sm">
-          <div className="flex items-center gap-2 text-sm text-amber-800">
-            <AlertTriangle className="h-4 w-4" />
+        <div className="rounded-3xl border border-amber-200 bg-amber-50 p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <div className="flex items-center gap-2 text-sm text-amber-800 lg:text-[11px]">
+            <AlertTriangle className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
             Cross-Domain Read
           </div>
-          <p className="mt-3 text-sm font-medium text-amber-950">
+          <p className="mt-3 text-sm font-medium text-amber-950 lg:mt-2 lg:text-[11px]">
             {abeBriefing.crossDomainSignal ||
               "No major cross-domain signal is dominating the read right now."}
           </p>
         </div>
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 lg:text-[9px]">
           Abe’s Closing Read
         </p>
-        <p className="mt-3 max-w-4xl text-sm leading-7 text-slate-700">
+        <p className="mt-3 max-w-4xl text-sm leading-7 lg:mt-2 lg:text-[11px] lg:leading-5 text-slate-700 lg:mt-2 lg:text-[11px]">
           {abeBriefing.supportText}
         </p>
       </section>

@@ -665,8 +665,8 @@ export default function PrintFocusModePage() {
 
   if (roleLoading) {
     return (
-      <div className="space-y-8">
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="space-y-8 lg:space-y-6">
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
           <p className="text-slate-600">Loading print focus context...</p>
         </section>
       </div>
@@ -675,26 +675,26 @@ export default function PrintFocusModePage() {
 
   if (!hasPrintAccess) {
     return (
-      <div className="space-y-8">
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-sm">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50">
-            <Package className="h-5 w-5 text-slate-500" />
+      <div className="space-y-8 lg:space-y-6">
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 lg:rounded-xl">
+            <Package className="h-5 w-5 text-slate-500 lg:h-4 lg:w-4" />
           </div>
-          <h1 className="mt-4 text-xl font-semibold text-slate-900">
+          <h1 className="mt-4 text-xl font-semibold text-slate-900 lg:mt-3 lg:text-lg">
             No Print Role Assigned
           </h1>
-          <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-600">
+          <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-600 lg:text-[11px]">
             You are not currently assigned to Print. Ask your campaign admin to
             add a Print Director or Print User role if you need access to print
             execution work.
           </p>
-          <div className="mt-5 flex justify-center">
+          <div className="mt-5 flex justify-center lg:mt-4">
             <Link
               href="/dashboard"
-              className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
+              className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
               Back to Dashboard
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
             </Link>
           </div>
         </section>
@@ -703,80 +703,80 @@ export default function PrintFocusModePage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 lg:space-y-6">
       <section
-        className={`rounded-3xl border border-slate-200 bg-gradient-to-br p-6 text-white shadow-sm transition-colors duration-300 lg:p-8 ${orgTheme.heroGradient}`}
+        className={`rounded-3xl border border-slate-200 bg-gradient-to-br p-6 text-white shadow-sm transition-colors duration-300 lg:p-6 ${orgTheme.heroGradient} lg:rounded-2xl lg:p-[18px]`}
       >
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-4">
+          <div className="space-y-4 lg:space-y-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200 lg:px-2.5 lg:text-[9px]">
               <Zap className="h-3.5 w-3.5" />
               Print Focus Mode
             </div>
 
-            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-300/30 bg-emerald-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-100">
+            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-300/30 bg-emerald-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-100 lg:px-2.5 lg:text-[9px]">
               {hasPrintDirector ? "Print Director Access" : "Print User Access"}
             </div>
 
-            <div className="space-y-3">
-              <h1 className="text-3xl font-semibold tracking-tight lg:text-4xl">
+            <div className="space-y-3 lg:space-y-2">
+              <h1 className="text-3xl font-semibold tracking-tight lg:text-3xl lg:text-2xl">
                 {nowLine.headline}
               </h1>
-              <p className="max-w-3xl text-sm text-slate-300 lg:text-base">
+              <p className="max-w-3xl text-sm text-slate-300 lg:text-sm lg:text-[11px]">
                 {nowLine.body}
               </p>
-              <p className="text-sm font-medium text-slate-200">
+              <p className="text-sm font-medium text-slate-200 lg:text-[11px]">
                 Approvals lead everything in print.
               </p>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 lg:gap-2">
             <Link
               href="/dashboard/print"
-              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
               Back to Print
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
             </Link>
 
             <Link
               href="/dashboard/lists"
-              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
-              <ListChecks className="h-4 w-4" />
+              <ListChecks className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               Lists
             </Link>
           </div>
         </div>
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-3">
           <div>
-            <p className="text-sm font-medium text-slate-500">
+            <p className="text-sm font-medium text-slate-500 lg:text-[11px]">
               Operational Universes
             </p>
-            <h2 className="text-xl font-semibold text-slate-900">
+            <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">
               Print-ready list routing
             </h2>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
               Print Focus now reads operational list containers and converts
               them into approval, inventory, and delivery work.
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 lg:rounded-xl lg:px-3 lg:text-[11px]">
             {printOperationalLists.length} universe
             {printOperationalLists.length === 1 ? "" : "s"} detected
           </div>
         </div>
 
-        <div className="mt-4 grid gap-3 lg:grid-cols-3">
+        <div className="mt-4 grid gap-3 lg:grid-cols-3 lg:gap-2 lg:mt-3">
           {systemPrintSignals.map((signal) => (
             <div
               key={signal}
-              className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700"
+              className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700 lg:rounded-xl lg:p-3 lg:text-[11px]"
             >
               {signal}
             </div>
@@ -787,18 +787,18 @@ export default function PrintFocusModePage() {
       {(readyAssets.length > 0 ||
         inventoryActions.length > 0 ||
         deliveryUnlocks.length > 0) && (
-        <section className="rounded-3xl border border-indigo-200 bg-indigo-50 p-6 shadow-sm">
-          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <section className="rounded-3xl border border-indigo-200 bg-indigo-50 p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-3 lg:mb-4">
             <div>
-              <p className="text-sm font-medium text-indigo-800">
+              <p className="text-sm font-medium text-indigo-800 lg:text-[11px]">
                 Material Readiness
               </p>
-              <h2 className="text-xl font-semibold text-indigo-950">
+              <h2 className="text-xl font-semibold text-indigo-950 lg:text-lg">
                 Print → Field activation state
               </h2>
             </div>
 
-            <div className="rounded-2xl border border-indigo-200 bg-white px-4 py-2 text-sm font-medium text-indigo-800">
+            <div className="rounded-2xl border border-indigo-200 bg-white px-4 py-2 text-sm font-medium text-indigo-800 lg:rounded-xl lg:px-3 lg:text-[11px]">
               {materialReadiness.readyAssetCount} ready asset
               {materialReadiness.readyAssetCount === 1 ? "" : "s"} •{" "}
               {materialReadiness.inventoryProtectionCount} inventory move
@@ -808,19 +808,19 @@ export default function PrintFocusModePage() {
             </div>
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-3">
-            <div className="rounded-2xl border border-indigo-200 bg-white p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700">
+          <div className="grid gap-4 lg:grid-cols-3 lg:gap-3">
+            <div className="rounded-2xl border border-indigo-200 bg-white p-4 lg:rounded-xl lg:p-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700 lg:text-[9px]">
                 Ready Assets
               </p>
-              <div className="mt-3 space-y-3">
+              <div className="mt-3 space-y-3 lg:space-y-2 lg:mt-2">
                 {readyAssets.length === 0 ? (
-                  <p className="text-sm text-slate-500">No assets cleared yet.</p>
+                  <p className="text-sm text-slate-500 lg:text-[11px]">No assets cleared yet.</p>
                 ) : (
                   readyAssets.map((asset) => (
-                    <div key={asset.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                    <div key={asset.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-3 lg:rounded-xl lg:p-2.5">
                       <p className="font-medium text-slate-900">{asset.assetName}</p>
-                      <p className="mt-1 text-xs text-slate-500">
+                      <p className="mt-1 text-xs text-slate-500 lg:text-[9px]">
                         {asset.linkedTurf || "No turf link"} • {asset.linkedUseCase || "No use case"}
                       </p>
                     </div>
@@ -829,20 +829,20 @@ export default function PrintFocusModePage() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-indigo-200 bg-white p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700">
+            <div className="rounded-2xl border border-indigo-200 bg-white p-4 lg:rounded-xl lg:p-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700 lg:text-[9px]">
                 Inventory Actions
               </p>
-              <div className="mt-3 space-y-3">
+              <div className="mt-3 space-y-3 lg:space-y-2 lg:mt-2">
                 {inventoryActions.length === 0 ? (
-                  <p className="text-sm text-slate-500">No reorders queued yet.</p>
+                  <p className="text-sm text-slate-500 lg:text-[11px]">No reorders queued yet.</p>
                 ) : (
                   inventoryActions.map((action) => (
-                    <div key={action.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                    <div key={action.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-3 lg:rounded-xl lg:p-2.5">
                       <p className="font-medium text-slate-900">
                         {action.item} · {action.amount.toLocaleString()}
                       </p>
-                      <p className="mt-1 text-xs text-slate-500">
+                      <p className="mt-1 text-xs text-slate-500 lg:text-[9px]">
                         {action.region} • {action.linkedUseCase || "No use case"}
                       </p>
                     </div>
@@ -851,18 +851,18 @@ export default function PrintFocusModePage() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-indigo-200 bg-white p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700">
+            <div className="rounded-2xl border border-indigo-200 bg-white p-4 lg:rounded-xl lg:p-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700 lg:text-[9px]">
                 Delivery Unlocks
               </p>
-              <div className="mt-3 space-y-3">
+              <div className="mt-3 space-y-3 lg:space-y-2 lg:mt-2">
                 {deliveryUnlocks.length === 0 ? (
-                  <p className="text-sm text-slate-500">No delivery unlocks yet.</p>
+                  <p className="text-sm text-slate-500 lg:text-[11px]">No delivery unlocks yet.</p>
                 ) : (
                   deliveryUnlocks.map((unlock) => (
-                    <div key={unlock.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                    <div key={unlock.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-3 lg:rounded-xl lg:p-2.5">
                       <p className="font-medium text-slate-900">{unlock.item}</p>
-                      <p className="mt-1 text-xs text-slate-500">
+                      <p className="mt-1 text-xs text-slate-500 lg:text-[9px]">
                         {unlock.vendor} • {unlock.linkedTurf || "No turf link"}
                       </p>
                     </div>
@@ -874,21 +874,21 @@ export default function PrintFocusModePage() {
         </section>
       )}
 
-      <section className="grid gap-6 xl:grid-cols-[1.6fr_1fr_0.9fr]">
-        <div className="rounded-3xl border-2 border-amber-300 bg-white p-6 shadow-md">
-          <div className="mb-5 flex items-center justify-between">
+      <section className="grid gap-6 xl:grid-cols-[1.45fr_1fr_0.95fr] lg:gap-4">
+        <div className="rounded-3xl border-2 border-amber-300 bg-white p-6 shadow-md lg:rounded-2xl lg:p-[18px]">
+          <div className="mb-5 flex items-center justify-between lg:mb-4">
             <div>
-              <p className="text-sm font-medium text-slate-500">Approval Lane</p>
-              <h2 className="text-xl font-semibold text-slate-900">
+              <p className="text-sm font-medium text-slate-500 lg:text-[11px]">Approval Lane</p>
+              <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">
                 Clear approvals
               </h2>
             </div>
-            <ClipboardCheck className="h-5 w-5 text-amber-600" />
+            <ClipboardCheck className="h-5 w-5 text-amber-600 lg:h-4 lg:w-4" />
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-4 lg:space-y-3">
             {grouped.approval.length === 0 ? (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 lg:rounded-xl lg:p-3 lg:text-[11px]">
                 No live print approval actions are available yet.
               </div>
             ) : null}
@@ -901,48 +901,48 @@ export default function PrintFocusModePage() {
                 return (
                   <div
                     key={item.id}
-                    className="rounded-2xl border border-amber-300 bg-amber-50 p-4"
+                    className="rounded-2xl border border-amber-300 bg-amber-50 p-4 lg:rounded-xl lg:p-3"
                   >
                     <div className="flex flex-wrap gap-2">
                       <span
                         className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${priorityTone(
                           item.priority
-                        )}`}
+                        )} lg:px-2.5 lg:text-[9px]`}
                       >
                         {item.priority}
                       </span>
                       <span
                         className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${typeTone(
                           item.type
-                        )}`}
+                        )} lg:px-2.5 lg:text-[9px]`}
                       >
                         {item.type}
                       </span>
                       {isConfirmed && (
-                        <span className="inline-flex rounded-full border border-amber-300 bg-white px-3 py-1 text-xs font-semibold text-amber-700">
+                        <span className="inline-flex rounded-full border border-amber-300 bg-white px-3 py-1 text-xs font-semibold text-amber-700 lg:px-2.5 lg:text-[9px]">
                           completed
                         </span>
                       )}
                     </div>
 
-                    <p className="mt-3 font-semibold text-slate-900">
+                    <p className="mt-3 font-semibold text-slate-900 lg:mt-2">
                       {activeApproval.title}
                     </p>
-                    <p className="mt-2 text-sm text-slate-600">
+                    <p className="mt-2 text-sm text-slate-600 lg:text-[11px]">
                       {activeApproval.summary}
                     </p>
 
-                    <div className="mt-2 rounded-2xl border border-slate-200 bg-white p-3">
-                      <p className="text-xs text-slate-500">
+                    <div className="mt-2 rounded-2xl border border-slate-200 bg-white p-3 lg:rounded-xl lg:p-2.5">
+                      <p className="text-xs text-slate-500 lg:text-[9px]">
                         Linked turf: {activeApproval.linkedTurf || "None"}
                       </p>
-                      <p className="mt-1 text-xs text-slate-500">
+                      <p className="mt-1 text-xs text-slate-500 lg:text-[9px]">
                         Use case: {activeApproval.linkedUseCase || "None"}
                       </p>
                     </div>
-                                        <div className="mt-4 space-y-3">
+                                        <div className="mt-4 space-y-3 lg:space-y-2 lg:mt-3">
                       <div>
-                        <label className="text-sm font-medium text-slate-900">
+                        <label className="text-sm font-medium text-slate-900 lg:text-[11px]">
                           Decision
                         </label>
                         <select
@@ -952,7 +952,7 @@ export default function PrintFocusModePage() {
                               e.target.value as "Approve" | "Request Revision"
                             )
                           }
-                          className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none"
+                          className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none lg:px-2.5 lg:text-[11px]"
                         >
                           <option>Approve</option>
                           <option>Request Revision</option>
@@ -962,13 +962,13 @@ export default function PrintFocusModePage() {
                       <div className="flex flex-wrap gap-2">
                         <button
                           onClick={confirmApprovalAction}
-                          className="rounded-xl bg-amber-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-amber-700"
+                          className="rounded-xl bg-amber-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-amber-700 lg:px-2.5 lg:text-[9px]"
                         >
                           Confirm Decision
                         </button>
                         <button
                           onClick={clearApprovalPanel}
-                          className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+                          className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100 lg:px-2.5 lg:text-[9px]"
                         >
                           Clear
                         </button>
@@ -981,41 +981,41 @@ export default function PrintFocusModePage() {
               return (
                 <div
                   key={item.id}
-                  className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                  className="rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3"
                 >
                   <div className="flex flex-wrap gap-2">
                     <span
                       className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${priorityTone(
                         item.priority
-                      )}`}
+                      )} lg:px-2.5 lg:text-[9px]`}
                     >
                       {item.priority}
                     </span>
                     <span
                       className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${typeTone(
                         item.type
-                      )}`}
+                      )} lg:px-2.5 lg:text-[9px]`}
                     >
                       {item.type}
                     </span>
                   </div>
 
-                  <p className="mt-3 font-semibold text-slate-900">
+                  <p className="mt-3 font-semibold text-slate-900 lg:mt-2">
                     {item.title}
                   </p>
-                  <p className="mt-2 text-sm text-slate-600">
+                  <p className="mt-2 text-sm text-slate-600 lg:text-[11px]">
                     {item.summary}
                   </p>
 
-                  <div className="mt-2 text-xs text-slate-500">
+                  <div className="mt-2 text-xs text-slate-500 lg:text-[9px]">
                     {item.linkedTurf || "No turf link"} •{" "}
                     {item.linkedUseCase || "No use case"}
                   </div>
 
-                  <div className="mt-4">
+                  <div className="mt-4 lg:mt-3">
                     <button
                       onClick={() => openApprovalPanel(item)}
-                      className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white transition hover:bg-slate-800"
+                      className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white transition hover:bg-slate-800 lg:px-2.5 lg:text-[9px]"
                     >
                       Open Approval
                     </button>
@@ -1027,20 +1027,20 @@ export default function PrintFocusModePage() {
         </div>
 
         {hasPrintDirector ? (
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="mb-5 flex items-center justify-between">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <div className="mb-5 flex items-center justify-between lg:mb-4">
             <div>
-              <p className="text-sm font-medium text-slate-500">Inventory Lane</p>
-              <h2 className="text-xl font-semibold text-slate-900">
+              <p className="text-sm font-medium text-slate-500 lg:text-[11px]">Inventory Lane</p>
+              <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">
                 Protect Materials
               </h2>
             </div>
-            <Boxes className="h-5 w-5 text-sky-600" />
+            <Boxes className="h-5 w-5 text-sky-600 lg:h-4 lg:w-4" />
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-4 lg:space-y-3">
             {grouped.inventory.length === 0 ? (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 lg:rounded-xl lg:p-3 lg:text-[11px]">
                 No live print inventory actions are available yet.
               </div>
             ) : null}
@@ -1053,64 +1053,64 @@ export default function PrintFocusModePage() {
                 return (
                   <div
                     key={item.id}
-                    className="rounded-2xl border border-sky-300 bg-sky-50 p-4"
+                    className="rounded-2xl border border-sky-300 bg-sky-50 p-4 lg:rounded-xl lg:p-3"
                   >
                     <div className="flex flex-wrap gap-2">
                       <span
                         className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${priorityTone(
                           item.priority
-                        )}`}
+                        )} lg:px-2.5 lg:text-[9px]`}
                       >
                         {item.priority}
                       </span>
                       <span
                         className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${typeTone(
                           item.type
-                        )}`}
+                        )} lg:px-2.5 lg:text-[9px]`}
                       >
                         {item.type}
                       </span>
                       {isConfirmed && (
-                        <span className="inline-flex rounded-full border border-sky-300 bg-white px-3 py-1 text-xs font-semibold text-sky-700">
+                        <span className="inline-flex rounded-full border border-sky-300 bg-white px-3 py-1 text-xs font-semibold text-sky-700 lg:px-2.5 lg:text-[9px]">
                           completed
                         </span>
                       )}
                     </div>
 
-                    <p className="mt-3 font-semibold text-slate-900">
+                    <p className="mt-3 font-semibold text-slate-900 lg:mt-2">
                       {activeInventory.title}
                     </p>
-                    <p className="mt-2 text-sm text-slate-600">
+                    <p className="mt-2 text-sm text-slate-600 lg:text-[11px]">
                       {activeInventory.summary}
                     </p>
 
-                    <div className="mt-2 rounded-2xl border border-slate-200 bg-white p-3 text-xs text-slate-500">
+                    <div className="mt-2 rounded-2xl border border-slate-200 bg-white p-3 text-xs text-slate-500 lg:rounded-xl lg:p-2.5 lg:text-[9px]">
                       {activeInventory.region} •{" "}
                       {activeInventory.linkedUseCase || "No use case"}
                     </div>
 
-                    <div className="mt-4 space-y-3">
+                    <div className="mt-4 space-y-3 lg:space-y-2 lg:mt-3">
                       <div>
-                        <label className="text-sm font-medium text-slate-900">
+                        <label className="text-sm font-medium text-slate-900 lg:text-[11px]">
                           Reorder Amount
                         </label>
                         <input
                           value={reorderAmount}
                           onChange={(e) => setReorderAmount(e.target.value)}
-                          className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm"
+                          className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm lg:px-2.5 lg:text-[11px]"
                         />
                       </div>
 
                       <div className="flex flex-wrap gap-2">
                         <button
                           onClick={confirmInventoryAction}
-                          className="rounded-xl bg-sky-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-sky-700"
+                          className="rounded-xl bg-sky-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-sky-700 lg:px-2.5 lg:text-[9px]"
                         >
                           Confirm Reorder
                         </button>
                         <button
                           onClick={clearInventoryPanel}
-                          className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+                          className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100 lg:px-2.5 lg:text-[9px]"
                         >
                           Clear
                         </button>
@@ -1123,41 +1123,41 @@ export default function PrintFocusModePage() {
               return (
                 <div
                   key={item.id}
-                  className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                  className="rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3"
                 >
                   <div className="flex flex-wrap gap-2">
                     <span
                       className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${priorityTone(
                         item.priority
-                      )}`}
+                      )} lg:px-2.5 lg:text-[9px]`}
                     >
                       {item.priority}
                     </span>
                     <span
                       className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${typeTone(
                         item.type
-                      )}`}
+                      )} lg:px-2.5 lg:text-[9px]`}
                     >
                       {item.type}
                     </span>
                   </div>
 
-                  <p className="mt-3 font-semibold text-slate-900">
+                  <p className="mt-3 font-semibold text-slate-900 lg:mt-2">
                     {item.title}
                   </p>
-                  <p className="mt-2 text-sm text-slate-600">
+                  <p className="mt-2 text-sm text-slate-600 lg:text-[11px]">
                     {item.summary}
                   </p>
 
-                  <div className="mt-2 text-xs text-slate-500">
+                  <div className="mt-2 text-xs text-slate-500 lg:text-[9px]">
                     {item.linkedTurf || "No turf link"} •{" "}
                     {item.linkedUseCase || "No use case"}
                   </div>
 
-                  <div className="mt-4">
+                  <div className="mt-4 lg:mt-3">
                     <button
                       onClick={() => openInventoryPanel(item)}
-                      className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white transition hover:bg-slate-800"
+                      className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white transition hover:bg-slate-800 lg:px-2.5 lg:text-[9px]"
                     >
                       Open Inventory
                     </button>
@@ -1169,20 +1169,20 @@ export default function PrintFocusModePage() {
         </div>
         ) : null}
 
-        <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm">
-          <div className="mb-5 flex items-center justify-between">
+        <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <div className="mb-5 flex items-center justify-between lg:mb-4">
             <div>
-              <p className="text-sm font-medium text-slate-500">Delivery Lane</p>
-              <h2 className="text-xl font-semibold text-slate-900">
+              <p className="text-sm font-medium text-slate-500 lg:text-[11px]">Delivery Lane</p>
+              <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">
                 Confirm delivery
               </h2>
             </div>
-            <Truck className="h-5 w-5 text-emerald-600" />
+            <Truck className="h-5 w-5 text-emerald-600 lg:h-4 lg:w-4" />
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-4 lg:space-y-3">
             {grouped.delivery.length === 0 ? (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 lg:rounded-xl lg:p-3 lg:text-[11px]">
                 No live print delivery actions are available yet.
               </div>
             ) : null}
@@ -1195,44 +1195,44 @@ export default function PrintFocusModePage() {
                 return (
                   <div
                     key={item.id}
-                    className="rounded-2xl border border-emerald-300 bg-emerald-50 p-4"
+                    className="rounded-2xl border border-emerald-300 bg-emerald-50 p-4 lg:rounded-xl lg:p-3"
                   >
                     <div className="flex flex-wrap gap-2">
                       <span
                         className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${priorityTone(
                           item.priority
-                        )}`}
+                        )} lg:px-2.5 lg:text-[9px]`}
                       >
                         {item.priority}
                       </span>
                       <span
                         className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${typeTone(
                           item.type
-                        )}`}
+                        )} lg:px-2.5 lg:text-[9px]`}
                       >
                         {item.type}
                       </span>
                       {isConfirmed && (
-                        <span className="inline-flex rounded-full border border-emerald-300 bg-white px-3 py-1 text-xs font-semibold text-emerald-700">
+                        <span className="inline-flex rounded-full border border-emerald-300 bg-white px-3 py-1 text-xs font-semibold text-emerald-700 lg:px-2.5 lg:text-[9px]">
                           completed
                         </span>
                       )}
                     </div>
 
-                    <p className="mt-3 font-semibold text-slate-900">
+                    <p className="mt-3 font-semibold text-slate-900 lg:mt-2">
                       {activeDelivery.title}
                     </p>
-                    <p className="mt-2 text-sm text-slate-600">
+                    <p className="mt-2 text-sm text-slate-600 lg:text-[11px]">
                       {activeDelivery.summary}
                     </p>
 
-                    <div className="mt-2 rounded-2xl border border-slate-200 bg-white p-3 text-xs text-slate-500">
+                    <div className="mt-2 rounded-2xl border border-slate-200 bg-white p-3 text-xs text-slate-500 lg:rounded-xl lg:p-2.5 lg:text-[9px]">
                       {activeDelivery.vendor} • ETA {activeDelivery.eta}
                     </div>
 
-                    <div className="mt-4 space-y-3">
+                    <div className="mt-4 space-y-3 lg:space-y-2 lg:mt-3">
                       <div>
-                        <label className="text-sm font-medium text-slate-900">
+                        <label className="text-sm font-medium text-slate-900 lg:text-[11px]">
                           Action
                         </label>
                         <select
@@ -1244,7 +1244,7 @@ export default function PrintFocusModePage() {
                                 | "Update ETA"
                             )
                           }
-                          className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm"
+                          className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm lg:px-2.5 lg:text-[11px]"
                         >
                           <option>Confirm Delivery</option>
                           <option>Update ETA</option>
@@ -1254,13 +1254,13 @@ export default function PrintFocusModePage() {
                       <div className="flex flex-wrap gap-2">
                         <button
                           onClick={confirmDeliveryAction}
-                          className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-emerald-700"
+                          className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-emerald-700 lg:px-2.5 lg:text-[9px]"
                         >
                           Confirm Delivery
                         </button>
                         <button
                           onClick={clearDeliveryPanel}
-                          className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+                          className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100 lg:px-2.5 lg:text-[9px]"
                         >
                           Clear
                         </button>
@@ -1273,41 +1273,41 @@ export default function PrintFocusModePage() {
               return (
                 <div
                   key={item.id}
-                  className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                  className="rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3"
                 >
                   <div className="flex flex-wrap gap-2">
                     <span
                       className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${priorityTone(
                         item.priority
-                      )}`}
+                      )} lg:px-2.5 lg:text-[9px]`}
                     >
                       {item.priority}
                     </span>
                     <span
                       className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${typeTone(
                         item.type
-                      )}`}
+                      )} lg:px-2.5 lg:text-[9px]`}
                     >
                       {item.type}
                     </span>
                   </div>
 
-                  <p className="mt-3 font-semibold text-slate-900">
+                  <p className="mt-3 font-semibold text-slate-900 lg:mt-2">
                     {item.title}
                   </p>
-                  <p className="mt-2 text-sm text-slate-600">
+                  <p className="mt-2 text-sm text-slate-600 lg:text-[11px]">
                     {item.summary}
                   </p>
 
-                  <div className="mt-2 text-xs text-slate-500">
+                  <div className="mt-2 text-xs text-slate-500 lg:text-[9px]">
                     {item.linkedTurf || "No turf link"} •{" "}
                     {item.linkedUseCase || "No use case"}
                   </div>
 
-                  <div className="mt-4">
+                  <div className="mt-4 lg:mt-3">
                     <button
                       onClick={() => openDeliveryPanel(item)}
-                      className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white transition hover:bg-slate-800"
+                      className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white transition hover:bg-slate-800 lg:px-2.5 lg:text-[9px]"
                     >
                       Open Delivery
                     </button>
@@ -1322,40 +1322,40 @@ export default function PrintFocusModePage() {
 <section
         className={`grid gap-4 ${
           hasPrintDirector ? "md:grid-cols-3" : "md:grid-cols-2"
-        }`}
+        } lg:gap-3`}
       >
         <div
           className={`rounded-2xl border p-4 shadow-sm ${
             grouped.approval.length > 0
               ? "border-rose-200 bg-rose-50"
               : "border-slate-200 bg-white"
-          }`}
+          } lg:rounded-xl lg:p-3`}
         >
           <div className="flex items-center justify-between">
             <p
               className={`text-xs font-medium ${
                 grouped.approval.length > 0 ? "text-rose-800" : "text-slate-700"
-              }`}
+              } lg:text-[9px]`}
             >
               Approval Priority
             </p>
             <ClipboardCheck
               className={`h-4 w-4 ${
                 grouped.approval.length > 0 ? "text-rose-700" : "text-slate-500"
-              }`}
+              } lg:h-3.5 lg:w-3.5`}
             />
           </div>
           <p
             className={`mt-2 text-xl font-semibold ${
               grouped.approval.length > 0 ? "text-rose-900" : "text-slate-900"
-            }`}
+            } lg:text-lg`}
           >
             {grouped.approval.length}
           </p>
           <p
             className={`mt-1 text-xs ${
               grouped.approval.length > 0 ? "text-rose-800" : "text-slate-600"
-            }`}
+            } lg:text-[9px]`}
           >
             Immediate approval actions
           </p>
@@ -1367,7 +1367,7 @@ export default function PrintFocusModePage() {
               grouped.inventory.length > 0
                 ? "border-rose-200 bg-rose-50"
                 : "border-slate-200 bg-white"
-            }`}
+            } lg:rounded-xl lg:p-3`}
           >
             <div className="flex items-center justify-between">
               <p
@@ -1375,7 +1375,7 @@ export default function PrintFocusModePage() {
                   grouped.inventory.length > 0
                     ? "text-rose-800"
                     : "text-slate-700"
-                }`}
+                } lg:text-[9px]`}
               >
                 Inventory Pressure
               </p>
@@ -1384,7 +1384,7 @@ export default function PrintFocusModePage() {
                   grouped.inventory.length > 0
                     ? "text-rose-700"
                     : "text-slate-500"
-                }`}
+                } lg:h-3.5 lg:w-3.5`}
               />
             </div>
             <p
@@ -1392,7 +1392,7 @@ export default function PrintFocusModePage() {
                 grouped.inventory.length > 0
                   ? "text-rose-900"
                   : "text-slate-900"
-              }`}
+              } lg:text-lg`}
             >
               {grouped.inventory.length}
             </p>
@@ -1401,7 +1401,7 @@ export default function PrintFocusModePage() {
                 grouped.inventory.length > 0
                   ? "text-rose-800"
                   : "text-slate-600"
-              }`}
+              } lg:text-[9px]`}
             >
               Protection moves
             </p>
@@ -1413,7 +1413,7 @@ export default function PrintFocusModePage() {
             grouped.delivery.length > 0
               ? "border-emerald-200 bg-emerald-50"
               : "border-slate-200 bg-white"
-          }`}
+          } lg:rounded-xl lg:p-3`}
         >
           <div className="flex items-center justify-between">
             <p
@@ -1421,7 +1421,7 @@ export default function PrintFocusModePage() {
                 grouped.delivery.length > 0
                   ? "text-emerald-800"
                   : "text-slate-700"
-              }`}
+              } lg:text-[9px]`}
             >
               Delivery Queue
             </p>
@@ -1430,7 +1430,7 @@ export default function PrintFocusModePage() {
                 grouped.delivery.length > 0
                   ? "text-emerald-700"
                   : "text-slate-500"
-              }`}
+              } lg:h-3.5 lg:w-3.5`}
             />
           </div>
           <p
@@ -1438,7 +1438,7 @@ export default function PrintFocusModePage() {
               grouped.delivery.length > 0
                 ? "text-emerald-900"
                 : "text-slate-900"
-            }`}
+            } lg:text-lg`}
           >
             {grouped.delivery.length}
           </p>
@@ -1447,7 +1447,7 @@ export default function PrintFocusModePage() {
               grouped.delivery.length > 0
                 ? "text-emerald-800"
                 : "text-slate-600"
-            }`}
+            } lg:text-[9px]`}
           >
             ETA checks
           </p>
@@ -1455,13 +1455,13 @@ export default function PrintFocusModePage() {
       </section>
 
       <section className="hidden" aria-hidden="true">
-        <div className="flex items-start gap-3">
-          <Sparkles className="mt-0.5 h-5 w-5 text-amber-700" />
+        <div className="flex items-start gap-3 lg:gap-2">
+          <Sparkles className="mt-0.5 h-5 w-5 text-amber-700 lg:h-4 lg:w-4" />
           <div>
-            <h2 className="text-lg font-semibold text-amber-900">
+            <h2 className="text-lg font-semibold text-amber-900 lg:text-base">
               Print Operating Pattern
             </h2>
-            <p className="mt-2 text-sm text-amber-800">
+            <p className="mt-2 text-sm text-amber-800 lg:text-[11px]">
               Clear approvals first, protect inventory second, and confirm
               deliveries third. Print should always be enabling execution in the
               field, not slowing it down.

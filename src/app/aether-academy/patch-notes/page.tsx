@@ -11,7 +11,7 @@ export default function PatchNotesPage() {
       <div className="mx-auto max-w-4xl px-6 py-10">
         <Link
           href="/aether-academy"
-          className="mb-8 inline-flex items-center rounded-xl border border-violet-400/40 bg-violet-400/10 px-6 py-3 font-semibold text-violet-300 transition hover:-translate-y-0.5 hover:border-violet-300"
+          className="mb-8 inline-flex items-center rounded-xl border border-violet-400/40 bg-violet-400/10 px-6 py-3 font-semibold text-violet-300 transition hover:-translate-y-0.5 hover:border-violet-300 lg:mb-6 lg:px-5 lg:py-2.5 lg:text-sm"
         >
           ← Back to Aether Academy
         </Link>
@@ -20,22 +20,82 @@ export default function PatchNotesPage() {
           Product Changelog
         </p>
 
-        <h1 className="mt-2 text-4xl font-bold">Patch Notes</h1>
+        <h1 className="mt-2 text-4xl font-bold lg:text-3xl">Patch Notes</h1>
 
         <p className="mt-3 text-base text-slate-300">
           Every improvement, documented.
         </p>
 
-        <div className="mt-6 rounded-xl border border-violet-400/20 bg-violet-400/5 p-4">
+        <div className="mt-6 rounded-xl border border-violet-400/20 bg-violet-400/5 p-4 lg:mt-5 lg:p-3.5">
           <p className="text-sm uppercase tracking-[0.2em] text-violet-300">
             Current Public Version
           </p>
-          <p className="mt-1 text-xl font-semibold text-white">Aether v1.1</p>
+          <p className="mt-1 text-xl font-semibold text-white">Aether v1.2</p>
           <p className="mt-1 text-slate-300">Live</p>
         </div>
 
-        <details className="group mt-7 overflow-hidden rounded-2xl border border-white/10 bg-[#10233e]/75 shadow-xl shadow-black/20" open>
-          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 transition hover:bg-white/[0.03] [&::-webkit-details-marker]:hidden">
+        <details className="group mt-7 overflow-hidden rounded-2xl border border-violet-400/20 bg-[#10233e]/75 shadow-xl shadow-black/20 lg:rounded-xl" open>
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 transition hover:bg-white/[0.03] [&::-webkit-details-marker]:hidden lg:gap-3 lg:p-4">
+            <div>
+              <p className="text-sm uppercase tracking-[0.2em] text-violet-300">
+                September 11, 2026
+              </p>
+
+              <h2 className="mt-1 text-2xl font-semibold text-white">
+                Aether v1.2 Patch Update
+              </h2>
+
+              <p className="mt-1 text-sm text-slate-400">
+                Interface scale and density normalization.
+              </p>
+            </div>
+
+            <span className="shrink-0 text-2xl text-violet-300 transition-transform duration-200 group-open:rotate-180">
+              ↓
+            </span>
+          </summary>
+
+          <div className="border-t border-white/10 p-5 md:p-6 lg:p-5">
+            <section>
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-violet-300">
+                Public / Organization Update
+              </p>
+
+              <h3 className="mt-1 text-xl font-semibold text-white">
+                The 75% Zoom Incident
+              </h3>
+
+              <div className="mt-4 rounded-xl border border-violet-400/20 bg-violet-400/5 p-4 text-sm leading-6 text-slate-300">
+                <p>
+                  The Architect developed much of Aether while his browser was set to 75% zoom.
+                </p>
+                <p className="mt-2 font-semibold text-white">
+                  Normal people, reasonably, do not change their browser zoom to use software.
+                </p>
+              </div>
+
+              <div className="mt-5 space-y-5 text-sm leading-6 text-slate-300 lg:mt-4 lg:space-y-4">
+                <div>
+                  <h4 className="text-base font-semibold text-white">Interface Scale &amp; Density</h4>
+                  <ul className="mt-1.5 space-y-0.5">
+                    <li>✓ Normalized desktop interface scale for standard 100% browser zoom.</li>
+                    <li>✓ Reduced oversized spacing, typography, cards, and navigation across Aether.</li>
+                    <li>✓ Preserved mobile sizing and mobile-first execution workflows.</li>
+                    <li>✓ No campaign logic, data behavior, permissions, or operational workflows were changed as part of this visual pass.</li>
+                  </ul>
+                </div>
+              </div>
+            </section>
+
+            <div className="mt-7 border-t border-white/10 pt-5">
+              <p className="font-semibold text-white">Clarity. Focus. Execution.</p>
+              <p className="mt-1 text-slate-400">— Team Aether</p>
+            </div>
+          </div>
+        </details>
+
+        <details className="group mt-7 overflow-hidden rounded-2xl border border-white/10 bg-[#10233e]/75 shadow-xl shadow-black/20 lg:rounded-xl">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 transition hover:bg-white/[0.03] [&::-webkit-details-marker]:hidden lg:gap-3 lg:p-4">
             <div>
               <p className="text-sm uppercase tracking-[0.2em] text-violet-300">
                 September 10, 2026
@@ -52,7 +112,7 @@ export default function PatchNotesPage() {
             </span>
           </summary>
 
-          <div className="border-t border-white/10 p-5 md:p-6">
+          <div className="border-t border-white/10 p-5 md:p-6 lg:p-5">
             <section>
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-violet-300">
                 Public / Organization Updates
@@ -61,7 +121,7 @@ export default function PatchNotesPage() {
                 Organization-facing changes
               </h3>
 
-              <div className="mt-5 space-y-5 text-sm text-slate-300 leading-6">
+              <div className="mt-5 space-y-5 text-sm text-slate-300 leading-6 lg:mt-4 lg:space-y-4">
                 <div>
                   <h4 className="text-base font-semibold text-white">Honest Abe</h4>
                   <ul className="mt-1.5 space-y-0.5">
@@ -147,7 +207,7 @@ export default function PatchNotesPage() {
                 </p>
               </div>
 
-              <div className="mt-5 space-y-5 text-sm text-slate-300 leading-6">
+              <div className="mt-5 space-y-5 text-sm text-slate-300 leading-6 lg:mt-4 lg:space-y-4">
                 <div>
                   <h4 className="text-base font-semibold text-white">Operations & Provisioning</h4>
                   <ul className="mt-1.5 space-y-0.5">

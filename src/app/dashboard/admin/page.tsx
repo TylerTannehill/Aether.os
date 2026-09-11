@@ -1721,8 +1721,8 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
 }
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="space-y-6 lg:space-y-4">
+        <div className="rounded-3xl lg:rounded-2xl border border-slate-200 bg-white p-6 lg:p-[18px] shadow-sm">
           <p className="text-slate-600">Loading admin control...</p>
         </div>
       </div>
@@ -1730,30 +1730,30 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 lg:space-y-6">
 
-      <section className="rounded-3xl border border-slate-800 bg-slate-950 p-6 text-white shadow-sm lg:p-8">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm text-slate-300">
-              <ShieldAlert className="h-4 w-4" />
+      <section className="rounded-3xl lg:rounded-2xl border border-slate-800 bg-slate-950 p-6 lg:p-[18px] text-white shadow-sm lg:p-6">
+        <div className="flex flex-col gap-6 lg:gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="space-y-3 lg:space-y-2">
+            <div className="flex items-center gap-2 text-sm lg:text-[11px] text-slate-300">
+              <ShieldAlert className="h-4 lg:h-3.5 w-4 lg:w-3.5" />
               Admin control layer
             </div>
 
             <div className="space-y-2">
-              <h1 className="text-3xl font-semibold tracking-tight text-white lg:text-4xl">
+              <h1 className="text-3xl lg:text-2xl font-semibold tracking-tight text-white lg:text-3xl">
                 Aether System Console
               </h1>
-              <p className="max-w-3xl text-sm text-slate-300 lg:text-base">
+              <p className="max-w-3xl text-sm lg:text-[11px] text-slate-300 lg:text-sm">
                 Govern organization roles, system posture, execution health, and deep diagnostics from one protected operating layer.
               </p>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 lg:gap-2">
             <button
               onClick={loadData}
-              className="rounded-2xl border border-white/15 bg-white px-4 py-3 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-slate-100"
+              className="rounded-2xl lg:rounded-xl border border-white/15 bg-white px-4 lg:px-3 py-3 lg:py-2 text-sm lg:text-[11px] font-semibold text-slate-950 shadow-sm transition hover:bg-slate-100"
             >
               Refresh
             </button>
@@ -1761,7 +1761,7 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
             <button
               onClick={loadAuditLog}
               disabled={auditLoading}
-              className="rounded-2xl border border-white/15 bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-2xl lg:rounded-xl border border-white/15 bg-slate-900 px-4 lg:px-3 py-3 lg:py-2 text-sm lg:text-[11px] font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {auditLoading ? "Refreshing Log..." : "Refresh Execution Log"}
             </button>
@@ -1770,26 +1770,26 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
       </section>
 
       {message ? (
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-700 shadow-sm">
+        <div className="rounded-2xl lg:rounded-xl border border-slate-200 bg-white p-4 lg:p-3 text-sm lg:text-[11px] text-slate-700 shadow-sm">
           {message}
         </div>
       ) : null}
 
       {policyActionMessage ? (
-        <div className="rounded-2xl border border-fuchsia-200 bg-fuchsia-50 p-4 text-sm text-fuchsia-900 shadow-sm">
+        <div className="rounded-2xl lg:rounded-xl border border-fuchsia-200 bg-fuchsia-50 p-4 lg:p-3 text-sm lg:text-[11px] text-fuchsia-900 shadow-sm">
           {policyActionMessage}
         </div>
       ) : null}
 
-      <section className="space-y-6">
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+      <section className="space-y-6 lg:space-y-4">
+        <section className="rounded-3xl lg:rounded-2xl border border-slate-200 bg-white p-6 lg:p-[18px] shadow-sm">
+          <div className="mb-5 flex flex-col gap-3 lg:gap-2 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="text-sm font-medium text-slate-500">Human Governance</p>
-              <h2 className="text-2xl font-semibold text-slate-900">
+              <p className="text-sm lg:text-[11px] font-medium text-slate-500">Human Governance</p>
+              <h2 className="text-2xl lg:text-xl font-semibold text-slate-900">
                 Team access snapshot
               </h2>
-              <p className="mt-2 text-sm text-slate-600">
+              <p className="mt-2 text-sm lg:text-[11px] text-slate-600">
                 Quick view of the current organization team. Full member creation, removal, and role assignment now lives in the dedicated team management page.
               </p>
             </div>
@@ -1798,55 +1798,55 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
               onClick={() => {
                 window.location.href = "/dashboard/admin/team";
               }}
-              className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+              className="inline-flex items-center gap-2 rounded-2xl lg:rounded-xl bg-slate-900 px-4 lg:px-3 py-3 lg:py-2 text-sm lg:text-[11px] font-semibold text-white shadow-sm transition hover:bg-slate-800"
             >
               Manage Team
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 lg:h-3.5 w-4 lg:w-3.5" />
             </button>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-3">
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-xs uppercase tracking-wide text-slate-500">
+          <div className="grid gap-3 lg:gap-2 sm:grid-cols-3">
+            <div className="rounded-2xl lg:rounded-xl border border-slate-200 bg-slate-50 p-4 lg:p-3">
+              <p className="text-xs lg:text-[9px] uppercase tracking-wide text-slate-500">
                 Members
               </p>
-              <p className="mt-2 text-3xl font-semibold text-slate-900">
+              <p className="mt-2 text-3xl lg:text-2xl font-semibold text-slate-900">
                 {orgMembers.length}
               </p>
             </div>
 
-            <div className="rounded-2xl border border-indigo-200 bg-indigo-50 p-4">
-              <p className="text-xs uppercase tracking-wide text-indigo-700">
+            <div className="rounded-2xl lg:rounded-xl border border-indigo-200 bg-indigo-50 p-4 lg:p-3">
+              <p className="text-xs lg:text-[9px] uppercase tracking-wide text-indigo-700">
                 Role Assignments
               </p>
-              <p className="mt-2 text-3xl font-semibold text-slate-900">
+              <p className="mt-2 text-3xl lg:text-2xl font-semibold text-slate-900">
                 {orgMemberRoles.length}
               </p>
             </div>
 
-            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
-              <p className="text-xs uppercase tracking-wide text-amber-700">
+            <div className="rounded-2xl lg:rounded-xl border border-amber-200 bg-amber-50 p-4 lg:p-3">
+              <p className="text-xs lg:text-[9px] uppercase tracking-wide text-amber-700">
                 Primary Lanes
               </p>
-              <p className="mt-2 text-3xl font-semibold text-slate-900">
+              <p className="mt-2 text-3xl lg:text-2xl font-semibold text-slate-900">
                 {orgMemberRoles.filter((role) => role.is_primary).length}
               </p>
             </div>
           </div>
 
-          <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+          <div className="mt-5 lg:mt-4 rounded-2xl lg:rounded-xl border border-amber-200 bg-amber-50 p-4 lg:p-3 text-sm lg:text-[11px] text-amber-900">
             <span className="font-semibold">Role model:</span> assign department + level pairs, not a single user type. Use Manage Team to add members, revoke access, and update operating lanes.
           </div>
 
-          <div className="mt-5 space-y-3">
+          <div className="mt-5 lg:mt-4 space-y-3 lg:space-y-2">
             {orgMembersLoading ? (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+              <div className="rounded-2xl lg:rounded-xl border border-slate-200 bg-slate-50 p-4 lg:p-3 text-sm lg:text-[11px] text-slate-600">
                 Loading organization members...
               </div>
             ) : null}
 
             {!orgMembersLoading && orgMembers.length === 0 ? (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+              <div className="rounded-2xl lg:rounded-xl border border-slate-200 bg-slate-50 p-4 lg:p-3 text-sm lg:text-[11px] text-slate-600">
                 No organization members found yet. Confirm the signed-in user has an organization_members row.
               </div>
             ) : null}
@@ -1858,18 +1858,18 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
               return (
                 <div
                   key={member.id}
-                  className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:flex-row lg:items-center lg:justify-between"
+                  className="flex flex-col gap-3 lg:gap-2 rounded-2xl lg:rounded-xl border border-slate-200 bg-slate-50 p-4 lg:p-3 lg:flex-row lg:items-center lg:justify-between"
                 >
                   <div>
-                    <p className="text-sm font-semibold text-slate-900">
+                    <p className="text-sm lg:text-[11px] font-semibold text-slate-900">
                       {getMemberDisplayName(member)}
                     </p>
-                    <p className="mt-1 text-xs text-slate-500">
+                    <p className="mt-1 text-xs lg:text-[9px] text-slate-500">
                       Base membership: {formatRoleText(member.role)} • {member.department || "No department"}
                     </p>
                   </div>
 
-                  <div className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-700">
+                  <div className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs lg:text-[9px] font-medium text-slate-700">
                     {primaryRole
                       ? `${formatRoleText(primaryRole.department)} / ${formatRoleText(primaryRole.role_level)}`
                       : "No primary lane"}
@@ -1883,7 +1883,7 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
                 onClick={() => {
                   window.location.href = "/dashboard/admin/team";
                 }}
-                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                className="w-full rounded-2xl lg:rounded-xl border border-slate-200 bg-white px-4 lg:px-3 py-3 lg:py-2 text-sm lg:text-[11px] font-medium text-slate-700 transition hover:bg-slate-50"
               >
                 View all {orgMembers.length} members in Manage Team
               </button>
@@ -1891,22 +1891,22 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
           </div>
         </section>
 
-        <section className="rounded-3xl border border-fuchsia-200 bg-fuchsia-50 p-6 shadow-sm">
-          <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <section className="rounded-3xl lg:rounded-2xl border border-fuchsia-200 bg-fuchsia-50 p-6 lg:p-[18px] shadow-sm">
+          <div className="mb-5 flex flex-col gap-3 lg:gap-2 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="text-sm font-medium text-fuchsia-800">
+              <p className="text-sm lg:text-[11px] font-medium text-fuchsia-800">
                 Honest Abe Campaign Strategy
               </p>
-              <h2 className="text-2xl font-semibold text-fuchsia-950">
+              <h2 className="text-2xl lg:text-xl font-semibold text-fuchsia-950">
                 Set the campaign lifecycle stage
               </h2>
-              <p className="mt-2 max-w-3xl text-sm text-fuchsia-800">
+              <p className="mt-2 max-w-3xl text-sm lg:text-[11px] text-fuchsia-800">
                 Tell Abe where this organization is in the campaign timeline so his strategic read weights the right lanes.
               </p>
             </div>
 
-            <div className="rounded-2xl border border-fuchsia-200 bg-white px-4 py-3 text-sm text-fuchsia-900 shadow-sm">
-              <p className="text-xs font-medium uppercase tracking-wide text-fuchsia-600">
+            <div className="rounded-2xl lg:rounded-xl border border-fuchsia-200 bg-white px-4 lg:px-3 py-3 lg:py-2 text-sm lg:text-[11px] text-fuchsia-900 shadow-sm">
+              <p className="text-xs lg:text-[9px] font-medium uppercase tracking-wide text-fuchsia-600">
                 Current Personality
               </p>
               <p className="mt-1 font-semibold">
@@ -1915,7 +1915,7 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
             </div>
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-3">
+          <div className="grid gap-4 lg:gap-3 lg:grid-cols-3">
             {ABE_STAGE_OPTIONS.map((stage) => {
               const selected = abeStage === stage.value;
 
@@ -1931,12 +1931,12 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
                       : "border-fuchsia-200 bg-white/70 hover:bg-white"
                   }`}
                 >
-                  <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start justify-between gap-3 lg:gap-2">
                     <div>
-                      <p className="text-base font-semibold text-slate-950">
+                      <p className="text-base lg:text-sm font-semibold text-slate-950">
                         {stage.label}
                       </p>
-                      <p className="mt-1 text-xs font-medium uppercase tracking-wide text-fuchsia-700">
+                      <p className="mt-1 text-xs lg:text-[9px] font-medium uppercase tracking-wide text-fuchsia-700">
                         {stage.lifecycle}
                       </p>
                     </div>
@@ -1952,19 +1952,19 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
                     </span>
                   </div>
 
-                  <div className="mt-4 rounded-2xl border border-fuchsia-100 bg-fuchsia-50/70 p-4">
-                    <p className="text-sm font-semibold text-fuchsia-950">
+                  <div className="mt-4 lg:mt-3 rounded-2xl lg:rounded-xl border border-fuchsia-100 bg-fuchsia-50/70 p-4 lg:p-3">
+                    <p className="text-sm lg:text-[11px] font-semibold text-fuchsia-950">
                       {stage.personality}
                     </p>
-                    <p className="mt-1 text-sm font-medium text-slate-800">
+                    <p className="mt-1 text-sm lg:text-[11px] font-medium text-slate-800">
                       {stage.focus}
                     </p>
-                    <p className="mt-2 text-xs leading-5 text-slate-600">
+                    <p className="mt-2 text-xs lg:text-[9px] leading-5 text-slate-600">
                       {stage.description}
                     </p>
                   </div>
 
-                  <p className="mt-4 text-xs font-medium leading-5 text-fuchsia-900">
+                  <p className="mt-4 lg:mt-3 text-xs lg:text-[9px] font-medium leading-5 text-fuchsia-900">
                     {formatAbeStageWeights(stage)}
                   </p>
                 </button>
@@ -1972,30 +1972,30 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
             })}
           </div>
 
-          <div className="mt-5 rounded-2xl border border-fuchsia-200 bg-white p-4 text-sm text-fuchsia-900">
+          <div className="mt-5 lg:mt-4 rounded-2xl lg:rounded-xl border border-fuchsia-200 bg-white p-4 lg:p-3 text-sm lg:text-[11px] text-fuchsia-900">
             <span className="font-semibold">Timeline model:</span> Early Stage = first 60%, Mid Stage = second 25%, Late Stage = final 15%.
           </div>
         </section>
 
 {showAetherStrategyLayer ? (
-        <section className="rounded-3xl border border-fuchsia-200 bg-fuchsia-50 p-6 shadow-sm">
-          <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <section className="rounded-3xl lg:rounded-2xl border border-fuchsia-200 bg-fuchsia-50 p-6 lg:p-[18px] shadow-sm">
+          <div className="mb-5 flex flex-col gap-3 lg:gap-2 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="text-sm font-medium text-fuchsia-800">Aether Strategy Layer</p>
-              <h2 className="text-2xl font-semibold text-fuchsia-900">
+              <p className="text-sm lg:text-[11px] font-medium text-fuchsia-800">Aether Strategy Layer</p>
+              <h2 className="text-2xl lg:text-xl font-semibold text-fuchsia-900">
                 Control autonomy and strategy
               </h2>
-              <p className="mt-2 text-sm text-fuchsia-800">
+              <p className="mt-2 text-sm lg:text-[11px] text-fuchsia-800">
                 Set how assertive Aether should be, then decide which strategy the system should favor.
               </p>
             </div>
 
-            <div className="rounded-2xl border border-indigo-200 bg-white px-4 py-3 text-sm text-fuchsia-900">
+            <div className="rounded-2xl lg:rounded-xl border border-indigo-200 bg-white px-4 lg:px-3 py-3 lg:py-2 text-sm lg:text-[11px] text-fuchsia-900">
               Mode: {autonomyConfig.mode.toUpperCase()}
             </div>
           </div>
 
-          <div className="grid gap-3 md:grid-cols-3">
+          <div className="grid gap-3 lg:gap-2 md:grid-cols-3">
             {["off", "suggest", "auto_safe"].map((mode) => (
               <button
                 key={mode}
@@ -2011,8 +2011,8 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
             ))}
           </div>
 
-          <div className="mt-6">
-            <p className="mb-2 text-sm font-medium text-fuchsia-800">Strategy</p>
+          <div className="mt-6 lg:mt-4">
+            <p className="mb-2 text-sm lg:text-[11px] font-medium text-fuchsia-800">Strategy</p>
             <div className="flex flex-wrap gap-2">
               {["balanced", "cleanup", "fundraising_push", "outreach_push", "stability"].map((strategy) => (
                 <button
@@ -2029,156 +2029,156 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
               ))}
             </div>
 
-            <div className="mt-4 flex flex-wrap items-center gap-3">
+            <div className="mt-4 lg:mt-3 flex flex-wrap items-center gap-3 lg:gap-2">
               <button
                 onClick={handleAutoShiftToSuggestedStrategy}
-                className="rounded-xl border border-indigo-200 bg-white px-3 py-2 text-xs text-fuchsia-900"
+                className="rounded-xl border border-indigo-200 bg-white px-3 py-2 text-xs lg:text-[9px] text-fuchsia-900"
               >
                 Apply Suggested Strategy
               </button>
 
-              <div className="text-sm text-fuchsia-900">
+              <div className="text-sm lg:text-[11px] text-fuchsia-900">
                 Suggested: <span className="font-semibold">{strategyDecision.strategy.replaceAll("_", " ")}</span>
               </div>
             </div>
 
-            <p className="mt-2 text-xs text-fuchsia-700">{strategyDecision.reason}</p>
+            <p className="mt-2 text-xs lg:text-[9px] text-fuchsia-700">{strategyDecision.reason}</p>
           </div>
         </section>
         ) : null}
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="rounded-3xl lg:rounded-2xl border border-slate-200 bg-white p-6 lg:p-[18px] shadow-sm">
         <div className="mb-5">
-          <p className="text-sm font-medium text-slate-500">System Health</p>
-          <h2 className="text-2xl font-semibold text-slate-900">
+          <p className="text-sm lg:text-[11px] font-medium text-slate-500">System Health</p>
+          <h2 className="text-2xl lg:text-xl font-semibold text-slate-900">
             Confirm the operating layer is stable
           </h2>
-          <p className="mt-2 text-sm text-slate-600">
+          <p className="mt-2 text-sm lg:text-[11px] text-slate-600">
             High-level health first. Deep risk and governance detail stays buried until you open Advanced System.
           </p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-            <p className="text-xs uppercase tracking-wide text-emerald-700">Execution Score</p>
-            <p className="mt-2 text-3xl font-semibold text-slate-900">
+        <div className="grid gap-4 lg:gap-3 md:grid-cols-2 xl:grid-cols-4">
+          <div className="rounded-2xl lg:rounded-xl border border-emerald-200 bg-emerald-50 p-4 lg:p-3">
+            <p className="text-xs lg:text-[9px] uppercase tracking-wide text-emerald-700">Execution Score</p>
+            <p className="mt-2 text-3xl lg:text-2xl font-semibold text-slate-900">
               {executionFeedback.executionHealthScore}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4">
-            <p className="text-xs uppercase tracking-wide text-rose-700">Failure Rate</p>
-            <p className="mt-2 text-3xl font-semibold text-slate-900">
+          <div className="rounded-2xl lg:rounded-xl border border-rose-200 bg-rose-50 p-4 lg:p-3">
+            <p className="text-xs lg:text-[9px] uppercase tracking-wide text-rose-700">Failure Rate</p>
+            <p className="mt-2 text-3xl lg:text-2xl font-semibold text-slate-900">
               {executionSummary.failureRate}%
             </p>
           </div>
 
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
-            <p className="text-xs uppercase tracking-wide text-amber-700">Blocked Rate</p>
-            <p className="mt-2 text-3xl font-semibold text-slate-900">
+          <div className="rounded-2xl lg:rounded-xl border border-amber-200 bg-amber-50 p-4 lg:p-3">
+            <p className="text-xs lg:text-[9px] uppercase tracking-wide text-amber-700">Blocked Rate</p>
+            <p className="mt-2 text-3xl lg:text-2xl font-semibold text-slate-900">
               {executionSummary.blockedRate}%
             </p>
           </div>
 
-          <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4">
-            <p className="text-xs uppercase tracking-wide text-sky-700">Finance Net</p>
-            <p className="mt-2 text-3xl font-semibold text-slate-900">
+          <div className="rounded-2xl lg:rounded-xl border border-sky-200 bg-sky-50 p-4 lg:p-3">
+            <p className="text-xs lg:text-[9px] uppercase tracking-wide text-sky-700">Finance Net</p>
+            <p className="mt-2 text-3xl lg:text-2xl font-semibold text-slate-900">
               ${financeSnapshot.net.toLocaleString()}
             </p>
           </div>
         </div>
 
-        <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+        <div className="mt-5 lg:mt-4 rounded-2xl lg:rounded-xl border border-slate-200 bg-slate-50 p-4 lg:p-3 text-sm lg:text-[11px] text-slate-700">
           {executionFeedback.recommendation}
         </div>
       </section>
 
-      <section className="rounded-3xl border border-slate-800 bg-slate-950 p-6 text-white shadow-sm">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <section className="rounded-3xl lg:rounded-2xl border border-slate-800 bg-slate-950 p-6 lg:p-[18px] text-white shadow-sm">
+        <div className="flex flex-col gap-4 lg:gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-sm font-medium text-slate-300">Advanced System</p>
-            <h2 className="text-2xl font-semibold text-white">
+            <p className="text-sm lg:text-[11px] font-medium text-slate-300">Advanced System</p>
+            <h2 className="text-2xl lg:text-xl font-semibold text-white">
               Policy, governed execution, and deep diagnostics
             </h2>
-            <p className="mt-2 text-sm text-slate-300">
+            <p className="mt-2 text-sm lg:text-[11px] text-slate-300">
               Keep this machine room collapsed until you need to inspect system internals.
             </p>
           </div>
 
           <button
             onClick={() => setAdvancedOpen((prev) => !prev)}
-            className="rounded-2xl border border-white/15 bg-white px-4 py-3 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-slate-100"
+            className="rounded-2xl lg:rounded-xl border border-white/15 bg-white px-4 lg:px-3 py-3 lg:py-2 text-sm lg:text-[11px] font-semibold text-slate-950 shadow-sm transition hover:bg-slate-100"
           >
             {advancedOpen ? "Hide Advanced System" : "Show Advanced System"}
           </button>
         </div>
 
         {advancedOpen ? (
-          <div className="mt-6 space-y-5 rounded-3xl border border-white/10 bg-slate-100 p-5 text-slate-950">
-            <section className="rounded-3xl border border-rose-200 bg-rose-50 p-6">
-              <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+          <div className="mt-6 lg:mt-4 space-y-5 lg:space-y-4 rounded-3xl lg:rounded-2xl border border-white/10 bg-slate-100 p-5 lg:p-4 text-slate-950">
+            <section className="rounded-3xl lg:rounded-2xl border border-rose-200 bg-rose-50 p-6 lg:p-[18px]">
+              <div className="flex flex-col gap-3 lg:gap-2 lg:flex-row lg:items-end lg:justify-between">
                 <div>
-                  <p className="text-sm font-medium text-rose-800">Risk</p>
-                  <h3 className="text-xl font-semibold text-rose-900">Risk + Governance Panel</h3>
+                  <p className="text-sm lg:text-[11px] font-medium text-rose-800">Risk</p>
+                  <h3 className="text-xl lg:text-lg font-semibold text-rose-900">Risk + Governance Panel</h3>
                 </div>
-                <div className="rounded-2xl border border-rose-200 bg-white px-4 py-3 text-sm text-rose-900">
+                <div className="rounded-2xl lg:rounded-xl border border-rose-200 bg-white px-4 lg:px-3 py-3 lg:py-2 text-sm lg:text-[11px] text-rose-900">
                   Failure rate <span className="font-semibold">{executionSummary.failureRate}%</span>
                 </div>
               </div>
 
-              <div className="mt-4 grid gap-4 xl:grid-cols-3">
-                <div className="rounded-2xl border border-rose-200 bg-white p-4">
-                  <p className="text-sm font-medium text-slate-900">Failure Hotspots</p>
-                  <div className="mt-4 space-y-3">
+              <div className="mt-4 lg:mt-3 grid gap-4 lg:gap-3 xl:grid-cols-3">
+                <div className="rounded-2xl lg:rounded-xl border border-rose-200 bg-white p-4 lg:p-3">
+                  <p className="text-sm lg:text-[11px] font-medium text-slate-900">Failure Hotspots</p>
+                  <div className="mt-4 lg:mt-3 space-y-3 lg:space-y-2">
                     {executionSummary.repeatedFailureActionTypes.slice(0, 3).map((item) => (
-                      <div key={item.key} className="rounded-2xl border border-rose-200 bg-rose-50 p-4">
-                        <p className="text-sm font-medium text-slate-900">{item.key}</p>
-                        <p className="mt-1 text-xs text-slate-600">
+                      <div key={item.key} className="rounded-2xl lg:rounded-xl border border-rose-200 bg-rose-50 p-4 lg:p-3">
+                        <p className="text-sm lg:text-[11px] font-medium text-slate-900">{item.key}</p>
+                        <p className="mt-1 text-xs lg:text-[9px] text-slate-600">
                           {item.count} repeated failure{item.count === 1 ? "" : "s"}
                         </p>
                       </div>
                     ))}
                     {executionSummary.repeatedFailureActionTypes.length === 0 ? (
-                      <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-slate-500">
+                      <div className="rounded-2xl lg:rounded-xl border border-rose-200 bg-rose-50 p-4 lg:p-3 text-sm lg:text-[11px] text-slate-500">
                         No repeated failure hotspots surfaced yet.
                       </div>
                     ) : null}
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-amber-200 bg-white p-4">
-                  <p className="text-sm font-medium text-slate-900">Blocked Hotspots</p>
-                  <div className="mt-4 space-y-3">
+                <div className="rounded-2xl lg:rounded-xl border border-amber-200 bg-white p-4 lg:p-3">
+                  <p className="text-sm lg:text-[11px] font-medium text-slate-900">Blocked Hotspots</p>
+                  <div className="mt-4 lg:mt-3 space-y-3 lg:space-y-2">
                     {executionSummary.repeatedBlockedReasons.slice(0, 3).map((item) => (
-                      <div key={item.key} className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
-                        <p className="text-sm font-medium text-slate-900">{formatPolicyReason(item.key)}</p>
-                        <p className="mt-1 text-xs text-slate-600">
+                      <div key={item.key} className="rounded-2xl lg:rounded-xl border border-amber-200 bg-amber-50 p-4 lg:p-3">
+                        <p className="text-sm lg:text-[11px] font-medium text-slate-900">{formatPolicyReason(item.key)}</p>
+                        <p className="mt-1 text-xs lg:text-[9px] text-slate-600">
                           {item.count} repeated block{item.count === 1 ? "" : "s"}
                         </p>
                       </div>
                     ))}
                     {executionSummary.repeatedBlockedReasons.length === 0 ? (
-                      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-slate-500">
+                      <div className="rounded-2xl lg:rounded-xl border border-amber-200 bg-amber-50 p-4 lg:p-3 text-sm lg:text-[11px] text-slate-500">
                         No repeated governance blocks surfaced yet.
                       </div>
                     ) : null}
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-sky-200 bg-white p-4">
-                  <p className="text-sm font-medium text-slate-900">Unstable Domains</p>
-                  <div className="mt-4 space-y-3">
+                <div className="rounded-2xl lg:rounded-xl border border-sky-200 bg-white p-4 lg:p-3">
+                  <p className="text-sm lg:text-[11px] font-medium text-slate-900">Unstable Domains</p>
+                  <div className="mt-4 lg:mt-3 space-y-3 lg:space-y-2">
                     {executionSummary.unstableDomains.slice(0, 3).map((item) => (
-                      <div key={item.key} className="rounded-2xl border border-sky-200 bg-sky-50 p-4">
-                        <p className="text-sm font-medium text-slate-900">{item.key.toUpperCase()}</p>
-                        <p className="mt-1 text-xs text-slate-600">
+                      <div key={item.key} className="rounded-2xl lg:rounded-xl border border-sky-200 bg-sky-50 p-4 lg:p-3">
+                        <p className="text-sm lg:text-[11px] font-medium text-slate-900">{item.key.toUpperCase()}</p>
+                        <p className="mt-1 text-xs lg:text-[9px] text-slate-600">
                           {item.count} instability signal{item.count === 1 ? "" : "s"}
                         </p>
                       </div>
                     ))}
                     {executionSummary.unstableDomains.length === 0 ? (
-                      <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sm text-slate-500">
+                      <div className="rounded-2xl lg:rounded-xl border border-sky-200 bg-sky-50 p-4 lg:p-3 text-sm lg:text-[11px] text-slate-500">
                         No unstable domains surfaced yet.
                       </div>
                     ) : null}
@@ -2187,33 +2187,33 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
               </div>
             </section>
 
-            <section className="space-y-5">
-              <div className="grid gap-5 xl:grid-cols-2">
-              <section className="rounded-3xl border border-sky-200 bg-sky-50 p-6">
-                  <div className="mb-4">
-                    <h3 className="text-xl font-semibold text-sky-900">
+            <section className="space-y-5 lg:space-y-4">
+              <div className="grid gap-5 lg:gap-4 xl:grid-cols-2">
+              <section className="rounded-3xl lg:rounded-2xl border border-sky-200 bg-sky-50 p-6 lg:p-[18px]">
+                  <div className="mb-4 lg:mb-3">
+                    <h3 className="text-xl lg:text-lg font-semibold text-sky-900">
                       Policy Recommendations
                     </h3>
-                    <p className="text-sm text-sky-700">
+                    <p className="text-sm lg:text-[11px] text-sky-700">
                       Suggested improvements based on repeated system friction.
                     </p>
                   </div>
 
                   {policyRecommendations.length === 0 ? (
-                    <p className="text-sm text-slate-600">No strong recommendations yet.</p>
+                    <p className="text-sm lg:text-[11px] text-slate-600">No strong recommendations yet.</p>
                   ) : (
-                    <div className="space-y-3">
+                    <div className="space-y-3 lg:space-y-2">
                       {policyRecommendations.map((rec) => (
-                        <div key={rec.id} className="rounded-xl border border-sky-200 bg-white p-4">
-                          <div className="flex items-center justify-between gap-4">
-                            <div className="text-sm font-medium text-slate-900">{rec.message}</div>
-                            <div className="flex items-center gap-3">
-                              <div className="text-xs text-sky-700">
+                        <div key={rec.id} className="rounded-xl border border-sky-200 bg-white p-4 lg:p-3">
+                          <div className="flex items-center justify-between gap-4 lg:gap-3">
+                            <div className="text-sm lg:text-[11px] font-medium text-slate-900">{rec.message}</div>
+                            <div className="flex items-center gap-3 lg:gap-2">
+                              <div className="text-xs lg:text-[9px] text-sky-700">
                                 {(rec.confidence * 100).toFixed(0)}%
                               </div>
                               <button
                                 onClick={() => handleApplyRecommendation(rec.id)}
-                                className="rounded-lg bg-sky-900 px-3 py-1 text-xs text-white"
+                                className="rounded-lg bg-sky-900 px-3 py-1 text-xs lg:text-[9px] text-white"
                               >
                                 Apply
                               </button>
@@ -2225,32 +2225,32 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
                   )}
                 </section>
 
-              <section className="rounded-3xl border border-slate-200 bg-white p-6">
-                  <div className="mb-4">
-                    <h3 className="text-xl font-semibold text-slate-900">
+              <section className="rounded-3xl lg:rounded-2xl border border-slate-200 bg-white p-6 lg:p-[18px]">
+                  <div className="mb-4 lg:mb-3">
+                    <h3 className="text-xl lg:text-lg font-semibold text-slate-900">
                       Policy History
                     </h3>
-                    <p className="text-sm text-slate-600">
+                    <p className="text-sm lg:text-[11px] text-slate-600">
                       Track changes and rollback safely.
                     </p>
                   </div>
 
                   {policyVersionHistory.length === 0 ? (
-                    <p className="text-sm text-slate-500">No policy changes recorded yet.</p>
+                    <p className="text-sm lg:text-[11px] text-slate-500">No policy changes recorded yet.</p>
                   ) : (
-                    <div className="space-y-3">
+                    <div className="space-y-3 lg:space-y-2">
                       {policyVersionHistory.map((item) => (
-                        <div key={item.id} className="rounded-xl border border-slate-200 p-4">
-                          <div className="flex items-center justify-between gap-4">
+                        <div key={item.id} className="rounded-xl border border-slate-200 p-4 lg:p-3">
+                          <div className="flex items-center justify-between gap-4 lg:gap-3">
                             <div>
-                              <div className="text-sm font-medium text-slate-900">{item.note}</div>
-                              <div className="text-xs text-slate-500">
+                              <div className="text-sm lg:text-[11px] font-medium text-slate-900">{item.note}</div>
+                              <div className="text-xs lg:text-[9px] text-slate-500">
                                 {new Date(item.createdAt).toLocaleString()}
                               </div>
                             </div>
                             <button
                               onClick={() => handleRollbackPolicy(item.id)}
-                              className="rounded-lg border border-slate-200 px-3 py-1 text-xs text-slate-700"
+                              className="rounded-lg border border-slate-200 px-3 py-1 text-xs lg:text-[9px] text-slate-700"
                             >
                               Rollback
                             </button>
@@ -2262,63 +2262,63 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
                 </section>
               </div>
 
-              <section className="rounded-3xl border border-slate-200 bg-white p-6">
-                <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+              <section className="rounded-3xl lg:rounded-2xl border border-slate-200 bg-white p-6 lg:p-[18px]">
+                <div className="mb-5 flex flex-col gap-3 lg:gap-2 lg:flex-row lg:items-end lg:justify-between">
                   <div>
-                    <p className="text-sm font-medium text-slate-500">
+                    <p className="text-sm lg:text-[11px] font-medium text-slate-500">
                       Governed Operations
                     </p>
-                    <h3 className="text-2xl font-semibold text-slate-900">
+                    <h3 className="text-2xl lg:text-xl font-semibold text-slate-900">
                       Governed Operations Queue
                     </h3>
-                    <p className="mt-2 max-w-3xl text-sm text-slate-600">
+                    <p className="mt-2 max-w-3xl text-sm lg:text-[11px] text-slate-600">
                       Review what is safe to run, what needs manual review, and what remains blocked under governance.
                     </p>
                   </div>
 
-                  <div className="flex flex-wrap gap-3">
+                  <div className="flex flex-wrap gap-3 lg:gap-2">
                     <button
                       onClick={handlePreviewAutoExecution}
                       disabled={previewingAutoExecution || runningAutoExecution}
-                      className="inline-flex items-center gap-2 rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm font-medium text-sky-900 transition hover:bg-sky-100 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex items-center gap-2 rounded-2xl lg:rounded-xl border border-sky-200 bg-sky-50 px-4 lg:px-3 py-3 lg:py-2 text-sm lg:text-[11px] font-medium text-sky-900 transition hover:bg-sky-100 disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      <Eye className="h-4 w-4" />
+                      <Eye className="h-4 lg:h-3.5 w-4 lg:w-3.5" />
                       {previewingAutoExecution ? "Previewing Auto..." : "Preview Auto"}
                     </button>
 
                     <button
                       onClick={handleRunAutoExecution}
                       disabled={runningAutoExecution || previewingAutoExecution}
-                      className="inline-flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-900 transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex items-center gap-2 rounded-2xl lg:rounded-xl border border-emerald-200 bg-emerald-50 px-4 lg:px-3 py-3 lg:py-2 text-sm lg:text-[11px] font-medium text-emerald-900 transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      <Play className="h-4 w-4" />
+                      <Play className="h-4 lg:h-3.5 w-4 lg:w-3.5" />
                       {runningAutoExecution ? "Running Auto..." : "Run Auto Execution"}
                     </button>
                   </div>
                 </div>
 
-                <div className="mb-4 flex flex-wrap gap-3">
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                <div className="mb-4 lg:mb-3 flex flex-wrap gap-3 lg:gap-2">
+                  <div className="rounded-2xl lg:rounded-xl border border-slate-200 bg-slate-50 px-4 lg:px-3 py-3 lg:py-2 text-sm lg:text-[11px] text-slate-700">
                     {autoExecutionPlan.summary.autoExecutable} auto executable
                   </div>
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                  <div className="rounded-2xl lg:rounded-xl border border-slate-200 bg-slate-50 px-4 lg:px-3 py-3 lg:py-2 text-sm lg:text-[11px] text-slate-700">
                     {autoExecutionPlan.summary.manualReview} manual review
                   </div>
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                  <div className="rounded-2xl lg:rounded-xl border border-slate-200 bg-slate-50 px-4 lg:px-3 py-3 lg:py-2 text-sm lg:text-[11px] text-slate-700">
                     {autoExecutionPlan.summary.blocked} blocked
                   </div>
                 </div>
 
-                <div className="grid gap-4 xl:grid-cols-3">
-                  <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
-                    <p className="text-sm font-medium text-emerald-800">Auto Executable</p>
-                    <div className="mt-4 space-y-3">
+                <div className="grid gap-4 lg:gap-3 xl:grid-cols-3">
+                  <div className="rounded-2xl lg:rounded-xl border border-emerald-200 bg-emerald-50 p-5 lg:p-4">
+                    <p className="text-sm lg:text-[11px] font-medium text-emerald-800">Auto Executable</p>
+                    <div className="mt-4 lg:mt-3 space-y-3 lg:space-y-2">
                       {autoActions.slice(0, 3).map((action) => (
-                        <div key={action.id} className="rounded-2xl border border-emerald-200 bg-white p-4">
-                          <div className="flex items-start justify-between gap-3">
+                        <div key={action.id} className="rounded-2xl lg:rounded-xl border border-emerald-200 bg-white p-4 lg:p-3">
+                          <div className="flex items-start justify-between gap-3 lg:gap-2">
                             <div>
                               <p className="font-medium text-slate-900">{action.title}</p>
-                              <p className="mt-1 text-xs text-slate-600">{action.whyNow}</p>
+                              <p className="mt-1 text-xs lg:text-[9px] text-slate-600">{action.whyNow}</p>
                             </div>
                             <span className={`rounded-full px-2 py-1 text-xs font-medium ${getActionModeClasses(action.mode)}`}>
                               {action.mode}
@@ -2329,20 +2329,20 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
                             <button
                               onClick={() => handlePreviewUnifiedAction(action)}
                               disabled={executingActionId === action.id}
-                              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700"
+                              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs lg:text-[9px] text-slate-700"
                             >
                               Preview
                             </button>
                             <button
                               onClick={() => handleRunUnifiedAction(action)}
                               disabled={executingActionId === action.id}
-                              className="rounded-xl bg-slate-900 px-3 py-2 text-xs text-white"
+                              className="rounded-xl bg-slate-900 px-3 py-2 text-xs lg:text-[9px] text-white"
                             >
                               Run
                             </button>
                             <button
                               onClick={() => setSelectedActionId(action.id)}
-                              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700"
+                              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs lg:text-[9px] text-slate-700"
                             >
                               Inspect
                             </button>
@@ -2352,15 +2352,15 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
                     </div>
                   </div>
 
-                  <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
-                    <p className="text-sm font-medium text-amber-800">Manual Review</p>
-                    <div className="mt-4 space-y-3">
+                  <div className="rounded-2xl lg:rounded-xl border border-amber-200 bg-amber-50 p-5 lg:p-4">
+                    <p className="text-sm lg:text-[11px] font-medium text-amber-800">Manual Review</p>
+                    <div className="mt-4 lg:mt-3 space-y-3 lg:space-y-2">
                       {manualActions.slice(0, 3).map((action) => (
-                        <div key={action.id} className="rounded-2xl border border-amber-200 bg-white p-4">
-                          <div className="flex items-start justify-between gap-3">
+                        <div key={action.id} className="rounded-2xl lg:rounded-xl border border-amber-200 bg-white p-4 lg:p-3">
+                          <div className="flex items-start justify-between gap-3 lg:gap-2">
                             <div>
                               <p className="font-medium text-slate-900">{action.title}</p>
-                              <p className="mt-1 text-xs text-slate-600">{action.governance.reason}</p>
+                              <p className="mt-1 text-xs lg:text-[9px] text-slate-600">{action.governance.reason}</p>
                             </div>
                             <span className={`rounded-full px-2 py-1 text-xs font-medium ${getActionModeClasses(action.mode)}`}>
                               {action.mode}
@@ -2371,13 +2371,13 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
                             <button
                               onClick={() => handlePreviewUnifiedAction(action)}
                               disabled={executingActionId === action.id}
-                              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700"
+                              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs lg:text-[9px] text-slate-700"
                             >
                               Preview
                             </button>
                             <button
                               onClick={() => setSelectedActionId(action.id)}
-                              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700"
+                              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs lg:text-[9px] text-slate-700"
                             >
                               Inspect
                             </button>
@@ -2387,15 +2387,15 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
                     </div>
                   </div>
 
-                  <div className="rounded-2xl border border-rose-200 bg-rose-50 p-5">
-                    <p className="text-sm font-medium text-rose-800">Blocked</p>
-                    <div className="mt-4 space-y-3">
+                  <div className="rounded-2xl lg:rounded-xl border border-rose-200 bg-rose-50 p-5 lg:p-4">
+                    <p className="text-sm lg:text-[11px] font-medium text-rose-800">Blocked</p>
+                    <div className="mt-4 lg:mt-3 space-y-3 lg:space-y-2">
                       {blockedActions.slice(0, 3).map((action) => (
-                        <div key={action.id} className="rounded-2xl border border-rose-200 bg-white p-4">
-                          <div className="flex items-start justify-between gap-3">
+                        <div key={action.id} className="rounded-2xl lg:rounded-xl border border-rose-200 bg-white p-4 lg:p-3">
+                          <div className="flex items-start justify-between gap-3 lg:gap-2">
                             <div>
                               <p className="font-medium text-slate-900">{action.title}</p>
-                              <p className="mt-1 text-xs text-slate-600">{action.governance.reason}</p>
+                              <p className="mt-1 text-xs lg:text-[9px] text-slate-600">{action.governance.reason}</p>
                             </div>
                             <span className={`rounded-full px-2 py-1 text-xs font-medium ${getActionModeClasses(action.mode)}`}>
                               {action.mode}
@@ -2405,7 +2405,7 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
                           <div className="mt-3 flex flex-wrap gap-2">
                             <button
                               onClick={() => setSelectedActionId(action.id)}
-                              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700"
+                              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs lg:text-[9px] text-slate-700"
                             >
                               Inspect
                             </button>
@@ -2417,14 +2417,14 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
                 </div>
 
                 {selectedAction ? (
-                  <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-5">
-                    <div className="flex items-start justify-between gap-4">
+                  <div className="mt-6 lg:mt-4 rounded-2xl lg:rounded-xl border border-slate-200 bg-slate-50 p-5 lg:p-4">
+                    <div className="flex items-start justify-between gap-4 lg:gap-3">
                       <div>
-                        <p className="text-sm font-medium text-slate-500">Selected Action</p>
-                        <h4 className="mt-1 text-lg font-semibold text-slate-900">
+                        <p className="text-sm lg:text-[11px] font-medium text-slate-500">Selected Action</p>
+                        <h4 className="mt-1 text-lg lg:text-base font-semibold text-slate-900">
                           {selectedAction.title}
                         </h4>
-                        <p className="mt-2 text-sm text-slate-600">{selectedAction.whyNow}</p>
+                        <p className="mt-2 text-sm lg:text-[11px] text-slate-600">{selectedAction.whyNow}</p>
                       </div>
 
                       <span className={`rounded-full px-2 py-1 text-xs font-medium ${getActionModeClasses(selectedAction.mode)}`}>
@@ -2432,22 +2432,22 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
                       </span>
                     </div>
 
-                    <div className="mt-4 grid gap-3 md:grid-cols-3">
-                      <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                        <p className="text-xs uppercase tracking-wide text-slate-500">Domain</p>
-                        <p className="mt-2 text-sm font-medium text-slate-900">
+                    <div className="mt-4 lg:mt-3 grid gap-3 lg:gap-2 md:grid-cols-3">
+                      <div className="rounded-2xl lg:rounded-xl border border-slate-200 bg-white p-4 lg:p-3">
+                        <p className="text-xs lg:text-[9px] uppercase tracking-wide text-slate-500">Domain</p>
+                        <p className="mt-2 text-sm lg:text-[11px] font-medium text-slate-900">
                           {selectedAction.domain.toUpperCase()}
                         </p>
                       </div>
-                      <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                        <p className="text-xs uppercase tracking-wide text-slate-500">Score</p>
-                        <p className="mt-2 text-sm font-medium text-slate-900">
+                      <div className="rounded-2xl lg:rounded-xl border border-slate-200 bg-white p-4 lg:p-3">
+                        <p className="text-xs lg:text-[9px] uppercase tracking-wide text-slate-500">Score</p>
+                        <p className="mt-2 text-sm lg:text-[11px] font-medium text-slate-900">
                           {selectedAction.score}/100
                         </p>
                       </div>
-                      <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                        <p className="text-xs uppercase tracking-wide text-slate-500">Governance</p>
-                        <p className="mt-2 text-sm font-medium text-slate-900">
+                      <div className="rounded-2xl lg:rounded-xl border border-slate-200 bg-white p-4 lg:p-3">
+                        <p className="text-xs lg:text-[9px] uppercase tracking-wide text-slate-500">Governance</p>
+                        <p className="mt-2 text-sm lg:text-[11px] font-medium text-slate-900">
                           {selectedAction.governance.reason}
                         </p>
                       </div>
@@ -2457,32 +2457,32 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
               </section>
             </section>
 
-            <section className="rounded-3xl border border-fuchsia-200 bg-fuchsia-50 p-6">
-              <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <section className="rounded-3xl lg:rounded-2xl border border-fuchsia-200 bg-fuchsia-50 p-6 lg:p-[18px]">
+              <div className="mb-5 flex flex-col gap-4 lg:gap-3 lg:flex-row lg:items-end lg:justify-between">
                 <div>
-                  <p className="text-sm font-medium text-fuchsia-800">
+                  <p className="text-sm lg:text-[11px] font-medium text-fuchsia-800">
                     Intelligence Layer
                   </p>
-                  <h3 className="text-2xl font-semibold text-fuchsia-900">
+                  <h3 className="text-2xl lg:text-xl font-semibold text-fuchsia-900">
                     System Brain Snapshot
                   </h3>
-                  <p className="mt-2 max-w-3xl text-sm text-fuchsia-900/80">
+                  <p className="mt-2 max-w-3xl text-sm lg:text-[11px] text-fuchsia-900/80">
                     The intelligence layer is still here, but it stays below the primary admin controls.
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-fuchsia-200 bg-white px-4 py-3 text-sm text-fuchsia-900">
+                <div className="rounded-2xl lg:rounded-xl border border-fuchsia-200 bg-white px-4 lg:px-3 py-3 lg:py-2 text-sm lg:text-[11px] text-fuchsia-900">
                   System risk: <span className="font-semibold">{intelligenceSnapshot.systemRiskLevel}/10</span>
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-fuchsia-200 bg-white p-5">
-                <p className="text-lg font-semibold text-slate-900">
+              <div className="rounded-2xl lg:rounded-xl border border-fuchsia-200 bg-white p-5 lg:p-4">
+                <p className="text-lg lg:text-base font-semibold text-slate-900">
                   {intelligenceSummary.headline}
                 </p>
-                <p className="mt-2 text-sm text-slate-600">{intelligenceSummary.body}</p>
-                <p className="mt-2 text-sm text-slate-600">{intelligenceSummary.crossDomain}</p>
-                <p className="mt-2 text-sm font-medium text-fuchsia-900">
+                <p className="mt-2 text-sm lg:text-[11px] text-slate-600">{intelligenceSummary.body}</p>
+                <p className="mt-2 text-sm lg:text-[11px] text-slate-600">{intelligenceSummary.crossDomain}</p>
+                <p className="mt-2 text-sm lg:text-[11px] font-medium text-fuchsia-900">
                   {intelligenceSummary.risk}
                 </p>
               </div>

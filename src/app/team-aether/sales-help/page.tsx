@@ -161,21 +161,21 @@ const dontSay = [
 
 export default function SalesHelpPage() {
   return (
-    <main className="min-h-screen bg-slate-100 p-4 text-slate-950 lg:p-8">
-      <div className="mx-auto max-w-7xl space-y-8">
-        <section className="overflow-hidden rounded-[2rem] border border-slate-200 bg-slate-950 p-6 text-white shadow-sm lg:p-8">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+    <main className="min-h-screen bg-slate-100 p-4 text-slate-950 lg:p-6 lg:p-3">
+      <div className="mx-auto max-w-7xl space-y-8 lg:space-y-6">
+        <section className="overflow-hidden rounded-[2rem] border border-slate-200 bg-slate-950 p-6 text-white shadow-sm lg:p-6 lg:rounded-2xl lg:p-[18px]">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between lg:gap-4">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-200">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-200 lg:text-[10px]">
                 <ShieldCheck className="h-3.5 w-3.5" />
                 Team Aether Sales Help
               </div>
 
-              <h1 className="mt-4 text-3xl font-semibold tracking-tight lg:text-5xl">
+              <h1 className="mt-4 text-3xl font-semibold tracking-tight lg:text-4xl lg:mt-3 lg:text-2xl">
                 Aether Political Tier Guide
               </h1>
 
-              <p className="mt-4 max-w-4xl text-sm leading-7 text-slate-300 lg:text-base">
+              <p className="mt-4 max-w-4xl text-sm leading-7 text-slate-300 lg:text-sm lg:mt-3 lg:text-[12px]">
                 Use this page to help sales staff understand which Aether Political
                 tier fits which campaign, how to explain the difference, and what
                 language to use during sales conversations.
@@ -184,82 +184,82 @@ export default function SalesHelpPage() {
 
             <Link
               href="/team-aether"
-              className="inline-flex w-fit items-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/15"
+              className="inline-flex w-fit items-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/15 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[12px]"
             >
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               Back to Team Aether
             </Link>
           </div>
         </section>
 
-        <section className="grid gap-4 lg:grid-cols-3">
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="w-fit rounded-2xl bg-slate-100 p-3 text-slate-700">
-              <Layers3 className="h-5 w-5" />
+        <section className="grid gap-4 lg:grid-cols-3 lg:gap-3">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-xl lg:p-[18px]">
+            <div className="w-fit rounded-2xl bg-slate-100 p-3 text-slate-700 lg:rounded-xl">
+              <Layers3 className="h-5 w-5 lg:h-4 lg:w-4" />
             </div>
 
-            <h2 className="mt-4 text-lg font-semibold">One System</h2>
+            <h2 className="mt-4 text-lg font-semibold lg:mt-3 lg:text-base">One System</h2>
 
-            <p className="mt-2 text-sm leading-6 text-slate-500">
+            <p className="mt-2 text-sm leading-6 text-slate-500 lg:mt-1.5 lg:text-[12px]">
               Aether Political is not priced as less software versus more
               software. Every tier runs on the same underlying operating system.
             </p>
           </div>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="w-fit rounded-2xl bg-slate-100 p-3 text-slate-700">
-              <Users className="h-5 w-5" />
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-xl lg:p-[18px]">
+            <div className="w-fit rounded-2xl bg-slate-100 p-3 text-slate-700 lg:rounded-xl">
+              <Users className="h-5 w-5 lg:h-4 lg:w-4" />
             </div>
 
-            <h2 className="mt-4 text-lg font-semibold">
+            <h2 className="mt-4 text-lg font-semibold lg:mt-3 lg:text-base">
               Campaign Maturity
             </h2>
 
-            <p className="mt-2 text-sm leading-6 text-slate-500">
+            <p className="mt-2 text-sm leading-6 text-slate-500 lg:mt-1.5 lg:text-[12px]">
               The tiers are based on campaign maturity, staffing level,
               operational complexity, and coordination pressure.
             </p>
           </div>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="w-fit rounded-2xl bg-slate-100 p-3 text-slate-700">
-              <Sparkles className="h-5 w-5" />
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-xl lg:p-[18px]">
+            <div className="w-fit rounded-2xl bg-slate-100 p-3 text-slate-700 lg:rounded-xl">
+              <Sparkles className="h-5 w-5 lg:h-4 lg:w-4" />
             </div>
 
-            <h2 className="mt-4 text-lg font-semibold">
+            <h2 className="mt-4 text-lg font-semibold lg:mt-3 lg:text-base">
               Upgrade Path
             </h2>
 
-            <p className="mt-2 text-sm leading-6 text-slate-500">
+            <p className="mt-2 text-sm leading-6 text-slate-500 lg:mt-1.5 lg:text-[12px]">
               As a campaign grows, Aether unlocks more visibility and
               coordination layers without forcing them to rebuild their workflow.
             </p>
           </div>
         </section>
 
-        <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
-          <div className="mb-6">
-            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-500">
+        <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm lg:p-6 lg:rounded-2xl lg:p-[18px]">
+          <div className="mb-6 lg:mb-4">
+            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-500 lg:text-[12px]">
               Positioning
             </p>
 
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
+            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 lg:mt-1.5 lg:text-xl">
               How to position Aether Political
             </h2>
 
-            <p className="mt-3 max-w-4xl text-sm leading-7 text-slate-600">
+            <p className="mt-3 max-w-4xl text-sm leading-7 text-slate-600 lg:mt-2 lg:text-[12px]">
               Aether Political is tiered by operational maturity. The question is
               not, “What features do they deserve?” The question is, “How complex
               is their campaign operation?”
             </p>
           </div>
 
-          <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-semibold text-slate-900">
+          <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5 lg:rounded-xl lg:p-4">
+            <p className="text-sm font-semibold text-slate-900 lg:text-[12px]">
               Sales framing:
             </p>
 
-            <p className="mt-2 text-sm leading-7 text-slate-600">
+            <p className="mt-2 text-sm leading-7 text-slate-600 lg:mt-1.5 lg:text-[12px]">
               “Aether scales with the campaign. A small campaign gets a clean
               ground-game operating system. A growing campaign gets full campaign
               operations. A large campaign gets strategic command infrastructure.”
@@ -267,40 +267,40 @@ export default function SalesHelpPage() {
           </div>
         </section>
 
-        <section className="grid gap-6">
+        <section className="grid gap-6 lg:gap-4">
           {tiers.map((item) => {
             const Icon = item.icon;
 
             return (
               <section
                 key={item.tier}
-                className={`rounded-[2rem] border p-6 shadow-sm lg:p-8 ${item.tone}`}
+                className={`rounded-[2rem] border p-6 shadow-sm lg:rounded-2xl lg:p-[18px] ${item.tone}`}
               >
-                <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+                <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between lg:gap-4">
                   <div>
-                    <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-slate-600">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-slate-600 lg:text-[10px]">
                       <Icon className="h-3.5 w-3.5" />
                       {item.tier}
                     </div>
 
-                    <h2 className="mt-4 text-3xl font-semibold tracking-tight text-slate-950">
+                    <h2 className="mt-4 text-3xl font-semibold tracking-tight text-slate-950 lg:mt-3 lg:text-2xl">
                       {item.name}
                     </h2>
 
-                    <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600 lg:text-base">
+                    <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600 lg:text-sm lg:mt-2 lg:text-[12px]">
                       {item.headline}
                     </p>
                   </div>
 
-                  <div className="rounded-3xl border border-slate-200 bg-white p-5 lg:max-w-sm">
-                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                  <div className="rounded-3xl border border-slate-200 bg-white p-5 lg:max-w-xs lg:rounded-xl lg:p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 lg:text-[10px]">
                       Best For
                     </p>
 
-                    <div className="mt-3 space-y-2">
+                    <div className="mt-3 space-y-2 lg:mt-2">
                       {item.bestFor.map((text) => (
-                        <div key={text} className="flex items-start gap-2 text-sm text-slate-700">
-                          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+                        <div key={text} className="flex items-start gap-2 text-sm text-slate-700 lg:text-[12px]">
+                          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 lg:h-3.5 lg:w-3.5" />
                           <span>{text}</span>
                         </div>
                       ))}
@@ -308,27 +308,27 @@ export default function SalesHelpPage() {
                   </div>
                 </div>
 
-                <div className="mt-8 grid gap-6 lg:grid-cols-3">
-                  <div className="rounded-3xl border border-slate-200 bg-white p-5">
-                    <p className="text-sm font-semibold text-slate-900">
+                <div className="mt-8 grid gap-6 lg:grid-cols-3 lg:gap-4 lg:mt-6">
+                  <div className="rounded-3xl border border-slate-200 bg-white p-5 lg:rounded-xl lg:p-4">
+                    <p className="text-sm font-semibold text-slate-900 lg:text-[12px]">
                       Core idea
                     </p>
 
-                    <p className="mt-3 text-sm leading-6 text-slate-600">
+                    <p className="mt-3 text-sm leading-6 text-slate-600 lg:mt-2 lg:text-[12px]">
                       {item.coreIdea}
                     </p>
                   </div>
 
-                  <div className="rounded-3xl border border-slate-200 bg-white p-5">
-                    <p className="text-sm font-semibold text-slate-900">
+                  <div className="rounded-3xl border border-slate-200 bg-white p-5 lg:rounded-xl lg:p-4">
+                    <p className="text-sm font-semibold text-slate-900 lg:text-[12px]">
                       What they care about
                     </p>
 
-                    <div className="mt-3 flex flex-wrap gap-2">
+                    <div className="mt-3 flex flex-wrap gap-2 lg:mt-2">
                       {item.caresAbout.map((value) => (
                         <span
                           key={value}
-                          className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700"
+                          className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700 lg:text-[10px]"
                         >
                           {value}
                         </span>
@@ -336,12 +336,12 @@ export default function SalesHelpPage() {
                     </div>
                   </div>
 
-                  <div className="rounded-3xl border border-slate-200 bg-white p-5">
-                    <p className="text-sm font-semibold text-slate-900">
+                  <div className="rounded-3xl border border-slate-200 bg-white p-5 lg:rounded-xl lg:p-4">
+                    <p className="text-sm font-semibold text-slate-900 lg:text-[12px]">
                       Sales line
                     </p>
 
-                    <p className="mt-3 text-sm leading-6 text-slate-600">
+                    <p className="mt-3 text-sm leading-6 text-slate-600 lg:mt-2 lg:text-[12px]">
                       “{item.salesLine}”
                     </p>
                   </div>
@@ -351,22 +351,22 @@ export default function SalesHelpPage() {
           })}
         </section>
 
-        <section className="grid gap-6 lg:grid-cols-[1fr_0.9fr]">
-          <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
-            <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-slate-600">
+        <section className="grid gap-6 lg:grid-cols-[1fr_0.9fr] lg:gap-4">
+          <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm lg:p-6 lg:rounded-2xl lg:p-[18px]">
+            <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-slate-600 lg:text-[10px]">
               <HelpCircle className="h-3.5 w-3.5" />
               Qualification
             </div>
 
-            <h2 className="mt-4 text-2xl font-semibold tracking-tight text-slate-950">
+            <h2 className="mt-4 text-2xl font-semibold tracking-tight text-slate-950 lg:mt-3 lg:text-xl">
               Quick qualification questions
             </h2>
 
-            <div className="mt-5 space-y-3">
+            <div className="mt-5 space-y-3 lg:mt-4">
               {qualificationQuestions.map((question) => (
                 <div
                   key={question}
-                  className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-700"
+                  className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-700 lg:rounded-xl lg:p-3 lg:text-[12px]"
                 >
                   {question}
                 </div>
@@ -374,26 +374,26 @@ export default function SalesHelpPage() {
             </div>
           </section>
 
-          <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
-            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-500">
+          <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm lg:p-6 lg:rounded-2xl lg:p-[18px]">
+            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-500 lg:text-[12px]">
               Shortcut
             </p>
 
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
+            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 lg:mt-1.5 lg:text-xl">
               Fast tier recommendation
             </h2>
 
-            <div className="mt-5 space-y-3">
+            <div className="mt-5 space-y-3 lg:mt-4">
               {salesShortcuts.map((item) => (
                 <div
                   key={item.signal}
-                  className="flex items-start justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                  className="flex items-start justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:gap-3 lg:rounded-xl lg:p-3"
                 >
-                  <p className="text-sm leading-6 text-slate-700">
+                  <p className="text-sm leading-6 text-slate-700 lg:text-[12px]">
                     {item.signal}
                   </p>
 
-                  <span className="rounded-full bg-slate-950 px-3 py-1 text-xs font-semibold text-white">
+                  <span className="rounded-full bg-slate-950 px-3 py-1 text-xs font-semibold text-white lg:text-[10px]">
                     {item.tier}
                   </span>
                 </div>
@@ -402,34 +402,34 @@ export default function SalesHelpPage() {
           </section>
         </section>
 
-        <section className="rounded-[2rem] border border-rose-200 bg-rose-50 p-6 shadow-sm lg:p-8">
-          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-rose-700">
+        <section className="rounded-[2rem] border border-rose-200 bg-rose-50 p-6 shadow-sm lg:p-6 lg:rounded-2xl lg:p-[18px]">
+          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-rose-700 lg:text-[12px]">
             Language Guardrails
           </p>
 
-          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
+          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 lg:mt-1.5 lg:text-xl">
             What not to say
           </h2>
 
-          <div className="mt-5 grid gap-4 lg:grid-cols-3">
+          <div className="mt-5 grid gap-4 lg:grid-cols-3 lg:gap-3 lg:mt-4">
             {dontSay.map((item) => (
               <div
                 key={item.wrong}
-                className="rounded-3xl border border-rose-200 bg-white p-5"
+                className="rounded-3xl border border-rose-200 bg-white p-5 lg:rounded-xl lg:p-4"
               >
-                <p className="text-sm font-semibold text-rose-700">
+                <p className="text-sm font-semibold text-rose-700 lg:text-[12px]">
                   Do not say:
                 </p>
 
-                <p className="mt-2 text-sm leading-6 text-slate-600">
+                <p className="mt-2 text-sm leading-6 text-slate-600 lg:mt-1.5 lg:text-[12px]">
                   {item.wrong}
                 </p>
 
-                <p className="mt-4 text-sm font-semibold text-emerald-700">
+                <p className="mt-4 text-sm font-semibold text-emerald-700 lg:mt-3 lg:text-[12px]">
                   Say instead:
                 </p>
 
-                <p className="mt-2 text-sm leading-6 text-slate-600">
+                <p className="mt-2 text-sm leading-6 text-slate-600 lg:mt-1.5 lg:text-[12px]">
                   {item.right}
                 </p>
               </div>

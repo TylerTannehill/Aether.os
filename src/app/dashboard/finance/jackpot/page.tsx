@@ -776,29 +776,29 @@ export default function FinanceJackpotQueuePage() {
 
   if (loading) {
     return (
-      <div className="space-y-8">
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <p className="text-sm text-slate-600">Loading jackpot queue...</p>
+      <div className="space-y-8 lg:space-y-6">
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <p className="text-sm text-slate-600 lg:text-[11px]">Loading jackpot queue...</p>
         </section>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
-      <section className="rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-6 text-white shadow-sm lg:p-8">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 rounded-full border border-amber-300/30 bg-amber-300/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-amber-200">
+    <div className="space-y-8 lg:space-y-6">
+      <section className="rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-6 text-white shadow-sm lg:p-6 lg:rounded-2xl lg:p-[18px]">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-4">
+          <div className="space-y-4 lg:space-y-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-amber-300/30 bg-amber-300/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-amber-200 lg:text-[9px]">
               <Crown className="h-3.5 w-3.5" />
               Jackpot Queue
             </div>
 
             <div>
-              <h1 className="text-3xl font-semibold tracking-tight lg:text-4xl">
+              <h1 className="text-3xl font-semibold tracking-tight lg:text-3xl lg:text-2xl">
                 Work the money-moving opportunities first.
               </h1>
-              <p className="mt-3 max-w-3xl text-sm text-slate-300 lg:text-base">
+              <p className="mt-3 max-w-3xl text-sm text-slate-300 lg:text-sm lg:mt-2 lg:text-[11px]">
                 Jackpot surfaces donors who may not already be in normal lists,
                 then lets Finance record contributions, create pledges, queue the
                 contact, or mark the opportunity worked.
@@ -806,20 +806,20 @@ export default function FinanceJackpotQueuePage() {
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 lg:gap-2">
             <Link
               href="/dashboard/finance/focus"
-              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
               Back to Finance Focus
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
             </Link>
 
             <Link
               href="/dashboard/contacts"
-              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
-              <Users className="h-4 w-4" />
+              <Users className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               Contacts
             </Link>
           </div>
@@ -827,80 +827,80 @@ export default function FinanceJackpotQueuePage() {
       </section>
 
       {message ? (
-        <section className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+        <section className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 lg:rounded-xl lg:p-3 lg:text-[11px]">
           {message}
         </section>
       ) : null}
 
-      <section className="grid gap-4 md:grid-cols-4">
-        <div className="rounded-3xl border border-amber-300 bg-amber-50 p-5 shadow-sm">
+      <section className="grid gap-4 md:grid-cols-4 lg:gap-3">
+        <div className="rounded-3xl border border-amber-300 bg-amber-50 p-5 shadow-sm lg:rounded-2xl lg:p-4">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-amber-800">Latent Value</p>
-            <BadgeDollarSign className="h-5 w-5 text-amber-700" />
+            <p className="text-sm font-medium text-amber-800 lg:text-[11px]">Latent Value</p>
+            <BadgeDollarSign className="h-5 w-5 text-amber-700 lg:h-4 lg:w-4" />
           </div>
-          <p className="mt-3 text-3xl font-semibold text-amber-950">
+          <p className="mt-3 text-3xl font-semibold text-amber-950 lg:mt-2 lg:text-2xl">
             {currency.format(totalLatentValue)}
           </p>
-          <p className="mt-2 text-sm text-amber-900/80">
+          <p className="mt-2 text-sm text-amber-900/80 lg:text-[11px]">
             Opportunity currently surfaced by Jackpot.
           </p>
         </div>
 
-        <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm">
+        <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm lg:rounded-2xl lg:p-4">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-emerald-800">Open Pledge Value</p>
-            <HandCoins className="h-5 w-5 text-emerald-700" />
+            <p className="text-sm font-medium text-emerald-800 lg:text-[11px]">Open Pledge Value</p>
+            <HandCoins className="h-5 w-5 text-emerald-700 lg:h-4 lg:w-4" />
           </div>
-          <p className="mt-3 text-3xl font-semibold text-emerald-950">
+          <p className="mt-3 text-3xl font-semibold text-emerald-950 lg:mt-2 lg:text-2xl">
             {currency.format(totalOpenPledgeValue)}
           </p>
-          <p className="mt-2 text-sm text-emerald-900/80">
+          <p className="mt-2 text-sm text-emerald-900/80 lg:text-[11px]">
             Pledge value that can be converted.
           </p>
         </div>
 
-        <div className="rounded-3xl border border-rose-200 bg-rose-50 p-5 shadow-sm">
+        <div className="rounded-3xl border border-rose-200 bg-rose-50 p-5 shadow-sm lg:rounded-2xl lg:p-4">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-rose-800">High Priority</p>
-            <Zap className="h-5 w-5 text-rose-700" />
+            <p className="text-sm font-medium text-rose-800 lg:text-[11px]">High Priority</p>
+            <Zap className="h-5 w-5 text-rose-700 lg:h-4 lg:w-4" />
           </div>
-          <p className="mt-3 text-3xl font-semibold text-rose-950">
+          <p className="mt-3 text-3xl font-semibold text-rose-950 lg:mt-2 lg:text-2xl">
             {highPriorityCount}
           </p>
-          <p className="mt-2 text-sm text-rose-900/80">
+          <p className="mt-2 text-sm text-rose-900/80 lg:text-[11px]">
             Opportunities with score 85 or higher.
           </p>
         </div>
 
-        <div className="rounded-3xl border border-sky-200 bg-sky-50 p-5 shadow-sm">
+        <div className="rounded-3xl border border-sky-200 bg-sky-50 p-5 shadow-sm lg:rounded-2xl lg:p-4">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-sky-800">
+            <p className="text-sm font-medium text-sky-800 lg:text-[11px]">
               Recommended First Move
             </p>
-            <PhoneCall className="h-5 w-5 text-sky-700" />
+            <PhoneCall className="h-5 w-5 text-sky-700 lg:h-4 lg:w-4" />
           </div>
-          <p className="mt-3 text-lg font-semibold text-sky-950">
+          <p className="mt-3 text-lg font-semibold text-sky-950 lg:mt-2 lg:text-base">
             {topOpportunity?.contactName || "No opportunity surfaced"}
           </p>
-          <p className="mt-2 text-sm text-sky-900/80">
+          <p className="mt-2 text-sm text-sky-900/80 lg:text-[11px]">
             {topOpportunity?.suggestedAsk || "Ingest donor or FEC signals to activate Jackpot."}
           </p>
         </div>
       </section>
 
-      <section className="rounded-3xl border-2 border-amber-300 bg-gradient-to-br from-amber-50 via-yellow-50 to-white p-6 shadow-md">
-        <div className="flex items-start gap-3">
-          <Sparkles className="mt-1 h-5 w-5 text-amber-700" />
+      <section className="rounded-3xl border-2 border-amber-300 bg-gradient-to-br from-amber-50 via-yellow-50 to-white p-6 shadow-md lg:rounded-2xl lg:p-[18px]">
+        <div className="flex items-start gap-3 lg:gap-2">
+          <Sparkles className="mt-1 h-5 w-5 text-amber-700 lg:h-4 lg:w-4" />
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700 lg:text-[9px]">
               Abe Jackpot Read
             </p>
-            <h2 className="mt-2 text-2xl font-semibold text-slate-900">
+            <h2 className="mt-2 text-2xl font-semibold text-slate-900 lg:text-xl">
               {jackpotOpportunities.length > 0
                 ? "Jackpot sees money sitting between signal and action."
                 : "Jackpot is waiting for live donor signal."}
             </h2>
-            <p className="mt-2 max-w-4xl text-sm text-slate-700">
+            <p className="mt-2 max-w-4xl text-sm text-slate-700 lg:text-[11px]">
               {jackpotOpportunities.length > 0
                 ? "Work open pledge value first, then underworked donor capacity, then hidden capacity and re-engagement. Jackpot is its own queue for opportunity discovery, not just a dashboard."
                 : "No live jackpot opportunities are available yet. Import contacts, FEC matches, pledge records, or donor activity to activate this queue."}
@@ -909,27 +909,27 @@ export default function FinanceJackpotQueuePage() {
         </div>
       </section>
 
-      <section className="grid gap-5">
+      <section className="grid gap-5 lg:gap-4">
         {jackpotOpportunities.length === 0 ? (
-          <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
-            <p className="text-lg font-semibold text-slate-900">
+          <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center lg:rounded-2xl lg:p-6">
+            <p className="text-lg font-semibold text-slate-900 lg:text-base">
               No live jackpot opportunities yet.
             </p>
-            <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-600">
+            <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-600 lg:text-[11px]">
               Jackpot will populate when contacts carry FEC totals, donor tiers,
               jackpot anomaly flags, pledges, contributions, or other finance signal fields.
             </p>
-            <div className="mt-5 flex justify-center gap-3">
+            <div className="mt-5 flex justify-center gap-3 lg:gap-2 lg:mt-4">
               <Link
                 href="/dashboard/contacts/import"
-                className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
+                className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
               >
                 Import Contacts
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               </Link>
               <Link
                 href="/dashboard/finance"
-                className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
               >
                 Back to Finance
               </Link>
@@ -944,26 +944,26 @@ export default function FinanceJackpotQueuePage() {
           return (
             <div
               key={opportunity.id}
-              className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm lg:p-6"
+              className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm lg:p-6 lg:rounded-2xl lg:p-4"
             >
-              <div className="grid gap-5 lg:grid-cols-[0.75fr_1.55fr_0.95fr] lg:items-start">
-                <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-amber-700">
+              <div className="grid gap-5 lg:grid-cols-[0.7fr_1.6fr_0.85fr] lg:gap-4 lg:items-start lg:gap-4">
+                <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 lg:rounded-xl lg:p-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-amber-700 lg:text-[9px]">
                     Rank #{index + 1}
                   </p>
-                  <p className={`mt-3 text-4xl font-semibold ${scoreTone(opportunity.opportunityScore)}`}>
+                  <p className={`mt-3 text-4xl font-semibold ${scoreTone(opportunity.opportunityScore)} lg:mt-2 lg:text-3xl`}>
                     {opportunity.opportunityScore}
                   </p>
-                  <p className="mt-1 text-sm text-slate-600">
+                  <p className="mt-1 text-sm text-slate-600 lg:text-[11px]">
                     Opportunity Score
                   </p>
-                  <p className="mt-4 text-2xl font-semibold text-slate-900">
+                  <p className="mt-4 text-2xl font-semibold text-slate-900 lg:mt-3 lg:text-xl">
                     {currency.format(opportunity.latentValue)}
                   </p>
-                  <p className="mt-1 text-sm text-slate-500">Latent value</p>
+                  <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">Latent value</p>
 
                   {latestAction ? (
-                    <div className="mt-4 rounded-xl border border-amber-200 bg-white p-3 text-xs text-slate-700">
+                    <div className="mt-4 rounded-xl border border-amber-200 bg-white p-3 text-xs text-slate-700 lg:mt-3 lg:text-[9px]">
                       <p className="font-semibold text-slate-900">
                         Last Action
                       </p>
@@ -978,72 +978,72 @@ export default function FinanceJackpotQueuePage() {
                     <span
                       className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${categoryTone(
                         opportunity.category,
-                      )}`}
+                      )} lg:text-[9px]`}
                     >
                       {categoryLabel(opportunity.category)}
                     </span>
-                    <span className="inline-flex rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                    <span className="inline-flex rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 lg:text-[9px]">
                       jackpot work queue
                     </span>
                   </div>
 
-                  <h2 className="mt-4 text-2xl font-semibold text-slate-900">
+                  <h2 className="mt-4 text-2xl font-semibold text-slate-900 lg:mt-3 lg:text-xl">
                     {opportunity.contactName}
                   </h2>
-                  <p className="mt-2 text-base font-medium text-slate-800">
+                  <p className="mt-2 text-base font-medium text-slate-800 lg:text-sm">
                     {opportunity.headline}
                   </p>
 
-                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                      <p className="text-xs text-slate-500">Campaign Contributions</p>
-                      <p className="mt-2 text-lg font-semibold text-slate-900">
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:gap-2 lg:mt-3">
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
+                      <p className="text-xs text-slate-500 lg:text-[9px]">Campaign Contributions</p>
+                      <p className="mt-2 text-lg font-semibold text-slate-900 lg:text-base">
                         {currency.format(opportunity.contributionTotal)}
                       </p>
                     </div>
-                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                      <p className="text-xs text-slate-500">Open Pledges</p>
-                      <p className="mt-2 text-lg font-semibold text-slate-900">
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
+                      <p className="text-xs text-slate-500 lg:text-[9px]">Open Pledges</p>
+                      <p className="mt-2 text-lg font-semibold text-slate-900 lg:text-base">
                         {currency.format(opportunity.pledgeTotal)}
                       </p>
                     </div>
                   </div>
 
-                  <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3 lg:mt-3">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 lg:text-[9px]">
                       Why Jackpot surfaced this
                     </p>
-                    <ul className="mt-3 space-y-2 text-sm text-slate-700">
+                    <ul className="mt-3 space-y-2 text-sm text-slate-700 lg:mt-2 lg:text-[11px]">
                       {opportunity.whySurfaced.map((reason) => (
                         <li key={reason} className="flex gap-2">
-                          <Target className="mt-0.5 h-4 w-4 flex-none text-amber-600" />
+                          <Target className="mt-0.5 h-4 w-4 flex-none text-amber-600 lg:h-3.5 lg:w-3.5" />
                           <span>{reason}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
 
-                  <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
+                  <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 lg:rounded-xl lg:p-3 lg:mt-3">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700 lg:text-[9px]">
                       Recommended action
                     </p>
-                    <p className="mt-2 text-sm text-emerald-900">
+                    <p className="mt-2 text-sm text-emerald-900 lg:text-[11px]">
                       {opportunity.recommendedAction}
                     </p>
                   </div>
 
                   {isActive && activeOpportunity ? (
-                    <div className="mt-4 rounded-2xl border border-amber-300 bg-amber-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">
+                    <div className="mt-4 rounded-2xl border border-amber-300 bg-amber-50 p-4 lg:rounded-xl lg:p-3 lg:mt-3">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-amber-700 lg:text-[9px]">
                         Jackpot Work Panel
                       </p>
 
-                      <div className="mt-4 grid gap-3 md:grid-cols-3">
+                      <div className="mt-4 grid gap-3 md:grid-cols-3 lg:gap-2 lg:mt-3">
                         <input
                           value={paymentAmount}
                           onChange={(event) => setPaymentAmount(event.target.value)}
                           placeholder="Contribution amount"
-                          className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm"
+                          className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm lg:text-[11px]"
                         />
 
                         <select
@@ -1051,7 +1051,7 @@ export default function FinanceJackpotQueuePage() {
                           onChange={(event) =>
                             setPaymentMethod(event.target.value as PaymentMethod)
                           }
-                          className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm"
+                          className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm lg:text-[11px]"
                         >
                           <option value="check">Check</option>
                           <option value="cash">Cash</option>
@@ -1062,23 +1062,23 @@ export default function FinanceJackpotQueuePage() {
                           type="date"
                           value={paymentDate}
                           onChange={(event) => setPaymentDate(event.target.value)}
-                          className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm"
+                          className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm lg:text-[11px]"
                         />
                       </div>
 
-                      <div className="mt-3 grid gap-3 md:grid-cols-2">
+                      <div className="mt-3 grid gap-3 md:grid-cols-2 lg:gap-2 lg:mt-2">
                         <input
                           value={pledgeAmount}
                           onChange={(event) => setPledgeAmount(event.target.value)}
                           placeholder="Pledge amount"
-                          className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm"
+                          className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm lg:text-[11px]"
                         />
 
                         <input
                           type="date"
                           value={pledgeFollowUp}
                           onChange={(event) => setPledgeFollowUp(event.target.value)}
-                          className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm"
+                          className="rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm lg:text-[11px]"
                         />
                       </div>
 
@@ -1087,44 +1087,44 @@ export default function FinanceJackpotQueuePage() {
                         onChange={(event) => setActionNotes(event.target.value)}
                         placeholder="Optional action notes..."
                         rows={3}
-                        className="mt-3 w-full rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm"
+                        className="mt-3 w-full rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm lg:mt-2 lg:text-[11px]"
                       />
 
-                      <div className="mt-3 flex flex-wrap gap-2">
+                      <div className="mt-3 flex flex-wrap gap-2 lg:mt-2">
                         <button
                           onClick={() => recordContribution(activeOpportunity)}
-                          className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-emerald-700"
+                          className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-emerald-700 lg:text-[9px]"
                         >
                           Record Contribution
                         </button>
                         <button
                           onClick={() => createPledge(activeOpportunity)}
-                          className="rounded-xl bg-amber-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-amber-700"
+                          className="rounded-xl bg-amber-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-amber-700 lg:text-[9px]"
                         >
                           Create Pledge
                         </button>
                         <button
                           onClick={() => addToFinanceQueue(activeOpportunity)}
-                          className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white transition hover:bg-slate-800"
+                          className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white transition hover:bg-slate-800 lg:text-[9px]"
                         >
                           Add to Finance Queue
                         </button>
                         <button
                           onClick={() => markWorked(activeOpportunity)}
-                          className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+                          className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100 lg:text-[9px]"
                         >
                           Mark Worked
                         </button>
                         <button
                           onClick={() => setActiveOpportunityId(null)}
-                          className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+                          className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100 lg:text-[9px]"
                         >
                           Close
                         </button>
                       </div>
 
                       {actionMessage ? (
-                        <p className="mt-3 text-sm font-medium text-amber-800">
+                        <p className="mt-3 text-sm font-medium text-amber-800 lg:mt-2 lg:text-[11px]">
                           {actionMessage}
                         </p>
                       ) : null}
@@ -1132,35 +1132,35 @@ export default function FinanceJackpotQueuePage() {
                   ) : null}
                 </div>
 
-                <div className="space-y-3">
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                    <p className="text-xs text-slate-500">Suggested Ask</p>
-                    <p className="mt-2 text-lg font-semibold text-slate-900">
+                <div className="space-y-3 lg:space-y-2">
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
+                    <p className="text-xs text-slate-500 lg:text-[9px]">Suggested Ask</p>
+                    <p className="mt-2 text-lg font-semibold text-slate-900 lg:text-base">
                       {opportunity.suggestedAsk}
                     </p>
                   </div>
 
                   <button
                     onClick={() => openActionPanel(opportunity)}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-amber-500 px-4 py-3 text-sm font-medium text-white transition hover:bg-amber-600"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-amber-500 px-4 py-3 text-sm font-medium text-white transition hover:bg-amber-600 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
                   >
-                    <PhoneCall className="h-4 w-4" />
+                    <PhoneCall className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                     Work Jackpot
                   </button>
 
                   <Link
                     href={opportunity.contactHref}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
                   >
                     Open Contact
-                    <ArrowRight className="h-4 w-4" />
+                    <ArrowRight className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                   </Link>
 
                   <Link
                     href="/dashboard/finance/focus"
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800 transition hover:bg-amber-100"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800 transition hover:bg-amber-100 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
                   >
-                    <FileSpreadsheet className="h-4 w-4" />
+                    <FileSpreadsheet className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                     Open Finance Focus
                   </Link>
                 </div>
@@ -1170,25 +1170,25 @@ export default function FinanceJackpotQueuePage() {
         })}
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-slate-900 p-6 text-white shadow-sm">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <section className="rounded-3xl border border-slate-200 bg-slate-900 p-6 text-white shadow-sm lg:rounded-2xl lg:p-[18px]">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-3">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-200">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-200 lg:text-[9px]">
               Jackpot Pattern Watch
             </p>
-            <h2 className="mt-2 text-2xl font-semibold">
+            <h2 className="mt-2 text-2xl font-semibold lg:text-xl">
               {jackpotOpportunities.length > 0
                 ? "The strongest pattern is conversion before discovery."
                 : "No jackpot pattern is active yet."}
             </h2>
-            <p className="mt-2 max-w-3xl text-sm text-slate-300">
+            <p className="mt-2 max-w-3xl text-sm text-slate-300 lg:text-[11px]">
               {jackpotOpportunities.length > 0
                 ? "Work active pledge conversion first, then underworked donor capacity, then hidden capacity and re-engagement. Jackpot protects focus by keeping money-moving signals above routine volume."
                 : "Once donor intelligence is ingested, this section will summarize the strongest live money-moving pattern."}
             </p>
           </div>
 
-          <TrendingUp className="h-10 w-10 text-amber-300" />
+          <TrendingUp className="h-10 w-10 text-amber-300 lg:h-8 lg:w-8" />
         </div>
       </section>
     </div>

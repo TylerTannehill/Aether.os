@@ -43,7 +43,7 @@ type ParsedCampaignCsv = {
 function ProgressDot({ active }: { active: boolean }) {
   return (
     <span
-      className={`inline-flex h-3 w-3 rounded-full border ${
+      className={`inline-flex h-3 w-3 rounded-full border lg:h-2.5 lg:w-2.5 ${
         active
           ? "border-slate-950 bg-slate-950"
           : "border-slate-300 bg-white"
@@ -63,7 +63,7 @@ function BooleanStatus({
 }) {
   return (
     <span
-      className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${
+      className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold lg:px-2.5 lg:py-0.5 lg:text-[10px] ${
         active
           ? "border-emerald-200 bg-emerald-50 text-emerald-800"
           : "border-slate-200 bg-white text-slate-500"
@@ -641,25 +641,25 @@ export default function TeamAetherSalesPage() {
   }, [activeFilter, campaigns, search]);
 
   return (
-    <main className="min-h-screen bg-slate-100 p-6 text-slate-950 lg:p-8">
-      <div className="mx-auto max-w-7xl space-y-6">
-        <section className="rounded-[2rem] bg-slate-950 p-8 text-white">
-          <div className="flex flex-col gap-8 lg:flex-row lg:justify-between">
+    <main className="min-h-screen bg-slate-100 p-6 text-slate-950 lg:p-6 lg:p-4">
+      <div className="mx-auto max-w-7xl space-y-6 lg:space-y-4">
+        <section className="rounded-[2rem] bg-slate-950 p-8 text-white lg:rounded-2xl lg:p-6">
+          <div className="flex flex-col gap-8 lg:flex-row lg:justify-between lg:gap-5">
             <div>
-              <div className="inline-flex rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em]">
+              <div className="inline-flex rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] lg:text-[10px]">
                 Team Aether
               </div>
 
-              <h1 className="mt-4 text-4xl font-bold tracking-tight lg:text-5xl">
+              <h1 className="mt-4 text-4xl font-bold tracking-tight lg:text-4xl lg:mt-3 lg:text-3xl">
                 Sales Pipeline
               </h1>
 
-              <p className="mt-3 max-w-2xl text-slate-300">
+              <p className="mt-3 max-w-2xl text-slate-300 lg:mt-2">
                 Track outreach, demos and customers from one operational page.
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 lg:w-[520px]">
+            <div className="grid grid-cols-2 gap-3 lg:w-[420px] lg:gap-2">
               {[
                 { label: "Dashboard", href: "/team-aether/dashboard" },
                 {
@@ -683,8 +683,8 @@ export default function TeamAetherSalesPage() {
                   href={item.href}
                   className={
                     item.label === "Sales Pipeline"
-                      ? "rounded-2xl border-2 border-slate-300 bg-white px-4 py-3 text-center text-base font-extrabold !text-black shadow-sm"
-                      : "rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-center text-white transition hover:bg-white/20"
+                      ? "rounded-2xl border-2 border-slate-300 bg-white px-4 py-3 text-center text-base font-extrabold !text-black shadow-sm lg:rounded-xl lg:px-3 lg:py-2 lg:text-sm"
+                      : "rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-center text-white transition hover:bg-white/20 lg:rounded-xl lg:px-3 lg:py-2 lg:text-sm"
                   }
                   style={item.label === "Sales Pipeline" ? { color: "#000000" } : undefined}
                 >
@@ -695,15 +695,15 @@ export default function TeamAetherSalesPage() {
           </div>
         </section>
 
-        <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
-            <div className="flex flex-wrap gap-3">
+        <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm lg:p-6 lg:rounded-2xl lg:p-4">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-3">
+            <div className="flex flex-wrap gap-3 lg:gap-2">
               <button
                 onClick={() => {
                   resetImportModal();
                   setShowImportModal(true);
                 }}
-                className="rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+                className="rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 lg:rounded-xl lg:px-3.5 lg:py-2 lg:text-[12px]"
               >
                 Import Campaigns
               </button>
@@ -714,7 +714,7 @@ export default function TeamAetherSalesPage() {
                   resetAddCampaignModal();
                   setShowAddModal(true);
                 }}
-                className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+                className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 lg:rounded-xl lg:px-3.5 lg:py-2 lg:text-[12px]"
               >
                 Add Campaign
               </button>
@@ -723,50 +723,50 @@ export default function TeamAetherSalesPage() {
             <input
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-slate-400 lg:ml-auto lg:w-96"
+              className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-slate-400 lg:ml-auto lg:w-96 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[12px]"
               placeholder="Search campaign, contact, race, state or owner..."
             />
           </div>
 
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-3xl border border-amber-200 bg-amber-50 p-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-700">
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-3 lg:mt-4">
+            <div className="rounded-3xl border border-amber-200 bg-amber-50 p-5 lg:rounded-xl lg:p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-700 lg:text-[10px]">
                 Needs Follow-up
               </p>
-              <p className="mt-3 text-3xl font-semibold text-amber-950">
+              <p className="mt-3 text-3xl font-semibold text-amber-950 lg:mt-2 lg:text-2xl">
                 {metrics.needsFollowUp}
               </p>
             </div>
 
-            <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-600">
+            <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5 lg:rounded-xl lg:p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-600 lg:text-[10px]">
                 Awaiting Reply
               </p>
-              <p className="mt-3 text-3xl font-semibold text-slate-950">
+              <p className="mt-3 text-3xl font-semibold text-slate-950 lg:mt-2 lg:text-2xl">
                 {metrics.awaitingReply}
               </p>
             </div>
 
-            <div className="rounded-3xl border border-blue-200 bg-blue-50 p-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-blue-700">
+            <div className="rounded-3xl border border-blue-200 bg-blue-50 p-5 lg:rounded-xl lg:p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-blue-700 lg:text-[10px]">
                 Upcoming Demos
               </p>
-              <p className="mt-3 text-3xl font-semibold text-blue-950">
+              <p className="mt-3 text-3xl font-semibold text-blue-950 lg:mt-2 lg:text-2xl">
                 {metrics.upcomingDemos}
               </p>
             </div>
 
-            <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">
+            <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 lg:rounded-xl lg:p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700 lg:text-[10px]">
                 Customers
               </p>
-              <p className="mt-3 text-3xl font-semibold text-emerald-950">
+              <p className="mt-3 text-3xl font-semibold text-emerald-950 lg:mt-2 lg:text-2xl">
                 {metrics.customers}
               </p>
             </div>
           </div>
 
-          <div className="mt-6 flex flex-wrap gap-2">
+          <div className="mt-6 flex flex-wrap gap-2 lg:mt-4">
             {(
               [
                 ["all", "All"],
@@ -785,7 +785,7 @@ export default function TeamAetherSalesPage() {
                   key={value}
                   type="button"
                   onClick={() => setActiveFilter(value)}
-                  className={`rounded-2xl border px-4 py-2.5 text-sm font-medium transition ${
+                  className={`rounded-2xl border px-4 py-2.5 text-sm font-medium transition lg:rounded-xl lg:px-3 lg:py-1.5 lg:text-xs ${
                     active
                       ? "border-slate-950 bg-slate-950 text-white"
                       : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
@@ -798,30 +798,30 @@ export default function TeamAetherSalesPage() {
           </div>
 
           {loadingCampaigns ? (
-            <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-8 text-center text-sm text-slate-500">
+            <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-8 text-center text-sm text-slate-500 lg:rounded-xl lg:p-6 lg:mt-4 lg:text-[12px]">
               Loading campaigns...
             </div>
           ) : pageError ? (
-            <div className="mt-6 rounded-3xl border border-rose-200 bg-rose-50 p-6 text-sm text-rose-800">
+            <div className="mt-6 rounded-3xl border border-rose-200 bg-rose-50 p-6 text-sm text-rose-800 lg:rounded-xl lg:p-4 lg:mt-4 lg:text-[12px]">
               {pageError}
             </div>
           ) : filteredCampaigns.length === 0 ? (
-            <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-8 text-center text-sm text-slate-500">
+            <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-8 text-center text-sm text-slate-500 lg:rounded-xl lg:p-6 lg:mt-4 lg:text-[12px]">
               No campaigns match the current search and filter.
             </div>
           ) : (
-            <div className="mt-6 overflow-hidden rounded-3xl border border-slate-200">
-              <div className="max-h-[70vh] min-h-[500px] overflow-auto">
-                <table className="min-w-full text-left text-sm">
-                  <thead className="sticky top-0 z-10 bg-slate-50 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 shadow-sm">
+            <div className="mt-6 overflow-hidden rounded-3xl border border-slate-200 lg:rounded-xl lg:mt-4">
+              <div className="max-h-[70vh] min-h-[500px] overflow-auto lg:min-h-[420px]">
+                <table className="min-w-full text-left text-sm lg:text-[12px]">
+                  <thead className="sticky top-0 z-10 bg-slate-50 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 shadow-sm lg:text-[10px]">
                     <tr>
-                      <th className="px-5 py-4">Campaign</th>
-                      <th className="px-5 py-4">Emails</th>
-                      <th className="px-5 py-4">Reply</th>
-                      <th className="px-5 py-4">Demo</th>
-                      <th className="px-5 py-4">Customer</th>
-                      <th className="px-5 py-4">Owner</th>
-                      <th className="px-5 py-4">Last Activity</th>
+                      <th className="px-5 py-4 lg:px-3.5 lg:py-2.5">Campaign</th>
+                      <th className="px-5 py-4 lg:px-3.5 lg:py-2.5">Emails</th>
+                      <th className="px-5 py-4 lg:px-3.5 lg:py-2.5">Reply</th>
+                      <th className="px-5 py-4 lg:px-3.5 lg:py-2.5">Demo</th>
+                      <th className="px-5 py-4 lg:px-3.5 lg:py-2.5">Customer</th>
+                      <th className="px-5 py-4 lg:px-3.5 lg:py-2.5">Owner</th>
+                      <th className="px-5 py-4 lg:px-3.5 lg:py-2.5">Last Activity</th>
                     </tr>
                   </thead>
 
@@ -846,9 +846,9 @@ export default function TeamAetherSalesPage() {
                                 : "bg-white hover:bg-slate-50"
                             }`}
                           >
-                            <td className="px-5 py-4">
-                              <div className="flex items-start gap-3">
-                                <span className="mt-0.5 text-xs text-slate-400">
+                            <td className="px-5 py-4 lg:px-3.5 lg:py-2.5">
+                              <div className="flex items-start gap-3 lg:gap-2">
+                                <span className="mt-0.5 text-xs text-slate-400 lg:text-[10px]">
                                   {expanded ? "▼" : "▶"}
                                 </span>
 
@@ -856,15 +856,15 @@ export default function TeamAetherSalesPage() {
                                   <p className="font-semibold text-slate-950">
                                     {campaign.campaign}
                                   </p>
-                                  <p className="mt-1 text-xs text-slate-500">
+                                  <p className="mt-1 text-xs text-slate-500 lg:text-[10px]">
                                     {campaign.race} · {campaign.state}
                                   </p>
                                 </div>
                               </div>
                             </td>
 
-                            <td className="px-5 py-4">
-                              <div className="flex items-center gap-3">
+                            <td className="px-5 py-4 lg:px-3.5 lg:py-2.5">
+                              <div className="flex items-center gap-3 lg:gap-2">
                                 <div className="flex gap-1.5">
                                   {[1, 2, 3].map((step) => (
                                     <ProgressDot
@@ -874,13 +874,13 @@ export default function TeamAetherSalesPage() {
                                   ))}
                                 </div>
 
-                                <span className="text-xs font-semibold text-slate-600">
+                                <span className="text-xs font-semibold text-slate-600 lg:text-[10px]">
                                   {campaign.emails}/3
                                 </span>
                               </div>
                             </td>
 
-                            <td className="px-5 py-4">
+                            <td className="px-5 py-4 lg:px-3.5 lg:py-2.5">
                               <BooleanStatus
                                 active={campaign.replyReceived}
                                 activeLabel="Received"
@@ -888,7 +888,7 @@ export default function TeamAetherSalesPage() {
                               />
                             </td>
 
-                            <td className="px-5 py-4">
+                            <td className="px-5 py-4 lg:px-3.5 lg:py-2.5">
                               <BooleanStatus
                                 active={campaign.demoScheduled}
                                 activeLabel="Scheduled"
@@ -896,7 +896,7 @@ export default function TeamAetherSalesPage() {
                               />
                             </td>
 
-                            <td className="px-5 py-4">
+                            <td className="px-5 py-4 lg:px-3.5 lg:py-2.5">
                               <BooleanStatus
                                 active={campaign.customer}
                                 activeLabel="Customer"
@@ -904,25 +904,25 @@ export default function TeamAetherSalesPage() {
                               />
                             </td>
 
-                            <td className="px-5 py-4 font-medium text-slate-700">
+                            <td className="px-5 py-4 font-medium text-slate-700 lg:px-3.5 lg:py-2.5">
                               {campaign.owner}
                             </td>
 
-                            <td className="whitespace-nowrap px-5 py-4 text-slate-600">
+                            <td className="whitespace-nowrap px-5 py-4 text-slate-600 lg:px-3.5 lg:py-2.5">
                               {campaign.lastActivity}
                             </td>
                           </tr>
 
                           {expanded ? (
                             <tr className="bg-slate-50">
-                              <td colSpan={7} className="p-6">
-                                <div className="grid gap-8 lg:grid-cols-[1fr_1fr]">
+                              <td colSpan={7} className="p-6 lg:p-4">
+                                <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:gap-5 lg:gap-5">
                                   <div>
-                                    <div className="inline-flex rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.15em] text-slate-600">
+                                    <div className="inline-flex rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.15em] text-slate-600 lg:text-[10px]">
                                       Campaign Details
                                     </div>
 
-                                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                                    <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:gap-2 lg:mt-3">
                                       {[
                                         ["Contact", campaign.contact],
                                         ["Email", campaign.email],
@@ -934,9 +934,9 @@ export default function TeamAetherSalesPage() {
                                       ].map(([label, value]) => (
                                         <div
                                           key={label}
-                                          className="rounded-2xl border border-slate-200 bg-white p-4"
+                                          className="rounded-2xl border border-slate-200 bg-white p-4 lg:rounded-xl lg:p-3"
                                         >
-                                          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+                                          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 lg:text-[10px]">
                                             {label}
                                           </p>
                                           {label === "Owner" ? (
@@ -944,14 +944,14 @@ export default function TeamAetherSalesPage() {
                                               value={campaign.owner}
                                               onClick={(e)=>e.stopPropagation()}
                                               onChange={(e)=>handleOwnerChange(campaign,e.target.value)}
-                                              className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-900"
+                                              className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-900 lg:mt-1.5 lg:text-[12px]"
                                             >
                                               <option>Tyler</option>
                                               <option>Mike</option>
                                               <option>Robby</option>
                                             </select>
                                           ) : (
-                                          <p className="mt-2 break-words text-sm font-semibold text-slate-900">
+                                          <p className="mt-2 break-words text-sm font-semibold text-slate-900 lg:mt-1.5 lg:text-[12px]">
                                             {value}
                                           </p>
                                           )}
@@ -961,56 +961,56 @@ export default function TeamAetherSalesPage() {
                                   </div>
 
                                   <div>
-                                    <div className="inline-flex rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.15em] text-slate-600">
+                                    <div className="inline-flex rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.15em] text-slate-600 lg:text-[10px]">
                                       Internal Progress
                                     </div>
 
-                                    <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-5">
-                                      <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                                        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+                                    <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-5 lg:gap-2 lg:mt-3">
+                                      <div className="rounded-2xl border border-slate-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                                        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 lg:text-[10px]">
                                           Emails
                                         </p>
-                                        <p className="mt-2 text-lg font-semibold">
+                                        <p className="mt-2 text-lg font-semibold lg:mt-1.5 lg:text-base">
                                           {campaign.emails}/3
                                         </p>
                                       </div>
 
-                                      <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                                        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+                                      <div className="rounded-2xl border border-slate-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                                        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 lg:text-[10px]">
                                           Reply
                                         </p>
-                                        <p className="mt-2 text-sm font-semibold">
+                                        <p className="mt-2 text-sm font-semibold lg:mt-1.5 lg:text-[12px]">
                                           {campaign.replyReceived
                                             ? "Received"
                                             : "Waiting"}
                                         </p>
                                       </div>
 
-                                      <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                                        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+                                      <div className="rounded-2xl border border-slate-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                                        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 lg:text-[10px]">
                                           Demo
                                         </p>
-                                        <p className="mt-2 text-sm font-semibold">
+                                        <p className="mt-2 text-sm font-semibold lg:mt-1.5 lg:text-[12px]">
                                           {campaign.demoScheduled
                                             ? "Scheduled"
                                             : "Not Set"}
                                         </p>
                                       </div>
 
-                                      <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                                        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+                                      <div className="rounded-2xl border border-slate-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                                        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 lg:text-[10px]">
                                           Interested
                                         </p>
-                                        <p className="mt-2 text-sm font-semibold">
+                                        <p className="mt-2 text-sm font-semibold lg:mt-1.5 lg:text-[12px]">
                                           {campaign.interested ? "Yes" : "No"}
                                         </p>
                                       </div>
 
-                                      <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                                        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+                                      <div className="rounded-2xl border border-slate-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                                        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 lg:text-[10px]">
                                           Customer
                                         </p>
-                                        <p className="mt-2 text-sm font-semibold">
+                                        <p className="mt-2 text-sm font-semibold lg:mt-1.5 lg:text-[12px]">
                                           {campaign.customer ? "Yes" : "No"}
                                         </p>
                                       </div>
@@ -1018,11 +1018,11 @@ export default function TeamAetherSalesPage() {
 
                                     <textarea
                                       defaultValue={campaign.notes}
-                                      className="mt-4 h-28 w-full resize-none rounded-2xl border border-slate-200 bg-white p-4 text-sm outline-none transition focus:border-slate-400"
+                                      className="mt-4 h-28 w-full resize-none lg:mt-3 lg:h-20 rounded-2xl border border-slate-200 bg-white p-4 text-sm outline-none transition focus:border-slate-400 lg:rounded-xl lg:p-3 lg:mt-3 lg:text-[12px]"
                                       placeholder="Internal notes..."
                                     />
 
-                                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                                    <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:gap-2 lg:mt-3">
                                       <button
                                         type="button"
                                         disabled={
@@ -1033,7 +1033,7 @@ export default function TeamAetherSalesPage() {
                                           event.stopPropagation();
                                           handleEmailSent(campaign);
                                         }}
-                                        className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-800 transition hover:border-slate-300 hover:bg-slate-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+                                        className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-800 transition hover:border-slate-300 hover:bg-slate-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[12px]"
                                       >
                                         {campaign.emails >= 3
                                           ? "3 Emails Sent"
@@ -1047,7 +1047,7 @@ export default function TeamAetherSalesPage() {
                                           event.stopPropagation();
                                           handleReply(campaign);
                                         }}
-                                        className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-800 transition hover:border-slate-300 hover:bg-slate-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+                                        className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-800 transition hover:border-slate-300 hover:bg-slate-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[12px]"
                                       >
                                         {campaign.replyReceived
                                           ? "Undo Reply"
@@ -1061,7 +1061,7 @@ export default function TeamAetherSalesPage() {
                                           event.stopPropagation();
                                           handleDemo(campaign);
                                         }}
-                                        className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-800 transition hover:border-slate-300 hover:bg-slate-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+                                        className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-800 transition hover:border-slate-300 hover:bg-slate-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[12px]"
                                       >
                                         {campaign.demoScheduled
                                           ? "Unschedule Demo"
@@ -1075,7 +1075,7 @@ export default function TeamAetherSalesPage() {
                                           event.stopPropagation();
                                           handleInterested(campaign);
                                         }}
-                                        className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-800 transition hover:border-slate-300 hover:bg-slate-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+                                        className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-800 transition hover:border-slate-300 hover:bg-slate-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[12px]"
                                       >
                                         {campaign.interested
                                           ? "Remove Interested"
@@ -1088,7 +1088,7 @@ export default function TeamAetherSalesPage() {
                                           event.stopPropagation();
                                           handleArchive(campaign);
                                         }}
-                                        className={`rounded-2xl border px-4 py-3 text-sm font-medium transition ${
+                                        className={`rounded-2xl border px-4 py-3 text-sm font-medium transition lg:rounded-xl lg:px-3 lg:py-2 lg:text-xs ${
                                           campaign.archived
                                             ? "border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
                                             : "border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-100"
@@ -1116,17 +1116,17 @@ export default function TeamAetherSalesPage() {
 
         {showAddModal && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-6"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-6 lg:p-4"
             onClick={closeAddCampaignModal}
           >
             <div
-              className="w-full max-w-3xl rounded-[2rem] bg-white p-8 shadow-2xl"
+              className="w-full max-w-3xl rounded-[2rem] bg-white p-8 shadow-2xl lg:rounded-2xl lg:p-5 lg:rounded-2xl lg:p-6"
               onClick={(event) => event.stopPropagation()}
             >
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start justify-between gap-4 lg:gap-3">
                 <div>
-                  <h2 className="text-3xl font-bold">Add Campaign</h2>
-                  <p className="mt-2 text-slate-500">
+                  <h2 className="text-3xl font-bold lg:text-2xl">Add Campaign</h2>
+                  <p className="mt-2 text-slate-500 lg:mt-1.5">
                     Add a campaign opportunity directly to the Team Aether sales pipeline.
                   </p>
                 </div>
@@ -1141,40 +1141,40 @@ export default function TeamAetherSalesPage() {
                 </button>
               </div>
 
-              <div className="mt-6 grid gap-4 sm:grid-cols-2">
+              <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:gap-3 lg:mt-4">
                 <label className="sm:col-span-2">
-                  <span className="text-sm font-semibold text-slate-700">Campaign Name *</span>
+                  <span className="text-sm font-semibold text-slate-700 lg:text-[12px]">Campaign Name *</span>
                   <input
                     value={newCampaign.campaign}
                     onChange={(event) =>
                       setNewCampaign({ ...newCampaign, campaign: event.target.value })
                     }
-                    className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-slate-400"
+                    className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-slate-400 lg:rounded-xl lg:px-3 lg:py-2 lg:mt-1.5 lg:text-[12px]"
                     placeholder="Campaign name"
                     autoFocus
                   />
                 </label>
 
                 <label>
-                  <span className="text-sm font-semibold text-slate-700">Contact</span>
+                  <span className="text-sm font-semibold text-slate-700 lg:text-[12px]">Contact</span>
                   <input
                     value={newCampaign.contact}
                     onChange={(event) =>
                       setNewCampaign({ ...newCampaign, contact: event.target.value })
                     }
-                    className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-slate-400"
+                    className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-slate-400 lg:rounded-xl lg:px-3 lg:py-2 lg:mt-1.5 lg:text-[12px]"
                     placeholder="Contact name"
                   />
                 </label>
 
                 <label>
-                  <span className="text-sm font-semibold text-slate-700">Owner</span>
+                  <span className="text-sm font-semibold text-slate-700 lg:text-[12px]">Owner</span>
                   <select
                     value={newCampaign.owner}
                     onChange={(event) =>
                       setNewCampaign({ ...newCampaign, owner: event.target.value })
                     }
-                    className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-400"
+                    className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-400 lg:rounded-xl lg:px-3 lg:py-2 lg:mt-1.5 lg:text-[12px]"
                   >
                     <option>Tyler</option>
                     <option>Mike</option>
@@ -1183,93 +1183,93 @@ export default function TeamAetherSalesPage() {
                 </label>
 
                 <label>
-                  <span className="text-sm font-semibold text-slate-700">Email</span>
+                  <span className="text-sm font-semibold text-slate-700 lg:text-[12px]">Email</span>
                   <input
                     type="email"
                     value={newCampaign.email}
                     onChange={(event) =>
                       setNewCampaign({ ...newCampaign, email: event.target.value })
                     }
-                    className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-slate-400"
+                    className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-slate-400 lg:rounded-xl lg:px-3 lg:py-2 lg:mt-1.5 lg:text-[12px]"
                     placeholder="contact@example.com"
                   />
                 </label>
 
                 <label>
-                  <span className="text-sm font-semibold text-slate-700">Phone</span>
+                  <span className="text-sm font-semibold text-slate-700 lg:text-[12px]">Phone</span>
                   <input
                     type="tel"
                     value={newCampaign.phone}
                     onChange={(event) =>
                       setNewCampaign({ ...newCampaign, phone: event.target.value })
                     }
-                    className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-slate-400"
+                    className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-slate-400 lg:rounded-xl lg:px-3 lg:py-2 lg:mt-1.5 lg:text-[12px]"
                     placeholder="Phone number"
                   />
                 </label>
 
                 <label>
-                  <span className="text-sm font-semibold text-slate-700">Race</span>
+                  <span className="text-sm font-semibold text-slate-700 lg:text-[12px]">Race</span>
                   <input
                     value={newCampaign.race}
                     onChange={(event) =>
                       setNewCampaign({ ...newCampaign, race: event.target.value })
                     }
-                    className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-slate-400"
+                    className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-slate-400 lg:rounded-xl lg:px-3 lg:py-2 lg:mt-1.5 lg:text-[12px]"
                     placeholder="Office / district / race"
                   />
                 </label>
 
                 <label>
-                  <span className="text-sm font-semibold text-slate-700">State</span>
+                  <span className="text-sm font-semibold text-slate-700 lg:text-[12px]">State</span>
                   <input
                     value={newCampaign.state}
                     onChange={(event) =>
                       setNewCampaign({ ...newCampaign, state: event.target.value })
                     }
-                    className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-slate-400"
+                    className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-slate-400 lg:rounded-xl lg:px-3 lg:py-2 lg:mt-1.5 lg:text-[12px]"
                     placeholder="State"
                   />
                 </label>
 
                 <label className="sm:col-span-2">
-                  <span className="text-sm font-semibold text-slate-700">Campaign Website</span>
+                  <span className="text-sm font-semibold text-slate-700 lg:text-[12px]">Campaign Website</span>
                   <input
                     type="url"
                     value={newCampaign.website}
                     onChange={(event) =>
                       setNewCampaign({ ...newCampaign, website: event.target.value })
                     }
-                    className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-slate-400"
+                    className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-slate-400 lg:rounded-xl lg:px-3 lg:py-2 lg:mt-1.5 lg:text-[12px]"
                     placeholder="https://..."
                   />
                 </label>
 
                 <label className="sm:col-span-2">
-                  <span className="text-sm font-semibold text-slate-700">Notes</span>
+                  <span className="text-sm font-semibold text-slate-700 lg:text-[12px]">Notes</span>
                   <textarea
                     value={newCampaign.notes}
                     onChange={(event) =>
                       setNewCampaign({ ...newCampaign, notes: event.target.value })
                     }
-                    className="mt-2 h-28 w-full resize-none rounded-2xl border border-slate-200 p-4 text-sm outline-none transition focus:border-slate-400"
+                    className="mt-2 h-28 w-full resize-none rounded-2xl border border-slate-200 p-4 text-sm outline-none transition focus:border-slate-400 lg:rounded-xl lg:p-3 lg:mt-1.5 lg:text-[12px]"
                     placeholder="Internal notes..."
                   />
                 </label>
               </div>
 
               {addCampaignError ? (
-                <div className="mt-5 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">
+                <div className="mt-5 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800 lg:rounded-xl lg:p-3 lg:mt-3 lg:text-[12px]">
                   {addCampaignError}
                 </div>
               ) : null}
 
-              <div className="mt-8 flex justify-end gap-3">
+              <div className="mt-8 flex justify-end gap-3 lg:gap-2 lg:mt-5">
                 <button
                   type="button"
                   onClick={closeAddCampaignModal}
                   disabled={addingCampaign}
-                  className="rounded-2xl border border-slate-300 px-5 py-3 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-2xl border border-slate-300 px-5 py-3 disabled:cursor-not-allowed disabled:opacity-50 lg:rounded-xl lg:px-3.5 lg:py-2"
                 >
                   Cancel
                 </button>
@@ -1277,7 +1277,7 @@ export default function TeamAetherSalesPage() {
                   type="button"
                   onClick={handleAddCampaign}
                   disabled={addingCampaign || !newCampaign.campaign.trim()}
-                  className="rounded-2xl bg-slate-950 px-5 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-2xl bg-slate-950 px-5 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50 lg:rounded-xl lg:px-3.5 lg:py-2"
                 >
                   {addingCampaign ? "Adding..." : "Add Campaign"}
                 </button>
@@ -1287,19 +1287,19 @@ export default function TeamAetherSalesPage() {
         )}
 
         {showImportModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-6">
-            <div className="w-full max-w-2xl rounded-[2rem] bg-white p-8 shadow-2xl">
-              <h2 className="text-3xl font-bold">Import Campaigns</h2>
-              <p className="mt-2 text-slate-500">Import campaign opportunities from a CSV file.</p>
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-6 lg:p-4">
+            <div className="w-full max-w-2xl rounded-[2rem] bg-white p-8 shadow-2xl lg:rounded-2xl lg:p-5 lg:rounded-2xl lg:p-6">
+              <h2 className="text-3xl font-bold lg:text-2xl">Import Campaigns</h2>
+              <p className="mt-2 text-slate-500 lg:mt-1.5">Import campaign opportunities from a CSV file.</p>
 
               <div
                 onDragOver={(event) => event.preventDefault()}
                 onDrop={handleDrop}
-                className="mt-6 rounded-3xl border-2 border-dashed border-slate-300 p-10 text-center transition hover:border-slate-400 hover:bg-slate-50"
+                className="mt-6 rounded-3xl border-2 border-dashed border-slate-300 p-10 text-center transition hover:border-slate-400 hover:bg-slate-50 lg:rounded-xl lg:p-6 lg:mt-4"
               >
                 <p className="font-semibold">Drag & Drop CSV Here</p>
                 <p className="my-4 text-slate-500">or</p>
-                <label className="inline-flex cursor-pointer rounded-2xl bg-slate-950 px-5 py-3 font-semibold text-white">
+                <label className="inline-flex cursor-pointer rounded-2xl bg-slate-950 px-5 py-3 font-semibold text-white lg:rounded-xl lg:px-3.5 lg:py-2">
                   Choose CSV File
                   <input
                     type="file"
@@ -1310,17 +1310,17 @@ export default function TeamAetherSalesPage() {
                 </label>
 
                 {parsedCsv ? (
-                  <p className="mt-4 text-sm font-medium text-emerald-700">
+                  <p className="mt-4 text-sm font-medium text-emerald-700 lg:mt-3 lg:text-[12px]">
                     {parsedCsv.rows.length} campaign row
                     {parsedCsv.rows.length === 1 ? "" : "s"} detected
                   </p>
                 ) : null}
               </div>
 
-              <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-5">
+              <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-5 lg:rounded-xl lg:p-4 lg:mt-4">
                 <p><strong>Selected File:</strong> {selectedFile?.name || "None"}</p>
-                <p className="mt-3 font-semibold">Expected Columns</p>
-                <ul className="mt-2 space-y-1 text-sm">
+                <p className="mt-3 font-semibold lg:mt-2">Expected Columns</p>
+                <ul className="mt-2 space-y-1 text-sm lg:mt-1.5 lg:text-[12px]">
                   <li>✓ Campaign</li>
                   <li>✓ Contact</li>
                   <li>✓ Email</li>
@@ -1333,29 +1333,29 @@ export default function TeamAetherSalesPage() {
                 <button
                   type="button"
                   onClick={downloadCsvTemplate}
-                  className="mt-5 rounded-xl border border-slate-300 px-4 py-2 text-sm transition hover:bg-white"
+                  className="mt-5 rounded-xl border border-slate-300 px-4 py-2 text-sm transition hover:bg-white lg:px-3 lg:mt-3 lg:text-[12px]"
                 >
                   Download CSV Template
                 </button>
               </div>
 
               {importError ? (
-                <div className="mt-5 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">
+                <div className="mt-5 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800 lg:rounded-xl lg:p-3 lg:mt-3 lg:text-[12px]">
                   {importError}
                 </div>
               ) : null}
 
-              <div className="mt-8 flex justify-end gap-3">
+              <div className="mt-8 flex justify-end gap-3 lg:gap-2 lg:mt-5">
                 <button
                   onClick={closeImportModal}
-                  className="rounded-2xl border border-slate-300 px-5 py-3"
+                  className="rounded-2xl border border-slate-300 px-5 py-3 lg:rounded-xl lg:px-3.5 lg:py-2"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleCampaignImport}
                   disabled={!parsedCsv}
-                  className="rounded-2xl bg-slate-950 px-5 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-2xl bg-slate-950 px-5 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50 lg:rounded-xl lg:px-3.5 lg:py-2"
                 >
                   Import Campaigns
                 </button>

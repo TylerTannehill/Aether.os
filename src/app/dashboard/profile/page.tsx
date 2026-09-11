@@ -777,14 +777,14 @@ export default function DashboardProfilePage() {
   }, []);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 lg:space-y-6">
       {profileError ? (
-        <section className="rounded-3xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900 shadow-sm">
+        <section className="rounded-3xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900 shadow-sm lg:rounded-2xl lg:p-3 lg:text-[11px]">
           {profileError}
         </section>
       ) : null}
 
-      <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-6 shadow-sm lg:p-8">
+      <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-6 shadow-sm lg:p-6 lg:rounded-2xl lg:p-[18px]">
         {identity.potatoEasterEggUnlocked ? (
           <div className="pointer-events-none absolute inset-0 z-10">
             {POTATO_NOTES.map((potato) => (
@@ -792,7 +792,7 @@ export default function DashboardProfilePage() {
                 key={potato.id}
                 type="button"
                 onClick={() => setActivePotatoNote(potato)}
-                className={`pointer-events-auto absolute ${potato.className} rounded-full border border-amber-200/60 bg-amber-50/90 px-2 py-1 text-base shadow-sm transition hover:scale-110 hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-300`}
+                className={`pointer-events-auto absolute ${potato.className} rounded-full border border-amber-200/60 bg-amber-50/90 px-2 py-1 text-base shadow-sm transition hover:scale-110 hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-300 lg:text-sm`}
                 aria-label="Good potato"
               >
                 🥔
@@ -800,57 +800,57 @@ export default function DashboardProfilePage() {
             ))}
           </div>
         ) : null}
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-          <div className="flex items-start gap-5">
-            <div className="flex h-20 w-20 items-center justify-center rounded-3xl border border-slate-700 bg-slate-800 text-2xl font-semibold text-white">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between lg:gap-4">
+          <div className="flex items-start gap-5 lg:gap-4">
+            <div className="flex h-20 w-20 items-center justify-center lg:h-[60px] lg:w-[60px] rounded-3xl border border-slate-700 bg-slate-800 text-2xl font-semibold text-white lg:rounded-2xl lg:text-xl">
               {identity.initials}
             </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 text-sm text-slate-300">
-                <UserCircle2 className="h-4 w-4" />
+            <div className="space-y-4 lg:space-y-3">
+              <div className="flex items-center gap-2 text-sm text-slate-300 lg:text-[11px]">
+                <UserCircle2 className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                 Operator profile
               </div>
 
               <div className="space-y-1">
-                <h1 className="text-3xl font-semibold tracking-tight text-white lg:text-4xl">
+                <h1 className="text-3xl font-semibold tracking-tight text-white lg:text-3xl lg:text-2xl">
                   {identity.name}
                 </h1>
-                <p className="text-sm text-slate-300 lg:text-base">
+                <p className="text-sm text-slate-300 lg:text-sm lg:text-[11px]">
                   {identity.role} • {identity.department}
                 </p>
-                <p className="text-sm text-slate-400">{identity.tagline}</p>
+                <p className="text-sm text-slate-400 lg:text-[11px]">{identity.tagline}</p>
                 {identity.email ? (
-                  <p className="text-xs text-slate-400">{identity.email}</p>
+                  <p className="text-xs text-slate-400 lg:text-[9px]">{identity.email}</p>
                 ) : null}
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
-                <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-900">
+                <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-900 lg:px-2.5 lg:text-[9px]">
                   <Sparkles className="h-3.5 w-3.5" />
                   Status: {profileLoading ? "Loading..." : formatProfileStatus(identity.status)}
                 </div>
 
-                <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-900">
+                <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-900 lg:px-2.5 lg:text-[9px]">
                   <Flame className="h-3.5 w-3.5" />
                   {streaks.executionDays} Day Execution Streak
                 </div>
 
-                <div className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-medium text-sky-900">
+                <div className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-medium text-sky-900 lg:px-2.5 lg:text-[9px]">
                   <Zap className="h-3.5 w-3.5" />
                   {streaks.outreachDays} Day Outreach Streak
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-slate-700 bg-slate-900/50 px-4 py-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+              <div className="rounded-2xl border border-slate-700 bg-slate-900/50 px-4 py-3 lg:rounded-xl lg:px-3 lg:py-2">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 lg:text-[9px]">
                   Assigned roles
                 </p>
-                <div className="mt-3 flex flex-wrap gap-2">
+                <div className="mt-3 flex flex-wrap gap-2 lg:mt-2">
                   {roleBadges.map((badge) => (
                     <div
                       key={`${badge.label}-${badge.isPrimary ? "primary" : "secondary"}`}
-                      className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${badge.tone}`}
+                      className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${badge.tone} lg:px-2.5 lg:text-[9px]`}
                     >
                       <Shield className="h-3.5 w-3.5" />
                       {badge.label}
@@ -864,14 +864,14 @@ export default function DashboardProfilePage() {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-slate-700 bg-slate-900/50 px-4 py-4">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="rounded-2xl border border-slate-700 bg-slate-900/50 px-4 py-4 lg:rounded-xl lg:px-3 lg:py-3">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between lg:gap-2">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 lg:text-[9px]">
                       Current status
                     </p>
                     {statusMessage ? (
-                      <p className="mt-1 text-xs text-slate-400">
+                      <p className="mt-1 text-xs text-slate-400 lg:text-[9px]">
                         {statusMessage}
                       </p>
                     ) : null}
@@ -883,7 +883,7 @@ export default function DashboardProfilePage() {
                     onChange={(event) =>
                       handleStatusChange(event.target.value as ProfileStatus)
                     }
-                    className="rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm font-semibold text-white outline-none transition hover:bg-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm font-semibold text-white outline-none transition hover:bg-slate-900 disabled:cursor-not-allowed disabled:opacity-60 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
                   >
                     {PROFILE_STATUS_OPTIONS.map((option) => (
                       <option key={option.value} value={option.value}>
@@ -898,7 +898,7 @@ export default function DashboardProfilePage() {
                 {badges.map((badge) => (
                   <div
                     key={badge.label}
-                    className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${badge.tone}`}
+                    className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${badge.tone} lg:px-2.5 lg:text-[9px]`}
                   >
                     <Trophy className="h-3.5 w-3.5" />
                     {badge.label}
@@ -908,76 +908,76 @@ export default function DashboardProfilePage() {
             </div>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-2xl border border-slate-700 bg-slate-900/40 px-4 py-3">
-              <p className="text-xs uppercase tracking-wide text-slate-500">
+          <div className="grid gap-3 sm:grid-cols-2 lg:gap-2">
+            <div className="rounded-2xl border border-slate-700 bg-slate-900/40 px-4 py-3 lg:rounded-xl lg:px-3 lg:py-2">
+              <p className="text-xs uppercase tracking-wide text-slate-500 lg:text-[9px]">
                 Current mode
               </p>
-              <p className="mt-1 text-sm font-semibold text-white">
+              <p className="mt-1 text-sm font-semibold text-white lg:text-[11px]">
                 {operatorStats.currentMode}
               </p>
             </div>
 
-            <div className="rounded-2xl border border-slate-700 bg-slate-900/40 px-4 py-3">
-              <p className="text-xs uppercase tracking-wide text-slate-500">
+            <div className="rounded-2xl border border-slate-700 bg-slate-900/40 px-4 py-3 lg:rounded-xl lg:px-3 lg:py-2">
+              <p className="text-xs uppercase tracking-wide text-slate-500 lg:text-[9px]">
                 Last active
               </p>
-              <p className="mt-1 text-sm font-semibold text-white">
+              <p className="mt-1 text-sm font-semibold text-white lg:text-[11px]">
                 {operatorStats.lastActive}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="mt-6 grid gap-4 lg:grid-cols-3">
-          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-            <p className="text-xs uppercase tracking-wide text-emerald-800">
+        <div className="mt-6 grid gap-4 lg:grid-cols-3 lg:gap-3 lg:mt-4">
+          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 lg:rounded-xl lg:p-3">
+            <p className="text-xs uppercase tracking-wide text-emerald-800 lg:text-[9px]">
               Actions completed
             </p>
-            <p className="mt-2 text-3xl font-semibold text-slate-900">
+            <p className="mt-2 text-3xl font-semibold text-slate-900 lg:mt-1.5 lg:text-2xl">
               {operatorStats.completedActions}
             </p>
-            <p className="mt-1 text-sm text-slate-600">
+            <p className="mt-1 text-sm text-slate-600 lg:text-[11px]">
               Execution movement this week
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-4">
-            <p className="text-xs uppercase tracking-wide text-slate-500">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 lg:rounded-xl lg:p-3">
+            <p className="text-xs uppercase tracking-wide text-slate-500 lg:text-[9px]">
               Outreach touches
             </p>
-            <p className="mt-2 text-3xl font-semibold text-slate-900">
+            <p className="mt-2 text-3xl font-semibold text-slate-900 lg:mt-1.5 lg:text-2xl">
               {operatorStats.outreachTouches}
             </p>
-            <p className="mt-1 text-sm text-slate-600">
+            <p className="mt-1 text-sm text-slate-600 lg:text-[11px]">
               Contact activity across live lanes
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-4">
-            <p className="text-xs uppercase tracking-wide text-slate-500">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 lg:rounded-xl lg:p-3">
+            <p className="text-xs uppercase tracking-wide text-slate-500 lg:text-[9px]">
               Tasks closed
             </p>
-            <p className="mt-2 text-3xl font-semibold text-slate-900">
+            <p className="mt-2 text-3xl font-semibold text-slate-900 lg:mt-1.5 lg:text-2xl">
               {operatorStats.tasksClosed}
             </p>
-            <p className="mt-1 text-sm text-slate-600">
+            <p className="mt-1 text-sm text-slate-600 lg:text-[11px]">
               Work completed and cleared
             </p>
           </div>
         </div>
 
-        <div className="mt-6 rounded-3xl border border-amber-200 bg-amber-50 p-5 shadow-sm">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="mt-6 rounded-3xl border border-amber-200 bg-amber-50 p-5 shadow-sm lg:rounded-2xl lg:p-4 lg:mt-4">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-3">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-amber-800">
+              <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-amber-800 lg:px-2.5 lg:text-[9px]">
                 <Zap className="h-3.5 w-3.5" />
                 Current Focus
               </div>
-              <h2 className="mt-3 text-xl font-semibold text-slate-900">
+              <h2 className="mt-3 text-xl font-semibold text-slate-900 lg:mt-2 lg:text-lg">
                 {currentFocus.lane} → {currentFocus.detail}
               </h2>
-              <p className="mt-1 max-w-2xl text-sm text-slate-600">
+              <p className="mt-1 max-w-2xl text-sm text-slate-600 lg:text-[11px]">
                 {currentFocus.priorityCount} priority item
                 {currentFocus.priorityCount === 1 ? "" : "s"} queued. {currentFocus.note}
               </p>
@@ -985,226 +985,226 @@ export default function DashboardProfilePage() {
 
             <Link
               href={currentFocus.href}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-amber-300 bg-white px-4 py-3 text-sm font-medium text-amber-900 transition hover:bg-amber-100"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-amber-300 bg-white px-4 py-3 text-sm font-medium text-amber-900 transition hover:bg-amber-100 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
               Open Focus Mode
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
             </Link>
           </div>
 
 
-          <div className="mt-6 rounded-3xl border border-violet-200 bg-violet-50/40 p-5 shadow-sm">
-            <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+          <div className="mt-6 rounded-3xl border border-violet-200 bg-violet-50/40 p-5 shadow-sm lg:rounded-2xl lg:p-4 lg:mt-4">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between lg:gap-2">
               <div>
-                <div className="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-violet-800">
+                <div className="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-violet-800 lg:px-2.5 lg:text-[9px]">
                   <Sparkles className="h-3.5 w-3.5" />
                   ABE-Aligned Read
                 </div>
-                <h2 className="mt-3 text-xl font-semibold text-slate-900">
+                <h2 className="mt-3 text-xl font-semibold text-slate-900 lg:mt-2 lg:text-lg">
                   Strategy and execution are reading the same profile context
                 </h2>
-                <p className="mt-1 max-w-3xl text-sm text-slate-600">
+                <p className="mt-1 max-w-3xl text-sm text-slate-600 lg:text-[11px]">
                   This profile now reflects the same lane structure ABE uses to shape attention and the Brain uses to prioritize work.
                 </p>
               </div>
 
               <Link
                 href={abeProfileRead.primary.href}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
               >
                 Open Primary Lane
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               </Link>
             </div>
 
-            <div className="mt-5 grid gap-3 lg:grid-cols-3">
+            <div className="mt-5 grid gap-3 lg:grid-cols-3 lg:gap-2 lg:mt-4">
               <Link
                 href={abeProfileRead.primary.href}
-                className={`rounded-2xl border p-4 transition hover:shadow-sm ${abeProfileRead.primary.tone}`}
+                className={`rounded-2xl border p-4 transition hover:shadow-sm ${abeProfileRead.primary.tone} lg:rounded-xl lg:p-3`}
               >
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] opacity-80">
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] opacity-80 lg:text-[9px]">
                   <Zap className="h-3.5 w-3.5" />
                   Primary Lane
                 </div>
-                <p className="mt-3 text-lg font-semibold">{abeProfileRead.primary.label}</p>
-                <p className="mt-1 text-sm opacity-90">{abeProfileRead.primary.detail}</p>
+                <p className="mt-3 text-lg font-semibold lg:mt-2 lg:text-base">{abeProfileRead.primary.label}</p>
+                <p className="mt-1 text-sm opacity-90 lg:text-[11px]">{abeProfileRead.primary.detail}</p>
               </Link>
 
               <Link
                 href={abeProfileRead.pressure.href}
-                className={`rounded-2xl border p-4 transition hover:shadow-sm ${abeProfileRead.pressure.tone}`}
+                className={`rounded-2xl border p-4 transition hover:shadow-sm ${abeProfileRead.pressure.tone} lg:rounded-xl lg:p-3`}
               >
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] opacity-80">
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] opacity-80 lg:text-[9px]">
                   <AlertTriangle className="h-3.5 w-3.5" />
                   Pressure Lane
                 </div>
-                <p className="mt-3 text-lg font-semibold">{abeProfileRead.pressure.label}</p>
-                <p className="mt-1 text-sm opacity-90">{abeProfileRead.pressure.detail}</p>
+                <p className="mt-3 text-lg font-semibold lg:mt-2 lg:text-base">{abeProfileRead.pressure.label}</p>
+                <p className="mt-1 text-sm opacity-90 lg:text-[11px]">{abeProfileRead.pressure.detail}</p>
               </Link>
 
               <Link
                 href={abeProfileRead.opportunity.href}
-                className={`rounded-2xl border p-4 transition hover:shadow-sm ${abeProfileRead.opportunity.tone}`}
+                className={`rounded-2xl border p-4 transition hover:shadow-sm ${abeProfileRead.opportunity.tone} lg:rounded-xl lg:p-3`}
               >
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] opacity-80">
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] opacity-80 lg:text-[9px]">
                   <TrendingUp className="h-3.5 w-3.5" />
                   Opportunity Lane
                 </div>
-                <p className="mt-3 text-lg font-semibold">{abeProfileRead.opportunity.label}</p>
-                <p className="mt-1 text-sm opacity-90">{abeProfileRead.opportunity.detail}</p>
+                <p className="mt-3 text-lg font-semibold lg:mt-2 lg:text-base">{abeProfileRead.opportunity.label}</p>
+                <p className="mt-1 text-sm opacity-90 lg:text-[11px]">{abeProfileRead.opportunity.detail}</p>
               </Link>
             </div>
 
-            <div className="mt-4 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700">
+            <div className="mt-4 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 lg:rounded-xl lg:px-3 lg:py-2 lg:mt-3 lg:text-[11px]">
               <span className="font-semibold">Why now:</span> {abeProfileRead.whyNow}
             </div>
           </div>
 
-        <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50/60 p-5 shadow-sm">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50/60 p-5 shadow-sm lg:rounded-2xl lg:p-4 lg:mt-4">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between lg:gap-2">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-slate-600">
+              <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-slate-600 lg:px-2.5 lg:text-[9px]">
                 <ListChecks className="h-3.5 w-3.5" />
                 Active Work Context
               </div>
-              <h2 className="mt-3 text-xl font-semibold text-slate-900">
+              <h2 className="mt-3 text-xl font-semibold text-slate-900 lg:mt-2 lg:text-lg">
                 Active work context from assigned roles
               </h2>
-              <p className="mt-1 max-w-3xl text-sm text-slate-600">
+              <p className="mt-1 max-w-3xl text-sm text-slate-600 lg:text-[11px]">
                 These are the lanes currently shaping what this operator sees, clicks into, and executes inside Aether.
               </p>
             </div>
 
             <Link
               href="/dashboard/lists"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
               Review Lists
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
             </Link>
           </div>
 
-          <div className="mt-5 grid gap-3 lg:grid-cols-3">
+          <div className="mt-5 grid gap-3 lg:grid-cols-3 lg:gap-2 lg:mt-4">
             {activeWorkContext.map((context) => (
               <Link
                 key={context.name}
                 href={context.href}
-                className={`rounded-2xl border p-4 transition hover:shadow-sm ${context.tone}`}
+                className={`rounded-2xl border p-4 transition hover:shadow-sm ${context.tone} lg:rounded-xl lg:p-3`}
               >
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start justify-between gap-3 lg:gap-2">
                   <div>
-                    <p className="text-sm font-semibold">{context.name}</p>
-                    <p className="mt-1 text-xs opacity-80">{context.lane}</p>
+                    <p className="text-sm font-semibold lg:text-[11px]">{context.name}</p>
+                    <p className="mt-1 text-xs opacity-80 lg:text-[9px]">{context.lane}</p>
                   </div>
-                  <span className="rounded-full border border-current/20 bg-white/60 px-2.5 py-1 text-xs font-semibold">
+                  <span className="rounded-full border border-current/20 bg-white/60 px-2.5 py-1 text-xs font-semibold lg:text-[9px]">
                     {context.count}
                   </span>
                 </div>
-                <p className="mt-3 text-sm opacity-90">{context.summary}</p>
+                <p className="mt-3 text-sm opacity-90 lg:mt-2 lg:text-[11px]">{context.summary}</p>
               </Link>
             ))}
           </div>
         </div>        </div>
       </section>
 
-      <section className="space-y-4">
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center gap-2 text-sm text-slate-500">
-            <Briefcase className="h-4 w-4" />
+      <section className="space-y-4 lg:space-y-3">
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <div className="flex items-center gap-2 text-sm text-slate-500 lg:text-[11px]">
+            <Briefcase className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
             Quick links
           </div>
 
-          <div className="mt-5 grid gap-3 md:grid-cols-2">
+          <div className="mt-5 grid gap-3 md:grid-cols-2 lg:gap-2 lg:mt-4">
             {quickLinks.map((item) => (
               <Link
                 key={item.label}
                 href={item.href}
-                className={`inline-flex items-center justify-between rounded-2xl border px-4 py-3 text-sm font-medium transition ${item.tone}`}
+                className={`inline-flex items-center justify-between rounded-2xl border px-4 py-3 text-sm font-medium transition ${item.tone} lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]`}
               >
                 {item.label}
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               </Link>
             ))}
           </div>
         </section>
 
-        <details className="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
+        <details className="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 lg:gap-3">
             <div>
-              <div className="flex items-center gap-2 text-sm text-slate-500">
-                <Shield className="h-4 w-4" />
+              <div className="flex items-center gap-2 text-sm text-slate-500 lg:text-[11px]">
+                <Shield className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                 Organization Context
               </div>
-              <p className="mt-2 text-sm text-slate-500">
+              <p className="mt-2 text-sm text-slate-500 lg:mt-1.5 lg:text-[11px]">
                 Role, access, reporting, and visibility details.
               </p>
             </div>
-            <ChevronDown className="h-5 w-5 text-slate-500 transition group-open:rotate-180" />
+            <ChevronDown className="h-5 w-5 text-slate-500 transition group-open:rotate-180 lg:h-4 lg:w-4" />
           </summary>
 
-          <div className="mt-5 grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
-            <div className="space-y-4">
-              <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                <p className="text-xs uppercase tracking-wide text-slate-500">
+          <div className="mt-5 grid gap-4 lg:grid-cols-[0.95fr_1.05fr] lg:gap-3 lg:mt-4">
+            <div className="space-y-4 lg:space-y-3">
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                <p className="text-xs uppercase tracking-wide text-slate-500 lg:text-[9px]">
                   Organization
                 </p>
-                <p className="mt-2 text-lg font-semibold text-slate-900">
+                <p className="mt-2 text-lg font-semibold text-slate-900 lg:mt-1.5 lg:text-base">
                   {identity.organizationName}
                 </p>
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
                   Context: {identity.contextMode}
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                <p className="text-xs uppercase tracking-wide text-slate-500">
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                <p className="text-xs uppercase tracking-wide text-slate-500 lg:text-[9px]">
                   Role
                 </p>
-                <p className="mt-2 text-lg font-semibold text-slate-900">
+                <p className="mt-2 text-lg font-semibold text-slate-900 lg:mt-1.5 lg:text-base">
                   {identity.role}
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                <p className="text-xs uppercase tracking-wide text-slate-500">
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                <p className="text-xs uppercase tracking-wide text-slate-500 lg:text-[9px]">
                   Department
                 </p>
-                <p className="mt-2 text-lg font-semibold text-slate-900">
+                <p className="mt-2 text-lg font-semibold text-slate-900 lg:mt-1.5 lg:text-base">
                   {identity.department}
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                <p className="text-xs uppercase tracking-wide text-slate-500">
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                <p className="text-xs uppercase tracking-wide text-slate-500 lg:text-[9px]">
                   Title
                 </p>
-                <p className="mt-2 text-lg font-semibold text-slate-900">
+                <p className="mt-2 text-lg font-semibold text-slate-900 lg:mt-1.5 lg:text-base">
                   {identity.title}
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                <p className="text-xs uppercase tracking-wide text-slate-500">
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                <p className="text-xs uppercase tracking-wide text-slate-500 lg:text-[9px]">
                   Reports to
                 </p>
-                <p className="mt-2 text-lg font-semibold text-slate-900">
+                <p className="mt-2 text-lg font-semibold text-slate-900 lg:mt-1.5 lg:text-base">
                   {orgContext.reportsTo}
                 </p>
-                <p className="mt-1 text-sm text-slate-600">
+                <p className="mt-1 text-sm text-slate-600 lg:text-[11px]">
                   Primary leadership context for escalation and alignment.
                 </p>
               </div>
 
               {orgContext.manages.length > 0 ? (
-                <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                  <p className="text-xs uppercase tracking-wide text-slate-500">
+                <div className="rounded-2xl border border-slate-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                  <p className="text-xs uppercase tracking-wide text-slate-500 lg:text-[9px]">
                     Manages
                   </p>
-                  <div className="mt-3 flex flex-wrap gap-2">
+                  <div className="mt-3 flex flex-wrap gap-2 lg:mt-2">
                     {orgContext.manages.map((person) => (
                       <div
                         key={person}
-                        className="rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700"
+                        className="rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 lg:px-2.5 lg:text-[9px]"
                       >
                         {person}
                       </div>
@@ -1214,16 +1214,16 @@ export default function DashboardProfilePage() {
               ) : null}
             </div>
 
-            <div className="space-y-4">
-              <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                <p className="text-xs uppercase tracking-wide text-slate-500">
+            <div className="space-y-4 lg:space-y-3">
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                <p className="text-xs uppercase tracking-wide text-slate-500 lg:text-[9px]">
                   Access summary
                 </p>
-                <div className="mt-3 space-y-2">
+                <div className="mt-3 space-y-2 lg:mt-2">
                   {accessSummary.map((item) => (
                     <div
                       key={item}
-                      className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700"
+                      className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 lg:px-2.5 lg:text-[11px]"
                     >
                       {item}
                     </div>
@@ -1231,20 +1231,20 @@ export default function DashboardProfilePage() {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                <p className="text-xs uppercase tracking-wide text-slate-500">
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                <p className="text-xs uppercase tracking-wide text-slate-500 lg:text-[9px]">
                   Visibility model
                 </p>
-                <p className="mt-2 text-sm text-slate-700">
+                <p className="mt-2 text-sm text-slate-700 lg:mt-1.5 lg:text-[11px]">
                   {orgContext.visibilityNote}
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                <p className="text-xs uppercase tracking-wide text-slate-500">
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                <p className="text-xs uppercase tracking-wide text-slate-500 lg:text-[9px]">
                   Future communication layer
                 </p>
-                <p className="mt-2 text-sm text-slate-700">
+                <p className="mt-2 text-sm text-slate-700 lg:mt-1.5 lg:text-[11px]">
                   {orgContext.chatNote}
                 </p>
               </div>
@@ -1252,27 +1252,27 @@ export default function DashboardProfilePage() {
           </div>
         </details>
 
-        <details className="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
+        <details className="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 lg:gap-3">
             <div>
-              <div className="flex items-center gap-2 text-sm text-slate-500">
-                <Bell className="h-4 w-4" />
+              <div className="flex items-center gap-2 text-sm text-slate-500 lg:text-[11px]">
+                <Bell className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                 Operator Preferences
               </div>
-              <p className="mt-2 text-sm text-slate-500">
+              <p className="mt-2 text-sm text-slate-500 lg:mt-1.5 lg:text-[11px]">
                 Notifications, default landing behavior, and briefing settings.
               </p>
             </div>
-            <ChevronDown className="h-5 w-5 text-slate-500 transition group-open:rotate-180" />
+            <ChevronDown className="h-5 w-5 text-slate-500 transition group-open:rotate-180 lg:h-4 lg:w-4" />
           </summary>
 
-          <div className="mt-5 space-y-4">
-            <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 p-4">
+          <div className="mt-5 space-y-4 lg:space-y-3 lg:mt-4">
+            <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
               <div>
-                <p className="text-sm font-medium text-slate-900">
+                <p className="text-sm font-medium text-slate-900 lg:text-[11px]">
                   Notifications
                 </p>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-slate-500 lg:text-[9px]">
                   Enable system alerts and operator updates
                 </p>
               </div>
@@ -1283,17 +1283,17 @@ export default function DashboardProfilePage() {
                   notificationsEnabled
                     ? "bg-slate-900 text-white"
                     : "bg-slate-200 text-slate-700"
-                }`}
+                } lg:px-3 lg:text-[11px]`}
               >
                 {notificationsEnabled ? "On" : "Off"}
               </button>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-sm font-medium text-slate-900">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
+              <p className="text-sm font-medium text-slate-900 lg:text-[11px]">
                 Default landing view
               </p>
-              <div className="mt-3 flex flex-wrap gap-2">
+              <div className="mt-3 flex flex-wrap gap-2 lg:mt-2">
                 {(
                   ["overview", "focus", "outreach", "admin"] as PreferenceOption[]
                 ).map((option) => (
@@ -1304,7 +1304,7 @@ export default function DashboardProfilePage() {
                       defaultLanding === option
                         ? "bg-slate-900 text-white"
                         : "border border-slate-200 bg-white text-slate-700"
-                    }`}
+                    } lg:px-2.5 lg:text-[9px]`}
                   >
                     {option}
                   </button>
@@ -1312,12 +1312,12 @@ export default function DashboardProfilePage() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
               <div>
-                <p className="text-sm font-medium text-slate-900">
+                <p className="text-sm font-medium text-slate-900 lg:text-[11px]">
                   Honest Abe daily briefing
                 </p>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-slate-500 lg:text-[9px]">
                   Future AI-generated operator brief at start of day
                 </p>
               </div>
@@ -1328,18 +1328,18 @@ export default function DashboardProfilePage() {
                   abeBriefingEnabled
                     ? "bg-indigo-600 text-white"
                     : "bg-slate-200 text-slate-700"
-                }`}
+                } lg:px-3 lg:text-[11px]`}
               >
                 {abeBriefingEnabled ? "On" : "Off"}
               </button>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <div className="flex items-center gap-2 text-sm font-medium text-slate-900">
-                <Bot className="h-4 w-4 text-sky-700" />
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
+              <div className="flex items-center gap-2 text-sm font-medium text-slate-900 lg:text-[11px]">
+                <Bot className="h-4 w-4 text-sky-700 lg:h-3.5 lg:w-3.5" />
                 Operator note
               </div>
-              <p className="mt-2 text-sm text-slate-600">
+              <p className="mt-2 text-sm text-slate-600 lg:mt-1.5 lg:text-[11px]">
                 This page is meant to become your personal operating layer inside
                 Aether — not just an account page, but a reflection of your
                 momentum, role context, and active execution lane.
@@ -1348,35 +1348,35 @@ export default function DashboardProfilePage() {
           </div>
         </details>
 
-        <details className="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
+        <details className="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 lg:gap-3">
             <div>
-              <div className="flex items-center gap-2 text-sm text-slate-500">
-                <Activity className="h-4 w-4" />
+              <div className="flex items-center gap-2 text-sm text-slate-500 lg:text-[11px]">
+                <Activity className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                 Execution Metrics
               </div>
-              <p className="mt-2 text-sm text-slate-500">
+              <p className="mt-2 text-sm text-slate-500 lg:mt-1.5 lg:text-[11px]">
                 Open work, blocked items, recent execution history, and cadence.
               </p>
             </div>
-            <ChevronDown className="h-5 w-5 text-slate-500 transition group-open:rotate-180" />
+            <ChevronDown className="h-5 w-5 text-slate-500 transition group-open:rotate-180 lg:h-4 lg:w-4" />
           </summary>
 
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-xs uppercase tracking-wide text-slate-500">
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:gap-2 lg:mt-4">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
+              <p className="text-xs uppercase tracking-wide text-slate-500 lg:text-[9px]">
                 Open items
               </p>
-              <p className="mt-2 text-2xl font-semibold text-slate-900">
+              <p className="mt-2 text-2xl font-semibold text-slate-900 lg:mt-1.5 lg:text-xl">
                 {operatorStats.openItems}
               </p>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-xs uppercase tracking-wide text-slate-500">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
+              <p className="text-xs uppercase tracking-wide text-slate-500 lg:text-[9px]">
                 Blocked items
               </p>
-              <p className="mt-2 text-2xl font-semibold text-slate-900">
+              <p className="mt-2 text-2xl font-semibold text-slate-900 lg:mt-1.5 lg:text-xl">
                 {operatorStats.blockedItems}
               </p>
             </div>
@@ -1384,15 +1384,15 @@ export default function DashboardProfilePage() {
             {executionHistory.map((item) => (
               <div
                 key={item.label}
-                className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                className="rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3"
               >
-                <p className="text-xs uppercase tracking-wide text-slate-500">
+                <p className="text-xs uppercase tracking-wide text-slate-500 lg:text-[9px]">
                   {item.label}
                 </p>
-                <p className="mt-2 text-xl font-semibold text-slate-900">
+                <p className="mt-2 text-xl font-semibold text-slate-900 lg:mt-1.5 lg:text-lg">
                   {item.value}
                 </p>
-                <p className="mt-1 text-sm text-slate-600">{item.subtext}</p>
+                <p className="mt-1 text-sm text-slate-600 lg:text-[11px]">{item.subtext}</p>
               </div>
             ))}
           </div>
@@ -1400,16 +1400,16 @@ export default function DashboardProfilePage() {
 
 
       {activePotatoNote ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4">
-          <div className="w-full max-w-sm rounded-3xl border border-amber-200 bg-amber-50 p-6 text-center shadow-2xl">
-            <div className="text-4xl">🥔</div>
-            <p className="mt-4 text-lg font-semibold text-slate-950">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4 lg:p-3">
+          <div className="w-full max-w-sm rounded-3xl border border-amber-200 bg-amber-50 p-6 text-center shadow-2xl lg:rounded-2xl lg:p-[18px]">
+            <div className="text-4xl lg:text-3xl">🥔</div>
+            <p className="mt-4 text-lg font-semibold text-slate-950 lg:mt-3 lg:text-base">
               {activePotatoNote.message}
             </p>
             <button
               type="button"
               onClick={() => setActivePotatoNote(null)}
-              className="mt-6 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+              className="mt-6 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 lg:rounded-xl lg:px-4 lg:py-2 lg:mt-4 lg:text-[11px]"
             >
               Thanks, potato
             </button>
@@ -1418,16 +1418,16 @@ export default function DashboardProfilePage() {
       ) : null}
 
       <section className="hidden" aria-hidden="true">
-        <div className="flex items-center gap-2 text-sm text-emerald-800">
-          <Clock3 className="h-4 w-4" />
+        <div className="flex items-center gap-2 text-sm text-emerald-800 lg:text-[11px]">
+          <Clock3 className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
           Recent activity
         </div>
 
-        <div className="mt-5 space-y-3">
+        <div className="mt-5 space-y-3 lg:space-y-2 lg:mt-4">
           {recentActivity.map((item, index) => (
             <div
               key={`${item}-${index}`}
-              className="rounded-2xl border border-emerald-200 bg-white p-4 text-sm text-slate-700"
+              className="rounded-2xl border border-emerald-200 bg-white p-4 text-sm text-slate-700 lg:rounded-xl lg:p-3 lg:text-[11px]"
             >
               {item}
             </div>

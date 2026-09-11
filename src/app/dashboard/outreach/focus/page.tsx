@@ -857,8 +857,8 @@ function OutreachFocusContent() {
 
   if (loading || roleLoading) {
     return (
-      <div className="space-y-8">
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="space-y-8 lg:space-y-6">
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
           <p className="text-slate-600">Loading outreach focus workspace...</p>
         </section>
       </div>
@@ -867,26 +867,26 @@ function OutreachFocusContent() {
 
   if (!hasOutreachAccess) {
     return (
-      <div className="space-y-8">
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-sm">
+      <div className="space-y-8 lg:space-y-6">
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-sm lg:rounded-2xl lg:p-[18px]">
           <div className="mx-auto max-w-xl">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-600">
-              <Users className="h-5 w-5" />
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-600 lg:rounded-xl">
+              <Users className="h-5 w-5 lg:h-4 lg:w-4" />
             </div>
-            <h1 className="mt-4 text-2xl font-semibold text-slate-900">
+            <h1 className="mt-4 text-2xl font-semibold text-slate-900 lg:mt-3 lg:text-xl">
               No Outreach Access Available
             </h1>
-            <p className="mt-2 text-sm text-slate-600">
+            <p className="mt-2 text-sm text-slate-600 lg:text-[11px]">
               Outreach is the shared contact, list, and relationship execution
               hub. You need an active organization role before this workspace can
               route work to you.
             </p>
             <Link
               href="/dashboard"
-              className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
+              className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 lg:rounded-xl lg:px-3 lg:py-2 lg:mt-4 lg:text-[11px]"
             >
               Back to Dashboard
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
             </Link>
           </div>
         </section>
@@ -895,174 +895,174 @@ function OutreachFocusContent() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 lg:space-y-6">
       <section
-        className={`rounded-3xl border border-slate-200 bg-gradient-to-br p-6 text-white shadow-sm transition-colors duration-300 lg:p-8 ${orgTheme.heroGradient}`}
+        className={`rounded-3xl border border-slate-200 bg-gradient-to-br p-6 text-white shadow-sm transition-colors duration-300 lg:p-6 ${orgTheme.heroGradient} lg:rounded-2xl lg:p-[18px]`}
       >
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-4">
+          <div className="space-y-4 lg:space-y-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200 lg:px-2.5 lg:text-[9px]">
               <Zap className="h-3.5 w-3.5" />
               Outreach Focus Mode
             </div>
 
-            <div className="space-y-3">
-              <h1 className="text-3xl font-semibold tracking-tight lg:text-4xl">
+            <div className="space-y-3 lg:space-y-2">
+              <h1 className="text-3xl font-semibold tracking-tight lg:text-3xl lg:text-2xl">
                 Outreach Focus
               </h1>
-              <p className="max-w-3xl text-sm text-slate-300 lg:text-base">
+              <p className="max-w-3xl text-sm text-slate-300 lg:text-sm lg:text-[11px]">
                 Stay in outreach flow. Work contacts, complete follow-ups, and
                 keep relationship lists moving.
               </p>
 
               <div className="flex flex-wrap gap-2">
                 {selectedList ? (
-                  <div className="inline-flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-900">
-                    <ListChecks className="h-4 w-4" />
+                  <div className="inline-flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-900 lg:rounded-xl lg:px-2.5 lg:text-[11px]">
+                    <ListChecks className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                     Focusing list: {selectedList.name}
                   </div>
                 ) : null}
 
-                <div className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-3 py-2 text-sm font-medium text-slate-100">
-                  <Users className="h-4 w-4" />
+                <div className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-3 py-2 text-sm font-medium text-slate-100 lg:rounded-xl lg:px-2.5 lg:text-[11px]">
+                  <Users className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                   {outreachAccessLabel}
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 lg:gap-2">
             <Link
               href="/dashboard/outreach"
-              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white hover:bg-white/10"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white hover:bg-white/10 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
               Back to Outreach
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
             </Link>
 
             <Link
               href="/dashboard/lists"
-              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white hover:bg-white/10"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white hover:bg-white/10 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
-              <ListChecks className="h-4 w-4" />
+              <ListChecks className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               Lists
             </Link>
 
             <Link
               href="/dashboard/contacts"
-              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white hover:bg-white/10"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white hover:bg-white/10 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
-              <ContactRound className="h-4 w-4" />
+              <ContactRound className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               Contacts
             </Link>
           </div>
         </div>
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm lg:p-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm lg:p-6 lg:rounded-2xl lg:p-4">
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 lg:text-[9px]">
           Today&apos;s Outreach Snapshot
         </p>
 
-        <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <div className="rounded-2xl border border-slate-200 bg-white p-4">
-            <div className="flex items-center gap-3">
-              <div className="rounded-2xl bg-violet-100 p-3 text-violet-700">
-                <Phone className="h-5 w-5" />
+        <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4 lg:gap-3 lg:mt-3">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 lg:rounded-xl lg:p-3">
+            <div className="flex items-center gap-3 lg:gap-2">
+              <div className="rounded-2xl bg-violet-100 p-3 text-violet-700 lg:rounded-xl lg:p-2.5">
+                <Phone className="h-5 w-5 lg:h-4 lg:w-4" />
               </div>
               <div>
-                <p className="text-2xl font-semibold text-slate-900">
+                <p className="text-2xl font-semibold text-slate-900 lg:text-xl">
                   {contactsToWork}
                 </p>
-                <p className="text-sm font-medium text-slate-700">
+                <p className="text-sm font-medium text-slate-700 lg:text-[11px]">
                   Contacts to work
                 </p>
-                <p className="text-xs text-slate-500">Prioritized queue</p>
+                <p className="text-xs text-slate-500 lg:text-[9px]">Prioritized queue</p>
               </div>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-4">
-            <div className="flex items-center gap-3">
-              <div className="rounded-2xl bg-emerald-100 p-3 text-emerald-700">
-                <CheckCircle2 className="h-5 w-5" />
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 lg:rounded-xl lg:p-3">
+            <div className="flex items-center gap-3 lg:gap-2">
+              <div className="rounded-2xl bg-emerald-100 p-3 text-emerald-700 lg:rounded-xl lg:p-2.5">
+                <CheckCircle2 className="h-5 w-5 lg:h-4 lg:w-4" />
               </div>
               <div>
-                <p className="text-2xl font-semibold text-slate-900">
+                <p className="text-2xl font-semibold text-slate-900 lg:text-xl">
                   {followUpsDue}
                 </p>
-                <p className="text-sm font-medium text-slate-700">
+                <p className="text-sm font-medium text-slate-700 lg:text-[11px]">
                   Follow-ups due
                 </p>
-                <p className="text-xs text-slate-500">Callbacks and replies</p>
+                <p className="text-xs text-slate-500 lg:text-[9px]">Callbacks and replies</p>
               </div>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-4">
-            <div className="flex items-center gap-3">
-              <div className="rounded-2xl bg-sky-100 p-3 text-sky-700">
-                <ListChecks className="h-5 w-5" />
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 lg:rounded-xl lg:p-3">
+            <div className="flex items-center gap-3 lg:gap-2">
+              <div className="rounded-2xl bg-sky-100 p-3 text-sky-700 lg:rounded-xl lg:p-2.5">
+                <ListChecks className="h-5 w-5 lg:h-4 lg:w-4" />
               </div>
               <div>
-                <p className="text-2xl font-semibold text-slate-900">
+                <p className="text-2xl font-semibold text-slate-900 lg:text-xl">
                   {activeOutreachListCount}
                 </p>
-                <p className="text-sm font-medium text-slate-700">
+                <p className="text-sm font-medium text-slate-700 lg:text-[11px]">
                   Outreach lists
                 </p>
-                <p className="text-xs text-slate-500">Only outreach tagged</p>
+                <p className="text-xs text-slate-500 lg:text-[9px]">Only outreach tagged</p>
               </div>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-4">
-            <div className="flex items-center gap-3">
-              <div className="rounded-2xl bg-amber-100 p-3 text-amber-700">
-                <Users className="h-5 w-5" />
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 lg:rounded-xl lg:p-3">
+            <div className="flex items-center gap-3 lg:gap-2">
+              <div className="rounded-2xl bg-amber-100 p-3 text-amber-700 lg:rounded-xl lg:p-2.5">
+                <Users className="h-5 w-5 lg:h-4 lg:w-4" />
               </div>
               <div>
-                <p className="text-2xl font-semibold text-slate-900">
+                <p className="text-2xl font-semibold text-slate-900 lg:text-xl">
                   {totalOutreachContacts}
                 </p>
-                <p className="text-sm font-medium text-slate-700">
+                <p className="text-sm font-medium text-slate-700 lg:text-[11px]">
                   Total contacts
                 </p>
-                <p className="text-xs text-slate-500">Across outreach lists</p>
+                <p className="text-xs text-slate-500 lg:text-[9px]">Across outreach lists</p>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-3 text-xs font-medium text-slate-600">
+        <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-3 text-xs font-medium text-slate-600 lg:rounded-xl lg:p-2.5 lg:mt-3 lg:text-[9px]">
           Only outreach-tagged lists and contacts are shown here. Use Lists to
           manage Field, Finance, and Print routing.
         </div>
       </section>
 
       {message ? (
-        <section className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-700 shadow-sm">
+        <section className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-700 shadow-sm lg:rounded-xl lg:p-3 lg:text-[11px]">
           {message}
         </section>
       ) : null}
 
-      <section className="grid gap-6 xl:grid-cols-[1.05fr_1fr_1fr]">
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="mb-4 flex items-center justify-between">
+      <section className="grid gap-6 xl:grid-cols-[1.05fr_1fr_1fr] lg:gap-4 lg:gap-4">
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm lg:rounded-2xl lg:p-4">
+          <div className="mb-4 flex items-center justify-between lg:mb-3">
             <div>
-              <h2 className="text-base font-semibold text-slate-900">
+              <h2 className="text-base font-semibold text-slate-900 lg:text-sm">
                 Contact Lane
               </h2>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-500 lg:text-[9px]">
                 Prioritized outreach contacts
               </p>
             </div>
-            <Users className="h-5 w-5 text-slate-500" />
+            <Users className="h-5 w-5 text-slate-500 lg:h-4 lg:w-4" />
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-3 lg:space-y-2">
             {visibleContactLaneItems.length === 0 && (
-              <div className="rounded-2xl border border-dashed border-slate-200 p-3 text-xs text-slate-500">
+              <div className="rounded-2xl border border-dashed border-slate-200 p-3 text-xs text-slate-500 lg:rounded-xl lg:p-2.5 lg:text-[9px]">
                 No outreach contacts are available from outreach-tagged lists.
               </div>
             )}
@@ -1081,32 +1081,32 @@ function OutreachFocusContent() {
                     isActive
                       ? "border-slate-900 bg-slate-50 shadow-md"
                       : "border-slate-200 bg-white"
-                  }`}
+                  } lg:rounded-xl lg:p-3`}
                 >
-                  <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start justify-between gap-3 lg:gap-2">
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-slate-900">
+                      <p className="truncate text-sm font-semibold text-slate-900 lg:text-[11px]">
                         {item.title}
                       </p>
-                      <p className="mt-1 text-xs text-slate-500">
+                      <p className="mt-1 text-xs text-slate-500 lg:text-[9px]">
                         {contact?.phone || contact?.email || "No contact method"}
                       </p>
                     </div>
                     <span
                       className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${priorityTone(
                         item.priority
-                      )}`}
+                      )} lg:text-[9px]`}
                     >
                       {priorityLabel(item.priority)}
                     </span>
                   </div>
 
-                  <p className="mt-2 text-xs text-slate-600">{item.summary}</p>
+                  <p className="mt-2 text-xs text-slate-600 lg:text-[9px]">{item.summary}</p>
 
-                  <div className="mt-3 grid grid-cols-[1fr_1fr_auto] gap-2">
+                  <div className="mt-3 grid grid-cols-[1fr_1fr_auto] gap-2 lg:mt-2">
                     <button
                       onClick={() => contact && activateContact(contact, item)}
-                      className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white hover:bg-slate-800"
+                      className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white hover:bg-slate-800 lg:px-2.5 lg:text-[9px]"
                     >
                       Call
                     </button>
@@ -1118,14 +1118,14 @@ function OutreachFocusContent() {
                         setActiveAction("text");
                         setChannel("text");
                       }}
-                      className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100"
+                      className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100 lg:px-2.5 lg:text-[9px]"
                     >
                       Text
                     </button>
 
                     <Link
                       href={`/contacts/${item.contactId}`}
-                      className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100"
+                      className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100 lg:px-2.5 lg:text-[9px]"
                     >
                       <UserRound className="h-3.5 w-3.5" />
                     </Link>
@@ -1137,29 +1137,29 @@ function OutreachFocusContent() {
 
           <Link
             href="/dashboard/outreach"
-            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
+            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 lg:px-2.5 lg:mt-3 lg:text-[9px]"
           >
             View outreach dashboard
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
 
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="mb-4 flex items-center justify-between">
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm lg:rounded-2xl lg:p-4">
+          <div className="mb-4 flex items-center justify-between lg:mb-3">
             <div>
-              <h2 className="text-base font-semibold text-slate-900">
+              <h2 className="text-base font-semibold text-slate-900 lg:text-sm">
                 Follow-Up Lane
               </h2>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-500 lg:text-[9px]">
                 Callbacks and unresolved conversations
               </p>
             </div>
-            <Clock3 className="h-5 w-5 text-slate-500" />
+            <Clock3 className="h-5 w-5 text-slate-500 lg:h-4 lg:w-4" />
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-3 lg:space-y-2">
             {visibleFollowUpLaneItems.length === 0 && (
-              <div className="rounded-2xl border border-dashed border-slate-200 p-3 text-xs text-slate-500">
+              <div className="rounded-2xl border border-dashed border-slate-200 p-3 text-xs text-slate-500 lg:rounded-xl lg:p-2.5 lg:text-[9px]">
                 No active follow-ups right now.
               </div>
             )}
@@ -1178,37 +1178,37 @@ function OutreachFocusContent() {
                     isActive
                       ? "border-slate-900 bg-slate-50 shadow-md"
                       : "border-slate-200 bg-white"
-                  }`}
+                  } lg:rounded-xl lg:p-3`}
                 >
-                  <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start justify-between gap-3 lg:gap-2">
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-slate-900">
+                      <p className="truncate text-sm font-semibold text-slate-900 lg:text-[11px]">
                         {item.title}
                       </p>
-                      <p className="mt-1 text-xs text-slate-500">
+                      <p className="mt-1 text-xs text-slate-500 lg:text-[9px]">
                         {contact?.phone || contact?.email || "No contact method"}
                       </p>
                     </div>
-                    <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-slate-400" />
+                    <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-slate-400 lg:h-3.5 lg:w-3.5" />
                   </div>
 
-                  <p className="mt-2 text-xs leading-5 text-slate-600">
+                  <p className="mt-2 text-xs leading-5 text-slate-600 lg:text-[9px]">
                     {item.summary}
                   </p>
 
-                  <div className="mt-3 flex gap-2">
+                  <div className="mt-3 flex gap-2 lg:mt-2">
                     <button
                       onClick={() =>
                         contact && activateFollowUp(contact, item)
                       }
-                      className="flex-1 rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white hover:bg-slate-800"
+                      className="flex-1 rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white hover:bg-slate-800 lg:px-2.5 lg:text-[9px]"
                     >
                       Continue
                     </button>
 
                     <Link
                       href={`/contacts/${item.contactId}`}
-                      className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100"
+                      className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100 lg:px-2.5 lg:text-[9px]"
                     >
                       Profile
                     </Link>
@@ -1220,27 +1220,27 @@ function OutreachFocusContent() {
 
           <Link
             href="/dashboard/outreach"
-            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
+            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 lg:px-2.5 lg:mt-3 lg:text-[9px]"
           >
             View all follow-ups
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
 
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="mb-4 flex items-center justify-between">
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm lg:rounded-2xl lg:p-4">
+          <div className="mb-4 flex items-center justify-between lg:mb-3">
             <div>
-              <h2 className="text-base font-semibold text-slate-900">
+              <h2 className="text-base font-semibold text-slate-900 lg:text-sm">
                 List Lane
               </h2>
-              <p className="text-xs text-slate-500">Active outreach lists</p>
+              <p className="text-xs text-slate-500 lg:text-[9px]">Active outreach lists</p>
             </div>
-            <ListChecks className="h-5 w-5 text-slate-500" />
+            <ListChecks className="h-5 w-5 text-slate-500 lg:h-4 lg:w-4" />
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-3 lg:space-y-2">
             {visibleListLaneItems.length === 0 && (
-              <div className="rounded-2xl border border-dashed border-slate-200 p-3 text-xs text-slate-500">
+              <div className="rounded-2xl border border-dashed border-slate-200 p-3 text-xs text-slate-500 lg:rounded-xl lg:p-2.5 lg:text-[9px]">
                 No outreach-tagged lists are available right now.
               </div>
             )}
@@ -1255,14 +1255,14 @@ function OutreachFocusContent() {
                     isActive
                       ? "border-slate-900 bg-slate-50 shadow-md"
                       : "border-slate-200 bg-white"
-                  }`}
+                  } lg:rounded-xl lg:p-3`}
                 >
-                  <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start justify-between gap-3 lg:gap-2">
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-slate-900">
+                      <p className="truncate text-sm font-semibold text-slate-900 lg:text-[11px]">
                         {item.title}
                       </p>
-                      <p className="mt-1 text-xs text-slate-500">
+                      <p className="mt-1 text-xs text-slate-500 lg:text-[9px]">
                         {item.summary}
                       </p>
                     </div>
@@ -1271,18 +1271,18 @@ function OutreachFocusContent() {
                       <span
                         className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${tagTone(
                           item.tag
-                        )}`}
+                        )} lg:text-[9px]`}
                       >
                         {item.tag}
                       </span>
                     ) : null}
                   </div>
 
-                  <p className="mt-3 text-xs text-slate-500">
+                  <p className="mt-3 text-xs text-slate-500 lg:mt-2 lg:text-[9px]">
                     {item.size || 0} known contacts
                   </p>
 
-                  <div className="mt-3 grid grid-cols-[1fr_auto] gap-2">
+                  <div className="mt-3 grid grid-cols-[1fr_auto] gap-2 lg:mt-2">
                     <button
                       onClick={() =>
                         item.listId &&
@@ -1293,14 +1293,14 @@ function OutreachFocusContent() {
                           item.size || 0
                         )
                       }
-                      className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white hover:bg-slate-800"
+                      className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white hover:bg-slate-800 lg:px-2.5 lg:text-[9px]"
                     >
                       Review List
                     </button>
 
                     <Link
                       href="/dashboard/lists"
-                      className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100"
+                      className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100 lg:px-2.5 lg:text-[9px]"
                     >
                       Lists
                     </Link>
@@ -1312,7 +1312,7 @@ function OutreachFocusContent() {
 
           <Link
             href="/dashboard/lists"
-            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
+            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 lg:px-2.5 lg:mt-3 lg:text-[9px]"
           >
             View all outreach lists
             <ArrowRight className="h-3.5 w-3.5" />
@@ -1320,13 +1320,13 @@ function OutreachFocusContent() {
         </div>
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+        <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between lg:gap-3 lg:mb-4">
           <div>
-            <h2 className="text-xl font-semibold text-slate-900">
+            <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">
               Active Work Panel
             </h2>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
               Work a contact, log the outcome, and move forward.
             </p>
           </div>
@@ -1334,7 +1334,7 @@ function OutreachFocusContent() {
           {(activeContact || activeFollowUp || activeList) ? (
             <button
               onClick={clearPanels}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 lg:px-2.5 lg:text-[9px]"
             >
               Close Active Panel
               <X className="h-3.5 w-3.5" />
@@ -1343,36 +1343,36 @@ function OutreachFocusContent() {
         </div>
 
         {!activeContact && !activeFollowUp && !activeList ? (
-          <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-5 text-sm text-slate-500">
+          <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-5 text-sm text-slate-500 lg:rounded-xl lg:p-4 lg:text-[11px]">
             Select a contact, follow-up, or list to begin.
           </div>
         ) : null}
 
         {(activeContact || activeFollowUp) ? (
-          <div className="space-y-5">
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-violet-100 text-sm font-semibold text-violet-700">
+          <div className="space-y-5 lg:space-y-4">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-3">
+                <div className="flex items-center gap-4 lg:gap-3">
+                  <div className="flex h-12 w-12 shrink-0 lg:h-9 lg:w-9 items-center justify-center rounded-2xl bg-violet-100 text-sm font-semibold text-violet-700 lg:rounded-xl lg:text-[11px]">
                     {initials(activeContact?.name || activeFollowUp?.name || "OC")}
                   </div>
 
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="text-lg font-semibold text-slate-900">
+                      <p className="text-lg font-semibold text-slate-900 lg:text-base">
                         {activeContact?.name || activeFollowUp?.name}
                       </p>
                       <span
                         className={`rounded-full px-2 py-0.5 text-xs font-semibold ${priorityTone(
                           activeContact?.priority || activeFollowUp?.priority || "medium"
-                        )}`}
+                        )} lg:text-[9px]`}
                       >
                         {priorityLabel(
                           activeContact?.priority || activeFollowUp?.priority || "medium"
                         )}
                       </span>
                     </div>
-                    <p className="mt-1 text-sm text-slate-500">
+                    <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
                       {activeContact?.phone ||
                         activeContact?.email ||
                         activeFollowUp?.note ||
@@ -1384,7 +1384,7 @@ function OutreachFocusContent() {
                 <div className="flex flex-wrap gap-2">
                   <Link
                     href={`/contacts/${activeContact?.id || activeFollowUp?.id}`}
-                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
+                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 lg:px-2.5 lg:text-[9px]"
                   >
                     <UserRound className="h-3.5 w-3.5" />
                     View Profile
@@ -1392,7 +1392,7 @@ function OutreachFocusContent() {
 
                   <Link
                     href="/dashboard/outreach"
-                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
+                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 lg:px-2.5 lg:text-[9px]"
                   >
                     <Clock3 className="h-3.5 w-3.5" />
                     View Activity
@@ -1401,8 +1401,8 @@ function OutreachFocusContent() {
               </div>
             </div>
 
-            <div className="grid gap-5 lg:grid-cols-[1.4fr_0.75fr]">
-              <div className="space-y-4">
+            <div className="grid gap-5 lg:grid-cols-[minmax(0,1.55fr)_minmax(220px,0.65fr)] lg:gap-4 lg:gap-4">
+              <div className="space-y-4 lg:space-y-3">
                 <div className="flex flex-wrap gap-2">
                   {([
                     ["call", Phone, "Call"],
@@ -1421,29 +1421,29 @@ function OutreachFocusContent() {
                         activeAction === value
                           ? "bg-slate-900 text-white"
                           : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-100"
-                      }`}
+                      } lg:px-2.5 lg:text-[11px]`}
                     >
-                      <Icon className="h-4 w-4" />
+                      <Icon className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                       {label}
                     </button>
                   ))}
                 </div>
 
-                <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                  <p className="text-sm font-semibold text-slate-900">
+                <div className="rounded-2xl border border-slate-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                  <p className="text-sm font-semibold text-slate-900 lg:text-[11px]">
                     Log {activeAction === "text" ? "Text" : activeAction === "email" ? "Email" : activeAction === "meeting" ? "Meeting" : activeAction === "note" ? "Note" : "Call"} Outcome
                   </p>
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-xs text-slate-500 lg:text-[9px]">
                     How did this outreach action go?
                   </p>
 
-                  <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-5 lg:gap-2 lg:gap-2 lg:mt-3">
                     <button
                       onClick={() => logActiveContactOutcome("connected_positive")}
                       disabled={saving}
-                      className="rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-left text-xs font-semibold text-emerald-800 transition hover:bg-emerald-100 disabled:opacity-50"
+                      className="rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-left text-xs font-semibold text-emerald-800 transition hover:bg-emerald-100 disabled:opacity-50 lg:rounded-xl lg:p-2.5 lg:text-[9px]"
                     >
-                      <CheckCircle2 className="mb-2 h-4 w-4" />
+                      <CheckCircle2 className="mb-2 h-4 w-4 lg:h-3.5 lg:w-3.5" />
                       Positive
                       <span className="mt-1 block font-normal text-emerald-700">
                         Supporter / interested
@@ -1453,9 +1453,9 @@ function OutreachFocusContent() {
                     <button
                       onClick={() => logActiveContactOutcome("follow_up_needed")}
                       disabled={saving}
-                      className="rounded-2xl border border-sky-200 bg-sky-50 p-3 text-left text-xs font-semibold text-sky-800 transition hover:bg-sky-100 disabled:opacity-50"
+                      className="rounded-2xl border border-sky-200 bg-sky-50 p-3 text-left text-xs font-semibold text-sky-800 transition hover:bg-sky-100 disabled:opacity-50 lg:rounded-xl lg:p-2.5 lg:text-[9px]"
                     >
-                      <CalendarDays className="mb-2 h-4 w-4" />
+                      <CalendarDays className="mb-2 h-4 w-4 lg:h-3.5 lg:w-3.5" />
                       Follow-Up
                       <span className="mt-1 block font-normal text-sky-700">
                         Needs another touch
@@ -1465,9 +1465,9 @@ function OutreachFocusContent() {
                     <button
                       onClick={() => logActiveContactOutcome("wrong_time")}
                       disabled={saving}
-                      className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-left text-xs font-semibold text-amber-800 transition hover:bg-amber-100 disabled:opacity-50"
+                      className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-left text-xs font-semibold text-amber-800 transition hover:bg-amber-100 disabled:opacity-50 lg:rounded-xl lg:p-2.5 lg:text-[9px]"
                     >
-                      <Clock3 className="mb-2 h-4 w-4" />
+                      <Clock3 className="mb-2 h-4 w-4 lg:h-3.5 lg:w-3.5" />
                       Wrong Time
                       <span className="mt-1 block font-normal text-amber-700">
                         Try later
@@ -1477,9 +1477,9 @@ function OutreachFocusContent() {
                     <button
                       onClick={() => logActiveContactOutcome("no_answer")}
                       disabled={saving}
-                      className="rounded-2xl border border-slate-200 bg-slate-50 p-3 text-left text-xs font-semibold text-slate-700 transition hover:bg-slate-100 disabled:opacity-50"
+                      className="rounded-2xl border border-slate-200 bg-slate-50 p-3 text-left text-xs font-semibold text-slate-700 transition hover:bg-slate-100 disabled:opacity-50 lg:rounded-xl lg:p-2.5 lg:text-[9px]"
                     >
-                      <Phone className="mb-2 h-4 w-4" />
+                      <Phone className="mb-2 h-4 w-4 lg:h-3.5 lg:w-3.5" />
                       No Answer
                       <span className="mt-1 block font-normal text-slate-500">
                         No response
@@ -1489,9 +1489,9 @@ function OutreachFocusContent() {
                     <button
                       onClick={() => logActiveContactOutcome("completed")}
                       disabled={saving}
-                      className="rounded-2xl border border-violet-200 bg-violet-50 p-3 text-left text-xs font-semibold text-violet-800 transition hover:bg-violet-100 disabled:opacity-50"
+                      className="rounded-2xl border border-violet-200 bg-violet-50 p-3 text-left text-xs font-semibold text-violet-800 transition hover:bg-violet-100 disabled:opacity-50 lg:rounded-xl lg:p-2.5 lg:text-[9px]"
                     >
-                      <CheckCircle2 className="mb-2 h-4 w-4" />
+                      <CheckCircle2 className="mb-2 h-4 w-4 lg:h-3.5 lg:w-3.5" />
                       Completed
                       <span className="mt-1 block font-normal text-violet-700">
                         Done for now
@@ -1499,14 +1499,14 @@ function OutreachFocusContent() {
                     </button>
                   </div>
 
-                  <label className="mt-4 block text-sm font-medium text-slate-900">
+                  <label className="mt-4 block text-sm font-medium text-slate-900 lg:mt-3 lg:text-[11px]">
                     Notes
                   </label>
                   <textarea
                     value={notes}
                     onChange={(event) => setNotes(event.target.value)}
                     placeholder="Add notes about this interaction..."
-                    className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                    className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm lg:px-2.5 lg:text-[11px]"
                     rows={4}
                   />
                 </div>
@@ -1514,53 +1514,53 @@ function OutreachFocusContent() {
                 <button
                   onClick={() => logActiveContactOutcome("completed")}
                   disabled={saving}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 py-4 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-50"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 py-4 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-50 lg:rounded-xl lg:px-3 lg:py-3 lg:text-[11px]"
                 >
                   {saving ? "Saving..." : "Save Outcome & Continue"}
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                 </button>
               </div>
 
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <p className="text-sm font-semibold text-slate-900">Context</p>
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
+                <p className="text-sm font-semibold text-slate-900 lg:text-[11px]">Context</p>
 
-                <div className="mt-4 space-y-3 text-sm">
-                  <div className="flex justify-between gap-3">
+                <div className="mt-4 space-y-3 text-sm lg:space-y-2 lg:mt-3 lg:text-[11px]">
+                  <div className="flex justify-between gap-3 lg:gap-2">
                     <span className="text-slate-500">List</span>
                     <span className="font-medium text-slate-900">
                       {selectedList?.name || "Outreach Focus"}
                     </span>
                   </div>
 
-                  <div className="flex justify-between gap-3">
+                  <div className="flex justify-between gap-3 lg:gap-2">
                     <span className="text-slate-500">Owner</span>
                     <span className="font-medium text-slate-900">
                       {ownerFilter || "Team"}
                     </span>
                   </div>
 
-                  <div className="flex justify-between gap-3">
+                  <div className="flex justify-between gap-3 lg:gap-2">
                     <span className="text-slate-500">Follow-up pressure</span>
                     <span className="font-medium text-slate-900">
                       {outreachContextItems.pendingFollowUps}
                     </span>
                   </div>
 
-                  <div className="flex justify-between gap-3">
+                  <div className="flex justify-between gap-3 lg:gap-2">
                     <span className="text-slate-500">Positive contacts</span>
                     <span className="font-medium text-slate-900">
                       {outreachContextItems.positiveContacts}
                     </span>
                   </div>
 
-                  <div className="flex justify-between gap-3">
+                  <div className="flex justify-between gap-3 lg:gap-2">
                     <span className="text-slate-500">Stale contacts</span>
                     <span className="font-medium text-slate-900">
                       {outreachContextItems.staleContacts}
                     </span>
                   </div>
 
-                  <div className="flex justify-between gap-3">
+                  <div className="flex justify-between gap-3 lg:gap-2">
                     <span className="text-slate-500">Finance-linked</span>
                     <span className="font-medium text-slate-900">
                       {outreachContextItems.financeLinkedDemand}
@@ -1573,14 +1573,14 @@ function OutreachFocusContent() {
         ) : null}
 
         {activeList ? (
-          <div className="space-y-4">
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="space-y-4 lg:space-y-3">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between lg:gap-2">
                 <div>
-                  <p className="text-lg font-semibold text-slate-900">
+                  <p className="text-lg font-semibold text-slate-900 lg:text-base">
                     Reviewing list: {activeList.name}
                   </p>
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
                     {activeList.size > 0
                       ? `${activeList.size} contact${activeList.size === 1 ? "" : "s"} loaded for this outreach list.`
                       : "Open this list in Outreach to load and review its contacts."}
@@ -1590,7 +1590,7 @@ function OutreachFocusContent() {
                 <span
                   className={`w-fit rounded-full px-3 py-1 text-xs font-semibold ${tagTone(
                     activeList.tag
-                  )}`}
+                  )} lg:px-2.5 lg:text-[9px]`}
                 >
                   {activeList.tag}
                 </span>
@@ -1600,14 +1600,14 @@ function OutreachFocusContent() {
             <div className="flex flex-wrap gap-2">
               <Link
                 href={`/dashboard/outreach?listId=${activeList.id}`}
-                className="inline-flex flex-1 items-center justify-center rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+                className="inline-flex flex-1 items-center justify-center rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 lg:px-3 lg:py-2 lg:text-[11px]"
               >
                 Open List in Outreach
               </Link>
 
               <Link
                 href="/dashboard/lists"
-                className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 lg:px-3 lg:py-2 lg:text-[11px]"
               >
                 Manage Lists
               </Link>
@@ -1621,7 +1621,7 @@ function OutreachFocusContent() {
 
 export default function OutreachFocusPage() {
   return (
-    <Suspense fallback={<div className="p-6">Loading focus...</div>}>
+    <Suspense fallback={<div className="p-6 lg:p-[18px]">Loading focus...</div>}>
       <OutreachFocusContent />
     </Suspense>
   );

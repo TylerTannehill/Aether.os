@@ -353,42 +353,42 @@ export default function TeamAetherDashboardPage() {
     );
 
     return (
-        <main className="min-h-screen bg-slate-950 text-white p-8">
+        <main className="min-h-screen bg-slate-950 text-white p-8 lg:p-6">
             <div className="max-w-7xl mx-auto">
 
                 {/* Hero */}
-                <div className="mb-10 rounded-3xl border border-slate-800 bg-slate-900 p-8">
-                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 items-start">
+                <div className="mb-10 rounded-3xl border border-slate-800 bg-slate-900 p-8 lg:mb-6 lg:rounded-2xl lg:p-6">
+                    <div className="grid grid-cols-1 xl:grid-cols-[1.15fr_0.85fr] gap-8 items-start lg:gap-6">
                         <div>
                             <div className="inline-flex items-center rounded-full border border-slate-700 px-4 py-1 text-xs font-bold tracking-wider text-slate-300">TEAM AETHER</div>
-                            <h1 className="mt-5 text-5xl font-bold">Dashboard</h1>
-                            <p className="mt-4 max-w-2xl text-lg text-slate-400">
+                            <h1 className="mt-5 text-5xl font-bold lg:mt-3 lg:text-3xl">Dashboard</h1>
+                            <p className="mt-4 max-w-2xl text-lg text-slate-400 lg:mt-2 lg:text-sm">
                                 Monitor sales, organizations, finance, and platform activity from one operational workspace.
                             </p>
                         </div>
-                        <div className="grid grid-cols-2 gap-4 xl:pl-12">
-                            <a href="/team-aether/sales-help" className="rounded-2xl border border-slate-700 bg-slate-800 px-6 py-4 text-center">Sales Help</a>
-                            <a href="/team-aether/dashboard" className="rounded-2xl border border-white bg-slate-800 px-6 py-4 text-center font-semibold">Dashboard</a>
-                            <a href="/login" className="rounded-2xl border border-slate-700 bg-slate-800 px-6 py-4 text-center">Logout</a>
-                            <a href="/team-aether/organizations" className="rounded-2xl border border-slate-700 bg-slate-800 px-6 py-4 text-center">Organizations</a>
-                            <a href="/team-aether" className="rounded-2xl border border-slate-700 bg-slate-800 px-6 py-4 text-center">Provisioning</a>
-                            <a href="/team-aether/sales-pipeline" className="rounded-2xl border border-slate-700 bg-slate-800 px-6 py-4 text-center">Sales Pipeline</a>
-                            <a href="/team-aether/email-templates" className="rounded-2xl border border-slate-700 bg-slate-800 px-6 py-4 text-center">Email Templates</a>
-                            <a href="/team-aether/support-portal" className="col-span-2 rounded-2xl border border-slate-700 bg-slate-800 px-6 py-4 text-center">Support</a>
+                        <div className="grid grid-cols-2 gap-4 xl:pl-8 lg:gap-2.5">
+                            <a href="/team-aether/sales-help" className="rounded-2xl border border-slate-700 bg-slate-800 px-6 py-4 text-center lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-sm">Sales Help</a>
+                            <a href="/team-aether/dashboard" className="rounded-2xl border border-white bg-slate-800 px-6 py-4 text-center font-semibold lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-sm">Dashboard</a>
+                            <a href="/login" className="rounded-2xl border border-slate-700 bg-slate-800 px-6 py-4 text-center lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-sm">Logout</a>
+                            <a href="/team-aether/organizations" className="rounded-2xl border border-slate-700 bg-slate-800 px-6 py-4 text-center lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-sm">Organizations</a>
+                            <a href="/team-aether" className="rounded-2xl border border-slate-700 bg-slate-800 px-6 py-4 text-center lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-sm">Provisioning</a>
+                            <a href="/team-aether/sales-pipeline" className="rounded-2xl border border-slate-700 bg-slate-800 px-6 py-4 text-center lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-sm">Sales Pipeline</a>
+                            <a href="/team-aether/email-templates" className="rounded-2xl border border-slate-700 bg-slate-800 px-6 py-4 text-center lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-sm">Email Templates</a>
+                            <a href="/team-aether/support-portal" className="col-span-2 rounded-2xl border border-slate-700 bg-slate-800 px-6 py-4 text-center lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-sm">Support</a>
                         </div>
                     </div>
                 </div>
 
                 {/* Dashboard Cards */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-4">
 
                     {/* Sales Pipeline */}
-                    <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-                        <h2 className="text-2xl font-semibold mb-6">
+                    <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 lg:rounded-xl lg:p-4">
+                        <h2 className="text-2xl font-semibold mb-6 lg:mb-4 lg:text-xl">
                             Sales Pipeline
                         </h2>
 
-                        <div className="space-y-3 text-slate-300">
+                        <div className="space-y-3 text-slate-300 lg:space-y-2 lg:text-sm">
                             <div className="flex justify-between">
                                 <span>Leads</span><span>{salesStats.leads}</span>
                             </div>
@@ -416,12 +416,12 @@ export default function TeamAetherDashboardPage() {
                     </div>
 
                     {/* Organizations */}
-                    <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-                        <h2 className="text-2xl font-semibold mb-6">
+                    <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 lg:rounded-xl lg:p-4">
+                        <h2 className="text-2xl font-semibold mb-6 lg:mb-4 lg:text-xl">
                             Organizations
                         </h2>
 
-                        <div className="space-y-3 text-slate-300">
+                        <div className="space-y-3 text-slate-300 lg:space-y-2 lg:text-sm">
                             <div className="flex justify-between"><span>Organizations</span><span>{orgStats.organizations}</span></div>
                             <div className="flex justify-between"><span>Active</span><span>{orgStats.active}</span></div>
                             <div className="flex justify-between"><span>Suspended</span><span>{orgStats.suspended}</span></div>
@@ -430,18 +430,18 @@ export default function TeamAetherDashboardPage() {
                     </div>
 
                     {/* Finance */}
-                    <div onClick={() => setExpanded(!expanded)} className="rounded-2xl border border-slate-800 bg-slate-900 p-6 cursor-pointer hover:border-purple-500 transition">
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-2xl font-semibold">Finance</h2>
+                    <div onClick={() => setExpanded(!expanded)} className="rounded-2xl border border-slate-800 bg-slate-900 p-6 cursor-pointer hover:border-purple-500 transition lg:rounded-xl lg:p-4">
+                        <div className="flex justify-between items-center mb-4 lg:mb-3">
+                            <h2 className="text-2xl font-semibold lg:text-xl">Finance</h2>
                             <div className="text-right">
-                                <div className="text-xl font-bold">{total >= 0 ? "+" : ""}${total.toFixed(2)}</div>
+                                <div className="text-xl font-bold lg:text-lg">{total >= 0 ? "+" : ""}${total.toFixed(2)}</div>
                                 <div className="text-xs text-slate-400">{finance.length} Items</div>
                             </div>
                         </div>
 
                         {expanded && (
                         <>
-                        <div className="grid grid-cols-3 gap-4 pb-3 border-b border-slate-700 text-sm font-semibold text-slate-400">
+                        <div className="grid grid-cols-3 gap-4 pb-3 border-b border-slate-700 text-sm font-semibold text-slate-400 lg:gap-3 lg:pb-2 lg:text-xs">
                             <div>Name</div>
                             <div>Due Date</div>
                             <div className="text-right">Amount</div>
@@ -451,7 +451,7 @@ export default function TeamAetherDashboardPage() {
                             <div className="py-4 text-slate-500 text-center">No finance items.</div>
                         ) : (
                             finance.map((row) => (
-                                <div key={row.id} className="grid grid-cols-3 gap-3 py-3 border-b border-slate-800 items-center" onClick={(e)=>e.stopPropagation()}>
+                                <div key={row.id} className="grid grid-cols-3 gap-3 py-3 border-b border-slate-800 items-center lg:gap-2 lg:py-2 lg:text-sm" onClick={(e)=>e.stopPropagation()}>
                                     <input className="bg-slate-800 rounded px-2 py-1" defaultValue={row.name}
                                         onBlur={(e)=>updateRow(row.id,"name",e.target.value)} />
                                     <input type="date" className="bg-slate-800 rounded px-2 py-1" defaultValue={row.due_date ?? ""}
@@ -475,14 +475,14 @@ export default function TeamAetherDashboardPage() {
                             ))
                         )}
 
-                        <div className="pt-4 space-y-3" onClick={(e)=>e.stopPropagation()}>
-                            <div className="grid grid-cols-3 gap-3">
+                        <div className="pt-4 space-y-3 lg:pt-3 lg:space-y-2" onClick={(e)=>e.stopPropagation()}>
+                            <div className="grid grid-cols-3 gap-3 lg:gap-2">
                                 <input className="bg-slate-800 rounded px-2 py-1" placeholder="Name" value={newRow.name} onChange={(e)=>setNewRow({...newRow,name:e.target.value})}/>
                                 <input type="date" className="bg-slate-800 rounded px-2 py-1" value={newRow.due_date} onChange={(e)=>setNewRow({...newRow,due_date:e.target.value})}/>
                                 <input type="number" className="bg-slate-800 rounded px-2 py-1" placeholder="Amount" value={newRow.amount} onChange={(e)=>setNewRow({...newRow,amount:e.target.value})}/>
                             </div>
                             <div className="flex justify-center">
-                                <button onClick={addRow} className="rounded-lg bg-purple-600 hover:bg-purple-500 px-6 py-2 font-medium">
+                                <button onClick={addRow} className="rounded-lg bg-purple-600 hover:bg-purple-500 px-6 py-2 font-medium lg:px-4 lg:py-2 lg:text-sm">
                                     Add Entry
                                 </button>
                             </div>
@@ -492,15 +492,15 @@ export default function TeamAetherDashboardPage() {
                     </div>
 
                     {/* Socials */}
-                    <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-                        <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-2xl font-semibold">Socials</h2>
-                            <button onClick={() => setIntegrationModalOpen(true)} className="rounded-lg bg-purple-600 hover:bg-purple-500 px-4 py-2 font-medium">
+                    <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 lg:rounded-xl lg:p-4">
+                        <div className="flex items-center justify-between mb-6 lg:mb-4">
+                            <h2 className="text-2xl font-semibold lg:text-xl">Socials</h2>
+                            <button onClick={() => setIntegrationModalOpen(true)} className="rounded-lg bg-purple-600 hover:bg-purple-500 px-4 py-2 font-medium lg:px-3 lg:py-1.5 lg:text-sm">
                                 Connect
                             </button>
                         </div>
 
-                        <div className="space-y-5">
+                        <div className="space-y-5 lg:space-y-4">
                             {[
                                 {
                                     title: "Website",
@@ -548,14 +548,14 @@ export default function TeamAetherDashboardPage() {
                                     ],
                                 },
                             ].map(({ title, connected, metrics }) => (
-                                <div key={title} className="border-b border-slate-800 pb-4 last:border-0">
-                                    <div className="flex justify-between mb-2">
+                                <div key={title} className="border-b border-slate-800 pb-4 last:border-0 lg:pb-3">
+                                    <div className="flex justify-between mb-2 lg:mb-1.5 lg:text-sm">
                                         <span className="font-semibold">{title}</span>
                                         <span className={connected ? "text-emerald-400" : "text-slate-500"}>
                                             {connected ? "Connected" : "Not Connected"}
                                         </span>
                                     </div>
-                                    <div className="space-y-1 text-sm text-slate-300">
+                                    <div className="space-y-1 text-sm text-slate-300 lg:text-xs">
                                         {metrics.map(([label, value]) => (
                                             <div key={String(label)} className="flex justify-between">
                                                 <span>{label}</span>
@@ -574,7 +574,7 @@ export default function TeamAetherDashboardPage() {
 
             {integrationModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={() => setIntegrationModalOpen(false)}>
-                    <div className="w-full max-w-lg rounded-3xl border border-slate-700 bg-slate-900 p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                    <div className="w-full max-w-lg rounded-3xl border border-slate-700 bg-slate-900 p-6 shadow-2xl lg:rounded-2xl lg:p-5" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-start justify-between gap-4">
                             <div>
                                 <div className="text-xs font-bold uppercase tracking-wider text-purple-400">Team Aether</div>
@@ -584,7 +584,7 @@ export default function TeamAetherDashboardPage() {
                             <button onClick={() => setIntegrationModalOpen(false)} className="rounded-lg border border-slate-700 px-3 py-2 text-slate-400 hover:bg-slate-800 hover:text-white" aria-label="Close integrations">✕</button>
                         </div>
 
-                        <div className="mt-6 space-y-3">
+                        <div className="mt-6 space-y-3 lg:mt-4 lg:space-y-2">
                             {["Website", "Meta", "X", "TikTok", "YouTube"].map((integration) => {
                                 const isWebsite = integration === "Website";
                                 const isMeta = integration === "Meta";
@@ -597,7 +597,7 @@ export default function TeamAetherDashboardPage() {
                                 const disconnectAction = isWebsite ? disconnectWebsite : isMeta ? disconnectMeta : isX ? disconnectX : isTikTok ? disconnectTikTok : isYouTube ? disconnectYouTube : undefined;
 
                                 return (
-                                    <div key={integration} className="flex items-center justify-between gap-4 rounded-2xl border border-slate-800 bg-slate-950/60 px-4 py-4">
+                                    <div key={integration} className="flex items-center justify-between gap-4 rounded-2xl border border-slate-800 bg-slate-950/60 px-4 py-4 lg:gap-3 lg:rounded-xl lg:px-3 lg:py-3">
                                         <div>
                                             <div className="font-semibold text-white">{integration}</div>
                                             <div className={`mt-1 text-xs ${connected ? "text-emerald-400" : "text-slate-500"}`}>
@@ -609,7 +609,7 @@ export default function TeamAetherDashboardPage() {
                                                 type="button"
                                                 onClick={connectAction}
                                                 disabled={(isWebsite || isMeta || isX || isTikTok || isYouTube) && (busy || connected)}
-                                                className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-500 disabled:cursor-not-allowed disabled:opacity-40"
+                                                className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-500 disabled:cursor-not-allowed disabled:opacity-40 lg:px-3 lg:py-1.5 lg:text-xs"
                                             >
                                                 {busy ? "Working..." : "Connect"}
                                             </button>
@@ -617,7 +617,7 @@ export default function TeamAetherDashboardPage() {
                                                 type="button"
                                                 onClick={disconnectAction}
                                                 disabled={(isWebsite || isMeta || isX || isTikTok || isYouTube) && (busy || !connected)}
-                                                className="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                                                className="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white disabled:cursor-not-allowed disabled:opacity-40 lg:px-3 lg:py-1.5 lg:text-xs"
                                             >
                                                 Disconnect
                                             </button>

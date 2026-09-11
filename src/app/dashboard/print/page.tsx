@@ -1443,8 +1443,8 @@ export default function PrintDashboardPage() {
 
   if (printLoading || listLoading) {
     return (
-      <div className="space-y-6">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="space-y-6 lg:space-y-4">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
           <p className="text-slate-600">Preparing print operations...</p>
         </div>
       </div>
@@ -1452,43 +1452,43 @@ export default function PrintDashboardPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 lg:space-y-6">
       <section
-        className={`rounded-3xl border border-slate-800 bg-gradient-to-br p-6 text-white shadow-sm transition-colors duration-300 lg:p-8 ${orgTheme.heroGradient}`}
+        className={`rounded-3xl border border-slate-800 bg-gradient-to-br p-6 text-white shadow-sm transition-colors duration-300 lg:p-6 ${orgTheme.heroGradient} lg:rounded-2xl lg:p-[18px]`}
       >
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm text-slate-300">
-              <Printer className="h-4 w-4" />
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-4">
+          <div className="space-y-3 lg:space-y-2">
+            <div className="flex items-center gap-2 text-sm text-slate-300 lg:text-[11px]">
+              <Printer className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               Print + asset operations center
             </div>
 
             <div className="space-y-2">
-              <h1 className="text-3xl font-semibold tracking-tight text-white lg:text-4xl">
+              <h1 className="text-3xl font-semibold tracking-tight text-white lg:text-3xl lg:text-2xl">
                 {perspectiveHeadline}
               </h1>
-              <p className="max-w-3xl text-sm text-slate-300 lg:text-base">
+              <p className="max-w-3xl text-sm text-slate-300 lg:text-sm lg:text-[11px]">
                 {perspectiveSubheadline}
               </p>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 lg:gap-2">
             <Link
               href="/dashboard/print/focus"
-              className="inline-flex items-center gap-2 rounded-2xl border border-amber-300 bg-amber-100 px-4 py-3 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-amber-200"
+              className="inline-flex items-center gap-2 rounded-2xl border border-amber-300 bg-amber-100 px-4 py-3 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-amber-200 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
-              <Zap className="h-4 w-4 text-slate-950" />
+              <Zap className="h-4 w-4 text-slate-950 lg:h-3.5 lg:w-3.5" />
               <span className="text-slate-950">{focusButtonLabel}</span>
             </Link>
           </div>
         </div>
       </section>
 
-      {isDemoOrg && (<section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="grid gap-5 lg:grid-cols-[1fr_1fr]">
-          <div className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+      {isDemoOrg && (<section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+        <div className="grid gap-5 lg:grid-cols-[1fr_1fr] lg:gap-4">
+          <div className="space-y-3 lg:space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 lg:text-[9px]">
               Demo role perspective
             </p>
             <div className="flex flex-wrap gap-2">
@@ -1500,7 +1500,7 @@ export default function PrintDashboardPage() {
                     demoRole === role
                       ? "bg-slate-900 text-white"
                       : "border border-slate-200 bg-white text-slate-700"
-                  }`}
+                  } lg:px-2.5 lg:text-[9px]`}
                 >
                   {role}
                 </button>
@@ -1508,8 +1508,8 @@ export default function PrintDashboardPage() {
             </div>
           </div>
 
-          <div className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+          <div className="space-y-3 lg:space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 lg:text-[9px]">
               Demo department perspective
             </p>
             <div className="flex flex-wrap gap-2">
@@ -1523,7 +1523,7 @@ export default function PrintDashboardPage() {
                     demoDepartment === department
                       ? "bg-slate-900 text-white"
                       : "border border-slate-200 bg-white text-slate-700"
-                  }`}
+                  } lg:px-2.5 lg:text-[9px]`}
                 >
                   {department}
                 </button>
@@ -1532,7 +1532,7 @@ export default function PrintDashboardPage() {
           </div>
         </div>
 
-        <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+        <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700 lg:rounded-xl lg:p-3 lg:mt-4 lg:text-[11px]">
           <span className="font-medium text-slate-900">
             {getRoleLabel(demoRole)}:
           </span>{" "}
@@ -1542,20 +1542,20 @@ export default function PrintDashboardPage() {
       </section>)}
 
       {showDepartmentAbe && printAbeReady ? (
-      <section className="rounded-3xl border border-fuchsia-200 bg-fuchsia-50 p-6 shadow-sm">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm text-fuchsia-800">
-              <Sparkles className="h-4 w-4" />
+      <section className="rounded-3xl border border-fuchsia-200 bg-fuchsia-50 p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between lg:gap-4">
+          <div className="space-y-3 lg:space-y-2">
+            <div className="flex items-center gap-2 text-sm text-fuchsia-800 lg:text-[11px]">
+              <Sparkles className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
               Honest Abe
             </div>
 
             <div className="space-y-2">
-              <p className="text-sm font-medium uppercase tracking-[0.18em] text-fuchsia-700/80">
+              <p className="text-sm font-medium uppercase tracking-[0.18em] text-fuchsia-700/80 lg:text-[11px]">
                 {getRoleLabel(demoRole)}
               </p>
 
-              <div className="flex flex-wrap gap-4 text-sm text-fuchsia-900">
+              <div className="flex flex-wrap gap-4 text-sm text-fuchsia-900 lg:gap-3 lg:text-[11px]">
                 <div>
                   <span className="font-medium text-fuchsia-700">Health:</span>{" "}
                   {printAbeBriefing.health}
@@ -1574,7 +1574,7 @@ export default function PrintDashboardPage() {
                 </div>
               </div>
 
-              <h2 className="text-2xl font-semibold text-fuchsia-900">
+              <h2 className="text-2xl font-semibold text-fuchsia-900 lg:text-xl">
                 {printAbeBriefing.primaryLane === "print"
                   ? "Print is the lane that needs protected timing right now."
                   : `${departmentLabel(
@@ -1582,39 +1582,39 @@ export default function PrintDashboardPage() {
                     )} is shaping what print should do next.`}
               </h2>
 
-              <p className="max-w-3xl text-sm text-slate-700 lg:text-base">
+              <p className="max-w-3xl text-sm text-slate-700 lg:text-sm lg:text-[11px]">
                 {aiSummary.body}
               </p>
 
-              <p className="max-w-3xl text-sm italic text-slate-600">
+              <p className="max-w-3xl text-sm italic text-slate-600 lg:text-[11px]">
                 Why now: {printAbeInsight}
               </p>
 
               {printAbeBriefing.crossDomainSignal ? (
-                <p className="max-w-3xl text-sm text-fuchsia-900/80">
+                <p className="max-w-3xl text-sm text-fuchsia-900/80 lg:text-[11px]">
                   {printAbeBriefing.crossDomainSignal}
                 </p>
               ) : null}
 
-              <p className="max-w-3xl text-sm text-slate-600">
+              <p className="max-w-3xl text-sm text-slate-600 lg:text-[11px]">
                 {printAbeBriefing.supportText}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="mt-5 rounded-2xl border border-white/70 bg-white/70 p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-fuchsia-700">
+        <div className="mt-5 rounded-2xl border border-white/70 bg-white/70 p-5 lg:rounded-xl lg:p-4 lg:mt-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-fuchsia-700 lg:text-[9px]">
             What Abe Would Do
           </p>
 
-          <div className="mt-3 space-y-3">
+          <div className="mt-3 space-y-3 lg:space-y-2 lg:mt-2">
             {printAbeBriefing.actions.map((move, index) => (
               <div
                 key={`${move}-${index}`}
-                className="flex items-start gap-3 text-sm text-slate-700"
+                className="flex items-start gap-3 text-sm text-slate-700 lg:gap-2 lg:text-[11px]"
               >
-                <div className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-fuchsia-200 bg-fuchsia-100 text-xs font-semibold text-fuchsia-800">
+                <div className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-fuchsia-200 bg-fuchsia-100 text-xs font-semibold text-fuchsia-800 lg:text-[9px]">
                   {index + 1}
                 </div>
                 <p>{move}</p>
@@ -1624,21 +1624,21 @@ export default function PrintDashboardPage() {
         </div>
 
         {printPatternWatch.length > 0 ? (
-          <div className="mt-5 rounded-2xl border border-white/70 bg-white/70 p-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-fuchsia-700">
+          <div className="mt-5 rounded-2xl border border-white/70 bg-white/70 p-5 lg:rounded-xl lg:p-4 lg:mt-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-fuchsia-700 lg:text-[9px]">
               Pattern Watch
             </p>
 
-            <div className="mt-3 space-y-3">
+            <div className="mt-3 space-y-3 lg:space-y-2 lg:mt-2">
               {printPatternWatch.map((insight, index) => (
                 <div
                   key={`${insight.label}-${index}`}
                   className={`rounded-2xl border p-4 ${patternSeverityTone(
                     insight.severity
-                  )}`}
+                  )} lg:rounded-xl lg:p-3`}
                 >
-                  <p className="text-sm font-semibold">{insight.label}</p>
-                  <p className="mt-1 text-sm opacity-90">{insight.detail}</p>
+                  <p className="text-sm font-semibold lg:text-[11px]">{insight.label}</p>
+                  <p className="mt-1 text-sm opacity-90 lg:text-[11px]">{insight.detail}</p>
                 </div>
               ))}
             </div>
@@ -1647,77 +1647,77 @@ export default function PrintDashboardPage() {
       </section>
       ) : null}
             {printLoopMode ? (
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-6 lg:rounded-2xl lg:p-[18px]">
           <div
             className={`mb-6 grid gap-4 ${
               demoRole === "general_user" ? "md:grid-cols-2" : "md:grid-cols-3"
-            }`}
+            } lg:gap-3 lg:mb-4`}
           >
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-sm font-medium text-slate-500">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
+              <p className="text-sm font-medium text-slate-500 lg:text-[11px]">
                 Print Loop Progress
               </p>
-              <p className="mt-2 text-3xl font-semibold text-slate-900">
+              <p className="mt-2 text-3xl font-semibold text-slate-900 lg:text-2xl">
                 {visibleFocusQueue.findIndex((item) => item.id === selectedTaskId) + 1 > 0
                   ? visibleFocusQueue.findIndex((item) => item.id === selectedTaskId) + 1
                   : 1}
-                <span className="text-base font-medium text-slate-500">
+                <span className="text-base font-medium text-slate-500 lg:text-sm">
                   {" "}
                   / {visibleFocusQueue.length}
                 </span>
               </p>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-sm font-medium text-slate-500">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
+              <p className="text-sm font-medium text-slate-500 lg:text-[11px]">
                 Loop Actions Saved
               </p>
-              <p className="mt-2 text-3xl font-semibold text-slate-900">
+              <p className="mt-2 text-3xl font-semibold text-slate-900 lg:text-2xl">
                 {completedLoopCount}
               </p>
             </div>
 
             {demoRole !== "general_user" ? (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <p className="text-sm font-medium text-slate-500">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
+                <p className="text-sm font-medium text-slate-500 lg:text-[11px]">
                   Highest Priority
                 </p>
-                <p className="mt-2 text-lg font-semibold text-slate-900">
+                <p className="mt-2 text-lg font-semibold text-slate-900 lg:text-base">
                   {visibleFocusQueue[0]?.title || "No task available"}
                 </p>
               </div>
             ) : null}
           </div>
 
-          <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
+          <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr] lg:gap-4">
             <div>
-              <div className="mb-4 rounded-2xl border border-indigo-200 bg-indigo-50 p-4">
-                <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700">
+              <div className="mb-4 rounded-2xl border border-indigo-200 bg-indigo-50 p-4 lg:rounded-xl lg:p-3 lg:mb-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700 lg:text-[9px]">
                   Highest Priority Print Task
                 </p>
-                <p className="mt-2 text-sm font-semibold text-slate-900">
+                <p className="mt-2 text-sm font-semibold text-slate-900 lg:text-[11px]">
                   {visibleFocusQueue[0]?.title || "No priority available"}
                 </p>
-                <p className="mt-1 text-xs text-slate-600">
+                <p className="mt-1 text-xs text-slate-600 lg:text-[9px]">
                   {visibleFocusQueue[0]?.summary ||
                     "System recommends immediate print action."}
                 </p>
               </div>
 
-              <div className="mb-4">
-                <p className="text-sm font-medium text-slate-500">
+              <div className="mb-4 lg:mb-3">
+                <p className="text-sm font-medium text-slate-500 lg:text-[11px]">
                   Print Loop Queue
                 </p>
-                <h2 className="text-xl font-semibold text-slate-900">
+                <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">
                   {demoRole === "general_user"
                     ? "Active Print Work"
                     : "Approval + Inventory Execution"}
                 </h2>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-4 lg:space-y-3">
                 {visibleFocusQueue.length === 0 ? (
-                  <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600">
+                  <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600 lg:rounded-xl lg:p-3 lg:text-[11px]">
                     No print loop tasks are available from live metrics yet.
                   </div>
                 ) : null}
@@ -1730,19 +1730,19 @@ export default function PrintDashboardPage() {
                       item.id === selectedTaskId
                         ? "border-blue-500 bg-blue-50 shadow-md"
                         : "border-slate-200 bg-white hover:bg-slate-50"
-                    }`}
+                    } lg:rounded-xl lg:p-3`}
                   >
-                    <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between lg:gap-2">
                       <div>
                         <p className="font-semibold text-slate-900">
                           {item.title}
                         </p>
-                        <p className="mt-2 text-sm text-slate-500">
+                        <p className="mt-2 text-sm text-slate-500 lg:text-[11px]">
                           {item.summary}
                         </p>
                         {item.id === selectedTaskId &&
                         selectedPrintPatternHint ? (
-                          <p className="mt-2 text-xs font-medium text-amber-700">
+                          <p className="mt-2 text-xs font-medium text-amber-700 lg:text-[9px]">
                             {selectedPrintPatternHint}
                           </p>
                         ) : null}
@@ -1752,7 +1752,7 @@ export default function PrintDashboardPage() {
                         <span
                           className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${priorityTone(
                             item.priority
-                          )}`}
+                          )} lg:px-2.5 lg:text-[9px]`}
                         >
                           {item.priority}
                         </span>
@@ -1760,7 +1760,7 @@ export default function PrintDashboardPage() {
                         <span
                           className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${focusTypeTone(
                             item.type
-                          )}`}
+                          )} lg:px-2.5 lg:text-[9px]`}
                         >
                           {item.type}
                         </span>
@@ -1771,34 +1771,34 @@ export default function PrintDashboardPage() {
               </div>
             </div>
 
-            <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+            <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5 lg:rounded-2xl lg:p-4">
               {selectedTask ? (
-                <div className="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
+                <div className="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 lg:rounded-xl lg:p-3 lg:mb-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700 lg:text-[9px]">
                     Aether Recommendation
                   </p>
-                  <p className="mt-2 text-sm font-medium text-slate-900">
+                  <p className="mt-2 text-sm font-medium text-slate-900 lg:text-[11px]">
                     {getPrintRecommendation(selectedTask)}
                   </p>
-                  <p className="mt-1 text-xs text-slate-600">
+                  <p className="mt-1 text-xs text-slate-600 lg:text-[9px]">
                     Save the execution decision and move immediately to the next
                     print priority.
                   </p>
                   {selectedPrintPatternHint ? (
-                    <p className="mt-2 text-xs font-medium text-amber-700">
+                    <p className="mt-2 text-xs font-medium text-amber-700 lg:text-[9px]">
                       {selectedPrintPatternHint}
                     </p>
                   ) : null}
                 </div>
               ) : null}
 
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold text-slate-900">
+              <div className="mb-4 lg:mb-3">
+                <h3 className="text-lg font-semibold text-slate-900 lg:text-base">
                   {demoRole === "general_user"
                     ? "Print Work"
                     : "Print Execution"}
                 </h3>
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
                   {demoRole === "general_user"
                     ? "Record the result and keep the next print action moving."
                     : "Record the result, reinforce the next move, and keep timing tight."}
@@ -1806,28 +1806,28 @@ export default function PrintDashboardPage() {
               </div>
 
               {selectedTask ? (
-                <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-4">
-                  <p className="text-sm text-slate-500">Selected Priority</p>
-                  <p className="mt-2 text-lg font-semibold text-slate-900">
+                <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 lg:rounded-xl lg:p-3 lg:mb-3">
+                  <p className="text-sm text-slate-500 lg:text-[11px]">Selected Priority</p>
+                  <p className="mt-2 text-lg font-semibold text-slate-900 lg:text-base">
                     {selectedTask.title}
                   </p>
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
                     {selectedTask.summary}
                   </p>
                 </div>
               ) : null}
 
               {loopMessage ? (
-                <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-700">
+                <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-700 lg:rounded-xl lg:p-3 lg:mb-3 lg:text-[11px]">
                   {loopMessage}
                 </div>
               ) : null}
 
-              <div className="space-y-4">
+              <div className="space-y-4 lg:space-y-3">
                 <select
                   value={loopResult}
                   onChange={(e) => setLoopResult(e.target.value)}
-                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400"
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
                 >
                   <option value="">Select an execution result</option>
                   <option value="completed">Completed</option>
@@ -1840,14 +1840,14 @@ export default function PrintDashboardPage() {
                   onChange={(e) => setLoopNotes(e.target.value)}
                   placeholder="Print notes..."
                   rows={5}
-                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400"
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
                 />
 
                 <button
                   type="button"
                   onClick={savePrintLoop}
                   disabled={!selectedTask}
-                  className="w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
                 >
                   {demoRole === "general_user" ? "Save & Continue" : "Save & Next"}
                 </button>
@@ -1864,17 +1864,17 @@ export default function PrintDashboardPage() {
             : visibleStats.length === 3
             ? "md:grid-cols-3"
             : "md:grid-cols-2 xl:grid-cols-4"
-        }`}
+        } lg:gap-3`}
       >
         {visibleStats.map((stat) => (
           <div
             key={stat.id}
-            className={`rounded-3xl border p-6 shadow-sm ${stat.tone}`}
+            className={`rounded-3xl border p-6 shadow-sm ${stat.tone} lg:rounded-2xl lg:p-[18px]`}
           >
-            <p className="text-sm font-medium">
+            <p className="text-sm font-medium lg:text-[11px]">
               {stat.label}
             </p>
-            <p className="mt-3 text-3xl font-semibold">
+            <p className="mt-3 text-3xl font-semibold lg:mt-2 lg:text-2xl">
               {stat.value}
             </p>
           </div>
@@ -1882,40 +1882,40 @@ export default function PrintDashboardPage() {
       </section>
 
       {operationalPrintUniverses.length > 0 ? (
-        <section className="rounded-3xl border border-violet-200 bg-violet-50 p-6 shadow-sm">
-          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <section className="rounded-3xl border border-violet-200 bg-violet-50 p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-3 lg:mb-4">
             <div>
-              <p className="text-sm font-medium text-violet-800">
+              <p className="text-sm font-medium text-violet-800 lg:text-[11px]">
                 Operational Print Universes
               </p>
-              <h2 className="text-xl font-semibold text-violet-950">
+              <h2 className="text-xl font-semibold text-violet-950 lg:text-lg">
                 Lists feeding print execution
               </h2>
-              <p className="mt-1 text-sm text-violet-900/75">
+              <p className="mt-1 text-sm text-violet-900/75 lg:text-[11px]">
                 These are routed from ingestion and Lists, then converted into approval, inventory, and delivery pressure for Print Focus.
               </p>
             </div>
 
             <Link
               href="/dashboard/lists"
-              className="inline-flex items-center gap-2 rounded-2xl border border-violet-200 bg-white px-4 py-3 text-sm font-medium text-violet-800 transition hover:bg-violet-100"
+              className="inline-flex items-center gap-2 rounded-2xl border border-violet-200 bg-white px-4 py-3 text-sm font-medium text-violet-800 transition hover:bg-violet-100 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
             >
               Review Lists
             </Link>
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-3">
+          <div className="grid gap-4 lg:grid-cols-3 lg:gap-3">
             {operationalPrintUniverses.slice(0, 6).map((universe) => (
               <div
                 key={universe.id}
-                className="rounded-2xl border border-violet-200 bg-white p-4"
+                className="rounded-2xl border border-violet-200 bg-white p-4 lg:rounded-xl lg:p-3"
               >
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-3 lg:gap-2">
                   <div>
                     <p className="font-semibold text-slate-900">
                       {universe.name}
                     </p>
-                    <p className="mt-1 text-sm text-slate-500">
+                    <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
                       {universe.routeLabel} · {universe.useCase}
                     </p>
                   </div>
@@ -1924,7 +1924,7 @@ export default function PrintDashboardPage() {
                     {universe.operationalTags.slice(0, 5).map((tag) => (
                       <span
                         key={`${universe.id}-${tag}`}
-                        className="rounded-full border border-violet-200 bg-violet-50 px-2.5 py-1 text-xs font-semibold text-violet-800"
+                        className="rounded-full border border-violet-200 bg-violet-50 px-2.5 py-1 text-xs font-semibold text-violet-800 lg:text-[9px]"
                       >
                         {tag}
                       </span>
@@ -1936,24 +1936,24 @@ export default function PrintDashboardPage() {
           </div>
         </section>
       ) : listLoading ? (
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 text-sm text-slate-600 shadow-sm">
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 text-sm text-slate-600 shadow-sm lg:rounded-2xl lg:p-[18px] lg:text-[11px]">
           Loading operational print universes...
         </section>
       ) : null}
 
       {visibleMaterialReadiness.show ? (
-        <section className="rounded-3xl border border-indigo-200 bg-indigo-50 p-6 shadow-sm">
-          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <section className="rounded-3xl border border-indigo-200 bg-indigo-50 p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-3 lg:mb-4">
             <div>
-              <p className="text-sm font-medium text-indigo-800">
+              <p className="text-sm font-medium text-indigo-800 lg:text-[11px]">
                 Material Readiness
               </p>
-              <h2 className="text-xl font-semibold text-indigo-950">
+              <h2 className="text-xl font-semibold text-indigo-950 lg:text-lg">
                 Print → Deployment Outputs
               </h2>
             </div>
 
-            <div className="rounded-2xl border border-indigo-200 bg-white px-4 py-2 text-sm font-medium text-indigo-800">
+            <div className="rounded-2xl border border-indigo-200 bg-white px-4 py-2 text-sm font-medium text-indigo-800 lg:rounded-xl lg:px-3 lg:text-[11px]">
               {visibleMaterialReadiness.readyAssets.length} ready asset
               {visibleMaterialReadiness.readyAssets.length === 1 ? "" : "s"} •{" "}
               {visibleMaterialReadiness.inventoryActions.length} inventory action
@@ -1966,22 +1966,22 @@ export default function PrintDashboardPage() {
           <div
             className={`grid gap-4 ${
               demoRole === "director" ? "lg:grid-cols-2" : "lg:grid-cols-3"
-            }`}
+            } lg:gap-3`}
           >
-            <div className="rounded-2xl border border-indigo-200 bg-white p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700">
+            <div className="rounded-2xl border border-indigo-200 bg-white p-4 lg:rounded-xl lg:p-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700 lg:text-[9px]">
                 Ready Assets
               </p>
-              <div className="mt-3 space-y-3">
+              <div className="mt-3 space-y-3 lg:space-y-2 lg:mt-2">
                 {visibleMaterialReadiness.readyAssets.map((asset) => (
                   <div
                     key={asset.id}
-                    className="rounded-2xl border border-slate-200 bg-slate-50 p-3"
+                    className="rounded-2xl border border-slate-200 bg-slate-50 p-3 lg:rounded-xl lg:p-2.5"
                   >
                     <p className="font-medium text-slate-900">
                       {asset.assetName}
                     </p>
-                    <p className="mt-1 text-xs text-slate-500">
+                    <p className="mt-1 text-xs text-slate-500 lg:text-[9px]">
                       {asset.linkedTurf} • {asset.linkedUseCase}
                     </p>
                   </div>
@@ -1989,20 +1989,20 @@ export default function PrintDashboardPage() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-indigo-200 bg-white p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700">
+            <div className="rounded-2xl border border-indigo-200 bg-white p-4 lg:rounded-xl lg:p-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700 lg:text-[9px]">
                 Inventory Actions
               </p>
-              <div className="mt-3 space-y-3">
+              <div className="mt-3 space-y-3 lg:space-y-2 lg:mt-2">
                 {visibleMaterialReadiness.inventoryActions.map((action) => (
                   <div
                     key={action.id}
-                    className="rounded-2xl border border-slate-200 bg-slate-50 p-3"
+                    className="rounded-2xl border border-slate-200 bg-slate-50 p-3 lg:rounded-xl lg:p-2.5"
                   >
                     <p className="font-medium text-slate-900">
                       {action.item} · {action.amount}
                     </p>
-                    <p className="mt-1 text-xs text-slate-500">
+                    <p className="mt-1 text-xs text-slate-500 lg:text-[9px]">
                       {action.region}
                     </p>
                   </div>
@@ -2011,20 +2011,20 @@ export default function PrintDashboardPage() {
             </div>
 
             {demoRole === "admin" ? (
-              <div className="rounded-2xl border border-indigo-200 bg-white p-4">
-                <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700">
+              <div className="rounded-2xl border border-indigo-200 bg-white p-4 lg:rounded-xl lg:p-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700 lg:text-[9px]">
                   Delivery Unlocks
                 </p>
-                <div className="mt-3 space-y-3">
+                <div className="mt-3 space-y-3 lg:space-y-2 lg:mt-2">
                   {visibleMaterialReadiness.deliveryUnlocks.map((unlock) => (
                     <div
                       key={unlock.id}
-                      className="rounded-2xl border border-slate-200 bg-slate-50 p-3"
+                      className="rounded-2xl border border-slate-200 bg-slate-50 p-3 lg:rounded-xl lg:p-2.5"
                     >
                       <p className="font-medium text-slate-900">
                         {unlock.item}
                       </p>
-                      <p className="mt-1 text-xs text-slate-500">
+                      <p className="mt-1 text-xs text-slate-500 lg:text-[9px]">
                         {unlock.vendor} • {unlock.eta}
                       </p>
                     </div>
@@ -2036,24 +2036,24 @@ export default function PrintDashboardPage() {
         </section>
       ) : null}
 
-      <section className="grid gap-6 xl:grid-cols-[1fr_1fr]">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="mb-6 flex items-center justify-between">
+      <section className="grid gap-6 xl:grid-cols-[1fr_1fr] lg:gap-4">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <div className="mb-6 flex items-center justify-between lg:mb-4">
             <div>
-              <p className="text-sm font-medium text-slate-500">
+              <p className="text-sm font-medium text-slate-500 lg:text-[11px]">
                 Asset Pipeline
               </p>
-              <h2 className="text-xl font-semibold text-slate-900">
+              <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">
                 Design → Approval → Production
               </h2>
             </div>
 
-            <Boxes className="h-5 w-5 text-slate-500" />
+            <Boxes className="h-5 w-5 text-slate-500 lg:h-4 lg:w-4" />
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-4 lg:space-y-3">
             {visibleAssetRows.length === 0 ? (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 lg:rounded-xl lg:p-3 lg:text-[11px]">
                 {printLoading
                   ? "Loading print assets..."
                   : "No print asset pipeline items or operational print universes are connected yet."}
@@ -2063,14 +2063,14 @@ export default function PrintDashboardPage() {
             {visibleAssetRows.map((asset) => (
               <div
                 key={asset.id}
-                className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                className="rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3"
               >
-                <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between lg:gap-2">
                   <div>
                     <p className="font-semibold text-slate-900">
                       {asset.name}
                     </p>
-                    <p className="mt-1 text-sm text-slate-500">
+                    <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
                       Owner: {asset.owner}
                     </p>
                   </div>
@@ -2078,7 +2078,7 @@ export default function PrintDashboardPage() {
                   <span
                     className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${assetStatusTone(
                       asset.status
-                    )}`}
+                    )} lg:px-2.5 lg:text-[9px]`}
                   >
                     {asset.status}
                   </span>
@@ -2088,23 +2088,23 @@ export default function PrintDashboardPage() {
           </div>
         </div>
 
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="mb-6 flex items-center justify-between">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <div className="mb-6 flex items-center justify-between lg:mb-4">
             <div>
-              <p className="text-sm font-medium text-slate-500">
+              <p className="text-sm font-medium text-slate-500 lg:text-[11px]">
                 Orders
               </p>
-              <h2 className="text-xl font-semibold text-slate-900">
+              <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">
                 Production + Delivery
               </h2>
             </div>
 
-            <Truck className="h-5 w-5 text-slate-500" />
+            <Truck className="h-5 w-5 text-slate-500 lg:h-4 lg:w-4" />
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-4 lg:space-y-3">
             {visibleOrderRows.length === 0 ? (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 lg:rounded-xl lg:p-3 lg:text-[11px]">
                 {printLoading
                   ? "Loading print orders..."
                   : "No print production, delivery, or operational universe orders are connected yet."}
@@ -2114,14 +2114,14 @@ export default function PrintDashboardPage() {
             {visibleOrderRows.map((order) => (
               <div
                 key={order.id}
-                className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                className="rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3"
               >
-                <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between lg:gap-2">
                   <div>
                     <p className="font-semibold text-slate-900">
                       {order.item}
                     </p>
-                    <p className="mt-1 text-sm text-slate-500">
+                    <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
                       {order.vendor}
                     </p>
                   </div>
@@ -2129,7 +2129,7 @@ export default function PrintDashboardPage() {
                   <span
                     className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${orderStatusTone(
                       order.status
-                    )}`}
+                    )} lg:px-2.5 lg:text-[9px]`}
                   >
                     {order.status}
                   </span>
@@ -2140,23 +2140,23 @@ export default function PrintDashboardPage() {
         </div>
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="mb-6 flex items-center justify-between">
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+        <div className="mb-6 flex items-center justify-between lg:mb-4">
           <div>
-            <p className="text-sm font-medium text-slate-500">
+            <p className="text-sm font-medium text-slate-500 lg:text-[11px]">
               Inventory
             </p>
-            <h2 className="text-xl font-semibold text-slate-900">
+            <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">
               Stock + Exposure
             </h2>
           </div>
 
-          <ClipboardCheck className="h-5 w-5 text-slate-500" />
+          <ClipboardCheck className="h-5 w-5 text-slate-500 lg:h-4 lg:w-4" />
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-4 lg:space-y-3">
           {visibleInventoryRows.length === 0 ? (
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 lg:rounded-xl lg:p-3 lg:text-[11px]">
               {printLoading
                 ? "Loading print inventory..."
                 : "No print inventory records or operational print universes are connected yet."}
@@ -2166,10 +2166,10 @@ export default function PrintDashboardPage() {
           {visibleInventoryRows.map((row) => (
             <div
               key={row.id}
-              className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+              className="rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3"
             >
               <p className="font-semibold text-slate-900">{row.item}</p>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
                 On hand: {row.onHand} • Reserved: {row.reserved}
               </p>
             </div>
