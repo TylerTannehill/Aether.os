@@ -191,11 +191,11 @@ function TierBadge({ tier }: { tier: AetherTier }) {
   const badge = getTierBadgeClasses(tier);
 
   return (
-    <div className="mt-3 flex flex-col items-center">
-      <div className="mt-2 flex items-center justify-center">
+    <div className="mt-3 flex flex-col items-center lg:mt-2.5">
+      <div className="mt-2 flex items-center justify-center lg:mt-1.5">
         <div
           className={cn(
-            "relative rounded-md px-2.5 py-0.5 text-xs font-bold uppercase tracking-[0.08em] min-w-[40px] text-center",
+            "relative rounded-md px-2.5 py-0.5 text-xs font-bold uppercase tracking-[0.08em] min-w-[40px] text-center lg:min-w-[30px] lg:px-2 lg:text-[9px]",
             badge.shell
           )}
         >
@@ -371,10 +371,10 @@ export function DashboardSidebar() {
   const theme = getOrgContextTheme(contextMode);
 
   return (
-    <aside className="flex h-screen w-full max-w-[280px] flex-col overflow-hidden border-r border-slate-800/70 bg-slate-950 text-white">
+    <aside className="flex h-screen w-full max-w-[280px] flex-col overflow-hidden border-r border-slate-800/70 bg-slate-950 text-white lg:max-w-[210px]">
       <div
         className={cn(
-          "border-b border-white/10 bg-gradient-to-br px-6 py-8 text-white shadow-[inset_0_-1px_0_rgba(255,255,255,0.08)]",
+          "border-b border-white/10 bg-gradient-to-br px-6 py-8 text-white shadow-[inset_0_-1px_0_rgba(255,255,255,0.08)] lg:px-[18px] lg:py-6",
           theme.sidebarGradient
         )}
       >
@@ -385,11 +385,11 @@ export function DashboardSidebar() {
               alt="Aether.os logo"
               width={180}
               height={120}
-              className="h-auto w-[175px] object-contain"
+              className="h-auto w-[175px] object-contain lg:w-[131px]"
               priority
             />
 
-            <p className="mt-2 text-center text-sm font-medium text-slate-100">
+            <p className="mt-2 text-center text-sm font-medium text-slate-100 lg:mt-1.5 lg:text-[11px]">
               Political Operating System
             </p>
 
@@ -398,8 +398,8 @@ export function DashboardSidebar() {
         </Link>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 px-4 py-5">
-        <div className="mb-4 px-3 text-xs font-bold uppercase tracking-[0.26em] text-slate-400">
+      <div className="min-h-0 flex-1 overflow-y-auto bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 px-4 py-5 lg:px-3 lg:py-4">
+        <div className="mb-4 px-3 text-xs font-bold uppercase tracking-[0.26em] text-slate-400 lg:mb-3 lg:px-2 lg:text-[9px]">
           Operations
         </div>
 
@@ -409,7 +409,7 @@ export function DashboardSidebar() {
           </div>
         ) : null}
 
-        <nav className="space-y-2">
+        <nav className="space-y-2 lg:space-y-1.5">
           {visibleNavItems.map((item) => {
             const Icon = item.icon;
 
@@ -422,13 +422,13 @@ export function DashboardSidebar() {
               <Link key={item.href} href={item.href}>
                 <div
                   className={cn(
-                    "flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-all duration-200",
+                    "flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-all duration-200 lg:gap-2.5 lg:rounded-xl lg:px-3 lg:py-2.5 lg:text-[11px]",
                     isActive
                       ? "bg-black/55 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_8px_18px_rgba(2,6,23,0.28)]"
                       : "text-slate-300 hover:bg-white/8 hover:text-white"
                   )}
                 >
-                  <Icon className="h-4 w-4" />
+                  <Icon className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                   <span>{item.title}</span>
                 </div>
               </Link>
@@ -437,13 +437,13 @@ export function DashboardSidebar() {
         </nav>
       </div>
 
-      <div className="shrink-0 border-t border-white/10 bg-slate-950 px-4 pt-4 pb-5">
+      <div className="shrink-0 border-t border-white/10 bg-slate-950 px-4 pt-4 pb-5 lg:px-3 lg:pt-3 lg:pb-4">
         <button
           type="button"
           onClick={handleLogout}
-          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-black/60 px-4 py-3 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition hover:bg-black/80"
+          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-black/60 px-4 py-3 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition hover:bg-black/80 lg:rounded-xl lg:px-3 lg:py-2.5 lg:text-[11px]"
         >
-          <LogOut className="h-4 w-4" />
+          <LogOut className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
           Logout
         </button>
       </div>

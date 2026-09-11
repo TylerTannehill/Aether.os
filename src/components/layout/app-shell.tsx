@@ -35,12 +35,12 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-slate-100">
-      <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-[280px]">
+      <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-[210px]">
         <DashboardSidebar />
       </div>
 
-      <div className="lg:pl-[280px]">
-        <header className="sticky top-0 z-40 flex h-20 items-center border-b border-slate-200 bg-white/95 px-4 lg:px-8">
+      <div className="lg:pl-[210px]">
+        <header className="sticky top-0 z-40 flex h-20 items-center border-b border-slate-200 bg-white/95 px-4 lg:h-[60px] lg:px-6">
           <div className="flex items-center gap-3 lg:hidden">
             <button
               type="button"
@@ -59,7 +59,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
 
           <div className="hidden flex-1 justify-center lg:flex">
-            <p className="select-none text-lg font-black uppercase tracking-[0.45em] text-slate-700">
+            <p className="select-none text-lg font-black uppercase tracking-[0.45em] text-slate-700 lg:text-sm">
               <span onClick={() => handleEasterEggClick("clarity")}>CLARITY.</span>{" "}
               <span onClick={() => handleEasterEggClick("focus")}>FOCUS.</span>{" "}
               <span onClick={() => handleEasterEggClick("execution")}>EXECUTION.</span>
@@ -67,7 +67,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-[1800px] p-4 lg:p-8">
+        <main className="mx-auto w-full max-w-[1800px] p-4 lg:p-6">
           {children}
         </main>
       </div>
