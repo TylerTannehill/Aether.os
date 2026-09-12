@@ -8,6 +8,105 @@ import {
 
 const X_API_BASE = "https://api.x.com/2";
 
+const X_TOKEN_URL = "https://api.x.com/2/oauth2/token";
+const X_TOKEN_REFRESH_BUFFER_MS = 20 * 60 * 1000;
+
+type XRefreshResponse = {
+  token_type?: string;
+  expires_in?: number;
+  access_token?: string;
+  scope?: string;
+  refresh_token?: string;
+  error?: string;
+  error_description?: string;
+};
+
+function xTokenNeedsRefresh(connection: IntegrationConnection): boolean {
+  if (!connection.access_token?.trim()) return true;
+  if (!connection.expires_at) return true;
+
+  const expiresAt = Date.parse(connection.expires_at);
+  if (!Number.isFinite(expiresAt)) return true;
+
+  return expiresAt <= Date.now() + X_TOKEN_REFRESH_BUFFER_MS;
+}
+
+async function ensureFreshXConnection(
+  connection: IntegrationConnection
+): Promise<IntegrationConnection> {
+  if (!xTokenNeedsRefresh(connection)) {
+    return connection;
+  }
+
+  const refreshToken = connection.refresh_token?.trim();
+  const clientId = process.env.X_CLIENT_ID?.trim();
+  const clientSecret = process.env.X_CLIENT_SECRET?.trim();
+
+  if (!refreshToken) {
+    throw new Error(
+      "X access token expired and no refresh token is available. Reconnect X."
+    );
+  }
+
+  if (!clientId || !clientSecret) {
+    throw new Error("X_CLIENT_ID and X_CLIENT_SECRET are required.");
+  }
+
+  const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
+
+  const response = await fetch(X_TOKEN_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Basic ${basicAuth}`,
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Cache-Control": "no-cache",
+    },
+    body: new URLSearchParams({
+      grant_type: "refresh_token",
+      refresh_token: refreshToken,
+      client_id: clientId,
+    }),
+    cache: "no-store",
+  });
+
+  const payload = (await response.json()) as XRefreshResponse;
+
+  if (!response.ok || !payload.access_token) {
+    const detail =
+      payload.error_description ||
+      payload.error ||
+      `X token refresh failed (${response.status}).`;
+
+    throw new Error(detail);
+  }
+
+  const nextRefreshToken = payload.refresh_token?.trim() || refreshToken;
+  const expiresAt = payload.expires_in
+    ? new Date(Date.now() + Number(payload.expires_in) * 1000).toISOString()
+    : connection.expires_at;
+
+  return {
+    ...connection,
+    access_token: payload.access_token,
+    refresh_token: nextRefreshToken,
+    expires_at: expiresAt,
+    scopes: payload.scope
+      ? payload.scope
+          .split(" ")
+          .map((scope) => scope.trim())
+          .filter(Boolean)
+      : connection.scopes,
+    metadata: {
+      ...(connection.metadata ?? {}),
+      token_type:
+        payload.token_type ??
+        connection.metadata?.token_type ??
+        "bearer",
+    },
+  };
+}
+
+
 type XUser = {
   id: string;
   name?: string;
@@ -115,7 +214,8 @@ export class XProvider implements AnalyticsProvider {
   async fetchAccounts(
     connection: IntegrationConnection
   ): Promise<AnalyticsAccount[]> {
-    const accessToken = requireAccessToken(connection);
+    const freshConnection = await ensureFreshXConnection(connection);
+    const accessToken = requireAccessToken(freshConnection);
     const user = await getAuthenticatedUser(accessToken);
 
     return [
@@ -134,7 +234,8 @@ export class XProvider implements AnalyticsProvider {
       endDate?: string;
     }
   ): Promise<RawAnalyticsEvent[]> {
-    const accessToken = requireAccessToken(connection);
+    const freshConnection = await ensureFreshXConnection(connection);
+    const accessToken = requireAccessToken(freshConnection);
     const user = await getAuthenticatedUser(accessToken);
 
     const now = new Date();
