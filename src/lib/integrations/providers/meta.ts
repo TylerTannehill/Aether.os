@@ -45,6 +45,39 @@ type InstagramInsightMetric = {
   };
 };
 
+type MetaPagePost = {
+  id: string;
+  message?: string;
+  created_time?: string;
+  permalink_url?: string;
+  shares?: {
+    count?: number;
+  };
+  reactions?: {
+    summary?: {
+      total_count?: number;
+    };
+  };
+  comments?: {
+    summary?: {
+      total_count?: number;
+    };
+  };
+};
+
+type MetaPostInsightMetric = {
+  id?: string;
+  name?: string;
+  period?: string;
+  values?: Array<{
+    value?: number | string | Record<string, unknown>;
+    end_time?: string;
+  }>;
+  total_value?: {
+    value?: number | string | Record<string, unknown>;
+  };
+};
+
 type MetaInsightRow = {
   account_id?: string;
   account_name?: string;
@@ -223,6 +256,89 @@ async function fetchManagedPages(
   url.searchParams.set("limit", "100");
 
   return fetchAllPages<MetaPage>(url, accessToken);
+}
+
+async function fetchPagePosts(
+  pageId: string,
+  pageAccessToken: string,
+  startDate?: string,
+  endDate?: string
+): Promise<MetaPagePost[]> {
+  const url = new URL(`${META_GRAPH_BASE}/${pageId}/posts`);
+  url.searchParams.set(
+    "fields",
+    [
+      "id",
+      "message",
+      "created_time",
+      "permalink_url",
+      "shares",
+      "reactions.limit(0).summary(true)",
+      "comments.limit(0).summary(true)",
+    ].join(",")
+  );
+  url.searchParams.set("limit", "100");
+
+  if (startDate) {
+    url.searchParams.set(
+      "since",
+      String(Math.floor(new Date(startDate).getTime() / 1000))
+    );
+  }
+
+  if (endDate) {
+    url.searchParams.set(
+      "until",
+      String(Math.floor(new Date(endDate).getTime() / 1000))
+    );
+  }
+
+  return fetchAllPages<MetaPagePost>(url, pageAccessToken);
+}
+
+async function fetchPagePostInsights(
+  postId: string,
+  pageAccessToken: string
+): Promise<MetaPostInsightMetric[]> {
+  const url = new URL(`${META_GRAPH_BASE}/${postId}/insights`);
+  url.searchParams.set("metric", "post_media_view,post_clicks");
+  url.searchParams.set("period", "lifetime");
+
+  return fetchAllPages<MetaPostInsightMetric>(url, pageAccessToken);
+}
+
+function postInsightValue(
+  metrics: MetaPostInsightMetric[],
+  metricName: string
+): number {
+  const metric = metrics.find((item) => item.name === metricName);
+
+  if (!metric) {
+    return 0;
+  }
+
+  if (metric.total_value?.value !== undefined) {
+    return numberValue(metric.total_value.value);
+  }
+
+  if (!Array.isArray(metric.values)) {
+    return 0;
+  }
+
+  return metric.values.reduce(
+    (total, item) => total + numberValue(item.value),
+    0
+  );
+}
+
+function facebookPostAssetName(post: MetaPagePost, page: MetaPage): string {
+  const message = post.message?.trim();
+
+  if (message) {
+    return message.length > 120 ? `${message.slice(0, 117)}...` : message;
+  }
+
+  return `${page.name || "Facebook"} Post`;
 }
 
 async function fetchInstagramProfile(
@@ -434,6 +550,83 @@ export class MetaProvider implements AnalyticsProvider {
     }
 
     const pages = await fetchManagedPages(accessToken);
+
+    for (const page of pages) {
+      const pageAccessToken = page.access_token;
+
+      if (!pageAccessToken) {
+        continue;
+      }
+
+      try {
+        const posts = await fetchPagePosts(
+          page.id,
+          pageAccessToken,
+          options?.startDate,
+          options?.endDate
+        );
+
+        for (const post of posts) {
+          try {
+            const insights = await fetchPagePostInsights(
+              post.id,
+              pageAccessToken
+            );
+
+            const reactions = numberValue(
+              post.reactions?.summary?.total_count
+            );
+            const comments = numberValue(
+              post.comments?.summary?.total_count
+            );
+            const shares = numberValue(post.shares?.count);
+
+            events.push({
+              source: "meta",
+              department: "digital",
+              platform: "facebook",
+              campaign_name: page.name || "Facebook Page",
+              asset_name: facebookPostAssetName(post, page),
+              metric_date:
+                post.created_time?.slice(0, 10) ||
+                new Date().toISOString().split("T")[0],
+              impressions: postInsightValue(insights, "post_media_view"),
+              engagements: reactions + comments + shares,
+              clicks: postInsightValue(insights, "post_clicks"),
+              spend: 0,
+              sentiment_positive: 0,
+              sentiment_negative: 0,
+              sentiment_neutral: 0,
+              notes: null,
+              raw_payload: {
+                provider: "meta",
+                data_type: "facebook_post_insights",
+                page: {
+                  id: page.id,
+                  name: page.name || null,
+                },
+                post,
+                insights,
+              } as any,
+            });
+          } catch (error) {
+            console.error(
+              "[META PROVIDER] Facebook post insights failed",
+              {
+                pageId: page.id,
+                postId: post.id,
+                error,
+              }
+            );
+          }
+        }
+      } catch (error) {
+        console.error("[META PROVIDER] Facebook posts failed", {
+          pageId: page.id,
+          error,
+        });
+      }
+    }
 
     for (const page of pages) {
       const instagramUserId = page.instagram_business_account?.id;
