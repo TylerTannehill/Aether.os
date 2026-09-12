@@ -196,10 +196,7 @@ export async function GET() {
                 try {
                   const insightsPayload = await metaGet(
                     `${firstPost.id}/insights`,
-                    pageToken,
-                    {
-                      metric: "post_media_view",
-                    }
+                    pageToken
                   );
 
                   firstPostInsights = {
