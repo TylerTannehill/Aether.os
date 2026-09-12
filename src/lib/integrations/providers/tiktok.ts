@@ -6,6 +6,119 @@ import {
   RawAnalyticsEvent,
 } from "../types";
 
+const TOKEN_URL = "https://open.tiktokapis.com/v2/oauth/token/";
+const TOKEN_REFRESH_BUFFER_MS = 20 * 60 * 1000;
+
+type TikTokRefreshResponse = {
+  access_token?: string;
+  expires_in?: number;
+  refresh_token?: string;
+  refresh_expires_in?: number;
+  open_id?: string;
+  scope?: string;
+  token_type?: string;
+  error?: string;
+  error_description?: string;
+  log_id?: string;
+};
+
+function tokenNeedsRefresh(connection: IntegrationConnection): boolean {
+  if (!connection.access_token?.trim()) return true;
+  if (!connection.expires_at) return true;
+
+  const expiresAt = Date.parse(connection.expires_at);
+  if (!Number.isFinite(expiresAt)) return true;
+
+  return expiresAt <= Date.now() + TOKEN_REFRESH_BUFFER_MS;
+}
+
+async function ensureFreshTikTokConnection(
+  connection: IntegrationConnection
+): Promise<IntegrationConnection> {
+  if (!tokenNeedsRefresh(connection)) {
+    return connection;
+  }
+
+  const refreshToken = connection.refresh_token?.trim();
+  const clientKey = process.env.TIKTOK_CLIENT_KEY?.trim();
+  const clientSecret = process.env.TIKTOK_CLIENT_SECRET?.trim();
+
+  if (!refreshToken) {
+    throw new Error(
+      "TikTok access token expired and no refresh token is available. Reconnect TikTok."
+    );
+  }
+
+  if (!clientKey || !clientSecret) {
+    throw new Error(
+      "TIKTOK_CLIENT_KEY and TIKTOK_CLIENT_SECRET are required."
+    );
+  }
+
+  const response = await fetch(TOKEN_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Cache-Control": "no-cache",
+    },
+    body: new URLSearchParams({
+      client_key: clientKey,
+      client_secret: clientSecret,
+      grant_type: "refresh_token",
+      refresh_token: refreshToken,
+    }),
+    cache: "no-store",
+  });
+
+  const payload = (await response.json()) as TikTokRefreshResponse;
+
+  if (!response.ok || !payload.access_token) {
+    const detail =
+      payload.error_description ||
+      payload.error ||
+      `TikTok token refresh failed (${response.status}).`;
+
+    throw new Error(
+      `${detail}${payload.log_id ? ` TikTok log ID: ${payload.log_id}.` : ""}`
+    );
+  }
+
+  const expiresAt = new Date(
+    Date.now() + Number(payload.expires_in || 86400) * 1000
+  ).toISOString();
+
+  const nextRefreshToken = payload.refresh_token?.trim() || refreshToken;
+
+  return {
+    ...connection,
+    access_token: payload.access_token,
+    refresh_token: nextRefreshToken,
+    expires_at: expiresAt,
+    scopes: payload.scope
+      ? payload.scope
+          .split(",")
+          .map((scope) => scope.trim())
+          .filter(Boolean)
+      : connection.scopes,
+    metadata: {
+      ...(connection.metadata ?? {}),
+      open_id:
+        payload.open_id ??
+        connection.metadata?.open_id ??
+        null,
+      token_type:
+        payload.token_type ??
+        connection.metadata?.token_type ??
+        "Bearer",
+      refresh_expires_in:
+        payload.refresh_expires_in ??
+        connection.metadata?.refresh_expires_in ??
+        null,
+    },
+  };
+}
+
+
 const USER_INFO_URL = "https://open.tiktokapis.com/v2/user/info/";
 const VIDEO_LIST_URL = "https://open.tiktokapis.com/v2/video/list/";
 
@@ -114,7 +227,8 @@ export class TikTokProvider implements AnalyticsProvider {
   private async fetchUser(
     connection: IntegrationConnection
   ): Promise<TikTokUser> {
-    const accessToken = requireAccessToken(connection);
+    const freshConnection = await ensureFreshTikTokConnection(connection);
+    const accessToken = requireAccessToken(freshConnection);
 
     const fields = [
       "open_id",
@@ -170,8 +284,9 @@ export class TikTokProvider implements AnalyticsProvider {
       endDate?: string;
     }
   ): Promise<RawAnalyticsEvent[]> {
-    const accessToken = requireAccessToken(connection);
-    const user = await this.fetchUser(connection);
+    const freshConnection = await ensureFreshTikTokConnection(connection);
+    const accessToken = requireAccessToken(freshConnection);
+    const user = await this.fetchUser(freshConnection);
 
     const fields = [
       "id",
