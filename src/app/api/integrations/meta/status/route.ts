@@ -108,6 +108,12 @@ export async function GET() {
           messagePreview: string | null;
         }>;
         postsError: string | null;
+        firstPostInsights?: {
+          postId: string;
+          success: boolean;
+          response?: unknown;
+          error?: string;
+        } | null;
       }>;
       error?: string;
     } = {
@@ -150,6 +156,14 @@ export async function GET() {
             messagePreview: string | null;
           }> = [];
           let postsError: string | null = null;
+          let firstPostInsights:
+            | {
+                postId: string;
+                success: boolean;
+                response?: unknown;
+                error?: string;
+              }
+            | null = null;
 
           if (page?.id && pageToken) {
             try {
@@ -175,6 +189,34 @@ export async function GET() {
                     ? post.message.slice(0, 120)
                     : null,
               }));
+
+              const firstPost = posts[0];
+
+              if (firstPost?.id) {
+                try {
+                  const insightsPayload = await metaGet(
+                    `${firstPost.id}/insights`,
+                    pageToken,
+                    {
+                      metric: "post_media_view",
+                    }
+                  );
+
+                  firstPostInsights = {
+                    postId: String(firstPost.id),
+                    success: true,
+                    response: insightsPayload,
+                  };
+                } catch (insightsError: any) {
+                  firstPostInsights = {
+                    postId: String(firstPost.id),
+                    success: false,
+                    error:
+                      insightsError?.message ||
+                      "Failed to read Facebook post insights.",
+                  };
+                }
+              }
             } catch (postError: any) {
               postsError =
                 postError?.message || "Failed to read Facebook Page posts.";
@@ -190,6 +232,7 @@ export async function GET() {
             recentPostCount,
             recentPosts,
             postsError,
+            firstPostInsights,
           });
         }
       } catch (diagnosticError: any) {
