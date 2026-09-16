@@ -30,11 +30,82 @@ export default function PatchNotesPage() {
           <p className="text-sm uppercase tracking-[0.2em] text-violet-300">
             Current Public Version
           </p>
-          <p className="mt-1 text-xl font-semibold text-white">Aether v1.2</p>
+          <p className="mt-1 text-xl font-semibold text-white">Aether v1.3</p>
           <p className="mt-1 text-slate-300">Live</p>
         </div>
 
         <details className="group mt-7 overflow-hidden rounded-2xl border border-violet-400/20 bg-[#10233e]/75 shadow-xl shadow-black/20 lg:rounded-xl" open>
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 transition hover:bg-white/[0.03] [&::-webkit-details-marker]:hidden lg:gap-3 lg:p-4">
+            <div>
+              <p className="text-sm uppercase tracking-[0.2em] text-violet-300">
+                September 16, 2026
+              </p>
+              <h2 className="mt-1 text-2xl font-semibold text-white">
+                Aether v1.3 Patch Update
+              </h2>
+              <p className="mt-1 text-sm text-slate-400">
+                Platform stability, mobile field operations, and integration improvements.
+              </p>
+            </div>
+            <span className="shrink-0 text-2xl text-violet-300 transition-transform duration-200 group-open:rotate-180">
+              ↓
+            </span>
+          </summary>
+
+          <div className="border-t border-white/10 p-5 md:p-6 lg:p-5">
+            <section>
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-violet-300">
+                Public / Organization Update
+              </p>
+              <h3 className="mt-1 text-xl font-semibold text-white">
+                Platform &amp; Mobile Improvements
+              </h3>
+
+              <div className="mt-5 space-y-5 text-sm leading-6 text-slate-300 lg:mt-4 lg:space-y-4">
+                <div>
+                  <h4 className="text-base font-semibold text-white">Potato Gate</h4>
+                  <ul className="mt-1.5 space-y-0.5">
+                    <li>✓ Improved authentication and profile-state handling across protected application workflows.</li>
+                    <li>✓ Strengthened access validation and application-state consistency.</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h4 className="text-base font-semibold text-white">System Performance</h4>
+                  <ul className="mt-1.5 space-y-0.5">
+                    <li>✓ Resolved elevated CPU usage caused by scheduled background processes.</li>
+                    <li>✓ Improved background scheduling behavior to reduce unnecessary resource consumption.</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h4 className="text-base font-semibold text-white">Routes &amp; Field Operations</h4>
+                  <ul className="mt-1.5 space-y-0.5">
+                    <li>✓ Updated Routes functionality across Aether Mobile.</li>
+                    <li>✓ Improved mobile Routes and organized-list workflows.</li>
+                    <li>✓ Completed end-to-end testing across desktop list creation, mobile retrieval, and field execution.</li>
+                    <li>✓ Refined mobile list and route behavior based on end-to-end testing.</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h4 className="text-base font-semibold text-white">X Integration</h4>
+                  <ul className="mt-1.5 space-y-0.5">
+                    <li>✓ Resolved an API integration issue affecting X.</li>
+                    <li>✓ Restored expected integration behavior and data flow.</li>
+                  </ul>
+                </div>
+              </div>
+            </section>
+
+            <div className="mt-7 border-t border-white/10 pt-5">
+              <p className="font-semibold text-white">Clarity. Focus. Execution.</p>
+              <p className="mt-1 text-slate-400">— Team Aether</p>
+            </div>
+          </div>
+        </details>
+
+        <details className="group mt-7 overflow-hidden rounded-2xl border border-white/10 bg-[#10233e]/75 shadow-xl shadow-black/20 lg:rounded-xl">
           <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 transition hover:bg-white/[0.03] [&::-webkit-details-marker]:hidden lg:gap-3 lg:p-4">
             <div>
               <p className="text-sm uppercase tracking-[0.2em] text-violet-300">
