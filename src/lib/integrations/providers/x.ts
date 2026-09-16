@@ -5,6 +5,7 @@ import {
   IntegrationStatus,
   RawAnalyticsEvent,
 } from "../types";
+import { updateTokens } from "@/lib/integrations/connection-store";
 
 const X_API_BASE = "https://api.x.com/2";
 
@@ -84,6 +85,12 @@ async function ensureFreshXConnection(
   const expiresAt = payload.expires_in
     ? new Date(Date.now() + Number(payload.expires_in) * 1000).toISOString()
     : connection.expires_at;
+
+  await updateTokens(connection.organization_id, "x", {
+    accessToken: payload.access_token,
+    refreshToken: nextRefreshToken,
+    expiresAt,
+  });
 
   return {
     ...connection,
