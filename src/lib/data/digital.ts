@@ -16,6 +16,8 @@ export type DigitalSnapshot = {
   impressions: number;
   engagement: number;
   spend: number;
+  positiveSentiment: number;
+  negativeSentiment: number;
   bestPlatform: string;
   issue: string;
 };
@@ -216,17 +218,19 @@ function determineBiggestIssue(rows: DigitalPlatformRow[]) {
 
   const platforms = Array.from(grouped.values());
 
-  const weakestSentiment = [...platforms].sort((a, b) => {
-    const aNet =
-      a.positive / Math.max(a.rows, 1) -
-      a.negative / Math.max(a.rows, 1);
+  const weakestSentiment = [...platforms]
+    .filter((platform) => platform.positive > 0 || platform.negative > 0)
+    .sort((a, b) => {
+      const aNet =
+        a.positive / Math.max(a.rows, 1) -
+        a.negative / Math.max(a.rows, 1);
 
-    const bNet =
-      b.positive / Math.max(b.rows, 1) -
-      b.negative / Math.max(b.rows, 1);
+      const bNet =
+        b.positive / Math.max(b.rows, 1) -
+        b.negative / Math.max(b.rows, 1);
 
-    return aNet - bNet;
-  })[0];
+      return aNet - bNet;
+    })[0];
 
   const leastEfficientSpend = [...platforms]
     .filter((platform) => platform.spend > 0)
@@ -399,10 +403,22 @@ export async function getDigitalSnapshot(): Promise<DigitalSnapshot> {
 
   const spend = rows.reduce((sum, row) => sum + toNumber(row.spend), 0);
 
+  const positiveSentiment = rows.reduce(
+    (sum, row) => sum + toNumber(row.positive_sentiment),
+    0
+  );
+
+  const negativeSentiment = rows.reduce(
+    (sum, row) => sum + toNumber(row.negative_sentiment),
+    0
+  );
+
   return {
     impressions,
     engagement,
     spend,
+    positiveSentiment,
+    negativeSentiment,
     bestPlatform: determineBestPlatform(rows),
     issue: determineBiggestIssue(rows),
   };

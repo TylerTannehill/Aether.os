@@ -812,6 +812,8 @@ export default function DashboardPage() {
     impressions: 0,
     engagement: 0,
     spend: 0,
+    positiveSentiment: 0,
+    negativeSentiment: 0,
     bestPlatform: "No platform data",
     issue: "No digital issues detected yet.",
   });
@@ -1249,31 +1251,14 @@ export default function DashboardPage() {
   }, [fieldSnapshot]);
 
   const digitalSentimentRatio = useMemo(() => {
-    const hasDigitalData =
-      digitalSnapshot.impressions > 0 ||
-      digitalSnapshot.engagement > 0 ||
-      digitalSnapshot.spend > 0;
-
-    if (!hasDigitalData) {
-      return {
-        positive: 0,
-        negative: 0,
-      };
-    }
-
-    const negativeWeight = String(digitalSnapshot.issue || "")
-      .toLowerCase()
-      .includes("negative")
-      ? 38
-      : 24;
-
-    const positiveWeight = Math.max(100 - negativeWeight, 0);
-
     return {
-      positive: positiveWeight,
-      negative: negativeWeight,
+      positive: Math.max(0, Number(digitalSnapshot.positiveSentiment || 0)),
+      negative: Math.max(0, Number(digitalSnapshot.negativeSentiment || 0)),
     };
-  }, [digitalSnapshot]);
+  }, [
+    digitalSnapshot.positiveSentiment,
+    digitalSnapshot.negativeSentiment,
+  ]);
 
   const outreachBundle = useMemo(() => {
     const staleContacts = (filteredData.contacts ?? []).filter((contact: any) =>
@@ -1997,7 +1982,10 @@ export default function DashboardPage() {
       });
     }
 
-    if (campaignBriefing.primaryLane === "digital") {
+    if (
+      campaignBriefing.primaryLane === "digital" &&
+      digitalSentimentRatio.negative > digitalSentimentRatio.positive
+    ) {
       signals.push({
         type: "pressure",
         label: "Digital Sentiment",
@@ -2875,7 +2863,13 @@ export default function DashboardPage() {
                 {digitalSentimentRatio.positive}% / {digitalSentimentRatio.negative}%
               </p>
               <p className={`mt-5 max-w-[18rem] text-sm leading-7 ${getDashboardStateTextTone(dashboardTeamStates.digital)} lg:mt-4 lg:text-[11px]`}>
-                Negative signal that may need intervention
+                {digitalSentimentRatio.positive === 0 &&
+                digitalSentimentRatio.negative === 0
+                  ? "No sentiment signal available yet"
+                  : digitalSentimentRatio.negative >
+                    digitalSentimentRatio.positive
+                  ? "Negative signal that may need intervention"
+                  : "Sentiment signal is currently net positive"}
               </p>
             </button>
           </>
