@@ -525,7 +525,48 @@ export default function TeamAetherSalesPage() {
       throw new Error(result?.error || "Failed to update campaign.");
     }
 
-    await loadCampaigns();
+    const updatedCampaign = result?.campaign;
+
+    if (updatedCampaign && typeof updatedCampaign === "object") {
+      const mappedCampaign = mapApiCampaign(
+        updatedCampaign as Record<string, unknown>
+      );
+
+      setCampaigns((current) =>
+        current.map((campaign) =>
+          campaign.id === id ? mappedCampaign : campaign
+        )
+      );
+      return;
+    }
+
+    setCampaigns((current) =>
+      current.map((campaign) =>
+        campaign.id === id
+          ? mapApiCampaign({
+              id: campaign.id,
+              campaign: campaign.campaign,
+              contact: campaign.contact,
+              race: campaign.race,
+              state: campaign.state,
+              emails_sent: campaign.emails,
+              owner: campaign.owner,
+              email: campaign.email,
+              phone: campaign.phone,
+              website: campaign.website,
+              notes: campaign.notes,
+              reply_received: campaign.replyReceived,
+              demo_scheduled: campaign.demoScheduled,
+              interested: campaign.interested,
+              customer: campaign.customer,
+              archived: campaign.archived,
+              needs_follow_up: campaign.needsFollowUp,
+              last_activity: campaign.lastActivity,
+              ...updates,
+            })
+          : campaign
+      )
+    );
   }
 
   async function handleEmailSent(campaign: Campaign) {
