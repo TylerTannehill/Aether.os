@@ -104,7 +104,7 @@ export async function POST() {
 
     const { data: membership, error: membershipError } = await databaseClient
       .from("organization_members")
-      .select("id, organization_id, profile_status")
+      .select("id, organization_id")
       .eq("organization_id", organizationId)
       .eq("user_id", appUser.id)
       .maybeSingle();
@@ -130,19 +130,6 @@ export async function POST() {
           success: false,
           error:
             "No membership found for active organization. Active org cookie may be stale.",
-        },
-        { status: 403 },
-      );
-    }
-
-    if (
-      membership.profile_status &&
-      String(membership.profile_status).toLowerCase() !== "active"
-    ) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Your campaign access is not active.",
         },
         { status: 403 },
       );
