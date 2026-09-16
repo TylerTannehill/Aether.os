@@ -166,6 +166,8 @@ export default function AbeBriefPage() {
     impressions: 0,
     engagement: 0,
     spend: 0,
+    positiveSentiment: 0,
+    negativeSentiment: 0,
     bestPlatform: "No platform data",
     issue: "No digital issues detected yet.",
   });
@@ -276,26 +278,14 @@ export default function AbeBriefPage() {
   }, [fieldSnapshot]);
 
   const digitalSentimentRatio = useMemo(() => {
-    const hasDigitalData =
-      digitalSnapshot.impressions > 0 ||
-      digitalSnapshot.engagement > 0 ||
-      digitalSnapshot.spend > 0;
-
-    if (!hasDigitalData) {
-      return { positive: 0, negative: 0 };
-    }
-
-    const negativeWeight = String(digitalSnapshot.issue || "")
-      .toLowerCase()
-      .includes("negative")
-      ? 38
-      : 24;
-
     return {
-      positive: Math.max(100 - negativeWeight, 0),
-      negative: negativeWeight,
+      positive: Math.max(0, Number(digitalSnapshot.positiveSentiment || 0)),
+      negative: Math.max(0, Number(digitalSnapshot.negativeSentiment || 0)),
     };
-  }, [digitalSnapshot]);
+  }, [
+    digitalSnapshot.positiveSentiment,
+    digitalSnapshot.negativeSentiment,
+  ]);
 
   const laneMetrics = useMemo(() => {
     const pendingFollowUps = (filteredData.tasks ?? []).filter((task: any) => {
@@ -467,7 +457,7 @@ export default function AbeBriefPage() {
           ? 1
           : 0,
       negativeSentimentThreads:
-        hasDigitalData && issueText.includes("sentiment") ? 1 : 0,
+        digitalSentimentRatio.negative > digitalSentimentRatio.positive ? 1 : 0,
       contentBacklogCount:
         digitalSnapshot.engagement > 0
           ? Math.max(1, Math.round(digitalSnapshot.engagement / 5000))

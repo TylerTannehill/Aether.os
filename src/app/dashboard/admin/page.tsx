@@ -542,6 +542,8 @@ export default function DashboardAdminPage() {
     impressions: 0,
     engagement: 0,
     spend: 0,
+    positiveSentiment: 0,
+    negativeSentiment: 0,
     bestPlatform: "No platform data",
     issue: "No digital issues detected yet.",
   });
@@ -1180,13 +1182,31 @@ async function handleSetPrimaryRole(member: OrgMemberRecord, primaryRole: OrgMem
 
   const digitalBundle = useMemo(() => {
     const issueText = String(digitalSnapshot.issue || "").toLowerCase();
-    const fallingCtrPlatforms = issueText.includes("issue") ? 1 : 0;
-    const strongPerformingPlatforms = digitalSnapshot.bestPlatform ? 1 : 0;
-    const negativeSentimentThreads = issueText.includes("sentiment") ? 1 : 0;
-    const contentBacklogCount = Math.max(
-      1,
-      Math.round(digitalSnapshot.engagement / 5000)
+    const hasDigitalData =
+      digitalSnapshot.impressions > 0 ||
+      digitalSnapshot.engagement > 0 ||
+      digitalSnapshot.spend > 0;
+    const positiveSentiment = Math.max(
+      0,
+      Number(digitalSnapshot.positiveSentiment || 0)
     );
+    const negativeSentiment = Math.max(
+      0,
+      Number(digitalSnapshot.negativeSentiment || 0)
+    );
+
+    const fallingCtrPlatforms =
+      hasDigitalData && issueText.includes("issue") ? 1 : 0;
+    const strongPerformingPlatforms =
+      hasDigitalData && digitalSnapshot.bestPlatform !== "No platform data"
+        ? 1
+        : 0;
+    const negativeSentimentThreads =
+      negativeSentiment > positiveSentiment ? 1 : 0;
+    const contentBacklogCount =
+      digitalSnapshot.engagement > 0
+        ? Math.max(1, Math.round(digitalSnapshot.engagement / 5000))
+        : 0;
 
     return getDigitalSignals({
       fallingCtrPlatforms,

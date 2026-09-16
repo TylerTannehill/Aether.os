@@ -142,6 +142,8 @@ export default function ExploreAbePage() {
     impressions: 0,
     engagement: 0,
     spend: 0,
+    positiveSentiment: 0,
+    negativeSentiment: 0,
     bestPlatform: "No platform data",
     issue: "No digital issues detected yet.",
   });
@@ -243,25 +245,14 @@ export default function ExploreAbePage() {
   }, [fieldSnapshot]);
 
   const digitalSentimentRatio = useMemo(() => {
-    const hasDigitalData =
-      digitalSnapshot.impressions > 0 ||
-      digitalSnapshot.engagement > 0 ||
-      digitalSnapshot.spend > 0;
-
-    if (!hasDigitalData) {
-      return { positive: 0, negative: 0 };
-    }
-
-    const negativeWeight = String(digitalSnapshot.issue || "")
-      .toLowerCase()
-      .includes("negative")
-      ? 38
-      : 24;
-
-    const positiveWeight = Math.max(100 - negativeWeight, 0);
-
-    return { positive: positiveWeight, negative: negativeWeight };
-  }, [digitalSnapshot]);
+    return {
+      positive: Math.max(0, Number(digitalSnapshot.positiveSentiment || 0)),
+      negative: Math.max(0, Number(digitalSnapshot.negativeSentiment || 0)),
+    };
+  }, [
+    digitalSnapshot.positiveSentiment,
+    digitalSnapshot.negativeSentiment,
+  ]);
 
   const outreachPressure = useMemo(() => {
     return (
@@ -365,13 +356,18 @@ export default function ExploreAbePage() {
     const fallingCtrPlatforms = hasDigitalData && issueText.includes("issue") ? 1 : 0;
     const strongPerformingPlatforms =
       hasDigitalData && digitalSnapshot.bestPlatform !== "No platform data" ? 1 : 0;
-    const negativeSentimentThreads = hasDigitalData && issueText.includes("sentiment") ? 1 : 0;
+    const negativeSentimentThreads =
+      digitalSentimentRatio.negative > digitalSentimentRatio.positive ? 1 : 0;
     const contentBacklogCount =
       digitalSnapshot.engagement > 0
         ? Math.max(1, Math.round(digitalSnapshot.engagement / 5000))
         : 0;
     return getDigitalSignals({ fallingCtrPlatforms, strongPerformingPlatforms, negativeSentimentThreads, contentBacklogCount });
-  }, [digitalSnapshot]);
+  }, [
+    digitalSnapshot,
+    digitalSentimentRatio.positive,
+    digitalSentimentRatio.negative,
+  ]);
 
   const printBundle = useMemo(() => {
     const approvalBlocks = printSnapshot.approvalReady > 0 ? 1 : 0;
