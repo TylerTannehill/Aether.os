@@ -95,8 +95,6 @@ function getSyncWindow(provider: AnalyticsProvider) {
     return {
       startDate: startDate.toISOString().slice(0, 10),
       endDate: endDate.toISOString().slice(0, 10),
-      cleanupStart: startDate.toISOString().slice(0, 10),
-      cleanupEnd: endDate.toISOString().slice(0, 10),
     };
   }
 
@@ -105,81 +103,38 @@ function getSyncWindow(provider: AnalyticsProvider) {
   return {
     startDate: startDate.toISOString(),
     endDate: endDate.toISOString(),
-    cleanupStart: startDate.toISOString().slice(0, 10),
-    cleanupEnd: endDate.toISOString().slice(0, 10),
   };
 }
 
-function getCleanupIdentity(provider: AnalyticsProvider) {
-  switch (provider) {
-    case "meta":
-      return {
-        sources: ["meta", "meta_api", "facebook", "facebook_api"],
-        platforms: ["meta", "facebook", "instagram"],
-      };
-
-    case "tiktok":
-      return {
-        sources: ["tiktok", "tiktok_api"],
-        platforms: ["tiktok"],
-      };
-
-    case "youtube":
-      return {
-        sources: ["youtube", "youtube_api"],
-        platforms: ["youtube"],
-      };
-
-    case "x":
-      return {
-        sources: ["x", "x_api", "twitter", "twitter_api"],
-        platforms: ["x", "twitter"],
-      };
-  }
-}
-
-async function cleanupProviderWindow(
-  organizationId: string,
-  provider: AnalyticsProvider,
-  startDate: string,
-  endDate: string
-) {
-  const supabase = getAdminClient();
-  const identity = getCleanupIdentity(provider);
-
-  const { error } = await supabase
-    .from("analytics_events")
-    .delete()
-    .eq("organization_id", organizationId)
-    .in("source", identity.sources)
-    .in("platform", identity.platforms)
-    .gte("metric_date", startDate)
-    .lte("metric_date", endDate);
-
-  if (error) {
-    throw new Error(
-      `${provider} analytics cleanup failed: ${error.message}`
-    );
-  }
-}
-
-async function insertRows(rows: AnalyticsEventRow[]) {
+async function upsertRows(rows: AnalyticsEventRow[]) {
   if (rows.length === 0) {
     return 0;
+  }
+
+  const rowsWithIdentity = rows.filter(
+    (row) => typeof row.external_id === "string" && row.external_id.trim().length > 0
+  );
+
+  if (rowsWithIdentity.length !== rows.length) {
+    throw new Error(
+      `Analytics sync refused to write ${rows.length - rowsWithIdentity.length} row(s) without a stable external_id.`
+    );
   }
 
   const supabase = getAdminClient();
 
   const { data, error } = await supabase
     .from("analytics_events")
-    .insert(rows)
+    .upsert(rowsWithIdentity, {
+      onConflict: "organization_id,source,platform,external_id",
+    })
     .select("id");
 
   if (error) {
-    throw new Error(`Analytics insert failed: ${error.message}`);
+    throw new Error(`Analytics upsert failed: ${error.message}`);
   }
 
-  return data?.length ?? rows.length;
+  return data?.length ?? rowsWithIdentity.length;
 }
 
 async function getConnectedIntegration(
@@ -247,17 +202,10 @@ export async function syncAnalyticsProviderForOrganization(
     const rows = normalizeAnalyticsEvents(payload, organizationId);
 
     /*
-     * analytics_events represents the latest provider truth for the active
-     * sync window. Fetch/normalize happens before cleanup so a provider/API
-     * failure never destroys the last successful analytics snapshot.
+     * Each provider row now carries a stable external_id. Existing rows are
+     * updated in place and new rows are inserted, so the hourly sync no longer
+     * deletes and rebuilds the active analytics window.
      */
-    await cleanupProviderWindow(
-      organizationId,
-      provider,
-      window.cleanupStart,
-      window.cleanupEnd
-    );
-
     if (rows.length === 0) {
       return {
         organizationId,
@@ -268,7 +216,7 @@ export async function syncAnalyticsProviderForOrganization(
       };
     }
 
-    const imported = await insertRows(rows);
+    const imported = await upsertRows(rows);
 
     return {
       organizationId,
