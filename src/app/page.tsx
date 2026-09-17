@@ -582,6 +582,7 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
                 <Link href="/privacy">Privacy Policy</Link>
                 <Link href="/terms">Terms of Service</Link>
                 <Link href="/security">Security</Link>
+                <Link href="/aether-academy/data-deletion">Data Deletion</Link>
               </div>
             </div>
           </div>
