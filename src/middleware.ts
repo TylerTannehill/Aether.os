@@ -31,6 +31,7 @@ export async function middleware(request: NextRequest) {
     '/aether-academy/articles',
     '/aether-academy/blog',
     '/aether-academy/patch-notes',
+    '/aether-academy/data-deletion',
   ]
 
   const isPublicApiRoute =
