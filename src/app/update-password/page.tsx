@@ -14,7 +14,28 @@ export default function UpdatePasswordPage() {
   const [message, setMessage] = useState('')
 
   useEffect(() => {
-    async function checkSession() {
+    async function prepareRecoverySession() {
+      const params = new URLSearchParams(window.location.search)
+      const tokenHash = params.get('token_hash')
+      const type = params.get('type')
+
+      if (tokenHash && type === 'recovery') {
+        const { error } = await supabase.auth.verifyOtp({
+          token_hash: tokenHash,
+          type: 'recovery',
+        })
+
+        if (error) {
+          setMessage(
+            'This password reset link is invalid or has expired. Please request a new reset link from the login page.'
+          )
+          setReady(true)
+          return
+        }
+
+        window.history.replaceState({}, '', '/update-password')
+      }
+
       const {
         data: { session },
       } = await supabase.auth.getSession()
@@ -28,7 +49,7 @@ export default function UpdatePasswordPage() {
       setReady(true)
     }
 
-    checkSession()
+    prepareRecoverySession()
   }, [supabase.auth])
 
   const handleUpdatePassword = async (e: React.FormEvent) => {
