@@ -102,6 +102,8 @@ export default function UpdatePasswordPage() {
           <p className="text-sm text-white/70">
             Set a new password for your Aether.os account.
           </p>
+
+          {/* Deployment test note: harmless source change used to verify GitHub → Vercel automatic deployments. */}
         </div>
 
         {message ? (
