@@ -23,6 +23,7 @@ export async function middleware(request: NextRequest) {
     '/public-sales',
     '/support',
     '/campaign-locked',
+    '/campaign-directory',
 
     // Academy
     '/aether-academy',

@@ -6,6 +6,7 @@ import {
   AlertTriangle,
   ArrowRight,
   Eye,
+  Globe2,
   Play,
   ShieldAlert,
   Sparkles,
@@ -530,6 +531,32 @@ function toAdminActionView(
   };
 }
 
+type PublicPortalMetricKey =
+  | "doors"
+  | "impressions"
+  | "raised"
+  | "print"
+  | "financeCalls"
+  | "outreachCalls";
+
+const PUBLIC_PORTAL_OFFICE_OPTIONS = [
+  "State House",
+  "State Senate",
+  "Governor",
+  "Mayor",
+  "U.S. House",
+  "U.S. Senate",
+] as const;
+
+const PUBLIC_PORTAL_METRICS: { key: PublicPortalMetricKey; label: string; description: string }[] = [
+  { key: "doors", label: "Total Doors Knocked", description: "Publish the campaign's aggregate doors knocked." },
+  { key: "impressions", label: "All Digital Impressions", description: "Publish aggregate impressions across connected digital platforms." },
+  { key: "raised", label: "Total Raised", description: "Publish the campaign's aggregate amount raised." },
+  { key: "print", label: "Print Materials", description: "Publish aggregate printed campaign materials." },
+  { key: "financeCalls", label: "Finance Calls", description: "Publish aggregate fundraising call activity." },
+  { key: "outreachCalls", label: "Outreach Calls", description: "Publish aggregate support and outreach call activity." },
+];
+
 export default function DashboardAdminPage() {
   const [contacts, setContacts] = useState<DashboardData["contacts"]>([]);
   const [lists, setLists] = useState<DashboardData["lists"]>([]);
@@ -537,6 +564,25 @@ export default function DashboardAdminPage() {
   const [tasks, setTasks] = useState<DashboardTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
+  const [publicPortalEnabled, setPublicPortalEnabled] = useState(false);
+  const [publicPortalMetrics, setPublicPortalMetrics] = useState<Record<PublicPortalMetricKey, boolean>>({
+    doors: true,
+    impressions: true,
+    raised: true,
+    print: true,
+    financeCalls: true,
+    outreachCalls: true,
+  });
+  const [publicPortalWebsite, setPublicPortalWebsite] = useState("");
+  const [publicPortalDonateUrl, setPublicPortalDonateUrl] = useState("");
+  const [publicPortalState, setPublicPortalState] = useState("");
+  const [publicPortalOffice, setPublicPortalOffice] = useState("");
+  const [publicPortalDistrict, setPublicPortalDistrict] = useState("");
+  const [publicPortalLoading, setPublicPortalLoading] = useState(true);
+  const [publicPortalError, setPublicPortalError] = useState("");
+  const [publicPortalSaving, setPublicPortalSaving] = useState(false);
+  const [publicPortalSaveMessage, setPublicPortalSaveMessage] = useState("");
+
 
   const [digitalSnapshot, setDigitalSnapshot] = useState<DigitalSnapshot>({
     impressions: 0,
@@ -612,6 +658,116 @@ const [orgMemberRoles, setOrgMemberRoles] = useState<OrgMemberRole[]>([]);
 const [roleDrafts, setRoleDrafts] = useState<Record<string, RoleDraft>>({});
 const [savingMemberId, setSavingMemberId] = useState<string | null>(null);
 const showAetherStrategyLayer = canShowAetherStrategyLayer(aetherTier);
+
+async function loadPublicPortalSettings() {
+  try {
+    setPublicPortalLoading(true);
+    setPublicPortalError("");
+
+    const response = await fetch("/api/public-portal/settings", {
+      method: "GET",
+      credentials: "include",
+      cache: "no-store",
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok || data?.success !== true || !data?.settings) {
+      setPublicPortalError(
+        data?.error || "Failed to load public campaign portal settings."
+      );
+      return;
+    }
+
+    const settings = data.settings;
+
+    setPublicPortalEnabled(Boolean(settings.enabled));
+    setPublicPortalMetrics({
+      doors: Boolean(settings.show_doors),
+      impressions: Boolean(settings.show_digital_impressions),
+      raised: Boolean(settings.show_total_raised),
+      print: Boolean(settings.show_print_materials),
+      financeCalls: Boolean(settings.show_finance_calls),
+      outreachCalls: Boolean(settings.show_outreach_calls),
+    });
+    setPublicPortalWebsite(settings.campaign_website_url || "");
+    setPublicPortalDonateUrl(settings.donation_url || "");
+    setPublicPortalState(settings.state || "");
+    setPublicPortalOffice(settings.office || "");
+    setPublicPortalDistrict(settings.district || "");
+  } catch (error: any) {
+    setPublicPortalError(
+      error?.message || "Failed to load public campaign portal settings."
+    );
+  } finally {
+    setPublicPortalLoading(false);
+  }
+}
+
+async function savePublicPortalSettings() {
+  if (publicPortalSaving || publicPortalLoading) return;
+
+  try {
+    setPublicPortalSaving(true);
+    setPublicPortalError("");
+    setPublicPortalSaveMessage("");
+
+    const response = await fetch("/api/public-portal/settings", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        enabled: publicPortalEnabled,
+        show_doors: publicPortalMetrics.doors,
+        show_digital_impressions: publicPortalMetrics.impressions,
+        show_total_raised: publicPortalMetrics.raised,
+        show_print_materials: publicPortalMetrics.print,
+        show_finance_calls: publicPortalMetrics.financeCalls,
+        show_outreach_calls: publicPortalMetrics.outreachCalls,
+        campaign_website_url: publicPortalWebsite.trim() || null,
+        donation_url: publicPortalDonateUrl.trim() || null,
+        state: publicPortalState.trim() || null,
+        office: publicPortalOffice.trim() || null,
+        district: publicPortalDistrict.trim() || null,
+      }),
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok || data?.success !== true || !data?.settings) {
+      setPublicPortalError(
+        data?.error || "Failed to save public campaign portal settings."
+      );
+      return;
+    }
+
+    const settings = data.settings;
+
+    setPublicPortalEnabled(Boolean(settings.enabled));
+    setPublicPortalMetrics({
+      doors: Boolean(settings.show_doors),
+      impressions: Boolean(settings.show_digital_impressions),
+      raised: Boolean(settings.show_total_raised),
+      print: Boolean(settings.show_print_materials),
+      financeCalls: Boolean(settings.show_finance_calls),
+      outreachCalls: Boolean(settings.show_outreach_calls),
+    });
+    setPublicPortalWebsite(settings.campaign_website_url || "");
+    setPublicPortalDonateUrl(settings.donation_url || "");
+    setPublicPortalState(settings.state || "");
+    setPublicPortalOffice(settings.office || "");
+    setPublicPortalDistrict(settings.district || "");
+    setPublicPortalSaveMessage("Public campaign portal settings saved.");
+  } catch (error: any) {
+    setPublicPortalError(
+      error?.message || "Failed to save public campaign portal settings."
+    );
+  } finally {
+    setPublicPortalSaving(false);
+  }
+}
 
 async function loadAetherTierContext() {
   try {
@@ -826,6 +982,7 @@ async function handleSetPrimaryRole(member: OrgMemberRecord, primaryRole: OrgMem
   useEffect(() => {
     loadAetherTierContext();
     loadOrgMembers();
+    loadPublicPortalSettings();
   }, []);
 
   useEffect(() => {
@@ -1751,6 +1908,171 @@ function adjustDomainWeight(key: DomainKey, delta: number) {
 
   return (
     <div className="space-y-8 lg:space-y-6">
+
+      <section className="rounded-3xl border border-violet-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-6">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+          <div className="max-w-3xl">
+            <div className="flex items-center gap-2 text-sm font-semibold text-violet-700">
+              <Globe2 className="h-4 w-4" />
+              Public Campaign Portal
+            </div>
+            <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-950">Campaign-controlled public transparency</h2>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              Choose whether this campaign appears in Aether's public campaign directory and exactly which aggregate activity metrics are visible.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setPublicPortalEnabled((current) => !current)}
+            className={`inline-flex min-w-[150px] items-center justify-center rounded-2xl px-5 py-3 text-sm font-bold transition ${
+              publicPortalEnabled
+                ? "bg-violet-600 text-white hover:bg-violet-700"
+                : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+            }`}
+          >
+            Portal {publicPortalEnabled ? "Enabled" : "Disabled"}
+          </button>
+        </div>
+
+        <div className={`mt-6 grid gap-6 lg:grid-cols-[1.25fr_0.75fr] ${publicPortalEnabled ? "" : "opacity-50"}`}>
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Published metrics</p>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              {PUBLIC_PORTAL_METRICS.map((metric) => {
+                const enabled = publicPortalMetrics[metric.key];
+                return (
+                  <button
+                    key={metric.key}
+                    type="button"
+                    disabled={!publicPortalEnabled}
+                    onClick={() =>
+                      setPublicPortalMetrics((current) => ({
+                        ...current,
+                        [metric.key]: !current[metric.key],
+                      }))
+                    }
+                    className="flex items-start justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:border-violet-300 disabled:cursor-not-allowed"
+                  >
+                    <div>
+                      <p className="text-sm font-bold text-slate-900">{metric.label}</p>
+                      <p className="mt-1 text-xs leading-5 text-slate-500">{metric.description}</p>
+                    </div>
+                    <span
+                      className={`mt-0.5 inline-flex h-6 w-11 shrink-0 items-center rounded-full p-1 transition ${
+                        enabled ? "justify-end bg-violet-600" : "justify-start bg-slate-300"
+                      }`}
+                    >
+                      <span className="h-4 w-4 rounded-full bg-white shadow-sm" />
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Campaign identity</p>
+            <div className="mt-3 grid gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 md:grid-cols-3">
+              <label className="block">
+                <span className="mb-2 block text-sm font-semibold text-slate-800">State</span>
+                <input
+                  type="text"
+                  disabled={!publicPortalEnabled}
+                  value={publicPortalState}
+                  onChange={(event) => setPublicPortalState(event.target.value)}
+                  placeholder="Illinois"
+                  className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-violet-500 disabled:cursor-not-allowed"
+                />
+              </label>
+
+              <label className="block">
+                <span className="mb-2 block text-sm font-semibold text-slate-800">Office</span>
+                <select
+                  disabled={!publicPortalEnabled}
+                  value={publicPortalOffice}
+                  onChange={(event) => setPublicPortalOffice(event.target.value)}
+                  className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-violet-500 disabled:cursor-not-allowed"
+                >
+                  <option value="">Select office</option>
+                  {PUBLIC_PORTAL_OFFICE_OPTIONS.map((office) => (
+                    <option key={office} value={office}>{office}</option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="block">
+                <span className="mb-2 block text-sm font-semibold text-slate-800">District</span>
+                <input
+                  type="text"
+                  disabled={!publicPortalEnabled}
+                  value={publicPortalDistrict}
+                  onChange={(event) => setPublicPortalDistrict(event.target.value)}
+                  placeholder="Optional"
+                  className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-violet-500 disabled:cursor-not-allowed"
+                />
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Campaign links</p>
+            <div className="mt-3 space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <label className="block">
+                <span className="mb-2 block text-sm font-semibold text-slate-800">Campaign Website</span>
+                <input
+                  type="url"
+                  disabled={!publicPortalEnabled}
+                  value={publicPortalWebsite}
+                  onChange={(event) => setPublicPortalWebsite(event.target.value)}
+                  placeholder="https://campaign.com"
+                  className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-violet-500 disabled:cursor-not-allowed"
+                />
+              </label>
+
+              <label className="block">
+                <span className="mb-2 block text-sm font-semibold text-slate-800">Donation URL</span>
+                <input
+                  type="url"
+                  disabled={!publicPortalEnabled}
+                  value={publicPortalDonateUrl}
+                  onChange={(event) => setPublicPortalDonateUrl(event.target.value)}
+                  placeholder="https://donate.example.com"
+                  className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-violet-500 disabled:cursor-not-allowed"
+                />
+              </label>
+
+              <div className="mt-5 flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={savePublicPortalSettings}
+                disabled={publicPortalLoading || publicPortalSaving}
+                className="rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {publicPortalSaving ? "Saving..." : "Save Portal Settings"}
+              </button>
+              {publicPortalSaveMessage ? (
+                <span className="text-sm font-medium text-emerald-700">
+                  {publicPortalSaveMessage}
+                </span>
+              ) : null}
+            </div>
+            <p className="text-xs leading-5 text-slate-500">
+                These links are optional and will only appear on the public campaign portal when provided.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-5 rounded-2xl border border-violet-100 bg-violet-50 px-4 py-3 text-xs leading-5 text-violet-900">
+          {publicPortalLoading
+                  ? "Loading portal settings..."
+                  : publicPortalError
+                    ? `Portal settings could not be loaded: ${publicPortalError}`
+                    : "Portal settings loaded from Aether."}
+        </div>
+      </section>
+
 
       <section className="rounded-3xl lg:rounded-2xl border border-slate-800 bg-slate-950 p-6 lg:p-[18px] text-white shadow-sm lg:p-6">
         <div className="flex flex-col gap-6 lg:gap-4 lg:flex-row lg:items-end lg:justify-between">

@@ -1,7 +1,7 @@
 "use client";
 
-import { ReactNode, useState } from "react";
-import { Menu, X } from "lucide-react";
+import { ReactNode, useEffect, useState } from "react";
+import { Check, Menu, Share2, X } from "lucide-react";
 
 import { DashboardSidebar } from "@/components/layout/dashboard-sidebar";
 
@@ -9,6 +9,63 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const [easterEggStep, setEasterEggStep] = useState(0);
   const [easterEggOpen, setEasterEggOpen] = useState(false);
+  const [publicPortalEnabled, setPublicPortalEnabled] = useState(false);
+  const [publicPortalOrgId, setPublicPortalOrgId] = useState("");
+  const [portalCopied, setPortalCopied] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadPublicPortalSettings() {
+      try {
+        const response = await fetch("/api/public-portal/settings", {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store",
+        });
+
+        const data = await response.json().catch(() => null);
+
+        if (!active || !response.ok || data?.success !== true) return;
+
+        const settings = data?.settings;
+        const organizationId =
+          settings?.organization_id ??
+          settings?.organizationId ??
+          settings?.org_id ??
+          settings?.orgId ??
+          "";
+
+        setPublicPortalEnabled(settings?.enabled === true);
+        setPublicPortalOrgId(String(organizationId || ""));
+      } catch {
+        if (active) {
+          setPublicPortalEnabled(false);
+          setPublicPortalOrgId("");
+        }
+      }
+    }
+
+    loadPublicPortalSettings();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const handleSharePublicPortal = async () => {
+    if (!publicPortalOrgId) return;
+
+    const portalUrl = `${window.location.origin}/campaign-directory?campaign=${encodeURIComponent(publicPortalOrgId)}`;
+
+    try {
+      await navigator.clipboard.writeText(portalUrl);
+      setPortalCopied(true);
+      window.setTimeout(() => setPortalCopied(false), 1800);
+    } catch {
+      window.prompt("Copy your public campaign portal link:", portalUrl);
+    }
+  };
 
   const handleEasterEggClick = (word: "clarity" | "focus" | "execution") => {
     const sequence = [
@@ -58,12 +115,31 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           </div>
 
-          <div className="hidden flex-1 justify-center lg:flex">
-            <p className="select-none text-lg font-black uppercase tracking-[0.45em] text-slate-700 lg:text-sm">
+          <div className="hidden w-full grid-cols-[1fr_auto_1fr] items-center lg:grid">
+            <div />
+
+            <p className="select-none text-sm font-black uppercase tracking-[0.45em] text-slate-700">
               <span onClick={() => handleEasterEggClick("clarity")}>CLARITY.</span>{" "}
               <span onClick={() => handleEasterEggClick("focus")}>FOCUS.</span>{" "}
               <span onClick={() => handleEasterEggClick("execution")}>EXECUTION.</span>
             </p>
+
+            <div className="flex justify-end">
+              {publicPortalEnabled && publicPortalOrgId && (
+                <button
+                  type="button"
+                  onClick={handleSharePublicPortal}
+                  className="inline-flex h-9 items-center justify-center gap-2 rounded-xl border border-violet-200 bg-violet-50 px-3.5 text-xs font-bold text-violet-700 transition hover:border-violet-300 hover:bg-violet-100"
+                >
+                  {portalCopied ? (
+                    <Check className="h-4 w-4" />
+                  ) : (
+                    <Share2 className="h-4 w-4" />
+                  )}
+                  <span>{portalCopied ? "Copied!" : "Share Public Portal"}</span>
+                </button>
+              )}
+            </div>
           </div>
         </header>
 
