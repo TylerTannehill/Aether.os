@@ -30,11 +30,77 @@ export default function PatchNotesPage() {
           <p className="text-sm uppercase tracking-[0.2em] text-violet-300">
             Current Public Version
           </p>
-          <p className="mt-1 text-xl font-semibold text-white">Aether v1.3</p>
+          <p className="mt-1 text-xl font-semibold text-white">Aether v1.4</p>
           <p className="mt-1 text-slate-300">Live</p>
         </div>
 
         <details className="group mt-7 overflow-hidden rounded-2xl border border-violet-400/20 bg-[#10233e]/75 shadow-xl shadow-black/20 lg:rounded-xl" open>
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 transition hover:bg-white/[0.03] [&::-webkit-details-marker]:hidden lg:gap-3 lg:p-4">
+            <div>
+              <p className="text-sm uppercase tracking-[0.2em] text-violet-300">
+                September 18, 2026
+              </p>
+              <h2 className="mt-1 text-2xl font-semibold text-white">
+                Aether v1.4 Patch Update
+              </h2>
+              <p className="mt-1 text-sm text-slate-400">
+                Public campaign visibility, organization controls, and account recovery improvements.
+              </p>
+            </div>
+            <span className="shrink-0 text-2xl text-violet-300 transition-transform duration-200 group-open:rotate-180">
+              ↓
+            </span>
+          </summary>
+
+          <div className="border-t border-white/10 p-5 md:p-6 lg:p-5">
+            <section>
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-violet-300">
+                Public / Organization Update
+              </p>
+              <h3 className="mt-1 text-xl font-semibold text-white">
+                Voter Portal &amp; Account Recovery
+              </h3>
+
+              <div className="mt-5 space-y-5 text-sm leading-6 text-slate-300 lg:mt-4 lg:space-y-4">
+                <div>
+                  <h4 className="text-base font-semibold text-white">Voter-Facing Campaign Portal</h4>
+                  <ul className="mt-1.5 space-y-0.5">
+                    <li>✓ Added a public campaign directory for participating organizations.</li>
+                    <li>✓ Added voter-facing campaign pages with organization-selected campaign activity and performance metrics.</li>
+                    <li>✓ Added direct campaign portal links for easier sharing with voters and supporters.</li>
+                    <li>✓ Added optional campaign website and donation links to public campaign profiles.</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h4 className="text-base font-semibold text-white">Organization Administrator Controls</h4>
+                  <ul className="mt-1.5 space-y-0.5">
+                    <li>✓ Added administrator controls to enable or disable an organization&apos;s public campaign portal.</li>
+                    <li>✓ Added individual visibility controls so organizations choose which supported campaign metrics appear publicly.</li>
+                    <li>✓ Added public directory information controls for state, office, and district.</li>
+                    <li>✓ Organizations with the public portal disabled remain absent from the public campaign directory.</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h4 className="text-base font-semibold text-white">Password Recovery</h4>
+                  <ul className="mt-1.5 space-y-0.5">
+                    <li>✓ Improved password-reset link handling and recovery-session verification.</li>
+                    <li>✓ Updated the password recovery flow to route users directly into the secure password update experience.</li>
+                    <li>✓ Improved expired or invalid reset-link messaging.</li>
+                  </ul>
+                </div>
+              </div>
+            </section>
+
+            <div className="mt-7 border-t border-white/10 pt-5">
+              <p className="font-semibold text-white">Clarity. Focus. Execution.</p>
+              <p className="mt-1 text-slate-400">— Team Aether</p>
+            </div>
+          </div>
+        </details>
+
+        <details className="group mt-7 overflow-hidden rounded-2xl border border-white/10 bg-[#10233e]/75 shadow-xl shadow-black/20 lg:rounded-xl">
           <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 transition hover:bg-white/[0.03] [&::-webkit-details-marker]:hidden lg:gap-3 lg:p-4">
             <div>
               <p className="text-sm uppercase tracking-[0.2em] text-violet-300">

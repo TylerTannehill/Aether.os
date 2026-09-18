@@ -103,7 +103,6 @@ export default function UpdatePasswordPage() {
             Set a new password for your Aether.os account.
           </p>
 
-          {/* Deployment test note: harmless source change used to verify GitHub → Vercel automatic deployments. */}
         </div>
 
         {message ? (
