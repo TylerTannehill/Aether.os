@@ -39,6 +39,7 @@ export async function middleware(request: NextRequest) {
     pathname === '/api/contact' ||
     pathname === '/api/auth/select-campaign' ||
     pathname === '/api/integrations/website/track' ||
+    pathname === '/api/public-portal/campaigns' ||
     pathname === '/api/cron/analytics-sync' ||
     pathname.startsWith('/api/mobile/')
 

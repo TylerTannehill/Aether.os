@@ -157,7 +157,15 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
             />
           </Link>
 
-          <div className="flex flex-col items-center gap-3">
+          <div className="flex items-start gap-4">
+            <Link
+              href="/campaign-directory"
+              className="inline-flex items-center justify-center rounded-2xl border border-white/15 bg-white/[0.03] px-7 py-4 text-sm font-black uppercase tracking-[0.08em] text-white shadow-xl shadow-black/20 transition hover:bg-white/[0.08]"
+            >
+              <span>Voter Portal</span>
+            </Link>
+
+            <div className="flex flex-col items-center gap-3">
             <Link
               href="/login"
               className="inline-flex items-center gap-3 rounded-2xl border border-violet-400/70 bg-violet-700/20 px-7 py-4 text-sm font-black uppercase tracking-[0.08em] text-white shadow-xl shadow-violet-950/30 transition hover:bg-violet-600/30"
@@ -177,6 +185,7 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
             <div className="max-w-[300px] text-center text-[11px] leading-5 text-slate-300">
               <p>Android available now • iOS coming soon</p>
               <p>Built for Finance &amp; Field teams.</p>
+            </div>
             </div>
           </div>
         </header>
@@ -216,6 +225,7 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
               >
                 <span>Request Demo</span>
               </Link>
+
             </div>
           </div>
 
@@ -551,6 +561,7 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
               <h3 className="text-lg font-bold text-white">Explore</h3>
               <div className="mt-5 flex flex-col gap-3 text-sm text-slate-300">
                 <Link href="/#top">Landing Page</Link>
+                <Link href="/campaign-directory">Campaign Directory</Link>
                 <Link href="/explore-abe">Explore Abe</Link>
                 <a href="https://github.com/TylerTannehill/Aether.os/releases/download/v1.0.0/aether-mobile.apk" download>Download Aether Mobile</a>
                 <Link href="/aether-academy">Aether Academy</Link>
