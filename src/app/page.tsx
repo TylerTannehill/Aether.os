@@ -160,9 +160,16 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
           <div className="flex items-start gap-4">
             <Link
               href="/campaign-directory"
-              className="inline-flex items-center justify-center rounded-2xl border border-white/15 bg-white/[0.03] px-7 py-4 text-sm font-black uppercase tracking-[0.08em] text-white shadow-xl shadow-black/20 transition hover:bg-white/[0.08]"
+              className="inline-flex items-center justify-center rounded-2xl border border-violet-400/70 bg-violet-950/70 px-7 py-4 text-sm font-black uppercase tracking-[0.08em] text-white shadow-xl shadow-violet-950/20 transition hover:bg-violet-900/80"
             >
               <span>Voter Portal</span>
+            </Link>
+
+            <Link
+              href="/explore-abe"
+              className="inline-flex items-center justify-center rounded-2xl border border-violet-400/70 bg-violet-950/70 px-7 py-4 text-sm font-black uppercase tracking-[0.08em] text-white shadow-xl shadow-violet-950/20 transition hover:bg-violet-900/80"
+            >
+              <span>Request Demo</span>
             </Link>
 
             <div className="flex flex-col items-center gap-3">
@@ -191,7 +198,7 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
         </header>
 
         <section className="grid flex-1 gap-14 py-10 lg:grid-cols-[0.92fr_1fr] lg:items-start lg:gap-10 lg:py-6 xl:grid-cols-[0.92fr_1.08fr]">
-          <div className="max-w-4xl">
+          <div className="max-w-4xl lg:-mt-14 xl:-mt-16">
 
 
             <div className="mt-8 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-300 lg:mt-5">
@@ -211,21 +218,17 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
               command system.
             </p>
 
-            <div className="mt-10 flex flex-col gap-4 sm:flex-row lg:mt-8">
-              <Link
-                href="/login"
-                className="inline-flex min-w-[240px] items-center justify-center gap-3 rounded-2xl border border-violet-300/60 bg-gradient-to-b from-violet-500 to-violet-800 px-8 py-5 text-base font-black uppercase tracking-[0.08em] text-white shadow-2xl shadow-violet-950/40 transition hover:from-violet-400 hover:to-violet-700"
-              >
-                <span>Enter Aether</span>
-              </Link>
-
-              <Link
-                href="/explore-abe"
-                className="inline-flex min-w-[240px] items-center justify-center gap-3 rounded-2xl border border-white/15 bg-white/[0.03] px-8 py-5 text-base font-black uppercase tracking-[0.08em] text-white shadow-xl shadow-black/20 transition hover:bg-white/[0.08]"
-              >
-                <span>Request Demo</span>
-              </Link>
-
+            <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-white/10 bg-black shadow-[0_24px_80px_rgba(0,0,0,0.35)]">
+              <div className="aspect-video w-full">
+                <iframe
+                  className="h-full w-full"
+                  src="https://www.youtube.com/embed/jIQ172k2dvM"
+                  title="Welcome to Aether"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  allowFullScreen
+                />
+              </div>
             </div>
           </div>
 
@@ -326,6 +329,7 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
               </div>
             </div>
           </div>
+
         </section>
 
         <section className="pb-24">
