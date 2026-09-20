@@ -65,39 +65,54 @@ export default function ExploreAbePage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-950 px-6 py-8 text-white lg:px-8 lg:px-[18px] lg:py-6">
-      <div className="mx-auto flex max-w-5xl flex-col gap-8 lg:gap-6">
+    <main className="min-h-screen bg-slate-950 px-6 py-6 text-white lg:h-screen lg:overflow-hidden lg:px-[18px] lg:py-3">
+      <div className="mx-auto flex max-w-7xl flex-col gap-6 lg:h-full lg:gap-3">
         <Link
           href="/"
-          className="inline-flex w-fit items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-slate-200 transition hover:bg-white/10 lg:px-3 lg:py-2.5 lg:text-[12px] lg:rounded-xl"
+          className="inline-flex w-fit items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-slate-200 transition hover:bg-white/10 lg:px-3 lg:py-2 lg:text-[11px] lg:rounded-xl"
         >
           <ArrowLeft className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
           Back to Landing Page
         </Link>
 
-        <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 shadow-2xl">
-          <div className="grid gap-0 lg:grid-cols-[1fr_0.8fr]">
-            <div className="p-8 lg:p-9 lg:p-6">
+        <section className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 shadow-2xl lg:min-h-0 lg:flex-1">
+          <div className="grid gap-0 lg:h-full lg:grid-cols-[1.15fr_0.85fr]">
+            <div className="p-8 lg:p-5">
               <div className="inline-flex items-center gap-2 rounded-full border border-violet-400/30 bg-violet-400/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-violet-200 lg:px-3 lg:py-1.5 lg:text-[10px]">
                 <Sparkles className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                 Explore Abe
               </div>
 
-              <h1 className="mt-8 max-w-3xl text-4xl font-black tracking-tight text-white lg:text-5xl lg:mt-6 lg:text-3xl">
+              <h1 className="mt-8 max-w-3xl text-3xl font-black tracking-tight text-white lg:mt-4 lg:text-[2rem] lg:leading-[1.05]">
                 Request a demo of Aether Political.
               </h1>
 
-              <p className="mt-6 max-w-2xl text-base leading-8 text-slate-300 lg:text-sm lg:leading-6 lg:text-base lg:mt-4 lg:text-sm">
-                Thank you for your interest in Aether. Tell us a little about
-                your campaign and what you're hoping to accomplish. Team Aether
-                will reach out as demo scheduling becomes available, and we're
-                looking forward to showing you how Aether can help simplify your
-                campaign operations.
+              <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-300 lg:mt-3 lg:text-[12px] lg:leading-[1.45]">
+                We’re excited to learn about your campaign, understand your goals,
+                and show you where Aether might fit. And don’t worry — we’re not
+                here to give you a sales pitch. We’re here to educate you about
+                Aether, answer your questions, and explore whether we’re the right
+                fit for your campaign. If we are, great. If we’re not, that’s okay
+                too. Either way, we want you to leave with a clear understanding
+                of what Aether can do for your team.
               </p>
+
+              <div className="mt-5 overflow-hidden rounded-2xl border border-white/10 bg-black shadow-[0_20px_60px_rgba(0,0,0,0.35)] lg:mt-4 lg:max-w-[640px]">
+                <div className="aspect-video w-full">
+                  <iframe
+                    className="h-full w-full"
+                    src="https://www.youtube.com/embed/jIQ172k2dvM"
+                    title="Welcome to Aether"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    allowFullScreen
+                  />
+                </div>
+              </div>
             </div>
 
-            <div className="border-t border-white/10 bg-white/[0.03] p-8 lg:border-l lg:border-t-0 lg:p-7 lg:p-6">
-              <div className="rounded-3xl border border-white/10 bg-white p-6 text-slate-950 shadow-xl lg:p-[18px] lg:rounded-2xl">
+            <div className="border-t border-white/10 bg-white/[0.03] p-8 lg:min-h-0 lg:border-l lg:border-t-0 lg:p-4">
+              <div className="rounded-3xl border border-white/10 bg-white p-6 text-slate-950 shadow-xl lg:h-full lg:overflow-hidden lg:p-4 lg:rounded-2xl">
                 <div className="flex items-center gap-3 lg:gap-2">
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-950 text-white lg:h-10 lg:w-10 lg:rounded-xl">
                     <Mail className="h-5 w-5 lg:h-4 lg:w-4" />
@@ -118,7 +133,7 @@ export default function ExploreAbePage() {
                     </p>
                   </div>
                 ) : (
-                  <form onSubmit={handleSubmit} className="mt-6 space-y-4 lg:space-y-3 lg:mt-4">
+                  <form onSubmit={handleSubmit} className="mt-6 space-y-4 lg:mt-3 lg:space-y-2">
                     <div>
                       <label
                         htmlFor="name"
@@ -133,7 +148,7 @@ export default function ExploreAbePage() {
                         required
                         value={form.name}
                         onChange={handleChange}
-                        className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-violet-500 lg:px-3 lg:py-2.5 lg:mt-1.5 lg:text-[12px] lg:rounded-xl"
+                        className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-violet-500 lg:px-3 lg:py-1.5 lg:mt-1 lg:text-[11px] lg:rounded-lg"
                       />
                     </div>
 
@@ -151,7 +166,7 @@ export default function ExploreAbePage() {
                         required
                         value={form.email}
                         onChange={handleChange}
-                        className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-violet-500 lg:px-3 lg:py-2.5 lg:mt-1.5 lg:text-[12px] lg:rounded-xl"
+                        className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-violet-500 lg:px-3 lg:py-1.5 lg:mt-1 lg:text-[11px] lg:rounded-lg"
                       />
                     </div>
 
@@ -168,7 +183,7 @@ export default function ExploreAbePage() {
                         type="text"
                         value={form.organization}
                         onChange={handleChange}
-                        className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-violet-500 lg:px-3 lg:py-2.5 lg:mt-1.5 lg:text-[12px] lg:rounded-xl"
+                        className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-violet-500 lg:px-3 lg:py-1.5 lg:mt-1 lg:text-[11px] lg:rounded-lg"
                       />
                     </div>
 
@@ -185,7 +200,7 @@ export default function ExploreAbePage() {
                         type="tel"
                         value={form.phone}
                         onChange={handleChange}
-                        className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-violet-500 lg:px-3 lg:py-2.5 lg:mt-1.5 lg:text-[12px] lg:rounded-xl"
+                        className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-violet-500 lg:px-3 lg:py-1.5 lg:mt-1 lg:text-[11px] lg:rounded-lg"
                       />
                     </div>
 
@@ -202,7 +217,7 @@ export default function ExploreAbePage() {
                         rows={4}
                         value={form.message}
                         onChange={handleChange}
-                        className="mt-2 w-full resize-none rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-violet-500 lg:px-3 lg:py-2.5 lg:mt-1.5 lg:text-[12px] lg:rounded-xl"
+                        className="mt-2 w-full resize-none rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-violet-500 lg:px-3 lg:py-1.5 lg:mt-1 lg:text-[11px] lg:rounded-lg"
                       />
                     </div>
 
@@ -213,12 +228,12 @@ export default function ExploreAbePage() {
                     <button
                       type="submit"
                       disabled={sending}
-                      className="w-full rounded-2xl bg-slate-950 px-5 py-4 text-sm font-bold text-white transition hover:bg-slate-800 cursor-pointer disabled:cursor-not-allowed disabled:opacity-60 lg:px-4 lg:py-3 lg:text-[12px] lg:rounded-xl"
+                      className="w-full rounded-2xl bg-slate-950 px-5 py-4 text-sm font-bold text-white transition hover:bg-slate-800 cursor-pointer disabled:cursor-not-allowed disabled:opacity-60 lg:px-4 lg:py-2 lg:text-[11px] lg:rounded-lg"
                     >
                       {sending ? "Sending..." : "Request Demo"}
                     </button>
 
-                    <p className="text-xs text-slate-500 lg:text-[10px]">* Required fields</p>
+                    <p className="text-xs text-slate-500 lg:text-[9px]">* Required fields</p>
                   </form>
                 )}
               </div>

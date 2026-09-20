@@ -47,6 +47,7 @@ const libraryGroups = [
       ["tools", "Tools"],
       ["integrations-hub", "Integrations Hub"],
       ["integrations", "Integrations"],
+      ["public-campaign-portal", "Public Campaign Portal"],
     ],
   },
   {
@@ -89,6 +90,7 @@ const academySections = [
   ["tools", "Tools", "Core Features"],
   ["integrations-hub", "Integrations Hub", "Core Features"],
   ["integrations", "Integrations", "Core Features"],
+  ["public-campaign-portal", "Public Campaign Portal", "Core Features"],
   ["organizations", "Organizations", "Administration"],
   ["team-management", "Team Management", "Administration"],
   ["roles", "Roles & Permissions", "Administration"],
@@ -1186,6 +1188,69 @@ export default function AetherAcademyPage() {
                       <h3 className="text-2xl font-bold text-white lg:text-xl">Clarity. Focus. Execution.</h3>
                       <p className="mt-4 leading-8 lg:mt-3">The best campaign software doesn't exist in isolation. It works alongside the tools campaigns already depend on. Connect what matters. Reduce unnecessary work. Keep information flowing. Help every department operate from the same shared understanding of the campaign.</p>
                       <p className="mt-3 leading-8 lg:mt-2">Great integrations are not measured by how many logos appear on a page. They are measured by how effectively they help campaigns execute.</p>
+                    </div>
+                  </div>
+                ) : id === "public-campaign-portal" ? (
+                  <div className="mt-8 max-w-4xl space-y-8 text-slate-300 lg:space-y-5 lg:mt-5">
+                    <p className="text-lg leading-8 lg:text-base lg:leading-7 lg:text-base">
+                      Campaigns generate meaningful activity every day. The Public Campaign Portal gives campaigns a simple way to share selected parts of that activity with voters, supporters, volunteers, donors, and the broader community without exposing the campaign&apos;s internal workspace.
+                    </p>
+
+                    <div className="rounded-2xl border border-violet-400/20 bg-violet-400/5 p-6 lg:p-[18px] lg:rounded-xl">
+                      <h3 className="text-2xl font-bold text-white lg:text-xl">Your Campaign Controls What Becomes Public</h3>
+                      <p className="mt-4 leading-8 lg:mt-3">
+                        Organization Administrators can enable or disable the Public Campaign Portal from Admin settings and choose which campaign metrics are visible. Metrics that are not enabled remain absent from the public portal.
+                      </p>
+                      <p className="mt-3 leading-8 lg:mt-2">
+                        This allows each campaign to decide what it wants to share while keeping internal campaign information private.
+                      </p>
+                    </div>
+
+                    <div>
+                      <h3 className="text-2xl font-bold text-white lg:text-xl">Available Public Metrics</h3>
+                      <p className="mt-3 leading-8 lg:mt-2">Campaigns can individually choose to display:</p>
+                      <ul className="mt-4 list-disc space-y-2 pl-6 lg:mt-3">
+                        <li><strong className="text-white">Doors Knocked</strong> — completed work from Field lists.</li>
+                        <li><strong className="text-white">Digital Impressions</strong> — impressions recorded through Digital analytics.</li>
+                        <li><strong className="text-white">Total Raised</strong> — recorded campaign contributions.</li>
+                        <li><strong className="text-white">Campaign Materials Available</strong> — current inventory recorded through Print.</li>
+                        <li><strong className="text-white">Finance Outreach</strong> — completed work from Finance lists.</li>
+                        <li><strong className="text-white">Voter Outreach</strong> — completed work from Outreach lists.</li>
+                      </ul>
+                    </div>
+
+                    <div className="rounded-2xl border border-white/10 bg-black/20 p-6 lg:p-[18px] lg:rounded-xl">
+                      <h3 className="text-2xl font-bold text-white lg:text-xl">Built Into the Campaign Directory</h3>
+                      <p className="mt-4 leading-8 lg:mt-3">
+                        When the Public Campaign Portal is enabled, the campaign can appear in Aether&apos;s public Campaign Directory. Visitors can browse participating campaigns by state, office, and candidate, then open the campaign&apos;s public profile to view the information that campaign has chosen to share.
+                      </p>
+                      <p className="mt-3 leading-8 lg:mt-2">
+                        Campaigns can also share a direct link to their own public portal, making it easy to connect voters and supporters directly to their campaign&apos;s page.
+                      </p>
+                    </div>
+
+                    <div>
+                      <h3 className="text-2xl font-bold text-white lg:text-xl">Connect Visitors to the Campaign</h3>
+                      <p className="mt-3 leading-8 lg:mt-2">
+                        Administrators can optionally add the campaign&apos;s official website and donation page to the portal. These links give visitors a direct path to learn more about the campaign or support it using the campaign&apos;s existing public resources.
+                      </p>
+                    </div>
+
+                    <div>
+                      <h3 className="text-2xl font-bold text-white lg:text-xl">Designed for Transparency Without Oversharing</h3>
+                      <p className="mt-3 leading-8 lg:mt-2">
+                        The Public Campaign Portal is intentionally separate from Aether&apos;s internal campaign workspace. It presents only the information a campaign has chosen to make public and does not provide visitors access to contacts, lists, notes, internal strategy, team activity, or administrative tools.
+                      </p>
+                    </div>
+
+                    <div className="rounded-2xl border border-violet-400/20 bg-gradient-to-r from-violet-400/10 to-transparent p-6 lg:p-[18px] lg:rounded-xl">
+                      <h3 className="text-2xl font-bold text-white lg:text-xl">One Campaign. Two Audiences.</h3>
+                      <p className="mt-4 leading-8 lg:mt-3">
+                        Inside Aether, campaign teams use operational data to organize and execute their work. Through the Public Campaign Portal, campaigns can selectively turn some of that activity into a public-facing view for the people they serve.
+                      </p>
+                      <p className="mt-3 leading-8 lg:mt-2">
+                        The campaign remains in control of what is shared, while voters and supporters gain a simple place to learn about participating campaigns and see selected campaign activity.
+                      </p>
                     </div>
                   </div>
                 ) : id === "organizations" ? (

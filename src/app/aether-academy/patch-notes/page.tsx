@@ -30,11 +30,76 @@ export default function PatchNotesPage() {
           <p className="text-sm uppercase tracking-[0.2em] text-violet-300">
             Current Public Version
           </p>
-          <p className="mt-1 text-xl font-semibold text-white">Aether v1.4</p>
+          <p className="mt-1 text-xl font-semibold text-white">Aether v1.5</p>
           <p className="mt-1 text-slate-300">Live</p>
         </div>
 
         <details className="group mt-7 overflow-hidden rounded-2xl border border-violet-400/20 bg-[#10233e]/75 shadow-xl shadow-black/20 lg:rounded-xl" open>
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 transition hover:bg-white/[0.03] [&::-webkit-details-marker]:hidden lg:gap-3 lg:p-4">
+            <div>
+              <p className="text-sm uppercase tracking-[0.2em] text-violet-300">
+                September 20, 2026
+              </p>
+              <h2 className="mt-1 text-2xl font-semibold text-white">
+                Aether v1.5 Patch Update
+              </h2>
+              <p className="mt-1 text-sm text-slate-400">
+                Training resources, Public Campaign Portal documentation, and demo-request improvements.
+              </p>
+            </div>
+            <span className="shrink-0 text-2xl text-violet-300 transition-transform duration-200 group-open:rotate-180">
+              ↓
+            </span>
+          </summary>
+
+          <div className="border-t border-white/10 p-5 md:p-6 lg:p-5">
+            <section>
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-violet-300">
+                Public / Organization Update
+              </p>
+
+              <h3 className="mt-1 text-xl font-semibold text-white">
+                Training, Documentation &amp; Demo Experience
+              </h3>
+
+              <div className="mt-5 space-y-5 text-sm leading-6 text-slate-300 lg:mt-4 lg:space-y-4">
+                <div>
+                  <h4 className="text-base font-semibold text-white">Aether Mobile Training</h4>
+                  <ul className="mt-1.5 space-y-0.5">
+                    <li>✓ Added the Aether Mobile training video to the Training Videos library.</li>
+                    <li>✓ Expanded guided training for mobile contact lookup, campaign lists, and field execution workflows.</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h4 className="text-base font-semibold text-white">Public Campaign Portal Training &amp; Documentation</h4>
+                  <ul className="mt-1.5 space-y-0.5">
+                    <li>✓ Added a dedicated Public Campaign Portal guide to Aether Academy.</li>
+                    <li>✓ Added Public Campaign Portal documentation to the Aether Comprehensive Guide.</li>
+                    <li>✓ Added the Public Campaign Portal training video to the Training Videos library.</li>
+                    <li>✓ Connected the Academy guide and companion training video for easier navigation between written and video resources.</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h4 className="text-base font-semibold text-white">Demo Request Experience</h4>
+                  <ul className="mt-1.5 space-y-0.5">
+                    <li>✓ Updated the Request Demo page with the Welcome to Aether video.</li>
+                    <li>✓ Refined the page layout into a more focused single-screen desktop experience.</li>
+                    <li>✓ Updated demo-request messaging to emphasize education, campaign goals, and product fit rather than a traditional sales pitch.</li>
+                  </ul>
+                </div>
+              </div>
+            </section>
+
+            <div className="mt-7 border-t border-white/10 pt-5">
+              <p className="font-semibold text-white">Clarity. Focus. Execution.</p>
+              <p className="mt-1 text-slate-400">— Team Aether</p>
+            </div>
+          </div>
+        </details>
+
+        <details className="group mt-7 overflow-hidden rounded-2xl border border-violet-400/20 bg-[#10233e]/75 shadow-xl shadow-black/20 lg:rounded-xl">
           <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 transition hover:bg-white/[0.03] [&::-webkit-details-marker]:hidden lg:gap-3 lg:p-4">
             <div>
               <p className="text-sm uppercase tracking-[0.2em] text-violet-300">
