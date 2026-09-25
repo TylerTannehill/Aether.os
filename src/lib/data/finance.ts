@@ -92,14 +92,14 @@ function formatTrendLabel(key: string) {
   });
 }
 
-async function getFinanceSourceRows(): Promise<{
+async function getFinanceSourceRows(organizationIdOverride?: string): Promise<{
   contributions: ContributionRow[];
   pledges: PledgeRow[];
 }> {
   let organizationId: string;
 
   try {
-    organizationId = await getActiveOrganizationId();
+    organizationId = organizationIdOverride || (await getActiveOrganizationId());
   } catch (error) {
     console.error("Failed to resolve active campaign for finance data", error);
     return { contributions: [], pledges: [] };
@@ -151,8 +151,91 @@ async function getFinanceSourceRows(): Promise<{
   };
 }
 
-export async function getFinanceSnapshot(): Promise<FinanceSnapshot> {
-  const { contributions, pledges } = await getFinanceSourceRows();
+export async function getFinanceDashboardData(
+  organizationIdOverride?: string
+): Promise<{
+  snapshot: FinanceSnapshot;
+  trendData: FinanceTrendPoint[];
+}> {
+  const { contributions, pledges } = await getFinanceSourceRows(
+    organizationIdOverride
+  );
+
+  const moneyIn = contributions.reduce(
+    (sum, contribution) => sum + toNumber(contribution.amount),
+    0
+  );
+  const moneyOut = 0;
+  const openPledges = pledges
+    .filter((pledge) => !isConvertedPledge(pledge.status))
+    .reduce((sum, pledge) => {
+      const amountPledged = toNumber(pledge.amount_pledged);
+      const amountFulfilled = toNumber(pledge.amount_fulfilled);
+      return sum + Math.max(amountPledged - amountFulfilled, 0);
+    }, 0);
+
+  const grouped = new Map<string, FinanceTrendPoint>();
+
+  const ensurePoint = (key: string) => {
+    const existing = grouped.get(key);
+    if (existing) return existing;
+
+    const point: FinanceTrendPoint = {
+      label: key,
+      moneyIn: 0,
+      moneyOut: 0,
+      net: 0,
+      pledges: 0,
+    };
+
+    grouped.set(key, point);
+    return point;
+  };
+
+  for (const contribution of contributions) {
+    const key = getDateKey(contribution.date || contribution.created_at);
+    const point = ensurePoint(key);
+    point.moneyIn += toNumber(contribution.amount);
+    point.net = point.moneyIn - point.moneyOut;
+  }
+
+  for (const pledge of pledges) {
+    if (isConvertedPledge(pledge.status)) continue;
+
+    const amountPledged = toNumber(pledge.amount_pledged);
+    const amountFulfilled = toNumber(pledge.amount_fulfilled);
+    const remainingAmount = Math.max(amountPledged - amountFulfilled, 0);
+    const key = getDateKey(pledge.created_at || pledge.next_follow_up);
+    const point = ensurePoint(key);
+    point.pledges += remainingAmount;
+    point.net = point.moneyIn - point.moneyOut;
+  }
+
+  const trendData = Array.from(grouped.values())
+    .sort((a, b) => a.label.localeCompare(b.label))
+    .slice(-8)
+    .map((point) => ({
+      ...point,
+      label: formatTrendLabel(point.label),
+    }));
+
+  return {
+    snapshot: {
+      moneyIn,
+      moneyOut,
+      net: moneyIn - moneyOut,
+      pledges: openPledges,
+    },
+    trendData,
+  };
+}
+
+export async function getFinanceSnapshot(
+  organizationIdOverride?: string
+): Promise<FinanceSnapshot> {
+  const { contributions, pledges } = await getFinanceSourceRows(
+    organizationIdOverride
+  );
 
   const moneyIn = contributions.reduce(
     (sum, contribution) => sum + toNumber(contribution.amount),
@@ -177,8 +260,12 @@ export async function getFinanceSnapshot(): Promise<FinanceSnapshot> {
   };
 }
 
-export async function getFinanceTrendData(): Promise<FinanceTrendPoint[]> {
-  const { contributions, pledges } = await getFinanceSourceRows();
+export async function getFinanceTrendData(
+  organizationIdOverride?: string
+): Promise<FinanceTrendPoint[]> {
+  const { contributions, pledges } = await getFinanceSourceRows(
+    organizationIdOverride
+  );
   const grouped = new Map<string, FinanceTrendPoint>();
 
   const ensurePoint = (key: string) => {

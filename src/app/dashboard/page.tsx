@@ -36,8 +36,7 @@ import {
   type PrintSnapshot,
 } from "@/lib/data/print";
 import {
-  getFinanceSnapshot,
-  getFinanceTrendData,
+  getFinanceDashboardData,
   type FinanceSnapshot,
   type FinanceTrendPoint,
 } from "@/lib/data/finance";
@@ -935,29 +934,27 @@ export default function DashboardPage() {
     }
   }
 
+  async function loadDigitalData() {
+    try {
+      const liveDigitalSnapshot = await getDigitalSnapshot();
+      setDigitalSnapshot(liveDigitalSnapshot);
+    } catch (error) {
+      console.error(
+        "Digital snapshot failed after core dashboard load",
+        error
+      );
+    }
+  }
+
   async function loadData() {
     try {
       setLoading(true);
       setMessage("");
 
-      const [
-        data,
-        liveDigitalSnapshot,
-        liveFieldSnapshot,
-        livePrintSnapshot,
-        liveFinanceSnapshot,
-        liveFinanceTrendData,
-        contextResponse,
-      ] = await Promise.all([
-        getDashboardData(),
-        getDigitalSnapshot(),
-        getFieldSnapshot(),
-        getPrintSnapshot(),
-        getFinanceSnapshot(),
-        getFinanceTrendData(),
-        fetch("/api/auth/current-context"),
-      ]);
-
+      // Resolve campaign context once, then reuse the organization ID across
+      // the core dashboard helpers. This prevents each department helper from
+      // independently calling /api/auth/current-context during startup.
+      const contextResponse = await fetch("/api/auth/current-context");
       const contextResult = await contextResponse.json();
 
       if (!contextResponse.ok) {
@@ -968,8 +965,15 @@ export default function DashboardPage() {
 
       const user = contextResult?.user;
       const organization = contextResult?.organization;
-      setIsDemoOrg(contextResult?.isDemoOrg === true);
       const membership = contextResult?.membership;
+      const organizationId =
+        organization?.id || membership?.organization_id || null;
+
+      if (!organizationId) {
+        throw new Error("No active campaign selected");
+      }
+
+      setIsDemoOrg(contextResult?.isDemoOrg === true);
 
       let nextUserContext: LiveDashboardUserContext | null = null;
 
@@ -1000,15 +1004,38 @@ export default function DashboardPage() {
       }
 
       setLiveUserContext(nextUserContext);
+
+      // Core startup now reuses the resolved organization ID. Dashboard
+      // analytics_events are skipped here because this page never consumes
+      // analyticsEvents/analyticsSnapshot directly. Field/Print/Finance load
+      // only the data they actually need.
+      const [
+        data,
+        liveFieldSnapshot,
+        livePrintSnapshot,
+        liveFinanceData,
+      ] = await Promise.all([
+        getDashboardData({
+          organizationId: String(organizationId),
+          includeAnalytics: false,
+        }),
+        getFieldSnapshot(String(organizationId)),
+        getPrintSnapshot(String(organizationId)),
+        getFinanceDashboardData(String(organizationId)),
+      ]);
+
       setContacts(data.contacts ?? []);
       setLists(data.lists ?? []);
       setLogs(data.logs ?? []);
       setTasks((data.tasks as DashboardTask[]) ?? []);
-      setDigitalSnapshot(liveDigitalSnapshot);
       setFieldSnapshot(liveFieldSnapshot);
       setPrintSnapshot(livePrintSnapshot);
-      setFinanceSnapshot(liveFinanceSnapshot);
-      setFinanceTrendData(liveFinanceTrendData);
+      setFinanceSnapshot(liveFinanceData.snapshot);
+      setFinanceTrendData(liveFinanceData.trendData);
+
+      // Digital remains intentionally outside the critical startup path.
+      // Leave its working data loader untouched.
+      void loadDigitalData();
     } catch (err: any) {
       setMessage(err?.message || "Failed to load dashboard");
     } finally {

@@ -6,6 +6,7 @@ import { createClient as createSupabaseAdminClient } from "@supabase/supabase-js
 type AetherTier = "t1" | "t2" | "t3";
 type AbeStage = "early" | "mid" | "late";
 
+
 type OrganizationContext = {
   id: string;
   name?: string | null;
@@ -73,6 +74,7 @@ function getAdminClient() {
 export async function GET() {
   try {
     const supabase = await createClient();
+
     const cookieStore = await cookies();
 
     const activeOrganizationId =
@@ -85,16 +87,16 @@ export async function GET() {
 
     if (userError || !user) {
       return NextResponse.json(
-        { error: "Not authenticated" },
-        { status: 401 }
-      );
+          { error: "Not authenticated" },
+          { status: 401 }
+        );
     }
 
     if (!activeOrganizationId) {
       return NextResponse.json(
-        { error: "No active organization selected" },
-        { status: 400 }
-      );
+          { error: "No active organization selected" },
+          { status: 400 }
+        );
     }
 
     // Use the service-role client for context lookup so the dashboard can
@@ -109,23 +111,23 @@ export async function GET() {
 
     if (appUserError) {
       return NextResponse.json(
-        { error: appUserError.message },
-        { status: 500 }
-      );
+          { error: appUserError.message },
+          { status: 500 }
+        );
     }
 
     if (!appUser) {
       return NextResponse.json(
-        { error: "Aether user profile not found" },
-        { status: 403 }
-      );
+          { error: "Aether user profile not found" },
+          { status: 403 }
+        );
     }
 
     if (appUser.is_active === false) {
       return NextResponse.json(
-        { error: "This user is inactive" },
-        { status: 403 }
-      );
+          { error: "This user is inactive" },
+          { status: 403 }
+        );
     }
 
     const { data: membership, error: membershipError } = await databaseClient
@@ -155,19 +157,19 @@ export async function GET() {
 
     if (membershipError) {
       return NextResponse.json(
-        { error: membershipError.message },
-        { status: 500 }
-      );
+          { error: membershipError.message },
+          { status: 500 }
+        );
     }
 
     if (!membership) {
       return NextResponse.json(
-        {
-          error:
-            "No membership found for active organization. Active org cookie may be stale.",
-        },
-        { status: 403 }
-      );
+          {
+            error:
+              "No membership found for active organization. Active org cookie may be stale.",
+          },
+          { status: 403 }
+        );
     }
 
     const resolvedOrganizationId = String(membership.organization_id);
@@ -180,9 +182,9 @@ export async function GET() {
 
     if (rolesError) {
       return NextResponse.json(
-        { error: rolesError.message },
-        { status: 500 }
-      );
+          { error: rolesError.message },
+          { status: 500 }
+        );
     }
 
     const primaryRole =
@@ -240,10 +242,10 @@ export async function GET() {
     return response;
   } catch (err: any) {
     return NextResponse.json(
-      {
-        error: err?.message || "Failed to load current campaign context",
-      },
-      { status: 500 }
-    );
+        {
+          error: err?.message || "Failed to load current campaign context",
+        },
+        { status: 500 }
+      );
   }
 }

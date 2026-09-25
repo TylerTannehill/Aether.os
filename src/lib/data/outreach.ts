@@ -133,6 +133,28 @@ export async function getListContacts(listId: string): Promise<Contact[]> {
   })) as Contact[];
 }
 
+export async function getAllOutreachContacts(): Promise<Contact[]> {
+  const organizationId = await getActiveOrganizationId();
+
+  const { data, error } = await supabase
+    .from("list_contacts")
+    .select(
+      "contact_id, contacts!inner(id, first_name, last_name, email, phone, city, state, party, owner_name, organization_id)"
+    )
+    .eq("contacts.organization_id", organizationId);
+
+  if (error) throw error;
+
+  const contacts = ((data ?? []) as unknown as ListContactRow[]).flatMap((row) => {
+    const linked = Array.isArray(row.contacts) ? row.contacts[0] : row.contacts;
+    return linked ? [linked] : [];
+  }) as Contact[];
+
+  return Array.from(
+    new Map(contacts.map((contact) => [contact.id, contact])).values()
+  );
+}
+
 export async function getOutreachLogs(listId: string): Promise<OutreachLog[]> {
   const organizationId = await getActiveOrganizationId();
   await validateListForActiveOrganization(listId, organizationId);

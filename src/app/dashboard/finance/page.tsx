@@ -666,7 +666,7 @@ function getChartDataForTimeframe(
 export default function FinanceDashboardPage() {
   const [chartView, setChartView] = useState<FinanceChartView>("money_in");
   const [chartTimeframe, setChartTimeframe] =
-    useState<FinanceTimeframe>("month");
+    useState<FinanceTimeframe>("cycle");
 
   const [demoRole, setDemoRole] = useState<DemoRole>("admin");
   const [demoDepartment, setDemoDepartment] =

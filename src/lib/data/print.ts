@@ -410,11 +410,14 @@ async function getTypedPrintListRows(
   return rows;
 }
 
-export async function getPrintMetricRows(): Promise<PrintMetricRow[]> {
+export async function getPrintMetricRows(
+  organizationIdOverride?: string
+): Promise<PrintMetricRow[]> {
   let organizationId: string;
 
   try {
-    organizationId = await getActiveOrganizationId();
+    organizationId =
+      organizationIdOverride || (await getActiveOrganizationId());
   } catch (error) {
     console.error("Failed to resolve active campaign for print metrics", error);
     return [];
@@ -428,8 +431,10 @@ export async function getPrintMetricRows(): Promise<PrintMetricRow[]> {
   return dedupePrintRows([...metricRows, ...printListRows]);
 }
 
-export async function getPrintSnapshot(): Promise<PrintSnapshot> {
-  const rows = await getPrintMetricRows();
+export async function getPrintSnapshot(
+  organizationIdOverride?: string
+): Promise<PrintSnapshot> {
+  const rows = await getPrintMetricRows(organizationIdOverride);
 
   const onHand = rows.filter(isOperationalPressureRow).length;
 

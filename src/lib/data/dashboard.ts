@@ -76,10 +76,15 @@ async function getActiveOrganizationId(): Promise<string> {
   return String(organizationId);
 }
 
-export async function getDashboardData(): Promise<DashboardData> {
-  const organizationId = await getActiveOrganizationId();
+export async function getDashboardData(options?: {
+  organizationId?: string;
+  includeAnalytics?: boolean;
+}): Promise<DashboardData> {
+  const organizationId =
+    options?.organizationId || (await getActiveOrganizationId());
+  const includeAnalytics = options?.includeAnalytics ?? true;
 
-  const [contactsRes, listsRes, logsRes, tasksRes, analyticsRes] = await Promise.all([
+  const [contactsRes, listsRes, logsRes, tasksRes] = await Promise.all([
     supabase
       .from("contacts")
       .select(
@@ -107,12 +112,6 @@ export async function getDashboardData(): Promise<DashboardData> {
       )
       .eq("organization_id", organizationId)
       .order("created_at", { ascending: false }),
-
-    supabase
-      .from("analytics_events")
-      .select("*")
-      .eq("organization_id", organizationId)
-      .order("metric_date", { ascending: false }),
   ]);
 
   if (contactsRes.error) throw contactsRes.error;
@@ -122,10 +121,21 @@ export async function getDashboardData(): Promise<DashboardData> {
 
   let analyticsEvents: AnalyticsEvent[] = [];
 
-  if (analyticsRes.error) {
-    console.error("Failed to load analytics events for dashboard", analyticsRes.error);
-  } else {
-    analyticsEvents = (analyticsRes.data ?? []) as AnalyticsEvent[];
+  if (includeAnalytics) {
+    const analyticsRes = await supabase
+      .from("analytics_events")
+      .select("*")
+      .eq("organization_id", organizationId)
+      .order("metric_date", { ascending: false });
+
+    if (analyticsRes.error) {
+      console.error(
+        "Failed to load analytics events for dashboard",
+        analyticsRes.error
+      );
+    } else {
+      analyticsEvents = (analyticsRes.data ?? []) as AnalyticsEvent[];
+    }
   }
 
   return {

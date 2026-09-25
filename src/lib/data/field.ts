@@ -31,6 +31,14 @@ type FieldListRow = {
   created_at?: string | null;
 };
 
+type FieldListContactRow = {
+  list_id: string;
+  disposition?: string | null;
+  status?: string | null;
+  notes?: string | null;
+  completed_at?: string | null;
+};
+
 async function getActiveOrganizationId() {
   const response = await fetch("/api/auth/current-context", {
     method: "GET",
@@ -210,17 +218,41 @@ function isLikelyFieldList(list: FieldListRow) {
   );
 }
 
-function buildFieldListMetricRow(list: FieldListRow): FieldMetricRow {
+function isWorkedFieldListContact(row: FieldListContactRow) {
+  return Boolean(
+    String(row.disposition || "").trim() ||
+      String(row.notes || "").trim() ||
+      normalize(row.status) === "completed" ||
+      row.completed_at
+  );
+}
+
+function buildFieldListMetricRow(
+  list: FieldListRow,
+  memberships: FieldListContactRow[]
+): FieldMetricRow {
+  const listMemberships = memberships.filter((row) => row.list_id === list.id);
+  const workedContacts = listMemberships.filter(isWorkedFieldListContact);
+  const totalContacts = listMemberships.length;
+  const doors = workedContacts.length;
+  const completion =
+    totalContacts > 0 ? Math.round((doors / totalContacts) * 100) : 0;
+
+  const latestCompletedAt = workedContacts
+    .map((row) => row.completed_at)
+    .filter((value): value is string => Boolean(value))
+    .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0];
+
   return {
     id: `field-list-${list.id}`,
     turf_name: list.name,
     region: "Field List",
-    doors: 0,
+    doors,
     conversations: 0,
     ids: 0,
-    completion: 0,
+    completion,
     canvasser_name: list.default_owner_name || "Unassigned",
-    created_at: list.created_at || null,
+    created_at: latestCompletedAt || list.created_at || null,
     linked_list_id: list.id,
     linked_list_name: list.name,
     source_type: "field_list",
@@ -244,7 +276,7 @@ function dedupeFieldRows(rows: FieldMetricRow[]) {
       toNumber(row.ids) > 0 ||
       toNumber(row.completion) > 0;
 
-    if (hasRealMetrics && turfName) {
+    if (hasRealMetrics && turfName && row.source_type !== "field_list") {
       seenTurfNamesWithMetrics.add(turfName);
     }
 
@@ -440,25 +472,53 @@ async function getTypedFieldListRows(
     return [];
   }
 
-  const rows = ((data as FieldListRow[]) ?? [])
-    .filter(isLikelyFieldList)
-    .map(buildFieldListMetricRow);
+  const fieldLists = ((data as FieldListRow[]) ?? []).filter(isLikelyFieldList);
+
+  if (!fieldLists.length) {
+    return [];
+  }
+
+  const fieldListIds = fieldLists.map((list) => list.id);
+  const { data: membershipData, error: membershipError } = await supabase
+    .from("list_contacts")
+    .select("list_id, disposition, status, notes, completed_at")
+    .in("list_id", fieldListIds);
+
+  if (membershipError) {
+    console.error("Failed to load field list progress", {
+      organizationId,
+      fieldListIds,
+      error: membershipError,
+    });
+
+    return fieldLists.map((list) => buildFieldListMetricRow(list, []));
+  }
+
+  const memberships = (membershipData as FieldListContactRow[]) ?? [];
+  const rows = fieldLists.map((list) =>
+    buildFieldListMetricRow(list, memberships)
+  );
 
   console.info("Typed field lists loaded for field metrics", {
     organizationId,
     rawCount: data?.length ?? 0,
     fieldListCount: rows.length,
+    membershipCount: memberships.length,
+    workedCount: memberships.filter(isWorkedFieldListContact).length,
     sample: rows[0] ?? null,
   });
 
   return rows;
 }
 
-export async function getFieldMetricRows(): Promise<FieldMetricRow[]> {
+export async function getFieldMetricRows(
+  organizationIdOverride?: string
+): Promise<FieldMetricRow[]> {
   let organizationId: string;
 
   try {
-    organizationId = await getActiveOrganizationId();
+    organizationId =
+      organizationIdOverride || (await getActiveOrganizationId());
   } catch (error) {
     console.error("Failed to resolve active campaign for field metrics", error);
     return [];
@@ -477,8 +537,10 @@ export async function getFieldMetricRows(): Promise<FieldMetricRow[]> {
   ]);
 }
 
-export async function getFieldSnapshot(): Promise<FieldSnapshot> {
-  const rows = await getFieldMetricRows();
+export async function getFieldSnapshot(
+  organizationIdOverride?: string
+): Promise<FieldSnapshot> {
+  const rows = await getFieldMetricRows(organizationIdOverride);
 
   const doors = rows.reduce((sum, row) => sum + toNumber(row.doors), 0);
 

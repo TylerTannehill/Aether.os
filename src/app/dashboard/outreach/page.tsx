@@ -23,6 +23,7 @@ import {
   callResults,
   createAutoTaskForOutcome,
   filterOutreachContacts,
+  getAllOutreachContacts,
   getListContacts,
   getOutreachLists,
   getOutreachLogs,
@@ -234,6 +235,7 @@ function OutreachPageContent() {
   const { ownerFilter } = useDashboardOwner();
   const focusSectionRef = useRef<HTMLElement | null>(null);
   const selectedContactRef = useRef<HTMLDivElement | null>(null);
+  const listsLoadedRef = useRef(false);
 
   useEffect(() => {
     loadLists();
@@ -265,6 +267,8 @@ function OutreachPageContent() {
   }, []);
 
   useEffect(() => {
+    if (!listsLoadedRef.current) return;
+
     if (
       preferredListId &&
       lists.some((list) => list.id === preferredListId) &&
@@ -305,6 +309,7 @@ function OutreachPageContent() {
       setMessage("");
 
       const loadedLists = await getOutreachLists();
+      listsLoadedRef.current = true;
       setLists(loadedLists);
 
       if (
@@ -317,7 +322,6 @@ function OutreachPageContent() {
     } catch (err: any) {
       setMessage(`Error loading lists: ${err?.message || "Unknown error"}`);
       setLists([]);
-    } finally {
       setLoading(false);
     }
   }
@@ -327,17 +331,7 @@ function OutreachPageContent() {
       setContactsLoading(true);
       setMessage("");
 
-      const allLists = await getOutreachLists();
-
-      const contactSets = await Promise.all(
-        allLists.map((list) => getListContacts(list.id))
-      );
-
-      const allContacts = contactSets.flat();
-
-      const uniqueContacts = Array.from(
-        new Map(allContacts.map((contact) => [contact.id, contact])).values()
-      );
+      const uniqueContacts = await getAllOutreachContacts();
 
       setContacts(uniqueContacts);
 
@@ -362,9 +356,11 @@ function OutreachPageContent() {
       setContacts([]);
     } finally {
       setContactsLoading(false);
+      setLoading(false);
     }
   }
-    async function loadSelectedListData(listId: string) {
+
+  async function loadSelectedListData(listId: string) {
     try {
       setContactsLoading(true);
       setLogsLoading(true);
@@ -403,6 +399,7 @@ function OutreachPageContent() {
     } finally {
       setContactsLoading(false);
       setLogsLoading(false);
+      setLoading(false);
     }
   }
 

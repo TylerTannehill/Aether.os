@@ -1338,26 +1338,111 @@ export default function DigitalDashboardPage() {
           </div>
 
           {chartData.length > 0 ? (
-            <div className="grid grid-cols-4 gap-4 lg:gap-3">
-              {chartData.map((point, index) => {
-                const value = point[trendView];
-                const height = (value / chartMax) * 120;
+            <div className="rounded-[28px] border border-slate-200 bg-slate-50/70 px-7 pb-6 pt-7 lg:rounded-2xl lg:px-6 lg:pb-5 lg:pt-6">
+              <div className="relative h-64 overflow-hidden">
+                <div className="absolute inset-x-0 top-[22%] border-t border-dashed border-slate-200" />
+                <div className="absolute inset-x-0 top-[44%] border-t border-dashed border-slate-200" />
+                <div className="absolute inset-x-0 top-[66%] border-t border-dashed border-slate-200" />
 
-                return (
-                  <div
-                    key={`${point.label}-${index}`}
-                    className="flex flex-col items-center gap-2 lg:gap-1.5"
-                  >
-                    <div className="flex h-32 items-end lg:h-24">
-                      <div
-                        style={{ height }}
-                        className="w-10 rounded-2xl bg-slate-900 lg:w-8 lg:rounded-xl"
-                      />
-                    </div>
-                    <p className="text-xs text-slate-500 lg:text-[9px]">{point.label}</p>
+                <svg
+                  viewBox="0 0 1000 260"
+                  preserveAspectRatio="none"
+                  className="absolute inset-0 h-full w-full"
+                  aria-hidden="true"
+                >
+                  <defs>
+                    <linearGradient id="digitalTrendFill" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="currentColor" stopOpacity="0.16" />
+                      <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
+                    </linearGradient>
+                  </defs>
+
+                  {(() => {
+                    const points = chartData.map((point, index) => {
+                      const x =
+                        chartData.length === 1
+                          ? 500
+                          : 40 + (index / (chartData.length - 1)) * 920;
+                      const normalized = point[trendView] / chartMax;
+                      const y = 220 - normalized * 170;
+                      return { x, y };
+                    });
+
+                    if (points.length === 1) {
+                      const only = points[0];
+                      return (
+                        <>
+                          <path
+                            d={`M 40 220 L ${only.x} ${only.y} L 960 ${only.y} L 960 220 Z`}
+                            fill="url(#digitalTrendFill)"
+                            className="text-slate-700"
+                          />
+                          <path
+                            d={`M 40 220 L ${only.x} ${only.y} L 960 ${only.y}`}
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                            strokeLinecap="round"
+                            className="text-slate-700"
+                          />
+                        </>
+                      );
+                    }
+
+                    const linePath = points.reduce((path, point, index) => {
+                      if (index === 0) return `M ${point.x} ${point.y}`;
+
+                      const previous = points[index - 1];
+                      const controlX = (previous.x + point.x) / 2;
+
+                      return `${path} C ${controlX} ${previous.y}, ${controlX} ${point.y}, ${point.x} ${point.y}`;
+                    }, "");
+
+                    const areaPath = `${linePath} L ${points[points.length - 1].x} 220 L ${points[0].x} 220 Z`;
+
+                    return (
+                      <>
+                        <path
+                          d={areaPath}
+                          fill="url(#digitalTrendFill)"
+                          className="text-slate-700"
+                        />
+                        <path
+                          d={linePath}
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="text-slate-700"
+                        />
+                      </>
+                    );
+                  })()}
+                </svg>
+              </div>
+
+              <div
+                className="mt-3 grid gap-4"
+                style={{
+                  gridTemplateColumns: `repeat(${Math.max(chartData.length, 1)}, minmax(0, 1fr))`,
+                }}
+              >
+                {chartData.map((point, index) => (
+                  <div key={`${point.label}-${index}`} className="text-center">
+                    <p className="text-xs font-medium uppercase tracking-wide text-slate-500 lg:text-[9px]">
+                      {point.label}
+                    </p>
+                    <p className="mt-1 text-sm font-medium text-slate-900 lg:text-[11px]">
+                      {trendView === "spend"
+                        ? currency.format(point[trendView])
+                        : trendView === "sentiment"
+                        ? `${point[trendView]}%`
+                        : point[trendView].toLocaleString()}
+                    </p>
                   </div>
-                );
-              })}
+                ))}
+              </div>
             </div>
           ) : (
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-600 lg:rounded-xl lg:p-4 lg:text-[11px]">
