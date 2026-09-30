@@ -85,7 +85,7 @@ export async function POST(request: Request) {
 
     const { data: organization, error: organizationError } = await databaseClient
       .from("organizations")
-      .select("id, name, slug, context_mode, aether_tier")
+      .select("id, name, slug, context_mode, aether_tier, product_context")
       .eq("slug", normalizedCampaign)
       .maybeSingle();
 

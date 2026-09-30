@@ -15,6 +15,9 @@ import {
   Printer,
   Wrench,
   PlugZap,
+  ContactRound,
+  Boxes,
+  Truck,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -45,6 +48,7 @@ type CurrentContextResponse = {
     slug?: string | null;
     context_mode?: string | null;
     aether_tier?: AetherTier | null;
+    product_context?: string | null;
   } | null;
   membership?: {
     id: string;
@@ -59,7 +63,7 @@ type CurrentContextResponse = {
   error?: string;
 };
 
-const navItems: NavItem[] = [
+const politicalNavItems: NavItem[] = [
   {
     title: "Overview",
     href: "/dashboard",
@@ -111,6 +115,51 @@ const navItems: NavItem[] = [
   {
     title: "Tools",
     href: "/dashboard/tools",
+    icon: Wrench,
+    alwaysVisible: true,
+  },
+];
+
+const businessNavItems: NavItem[] = [
+  {
+    title: "Overview",
+    href: "/business/dashboard",
+    icon: LayoutDashboard,
+    alwaysVisible: true,
+  },
+  {
+    title: "CRM",
+    href: "/business/crm",
+    icon: ContactRound,
+    alwaysVisible: true,
+  },
+  {
+    title: "Marketing",
+    href: "/business/marketing",
+    icon: Megaphone,
+    alwaysVisible: true,
+  },
+  {
+    title: "Inventory",
+    href: "/business/inventory",
+    icon: Boxes,
+    alwaysVisible: true,
+  },
+  {
+    title: "Dispatch",
+    href: "/business/dispatch",
+    icon: Truck,
+    alwaysVisible: true,
+  },
+  {
+    title: "FAQ",
+    href: "/business/faq",
+    icon: BookOpen,
+    alwaysVisible: true,
+  },
+  {
+    title: "Tools",
+    href: "/business/tools",
     icon: Wrench,
     alwaysVisible: true,
   },
@@ -220,6 +269,7 @@ export function DashboardSidebar() {
   const [hasAdminAccess, setHasAdminAccess] = useState(false);
   const [contextMode, setContextMode] = useState("default");
   const [aetherTier, setAetherTier] = useState<AetherTier>("t3");
+  const [productContext, setProductContext] = useState<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -254,6 +304,7 @@ export function DashboardSidebar() {
 
         setContextMode(organizationContextMode);
         setAetherTier(organizationTier);
+        setProductContext(data.organization?.product_context ?? null);
 
         const nextDepartments = new Set<string>();
 
@@ -313,8 +364,14 @@ export function DashboardSidebar() {
     };
   }, []);
 
+  const isBusiness = productContext === "business";
+
   const visibleNavItems = useMemo(() => {
-    const tierFiltered = navItems.filter((item) => {
+    if (isBusiness) {
+      return businessNavItems;
+    }
+
+    const tierFiltered = politicalNavItems.filter((item) => {
       if (item.href === "/dashboard/tools") {
         return canAccessTools(aetherTier);
       }
@@ -354,6 +411,7 @@ export function DashboardSidebar() {
     hasAdminAccess,
     roleLoading,
     aetherTier,
+    isBusiness,
   ]);
 
   async function handleLogout() {
@@ -378,7 +436,7 @@ export function DashboardSidebar() {
           theme.sidebarGradient
         )}
       >
-        <Link href="/dashboard" className="block">
+        <Link href={isBusiness ? "/business/dashboard" : "/dashboard"} className="block">
           <div className="flex flex-col items-center justify-center">
             <Image
               src="/aether-logo-full.png"
@@ -390,10 +448,10 @@ export function DashboardSidebar() {
             />
 
             <p className="mt-2 text-center text-sm font-medium text-slate-100 lg:mt-1.5 lg:text-[11px]">
-              Political Operating System
+              {isBusiness ? "Business Operating System" : "Political Operating System"}
             </p>
 
-            <TierBadge tier={aetherTier} />
+            {!isBusiness ? <TierBadge tier={aetherTier} /> : null}
           </div>
         </Link>
       </div>

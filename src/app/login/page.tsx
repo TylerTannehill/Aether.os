@@ -66,6 +66,11 @@ export default function LoginPage() {
       return
     }
 
+    if (campaignResult?.organization?.product_context === 'business') {
+      window.location.href = '/business/dashboard'
+      return
+    }
+
     window.location.href = '/dashboard'
   }
 
@@ -114,7 +119,7 @@ export default function LoginPage() {
 
           <p className="text-sm text-white/70">
             {mode === 'login'
-              ? 'Enter your campaign workspace to continue.'
+              ? 'Enter your campaign or organization workspace to continue.'
               : 'Enter your email and we’ll send a secure password reset link.'}
           </p>
         </div>
@@ -129,7 +134,7 @@ export default function LoginPage() {
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
               <label htmlFor="campaign" className="block text-sm font-medium">
-                Campaign
+                Campaign / Organization
               </label>
 
               <input

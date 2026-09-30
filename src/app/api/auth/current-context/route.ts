@@ -14,6 +14,7 @@ type OrganizationContext = {
   context_mode?: string | null;
   aether_tier?: AetherTier | null;
   abe_stage?: AbeStage | null;
+  product_context?: string | null;
 };
 
 function normalizeRole(role?: string | null) {
@@ -52,6 +53,7 @@ function resolveOrganization(
     context_mode: organization.context_mode ?? "default",
     aether_tier: normalizeAetherTier(organization.aether_tier),
     abe_stage: organization.abe_stage ?? "early",
+    product_context: organization.product_context ?? null,
   };
 }
 
@@ -147,7 +149,8 @@ export async function GET() {
             slug,
             context_mode,
             aether_tier,
-            abe_stage
+            abe_stage,
+            product_context
           )
         `
       )
