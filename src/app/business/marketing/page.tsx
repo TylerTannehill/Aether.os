@@ -10,6 +10,7 @@ import {
   MousePointerClick,
   Sparkles,
   TrendingUp,
+  Upload,
   Zap,
 } from "lucide-react";
 import {
@@ -445,13 +446,23 @@ export default function BusinessMarketingPage() {
             </div>
           </div>
 
-          <Link
-            href="/business/marketing/focus"
-            className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/15 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
-          >
-            <Zap className="h-4 w-4" />
-            Open Marketing Focus
-          </Link>
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href="/business/marketing/import"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
+            >
+              <Upload className="h-4 w-4" />
+              Import Analytics
+            </Link>
+
+            <Link
+              href="/business/marketing/focus"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/15 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
+            >
+              <Zap className="h-4 w-4" />
+              Open Marketing Focus
+            </Link>
+          </div>
         </div>
       </section>
 

@@ -8,6 +8,8 @@ import {
   BriefcaseBusiness,
   CheckCircle2,
   Clock3,
+  ContactRound,
+  ListChecks,
   MapPinned,
   Navigation,
   Search,
@@ -136,22 +138,40 @@ export default function BusinessDispatchPage() {
             </div>
           </div>
 
-          <Link
-            href="/business/dispatch/focus"
-            className="group rounded-2xl border border-white/10 bg-white/5 px-4 py-3 transition hover:border-white/20 hover:bg-white/10 lg:rounded-xl lg:px-3 lg:py-2"
-          >
-            <div className="flex items-center justify-between gap-6">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400 lg:text-[9px]">
-                  Focus Mode
-                </p>
-                <p className="mt-1 text-sm font-medium text-slate-200 transition group-hover:text-white lg:text-[11px]">
-                  Open Dispatch Focus
-                </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href="/business/contacts"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
+            >
+              <ContactRound className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
+              Contacts
+            </Link>
+
+            <Link
+              href="/business/lists"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
+            >
+              <ListChecks className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
+              Lists
+            </Link>
+
+            <Link
+              href="/business/dispatch/focus"
+              className="group rounded-2xl border border-white/10 bg-white/5 px-4 py-3 transition hover:border-white/20 hover:bg-white/10 lg:rounded-xl lg:px-3 lg:py-2"
+            >
+              <div className="flex items-center justify-between gap-6">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400 lg:text-[9px]">
+                    Focus Mode
+                  </p>
+                  <p className="mt-1 text-sm font-medium text-slate-200 transition group-hover:text-white lg:text-[11px]">
+                    Open Dispatch Focus
+                  </p>
+                </div>
+                <Zap className="h-4 w-4 text-slate-300 transition group-hover:text-white" />
               </div>
-              <Zap className="h-4 w-4 text-slate-300 transition group-hover:text-white" />
-            </div>
-          </Link>
+            </Link>
+          </div>
         </div>
       </section>
 

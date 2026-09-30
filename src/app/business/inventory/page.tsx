@@ -6,6 +6,8 @@ import {
   AlertTriangle,
   Boxes,
   ClipboardList,
+  ContactRound,
+  ListChecks,
   Package,
   Search,
   Truck,
@@ -130,17 +132,35 @@ export default function BusinessInventoryPage() {
             </div>
           </div>
 
-          <Link
-            href="/business/inventory/focus"
-            className="group rounded-2xl border border-white/10 bg-white/5 px-4 py-3 transition hover:border-white/20 hover:bg-white/10 lg:rounded-xl lg:px-3 lg:py-2"
-          >
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400 lg:text-[9px]">
-              Focus Mode
-            </p>
-            <p className="mt-1 text-sm font-medium text-slate-200 transition group-hover:text-white lg:text-[11px]">
-              Open Inventory Focus
-            </p>
-          </Link>
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href="/business/contacts"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
+            >
+              <ContactRound className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
+              Contacts
+            </Link>
+
+            <Link
+              href="/business/lists"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/10 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
+            >
+              <ListChecks className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
+              Lists
+            </Link>
+
+            <Link
+              href="/business/inventory/focus"
+              className="group rounded-2xl border border-white/10 bg-white/5 px-4 py-3 transition hover:border-white/20 hover:bg-white/10 lg:rounded-xl lg:px-3 lg:py-2"
+            >
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400 lg:text-[9px]">
+                Focus Mode
+              </p>
+              <p className="mt-1 text-sm font-medium text-slate-200 transition group-hover:text-white lg:text-[11px]">
+                Open Inventory Focus
+              </p>
+            </Link>
+          </div>
         </div>
       </section>
 
