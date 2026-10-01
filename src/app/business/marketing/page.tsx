@@ -6,6 +6,7 @@ import {
   BarChart3,
   CircleDollarSign,
   Clock3,
+  Download,
   Megaphone,
   MousePointerClick,
   Sparkles,
@@ -17,6 +18,7 @@ import {
   getDigitalPlatformRows,
   type DigitalPlatformRow,
 } from "@/lib/data/digital";
+import { createClient } from "@/lib/supabase/client";
 
 type PlatformKey =
   | "meta"
@@ -48,14 +50,31 @@ type ChartPoint = {
   sentiment: number;
 };
 
-type ContentItem = {
+type MarketingContentItem = {
   id: string;
   title: string;
-  platform: PlatformKey;
-  status: "drafting" | "review" | "scheduled" | "live";
-  publish_at?: string | null;
-  owner: string;
+  platform: string;
+  stage: string;
+  overall_due_date: string | null;
+  overall_completed_at: string | null;
+  draft_due_date: string | null;
+  draft_completed_at: string | null;
+  review_due_date: string | null;
+  review_completed_at: string | null;
+  publish_at: string | null;
+  published_at: string | null;
+  archived_at: string | null;
+  created_at: string;
+  updated_at: string;
 };
+
+type MarketingResponseReview = {
+  id: string;
+  platform: string;
+  engagement_baseline: number | string;
+  reviewed_at: string;
+};
+
 
 const currency = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -273,9 +292,33 @@ function formatTrendValue(view: TrendView, value: number) {
   return value.toLocaleString();
 }
 
+function csvCell(value: unknown) {
+  const text = String(value ?? "");
+  return `"${text.replace(/"/g, '""')}"`;
+}
+
+function downloadCsv(filename: string, headers: string[], rows: unknown[][]) {
+  const csv = [
+    headers.map(csvCell).join(","),
+    ...rows.map((row) => row.map(csvCell).join(",")),
+  ].join("\n");
+
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
 export default function BusinessMarketingPage() {
   const [trendView, setTrendView] = useState<TrendView>("impressions");
   const [digitalRows, setDigitalRows] = useState<DigitalPlatformRow[]>([]);
+  const [contentItems, setContentItems] = useState<MarketingContentItem[]>([]);
+  const [responseReviews, setResponseReviews] = useState<MarketingResponseReview[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
 
@@ -287,16 +330,59 @@ export default function BusinessMarketingPage() {
         setLoading(true);
         setLoadError("");
 
-        const rows = await getDigitalPlatformRows();
+        const [rows, contextResponse] = await Promise.all([
+          getDigitalPlatformRows(),
+          fetch("/api/auth/current-context", {
+            method: "GET",
+            credentials: "include",
+            cache: "no-store",
+          }),
+        ]);
+
+        if (!contextResponse.ok) {
+          throw new Error("Could not load the current organization.");
+        }
+
+        const context = await contextResponse.json();
+        const organizationId =
+          context?.organization?.id ?? context?.membership?.organization_id ?? "";
+
+        if (!organizationId) {
+          throw new Error("No active organization is available.");
+        }
+
+        const supabase = createClient();
+        const [contentResult, responseReviewResult] = await Promise.all([
+          supabase
+            .from("business_marketing_content")
+            .select(
+              "id, title, platform, stage, overall_due_date, overall_completed_at, draft_due_date, draft_completed_at, review_due_date, review_completed_at, publish_at, published_at, archived_at, created_at, updated_at"
+            )
+            .eq("organization_id", organizationId),
+          supabase
+            .from("business_marketing_response_reviews")
+            .select("id, platform, engagement_baseline, reviewed_at")
+            .eq("organization_id", organizationId)
+            .order("reviewed_at", { ascending: false }),
+        ]);
+
+        if (contentResult.error) throw contentResult.error;
+        if (responseReviewResult.error) throw responseReviewResult.error;
 
         if (!mounted) return;
         setDigitalRows(rows);
+        setContentItems((contentResult.data ?? []) as MarketingContentItem[]);
+        setResponseReviews(
+          (responseReviewResult.data ?? []) as MarketingResponseReview[]
+        );
       } catch (error) {
         console.error("Failed to load Business Marketing metrics:", error);
 
         if (!mounted) return;
         setDigitalRows([]);
-        setLoadError("Marketing analytics could not be loaded.");
+        setContentItems([]);
+        setResponseReviews([]);
+        setLoadError("Marketing data could not be loaded.");
       } finally {
         if (mounted) setLoading(false);
       }
@@ -314,9 +400,38 @@ export default function BusinessMarketingPage() {
     [digitalRows]
   );
 
-  // Content workflow persistence does not exist for Business yet.
-  // Keep this truthful rather than manufacturing sample content.
-  const contentPipeline = useMemo<ContentItem[]>(() => [], []);
+  const activeContentCount = useMemo(
+    () =>
+      contentItems.filter(
+        (item) => item.stage !== "published" && item.archived_at === null
+      ).length,
+    [contentItems]
+  );
+
+  const publishedContentCount = useMemo(
+    () =>
+      contentItems.filter(
+        (item) => item.stage === "published" && item.archived_at === null
+      ).length,
+    [contentItems]
+  );
+
+  const openEngagementCount = useMemo(() => {
+    const latestReviewByPlatform = new Map<string, MarketingResponseReview>();
+
+    for (const review of responseReviews) {
+      if (!latestReviewByPlatform.has(review.platform)) {
+        latestReviewByPlatform.set(review.platform, review);
+      }
+    }
+
+    return platformMetrics.reduce((total, platform) => {
+      const storageKey = platform.key === "meta" ? "facebook" : platform.key;
+      const latestReview = latestReviewByPlatform.get(storageKey);
+      const baseline = toNumber(latestReview?.engagement_baseline);
+      return total + Math.max(0, platform.engagement - baseline);
+    }, 0);
+  }, [platformMetrics, responseReviews]);
 
   const topLine = useMemo(
     () =>
@@ -373,6 +488,112 @@ export default function BusinessMarketingPage() {
   );
 
   const hasAnalytics = platformMetrics.length > 0;
+
+  function exportAnalyticsCsv() {
+    downloadCsv(
+      `aether-marketing-analytics-${new Date().toISOString().slice(0, 10)}.csv`,
+      ["Date", "Platform", "Impressions", "Engagement", "Spend", "CTR", "Positive Sentiment", "Negative Sentiment"],
+      digitalRows.map((row) => [
+        row.created_at,
+        row.platform,
+        row.impressions,
+        row.engagement,
+        row.spend,
+        row.ctr,
+        row.positive_sentiment,
+        row.negative_sentiment,
+      ])
+    );
+  }
+
+  async function exportContentHistoryCsv() {
+    try {
+      const contextResponse = await fetch("/api/auth/current-context", {
+        method: "GET",
+        credentials: "include",
+        cache: "no-store",
+      });
+
+      if (!contextResponse.ok) {
+        throw new Error("Could not load the current organization.");
+      }
+
+      const context = await contextResponse.json();
+      const organizationId =
+        context?.organization?.id ?? context?.membership?.organization_id ?? "";
+
+      if (!organizationId) {
+        throw new Error("No active organization is available.");
+      }
+
+      const supabase = createClient();
+      const [publishedResult, archivedResult] = await Promise.all([
+        supabase
+          .from("business_marketing_content")
+          .select("*")
+          .eq("organization_id", organizationId)
+          .eq("stage", "published")
+          .is("archived_at", null)
+          .order("published_at", { ascending: false, nullsFirst: false }),
+        supabase
+          .from("business_marketing_content")
+          .select("*")
+          .eq("organization_id", organizationId)
+          .not("archived_at", "is", null)
+          .order("archived_at", { ascending: false, nullsFirst: false }),
+      ]);
+
+      if (publishedResult.error) throw publishedResult.error;
+      if (archivedResult.error) throw archivedResult.error;
+
+      const historyItems = [
+        ...((publishedResult.data ?? []) as MarketingContentItem[]),
+        ...((archivedResult.data ?? []) as MarketingContentItem[]),
+      ].sort((a, b) => {
+        const aDate = a.published_at ?? a.archived_at ?? a.updated_at;
+        const bDate = b.published_at ?? b.archived_at ?? b.updated_at;
+        return new Date(bDate).getTime() - new Date(aDate).getTime();
+      });
+
+      downloadCsv(
+        `aether-marketing-content-history-${new Date().toISOString().slice(0, 10)}.csv`,
+        [
+          "Title",
+          "Platform",
+          "Stage",
+          "Overall Due",
+          "Overall Completed",
+          "Draft Due",
+          "Draft Completed",
+          "Review Due",
+          "Review Completed",
+          "Scheduled Publish",
+          "Published",
+          "Archived",
+          "Created",
+          "Updated",
+        ],
+        historyItems.map((item) => [
+          item.title,
+          item.platform,
+          item.stage,
+          item.overall_due_date,
+          item.overall_completed_at,
+          item.draft_due_date,
+          item.draft_completed_at,
+          item.review_due_date,
+          item.review_completed_at,
+          item.publish_at,
+          item.published_at,
+          item.archived_at,
+          item.created_at,
+          item.updated_at,
+        ])
+      );
+    } catch (error) {
+      console.error("Failed to export Marketing content history:", error);
+    }
+  }
 
   const stats = [
     {
@@ -498,26 +719,52 @@ export default function BusinessMarketingPage() {
 
       {!hasAnalytics ? (
         <section className="rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
-          <div className="flex items-start gap-4">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white">
-              <BarChart3 className="h-5 w-5 text-slate-600" />
-            </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                Marketing analytics
-              </p>
-              <h2 className="mt-1 text-lg font-semibold text-slate-950">
-                No Marketing metrics connected yet
-              </h2>
-              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-                This organization does not currently have Marketing analytics
-                available through Aether&apos;s shared analytics layer. When
-                real platform data is connected or imported, this command
-                center will populate from those records.
-              </p>
-            </div>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+              Marketing Activity
+            </p>
+            <h2 className="mt-1 text-lg font-semibold text-slate-900">
+              Workflow activity at a glance
+            </h2>
           </div>
-        </section>
+
+          <Link
+            href="/business/marketing/focus"
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
+          >
+            Open Marketing Focus
+            <Zap className="h-4 w-4" />
+          </Link>
+        </div>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+              Active Content
+            </p>
+            <p className="mt-1 text-lg font-semibold text-slate-950">
+              {activeContentCount.toLocaleString()}
+            </p>
+          </div>
+          <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+              Open Engagements
+            </p>
+            <p className="mt-1 text-lg font-semibold text-slate-950">
+              {openEngagementCount.toLocaleString()}
+            </p>
+          </div>
+          <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+              Completed Posts
+            </p>
+            <p className="mt-1 text-lg font-semibold text-slate-950">
+              {publishedContentCount.toLocaleString()}
+            </p>
+          </div>
+        </div>
+      </section>
       ) : null}
 
       <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
@@ -568,40 +815,143 @@ export default function BusinessMarketingPage() {
             </p>
           </div>
         ) : (
-          <div className="mt-7">
-            <div className="flex h-64 items-end gap-2 overflow-x-auto border-b border-slate-200 pb-1">
-              {chartData.map((point, index) => {
-                const value = point[trendView];
-                const height = Math.max((value / chartMax) * 100, value > 0 ? 4 : 0);
+          <div className="mt-7 rounded-2xl border border-slate-200 bg-slate-50/70 px-5 pb-5 pt-6">
+            <div className="relative h-64 overflow-hidden">
+              <div className="absolute inset-x-0 top-[20%] border-t border-dashed border-slate-200" />
+              <div className="absolute inset-x-0 top-[40%] border-t border-dashed border-slate-200" />
+              <div className="absolute inset-x-0 top-[60%] border-t border-dashed border-slate-200" />
+              <div className="absolute inset-x-0 top-[80%] border-t border-dashed border-slate-200" />
 
-                return (
-                  <div
-                    key={`${point.label}-${index}`}
-                    className="flex min-w-12 flex-1 flex-col items-center justify-end gap-2"
-                  >
-                    <span className="text-[10px] font-medium text-slate-500">
-                      {formatTrendValue(trendView, value)}
-                    </span>
-                    <div
-                      className="w-full max-w-12 rounded-t-md bg-slate-800 transition-all"
-                      style={{ height: `${height}%` }}
-                      title={`${point.label}: ${formatTrendValue(
-                        trendView,
-                        value
-                      )}`}
-                    />
-                  </div>
-                );
-              })}
+              <svg
+                viewBox="0 0 1000 260"
+                preserveAspectRatio="none"
+                className="absolute inset-0 h-full w-full"
+                role="img"
+                aria-label={`${trendView} trend over time`}
+              >
+                <defs>
+                  <linearGradient id="businessMarketingTrendFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="currentColor" stopOpacity="0.16" />
+                    <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+
+                {(() => {
+                  const points = chartData.map((point, index) => {
+                    const x =
+                      chartData.length === 1
+                        ? 500
+                        : 40 + (index / (chartData.length - 1)) * 920;
+                    const normalized = point[trendView] / chartMax;
+                    const y = 220 - normalized * 170;
+
+                    return {
+                      x,
+                      y,
+                      label: point.label,
+                      value: point[trendView],
+                    };
+                  });
+
+                  if (points.length === 1) {
+                    const only = points[0];
+
+                    return (
+                      <>
+                        <path
+                          d={`M 40 220 L ${only.x} ${only.y} L 960 ${only.y} L 960 220 Z`}
+                          fill="url(#businessMarketingTrendFill)"
+                          className="text-slate-800"
+                        />
+                        <path
+                          d={`M 40 220 L ${only.x} ${only.y} L 960 ${only.y}`}
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                          strokeLinecap="round"
+                          className="text-slate-800"
+                        />
+                        <circle
+                          cx={only.x}
+                          cy={only.y}
+                          r="6"
+                          fill="currentColor"
+                          className="text-slate-950"
+                        >
+                          <title>{`${only.label}: ${formatTrendValue(
+                            trendView,
+                            only.value
+                          )}`}</title>
+                        </circle>
+                      </>
+                    );
+                  }
+
+                  const linePath = points.reduce((path, point, index) => {
+                    if (index === 0) return `M ${point.x} ${point.y}`;
+
+                    const previous = points[index - 1];
+                    const controlX = (previous.x + point.x) / 2;
+
+                    return `${path} C ${controlX} ${previous.y}, ${controlX} ${point.y}, ${point.x} ${point.y}`;
+                  }, "");
+
+                  const areaPath = `${linePath} L ${points[points.length - 1].x} 220 L ${points[0].x} 220 Z`;
+
+                  return (
+                    <>
+                      <path
+                        d={areaPath}
+                        fill="url(#businessMarketingTrendFill)"
+                        className="text-slate-800"
+                      />
+                      <path
+                        d={linePath}
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="text-slate-800"
+                      />
+                      {points.map((point, index) => (
+                        <circle
+                          key={`${point.label}-${index}-point`}
+                          cx={point.x}
+                          cy={point.y}
+                          r="5"
+                          fill="currentColor"
+                          className="text-slate-950"
+                        >
+                          <title>{`${point.label}: ${formatTrendValue(
+                            trendView,
+                            point.value
+                          )}`}</title>
+                        </circle>
+                      ))}
+                    </>
+                  );
+                })()}
+              </svg>
             </div>
 
-            <div className="mt-2 flex gap-2 overflow-x-auto">
+            <div
+              className="mt-3 grid gap-2"
+              style={{
+                gridTemplateColumns: `repeat(${Math.max(
+                  chartData.length,
+                  1
+                )}, minmax(0, 1fr))`,
+              }}
+            >
               {chartData.map((point, index) => (
-                <div
-                  key={`${point.label}-label-${index}`}
-                  className="min-w-12 flex-1 text-center text-[10px] text-slate-500"
-                >
-                  {point.label}
+                <div key={`${point.label}-${index}-label`} className="text-center">
+                  <p className="text-[10px] font-medium uppercase tracking-wide text-slate-500">
+                    {point.label}
+                  </p>
+                  <p className="mt-1 text-[10px] font-semibold text-slate-900">
+                    {formatTrendValue(trendView, point[trendView])}
+                  </p>
                 </div>
               ))}
             </div>
@@ -711,18 +1061,53 @@ export default function BusinessMarketingPage() {
             <Clock3 className="h-5 w-5 text-slate-500" />
           </div>
 
-          <div className="mt-5">
-            {contentPipeline.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6">
-                <p className="text-sm font-semibold text-slate-900">
-                  No content workflow connected yet
-                </p>
-                <p className="mt-2 text-sm leading-6 text-slate-500">
-                  Drafting, review, scheduling, ownership, and publishing state
-                  will live here once Business content persistence exists.
-                </p>
-              </div>
-            ) : null}
+          <div className="mt-5 space-y-2">
+            {[
+              {
+                lane: "Lane 1",
+                title: "Content",
+                value: `${activeContentCount.toLocaleString()} open ${
+                  activeContentCount === 1 ? "task" : "tasks"
+                }`,
+              },
+              {
+                lane: "Lane 2",
+                title: "Spend",
+                value: "Check spend",
+              },
+              {
+                lane: "Lane 3",
+                title: "Audience Response",
+                value: `${openEngagementCount.toLocaleString()} open ${
+                  openEngagementCount === 1 ? "engagement" : "engagements"
+                }`,
+              },
+              {
+                lane: "Lane 4",
+                title: "History",
+                value: `${publishedContentCount.toLocaleString()} completed ${
+                  publishedContentCount === 1 ? "post" : "posts"
+                }`,
+              },
+            ].map((item) => (
+              <Link
+                key={item.lane}
+                href="/business/marketing/focus"
+                className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 transition hover:border-slate-300 hover:bg-slate-100"
+              >
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                    {item.lane}
+                  </p>
+                  <p className="mt-0.5 text-sm font-semibold text-slate-900">
+                    {item.title}
+                  </p>
+                </div>
+                <span className="text-sm font-semibold text-slate-950">
+                  {item.value}
+                </span>
+              </Link>
+            ))}
           </div>
         </div>
 
@@ -762,7 +1147,7 @@ export default function BusinessMarketingPage() {
               <div className="flex items-center justify-between gap-3">
                 <span className="text-sm text-slate-600">Content items</span>
                 <span className="font-semibold text-slate-950">
-                  {contentPipeline.length}
+                  {contentItems.length}
                 </span>
               </div>
             </div>
@@ -777,16 +1162,44 @@ export default function BusinessMarketingPage() {
       </section>
 
       <section className="rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
-        <h2 className="text-lg font-semibold text-slate-900">
-          Marketing reflects real performance. It does not invent it.
-        </h2>
-        <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">
-          Platform metrics are loaded through Aether&apos;s existing
-          organization-scoped analytics layer. Content workflow remains empty
-          until real persistence exists. Marketing Focus will handle actionable
-          pressure separately from this command-center view.
-        </p>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+              Data Export
+            </p>
+            <h2 className="mt-1 text-lg font-semibold text-slate-900">
+              Take your Marketing data with you.
+            </h2>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+              Export the Marketing analytics Aether currently knows or download
+              the completed content history created through Marketing Focus.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={exportAnalyticsCsv}
+              disabled={digitalRows.length === 0}
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Download className="h-4 w-4" />
+              Export Analytics CSV
+            </button>
+
+            <button
+              type="button"
+              onClick={exportContentHistoryCsv}
+              disabled={!contentItems.some((item) => item.stage === "published" || item.archived_at !== null)}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-950 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Download className="h-4 w-4" />
+              Export Content History CSV
+            </button>
+          </div>
+        </div>
       </section>
+
     </div>
   );
 }

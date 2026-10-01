@@ -46,16 +46,54 @@ export async function POST(req: Request) {
       );
     }
 
+    const activeOrganizationId =
+      cookieStore.get("active_organization_id")?.value ?? null;
+
+    if (!activeOrganizationId) {
+      return NextResponse.json(
+        { success: false, error: "No active organization selected." },
+        { status: 400 }
+      );
+    }
+
+    const { data: appUser, error: appUserError } = await supabase
+      .from("users")
+      .select("id, is_active")
+      .eq("auth_id", user.id)
+      .maybeSingle();
+
+    if (appUserError) {
+      return NextResponse.json(
+        { success: false, error: appUserError.message },
+        { status: 500 }
+      );
+    }
+
+    if (!appUser || appUser.is_active === false) {
+      return NextResponse.json(
+        { success: false, error: "Aether user profile is unavailable." },
+        { status: 403 }
+      );
+    }
+
     const { data: member, error: memberError } = await supabase
       .from("organization_members")
       .select("organization_id")
-      .eq("user_id", user.id)
+      .eq("user_id", appUser.id)
+      .eq("organization_id", activeOrganizationId)
       .maybeSingle();
 
-    if (memberError || !member?.organization_id) {
+    if (memberError) {
       return NextResponse.json(
-        { success: false, error: "No active organization found." },
-        { status: 400 }
+        { success: false, error: memberError.message },
+        { status: 500 }
+      );
+    }
+
+    if (!member?.organization_id) {
+      return NextResponse.json(
+        { success: false, error: "No membership found for active organization." },
+        { status: 403 }
       );
     }
 

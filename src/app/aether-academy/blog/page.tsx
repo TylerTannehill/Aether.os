@@ -1,6 +1,22 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 
 export default function BlogPage() {
+  const [lyraClicks, setLyraClicks] = useState(0);
+  const [lyraOpen, setLyraOpen] = useState(false);
+
+  const handleLyraClick = () => {
+    const next = lyraClicks + 1;
+    if (next >= 3) {
+      setLyraOpen(true);
+      setLyraClicks(0);
+      return;
+    }
+    setLyraClicks(next);
+  };
+
   return (
     <main className="min-h-screen bg-[linear-gradient(180deg,#10233e_0%,#0a1728_45%,#07111f_100%)] text-white">
       <div className="mx-auto max-w-4xl px-6 py-16 lg:py-10">
@@ -10,6 +26,85 @@ export default function BlogPage() {
         >
           ← Back to Aether Academy
         </Link>
+
+        <details className="group mt-10 rounded-2xl border border-white/10 bg-[#10233e]/75 shadow-xl shadow-black/20 lg:mt-7 lg:rounded-xl">
+          <summary className="cursor-pointer list-none px-10 py-7 text-lg font-semibold text-white [&::-webkit-details-marker]:hidden lg:px-7 lg:py-5 lg:text-base">
+            <span className="flex items-center justify-between gap-4 lg:gap-3">
+              <span>October 1st 2026 - Note from Team Aether</span>
+              <span aria-hidden="true" className="text-violet-300 transition group-open:rotate-180">⌄</span>
+            </span>
+          </summary>
+          <div className="border-t border-white/10 px-10 pb-10 pt-8 lg:px-7 lg:pb-7 lg:pt-6">
+            <div className="space-y-6 text-slate-300 leading-8 lg:space-y-4 lg:text-sm lg:leading-6">
+              <h1 className="text-5xl font-bold text-white lg:text-4xl">One Month In</h1>
+
+              <p>
+                A month ago, Aether launched. After spending so long building the product, we expected the first month to be about improving it, talking to campaigns, and slowly figuring out what came next. All of those things happened, but September also taught us something we probably should have known already: building something and figuring out how to get people to notice it are two completely different jobs.
+              </p>
+
+              <p>
+                Starting a marketing engine from zero has been an interesting experience. There is no existing audience waiting for you, no years of brand recognition working in the background, and very little context behind the numbers you're watching. You send something, see what happens, adjust, and try again. Sometimes people respond. Sometimes they don't. Sometimes a number moves and you spend entirely too long trying to figure out why.
+              </p>
+
+              <p>
+                Over the course of the month, we've started learning the difference between simply creating activity and actually learning from it. More isn't always better. Sometimes the message needs to change. Sometimes the audience does. Sometimes the best decision is to leave everything alone for a moment and see what happens without you touching it.
+              </p>
+
+              <p>
+                In a strange way, we've found ourselves applying the same philosophy we built into Aether to the process of building the company around it: <strong className="text-white">Input. Interpret. Structure. Assign. Execute. Feedback.</strong> The feedback part matters. September was largely about learning to listen to it.
+              </p>
+
+              <h2 className="pt-6 text-3xl font-semibold text-white lg:pt-4 lg:text-2xl">Fine-Tuning the Machine</h2>
+
+              <p>
+                While we've been learning how to introduce Aether to the world, we've also continued working on the product itself. Launch didn't magically turn Aether into something finished. It gave us a much better perspective on what deserved attention.
+              </p>
+
+              <p>
+                September included performance improvements, workflow refinements, analytics work, continued integration development, mobile work, and plenty of smaller changes that probably aren't interesting enough to deserve their own paragraph. The goal hasn't been to endlessly add features. It's been to make the machine we already built faster, clearer, more reliable, and easier to use.
+              </p>
+
+              <p>
+                That distinction matters to us. One of the easiest traps in software is confusing <em>more</em> with <em>better</em>. Our first month reinforced something we've believed for a while: Aether doesn't need to do everything. It needs to do the right things well.
+              </p>
+
+              <h2 className="pt-6 text-3xl font-semibold text-white lg:pt-4 lg:text-2xl">Something Else Is Happening</h2>
+
+              <p>
+                September also ended a little differently than we expected. A conversation inside Team Aether turned into an idea. The idea turned into a question. The question survived long enough that somebody eventually opened a laptop—which, historically, is when things around here tend to get dangerous.
+              </p>
+
+              <p>
+                We're going to leave it there for now. What we can say is that we've been busy, we're excited about where the idea is going, and it has moved from conversation to something real considerably faster than any of us expected.
+              </p>
+
+              <p>You'll hear more about that soon.</p>
+
+              <p>
+                For now, Aether Political enters its second month stronger than it entered its first. We have plenty left to learn about marketing it, selling it, and growing the company around it. We also have a better machine than we had thirty days ago and thirty days of real experience we didn't have at launch.
+              </p>
+
+              <p>That's enough progress for one month. Now we'll see what October brings.</p>
+
+              <div className="rounded-2xl border border-violet-400/20 bg-gradient-to-r from-violet-400/10 to-transparent p-6 lg:rounded-xl lg:p-[18px]">
+                <p className="text-2xl font-black text-white lg:text-xl">One month down.</p>
+                <p className="mt-4 text-xl font-semibold text-white lg:mt-3 lg:text-lg">Clarity. Focus. Execution.</p>
+              </div>
+
+              <p className="font-semibold text-white">
+                — Team{" "}
+                <button
+                  type="button"
+                  onClick={handleLyraClick}
+                  className="font-semibold text-white hover:text-white focus:outline-none"
+                  aria-label="Aether"
+                >
+                  Aether
+                </button>
+              </p>
+            </div>
+          </div>
+        </details>
 
         <details className="group mt-10 rounded-2xl border border-white/10 bg-[#10233e]/75 shadow-xl shadow-black/20 lg:mt-7 lg:rounded-xl">
           <summary className="cursor-pointer list-none px-10 py-7 text-lg font-semibold text-white [&::-webkit-details-marker]:hidden lg:px-7 lg:py-5 lg:text-base">
@@ -240,6 +335,35 @@ export default function BlogPage() {
         </details>
 
       </div>
+        {lyraOpen && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-6 backdrop-blur-sm"
+            onClick={() => setLyraOpen(false)}
+          >
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="lyra-title"
+              className="w-full max-w-lg rounded-2xl border border-violet-400/30 bg-[#0d1b31] p-8 text-center shadow-2xl shadow-violet-950/40"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <button
+                type="button"
+                onClick={() => setLyraOpen(false)}
+                className="float-right text-xl text-slate-400 transition hover:text-white"
+                aria-label="Close"
+              >
+                ×
+              </button>
+              <div className="pt-6">
+                <p id="lyra-title" className="text-xl font-semibold leading-8 text-white">
+                  We teased one idea here, but another has always been here.
+                </p>
+                <p className="mt-6 text-lg font-semibold text-violet-300">— Lyra</p>
+              </div>
+            </div>
+          </div>
+        )}
     </main>
   );
 }
