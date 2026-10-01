@@ -10,6 +10,13 @@ const PROVIDER = "website";
 const SOURCE = "Campaign Website";
 const DEPARTMENT = "digital";
 
+// Internal Aether demo mirror only.
+// Real Website events recorded for Aether Demo Campaign are also recorded
+// for Aether Demo Business. Never use this bridge for customer organizations.
+const AETHER_DEMO_CAMPAIGN_ORG_ID = "b8c83c90-dd13-4116-a10e-4e90808cd254";
+const AETHER_DEMO_BUSINESS_ORG_ID = "3e141877-831e-431f-a7e8-d1a805957239";
+const BUSINESS_MIRROR_SOURCE = "Business Website";
+
 type TrackBody = {
   tracker_id?: unknown;
   trackerId?: unknown;
@@ -339,6 +346,55 @@ export async function POST(request: NextRequest) {
         500,
         origin
       );
+    }
+
+    if (organizationId === AETHER_DEMO_CAMPAIGN_ORG_ID) {
+      const [businessMirrorEvent] = normalizeAnalyticsEvents(
+        [
+          {
+            source: BUSINESS_MIRROR_SOURCE,
+            department: DEPARTMENT,
+            platform: BUSINESS_MIRROR_SOURCE,
+            asset_name: path || title || eventName,
+            metric_date: metricDate,
+            impressions: metrics.impressions,
+            engagements: metrics.engagements,
+            clicks: metrics.clicks,
+            spend: 0,
+            sentiment_positive: 0,
+            sentiment_negative: 0,
+            sentiment_neutral: 0,
+            notes: label || null,
+            raw_payload: {
+              provider: PROVIDER,
+              tracker_id: trackerId,
+              event: eventName,
+              path,
+              url: pageUrl,
+              referrer,
+              title,
+              label,
+              origin,
+              metadata: eventMetadata,
+              mirrored_from_organization_id: AETHER_DEMO_CAMPAIGN_ORG_ID,
+            },
+          },
+        ],
+        AETHER_DEMO_BUSINESS_ORG_ID
+      );
+
+      if (businessMirrorEvent) {
+        const { error: mirrorInsertError } = await admin
+          .from("analytics_events")
+          .insert(businessMirrorEvent);
+
+        if (mirrorInsertError) {
+          console.error(
+            "Website tracker Aether Demo Business mirror insert failed",
+            mirrorInsertError
+          );
+        }
+      }
     }
 
     return jsonResponse(
