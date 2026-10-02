@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { supabase } from "../../../../lib/supabase";
 import {
   ArrowRight,
   Clock3,
@@ -14,7 +16,142 @@ import {
 const laneCard =
   "rounded-3xl border border-slate-200 bg-white p-5 shadow-sm lg:rounded-2xl lg:p-4";
 
+type CrmWorkList = {
+  id: string;
+  name: string;
+  due_date: string | null;
+};
+
+type CrmFollowUp = {
+  id: string;
+  contact_id: string;
+  department: "crm" | "dispatch" | "inventory";
+  follow_up_date: string;
+  action:
+    | "Talked on phone"
+    | "No answer"
+    | "Emailed"
+    | "Responded to Email"
+    | "Texted"
+    | "Responded to text";
+};
+
+type CrmFollowUpContact = {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  company: string | null;
+};
+
 export default function BusinessCrmFocusPage() {
+  const [crmLists, setCrmLists] = useState<CrmWorkList[]>([]);
+  const [listsLoading, setListsLoading] = useState(true);
+  const [crmFollowUps, setCrmFollowUps] = useState<CrmFollowUp[]>([]);
+  const [followUpContacts, setFollowUpContacts] = useState<Record<string, CrmFollowUpContact>>({});
+  const [followUpsLoading, setFollowUpsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadCrmLists() {
+      setListsLoading(true);
+
+      try {
+        const contextResponse = await fetch("/api/auth/current-context", {
+          method: "GET",
+          credentials: "include",
+        });
+        const context = await contextResponse.json().catch(() => null);
+
+        if (!contextResponse.ok || !context?.organization?.id) {
+          setCrmLists([]);
+          return;
+        }
+
+        const { data, error } = await supabase
+          .from("business_lists")
+          .select("id, name, due_date")
+          .eq("organization_id", context.organization.id)
+          .eq("department", "crm")
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+
+        setCrmLists((data as CrmWorkList[]) || []);
+      } catch {
+        setCrmLists([]);
+      } finally {
+        setListsLoading(false);
+      }
+    }
+
+    loadCrmLists();
+  }, []);
+
+  useEffect(() => {
+    async function loadCrmFollowUps() {
+      setFollowUpsLoading(true);
+
+      try {
+        const contextResponse = await fetch("/api/auth/current-context", {
+          method: "GET",
+          credentials: "include",
+        });
+        const context = await contextResponse.json().catch(() => null);
+
+        if (!contextResponse.ok || !context?.organization?.id) {
+          setCrmFollowUps([]);
+          setFollowUpContacts({});
+          return;
+        }
+
+        const { data: followUpData, error: followUpError } = await supabase
+          .from("business_follow_ups")
+          .select("id, contact_id, department, follow_up_date, action")
+          .eq("organization_id", context.organization.id)
+          .eq("department", "crm")
+          .order("follow_up_date", { ascending: true })
+          .order("created_at", { ascending: true });
+
+        if (followUpError) throw followUpError;
+
+        const loadedFollowUps = (followUpData as CrmFollowUp[]) || [];
+        setCrmFollowUps(loadedFollowUps);
+
+        const contactIds = Array.from(
+          new Set(loadedFollowUps.map((followUp) => followUp.contact_id)),
+        );
+
+        if (contactIds.length === 0) {
+          setFollowUpContacts({});
+          return;
+        }
+
+        const { data: contactData, error: contactError } = await supabase
+          .from("business_contacts")
+          .select("id, first_name, last_name, company")
+          .eq("organization_id", context.organization.id)
+          .in("id", contactIds);
+
+        if (contactError) throw contactError;
+
+        const contactsById = ((contactData as CrmFollowUpContact[]) || []).reduce<
+          Record<string, CrmFollowUpContact>
+        >((current, contact) => {
+          current[contact.id] = contact;
+          return current;
+        }, {});
+
+        setFollowUpContacts(contactsById);
+      } catch {
+        setCrmFollowUps([]);
+        setFollowUpContacts({});
+      } finally {
+        setFollowUpsLoading(false);
+      }
+    }
+
+    loadCrmFollowUps();
+  }, []);
+
   return (
     <div className="space-y-8 pb-10 lg:space-y-6 lg:pb-8">
       <section className="rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-6 text-white shadow-sm lg:rounded-2xl lg:p-[18px]">
@@ -99,14 +236,43 @@ export default function BusinessCrmFocusPage() {
             <Phone className="h-5 w-5 text-slate-500 lg:h-4 lg:w-4" />
           </div>
 
-          <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
-            <p className="text-sm font-medium text-slate-700 lg:text-[11px]">
-              No executable lists are connected yet.
-            </p>
-            <p className="mt-1 text-xs leading-5 text-slate-500 lg:text-[9px]">
-              Lists ready for CRM execution will appear here once Business list data
-              is connected.
-            </p>
+          <div className="space-y-2">
+            {listsLoading ? (
+              <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
+                <p className="text-sm font-medium text-slate-700 lg:text-[11px]">
+                  Loading CRM lists...
+                </p>
+              </div>
+            ) : crmLists.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
+                <p className="text-sm font-medium text-slate-700 lg:text-[11px]">
+                  No CRM lists are ready to work.
+                </p>
+                <p className="mt-1 text-xs leading-5 text-slate-500 lg:text-[9px]">
+                  CRM-tagged Business lists will appear here when they exist.
+                </p>
+              </div>
+            ) : (
+              crmLists.map((list) => (
+                <Link
+                  key={list.id}
+                  href={`/business/lists/${list.id}`}
+                  className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 transition hover:border-slate-300 hover:bg-slate-100 lg:rounded-xl lg:p-3"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-slate-900 lg:text-[11px]">
+                      {list.name}
+                    </p>
+                    <p className="mt-1 text-xs text-slate-500 lg:text-[9px]">
+                      {list.due_date
+                        ? `Due ${new Date(`${list.due_date}T00:00:00`).toLocaleDateString()}`
+                        : "No due date"}
+                    </p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 shrink-0 text-slate-500 lg:h-3.5 lg:w-3.5" />
+                </Link>
+              ))
+            )}
           </div>
 
           <Link
@@ -131,14 +297,63 @@ export default function BusinessCrmFocusPage() {
             <Clock3 className="h-5 w-5 text-slate-500 lg:h-4 lg:w-4" />
           </div>
 
-          <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
-            <p className="text-sm font-medium text-slate-700 lg:text-[11px]">
-              No follow-ups are connected yet.
-            </p>
-            <p className="mt-1 text-xs leading-5 text-slate-500 lg:text-[9px]">
-              Follow-up obligations created by real customer interactions will appear
-              here when the CRM relationship layer is connected.
-            </p>
+          <div className="space-y-2">
+            {followUpsLoading ? (
+              <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
+                <p className="text-sm font-medium text-slate-700 lg:text-[11px]">
+                  Loading CRM follow-ups...
+                </p>
+              </div>
+            ) : crmFollowUps.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
+                <p className="text-sm font-medium text-slate-700 lg:text-[11px]">
+                  No CRM follow-ups are scheduled.
+                </p>
+                <p className="mt-1 text-xs leading-5 text-slate-500 lg:text-[9px]">
+                  CRM follow-up obligations created on Contact Profiles will appear here.
+                </p>
+              </div>
+            ) : (
+              crmFollowUps.map((followUp) => {
+                const followUpContact = followUpContacts[followUp.contact_id];
+                const contactName = followUpContact
+                  ? `${followUpContact.first_name || ""} ${followUpContact.last_name || ""}`.trim() ||
+                    "Unnamed Contact"
+                  : "Contact";
+
+                return (
+                  <Link
+                    key={followUp.id}
+                    href={`/business/contacts/${followUp.contact_id}`}
+                    className="block rounded-2xl border border-slate-200 bg-slate-50 p-4 transition hover:border-slate-300 hover:bg-slate-100 lg:rounded-xl lg:p-3"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-slate-900 lg:text-[11px]">
+                          {contactName}
+                        </p>
+                        <p className="mt-1 text-xs font-medium text-slate-600 lg:text-[9px]">
+                          {followUp.action}
+                        </p>
+                        {followUpContact?.company ? (
+                          <p className="mt-1 truncate text-xs text-slate-500 lg:text-[9px]">
+                            {followUpContact.company}
+                          </p>
+                        ) : null}
+                      </div>
+                      <div className="shrink-0 text-right">
+                        <p className="text-xs font-semibold text-slate-700 lg:text-[9px]">
+                          {new Date(`${followUp.follow_up_date}T00:00:00`).toLocaleDateString()}
+                        </p>
+                        <p className="mt-1 text-xs text-slate-400 lg:text-[8px]">
+                          CRM
+                        </p>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })
+            )}
           </div>
 
           <Link
