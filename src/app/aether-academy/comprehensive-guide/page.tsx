@@ -402,6 +402,7 @@ export default function AetherComprehensiveGuidePage() {
                 ) : id === "aether-mobile" ? (
                   <div className="mt-8 space-y-8 leading-8">
                     <p className="text-lg leading-8">Campaign work doesn't stop when you leave the office. Aether Mobile extends the Campaign Operating System beyond the desktop, allowing campaign teams to stay connected and execute work wherever it happens.</p>
+                    <p className="leading-8"><strong className="text-white">Aether Mobile is available on the Apple App Store and Google Play</strong>, giving authorized campaign staff and volunteers direct mobile access to their Aether workspace on iOS and Android.</p>
 
                     <div>
                       <h3 className="text-2xl font-bold text-white">Built for Execution</h3>

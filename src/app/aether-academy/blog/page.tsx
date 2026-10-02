@@ -86,6 +86,19 @@ export default function BlogPage() {
 
               <p>That's enough progress for one month. Now we'll see what October brings.</p>
 
+              <div className="rounded-2xl border border-violet-400/20 bg-violet-400/5 p-6 lg:rounded-xl lg:p-[18px]">
+                <p className="text-xl font-semibold text-white lg:text-lg">Oh, and one more thing...</p>
+                <p className="mt-3">
+                  Aether Mobile is officially available on both the Apple App Store and Google Play.
+                </p>
+                <p className="mt-3">
+                  Getting there was, somehow, more of a headache than we expected. Between store requirements, screenshots, metadata, builds, reviews, resubmissions, and the occasional moment of wondering whether we had angered a very specific technology deity, the process turned into its own little adventure.
+                </p>
+                <p className="mt-3">
+                  But it's done. Aether Mobile is now available through the same app stores people already use every day—which feels like a pretty good way to start month two.
+                </p>
+              </div>
+
               <div className="rounded-2xl border border-violet-400/20 bg-gradient-to-r from-violet-400/10 to-transparent p-6 lg:rounded-xl lg:p-[18px]">
                 <p className="text-2xl font-black text-white lg:text-xl">One month down.</p>
                 <p className="mt-4 text-xl font-semibold text-white lg:mt-3 lg:text-lg">Clarity. Focus. Execution.</p>

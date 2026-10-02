@@ -30,11 +30,77 @@ export default function PatchNotesPage() {
           <p className="text-sm uppercase tracking-[0.2em] text-violet-300">
             Current Public Version
           </p>
-          <p className="mt-1 text-xl font-semibold text-white">Aether v1.6</p>
+          <p className="mt-1 text-xl font-semibold text-white">Aether v1.7</p>
           <p className="mt-1 text-slate-300">Live</p>
         </div>
 
         <details className="group mt-7 overflow-hidden rounded-2xl border border-violet-400/20 bg-[#10233e]/75 shadow-xl shadow-black/20 lg:rounded-xl" open>
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 transition hover:bg-white/[0.03] [&::-webkit-details-marker]:hidden lg:gap-3 lg:p-4">
+            <div>
+              <p className="text-sm uppercase tracking-[0.2em] text-violet-300">
+                October 2, 2026
+              </p>
+              <h2 className="mt-1 text-2xl font-semibold text-white">
+                Aether v1.7 Patch Update
+              </h2>
+              <p className="mt-1 text-sm text-slate-400">
+                Aether Mobile is now publicly available through the Apple App Store and Google Play.
+              </p>
+            </div>
+            <span className="shrink-0 text-2xl text-violet-300 transition-transform duration-200 group-open:rotate-180">
+              ↓
+            </span>
+          </summary>
+
+          <div className="border-t border-white/10 p-5 md:p-6 lg:p-5">
+            <section>
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-violet-300">
+                Public / Organization Update
+              </p>
+
+              <h3 className="mt-1 text-xl font-semibold text-white">
+                Aether Mobile — App Store &amp; Google Play Release
+              </h3>
+
+              <div className="mt-5 space-y-5 text-sm leading-6 text-slate-300 lg:mt-4 lg:space-y-4">
+                <div>
+                  <h4 className="text-base font-semibold text-white">Public Mobile Distribution</h4>
+                  <ul className="mt-1.5 space-y-0.5">
+                    <li>✓ Aether Mobile is now publicly available on the Apple App Store.</li>
+                    <li>✓ Aether Mobile is now publicly available on Google Play.</li>
+                    <li>✓ Campaign teams can install Aether Mobile through the standard iOS and Android store experience.</li>
+                    <li>✓ Direct Android APK distribution remains available as an alternate installation option.</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h4 className="text-base font-semibold text-white">Aether Mobile Access</h4>
+                  <ul className="mt-1.5 space-y-0.5">
+                    <li>✓ Mobile access continues to support campaign contact lookup and organized campaign lists.</li>
+                    <li>✓ Finance, Outreach, and Field workflows remain synchronized with the organization&apos;s Aether workspace.</li>
+                    <li>✓ Notes, dispositions, activity, and list progress can be recorded from mobile campaign workflows.</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h4 className="text-base font-semibold text-white">Public Website</h4>
+                  <ul className="mt-1.5 space-y-0.5">
+                    <li>✓ Added direct Apple App Store and Google Play download links to the Aether landing page.</li>
+                    <li>✓ Updated mobile download presentation with dedicated App Store and Google Play badges.</li>
+                    <li>✓ Retained the direct Android APK link in the site footer for alternate distribution.</li>
+                  </ul>
+                </div>
+              </div>
+            </section>
+
+            <div className="mt-7 border-t border-white/10 pt-5">
+              <p className="font-semibold text-white">Clarity. Focus. Execution.</p>
+              <p className="mt-1 text-slate-400">— Team Aether</p>
+            </div>
+          </div>
+        </details>
+
+        <details className="group mt-7 overflow-hidden rounded-2xl border border-violet-400/20 bg-[#10233e]/75 shadow-xl shadow-black/20 lg:rounded-xl">
           <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 transition hover:bg-white/[0.03] [&::-webkit-details-marker]:hidden lg:gap-3 lg:p-4">
             <div>
               <p className="text-sm uppercase tracking-[0.2em] text-violet-300">

@@ -8,7 +8,6 @@ import {
   Building2,
   CheckCircle2,
   Shield,
-  Smartphone,
   Users,
 } from "lucide-react";
 
@@ -173,18 +172,34 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
               <span>Enter Aether</span>
             </Link>
 
-            <a
-              href="https://github.com/TylerTannehill/Aether.os/releases/download/v1.0.0/aether-mobile.apk"
-              download
-              className="inline-flex w-[250px] items-center justify-center gap-2 rounded-2xl border border-violet-400/40 bg-violet-700/10 px-5 py-4 text-xs font-black uppercase tracking-[0.05em] text-white transition hover:border-violet-300/70 hover:bg-violet-600/20"
-            >
-              <Smartphone className="h-4 w-4" />
-              <span>Download Aether Mobile</span>
-            </a>
+            <div className="flex items-center justify-center gap-3">
+              <a
+                href="https://apps.apple.com/us/app/aether-mobile/id6814591434"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Download Aether Mobile on the App Store"
+                className="inline-flex transition hover:scale-[1.03] hover:opacity-90"
+              >
+                <img
+                  src="/apple-appstore.png"
+                  alt="Download on the App Store"
+                  className="h-[44px] w-auto object-contain"
+                />
+              </a>
 
-            <div className="max-w-[300px] text-center text-[11px] leading-5 text-slate-300">
-              <p>Android available now • iOS coming soon</p>
-              <p>Built for Finance &amp; Field teams.</p>
+              <a
+                href="https://play.google.com/store/apps/details?id=pro.aetheros.mobile"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Get Aether Mobile on Google Play"
+                className="inline-flex transition hover:scale-[1.03] hover:opacity-90"
+              >
+                <img
+                  src="/google-play.png"
+                  alt="Get it on Google Play"
+                  className="h-[44px] w-auto object-contain"
+                />
+              </a>
             </div>
             </div>
           </div>
@@ -563,7 +578,23 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
                 <Link href="/#top">Landing Page</Link>
                 <Link href="/campaign-directory">Campaign Directory</Link>
                 <Link href="/explore-abe">Explore Abe</Link>
-                <a href="https://github.com/TylerTannehill/Aether.os/releases/download/v1.0.0/aether-mobile.apk" download>Download Aether Mobile</a>
+                <a
+                  href="https://apps.apple.com/us/app/aether-mobile/id6814591434"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Apple App Store
+                </a>
+                <a
+                  href="https://play.google.com/store/apps/details?id=pro.aetheros.mobile"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Google Play Store
+                </a>
+                <a href="https://github.com/TylerTannehill/Aether.os/releases/download/v1.0.0/aether-mobile.apk" download>
+                  Legacy Mobile Download
+                </a>
                 <Link href="/aether-academy">Aether Academy</Link>
               </div>
             </div>
