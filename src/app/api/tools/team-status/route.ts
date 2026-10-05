@@ -128,6 +128,7 @@ export async function GET() {
     const members = (memberships || [])
       .map((membership) => ({
         id: String(membership.id),
+        user_id: String(membership.user_id),
         name: namesById.get(String(membership.user_id)) || "Team member",
         role: String(membership.role || membership.title || "Team member"),
         department: membership.department || null,

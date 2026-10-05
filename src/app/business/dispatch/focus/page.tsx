@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -28,6 +28,11 @@ type AssignmentFocusItem = {
   priority: FocusPriority;
 };
 
+type DispatchWorker = {
+  id: string;
+  name: string;
+};
+
 type RoutingFocusItem = {
   id: string;
   jobId: string;
@@ -45,7 +50,7 @@ type ExecutionFocusItem = {
   customerName: string | null;
   address: string;
   assigneeName: string | null;
-  status: "scheduled" | "in_progress";
+  status: "ready" | "scheduled" | "in_progress";
   priority: FocusPriority;
 };
 
@@ -91,12 +96,459 @@ function EmptyLane({
 }
 
 export default function BusinessDispatchFocusPage() {
-  // Dispatch Focus is intentionally empty until real Business Dispatch
-  // persistence exists. These queues must eventually be derived from real
-  // jobs/work orders rather than seeded or manufactured UI data.
-  const [assignmentItems] = useState<AssignmentFocusItem[]>([]);
-  const [routingItems] = useState<RoutingFocusItem[]>([]);
-  const [executionItems] = useState<ExecutionFocusItem[]>([]);
+  const [assignmentItems, setAssignmentItems] = useState<AssignmentFocusItem[]>([]);
+  const [routingItems, setRoutingItems] = useState<RoutingFocusItem[]>([]);
+  const [executionItems, setExecutionItems] = useState<ExecutionFocusItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [buildingRoute, setBuildingRoute] = useState(false);
+  const [routingJobId, setRoutingJobId] = useState<string | null>(null);
+  const [routeActionError, setRouteActionError] = useState<string | null>(null);
+  const [routeActionSuccess, setRouteActionSuccess] = useState<string | null>(null);
+  const [workers, setWorkers] = useState<DispatchWorker[]>([]);
+  const [assigningJobId, setAssigningJobId] = useState<string | null>(null);
+  const [selectedWorkerByJob, setSelectedWorkerByJob] = useState<Record<string, string>>({});
+  const [assignmentActionError, setAssignmentActionError] = useState<string | null>(null);
+  const [executingJobId, setExecutingJobId] = useState<string | null>(null);
+  const [executionActionError, setExecutionActionError] = useState<string | null>(null);
+  const [executionActionSuccess, setExecutionActionSuccess] = useState<string | null>(null);
+
+  async function loadFocusWork() {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const contextResponse = await fetch("/api/auth/current-context", {
+        cache: "no-store",
+      });
+
+      if (!contextResponse.ok) {
+        throw new Error("Unable to load the active organization.");
+      }
+
+      const context = await contextResponse.json();
+      const organizationId =
+        context?.organization?.id ||
+        context?.organization_id ||
+        context?.organizationId ||
+        null;
+
+      if (!organizationId) {
+        throw new Error("No active organization found.");
+      }
+
+      const teamStatusResponse = await fetch("/api/tools/team-status", {
+        cache: "no-store",
+      });
+
+      if (!teamStatusResponse.ok) {
+        const teamStatusPayload = await teamStatusResponse.json().catch(() => null);
+        throw new Error(
+          teamStatusPayload?.error || "Unable to load assignable team members."
+        );
+      }
+
+      const teamStatus = await teamStatusResponse.json();
+      const teamMembers = Array.isArray(teamStatus?.members)
+        ? teamStatus.members
+        : [];
+
+      setWorkers(
+        teamMembers
+          .map((member: { user_id?: string; name?: string }) => ({
+            id: String(member.user_id || "").trim(),
+            name: String(member.name || "").trim() || "Team member",
+          }))
+          .filter((worker: DispatchWorker) => Boolean(worker.id))
+          .sort((a: DispatchWorker, b: DispatchWorker) =>
+            a.name.localeCompare(b.name)
+          )
+      );
+
+      const { createClient } = await import("@/lib/supabase/client");
+      const supabase = createClient();
+
+      const { data: jobRows, error: jobsError } = await supabase
+        .from("business_dispatch_jobs")
+        .select(
+          "id,name,contact_id,address,assigned_user_id,scheduled_start,scheduled_end,status"
+        )
+        .eq("organization_id", organizationId)
+        .neq("status", "completed")
+        .order("created_at", { ascending: false });
+
+      if (jobsError) throw jobsError;
+
+      const contactIds = Array.from(
+        new Set(
+          (jobRows || [])
+            .map((job) => job.contact_id)
+            .filter((id): id is string => Boolean(id))
+        )
+      );
+
+      const assigneeIds = Array.from(
+        new Set(
+          (jobRows || [])
+            .map((job) => job.assigned_user_id)
+            .filter((id): id is string => Boolean(id))
+        )
+      );
+
+      const jobIds = (jobRows || []).map((job) => job.id);
+
+      const [contactsResult, usersResult, routedJobsResult] = await Promise.all([
+        contactIds.length > 0
+          ? supabase
+              .from("business_contacts")
+              .select("id,first_name,last_name")
+              .eq("organization_id", organizationId)
+              .in("id", contactIds)
+          : Promise.resolve({ data: [], error: null }),
+        assigneeIds.length > 0
+          ? supabase
+              .from("users")
+              .select("id,name")
+              .in("id", assigneeIds)
+          : Promise.resolve({ data: [], error: null }),
+        jobIds.length > 0
+          ? supabase
+              .from("business_dispatch_route_jobs")
+              .select("dispatch_job_id")
+              .in("dispatch_job_id", jobIds)
+          : Promise.resolve({ data: [], error: null }),
+      ]);
+
+      if (contactsResult.error) throw contactsResult.error;
+      if (usersResult.error) throw usersResult.error;
+      if (routedJobsResult.error) throw routedJobsResult.error;
+
+      const contactNames = new Map(
+        (contactsResult.data || []).map((contact) => [
+          contact.id,
+          [contact.first_name, contact.last_name].filter(Boolean).join(" ") ||
+            "Unnamed contact",
+        ])
+      );
+
+      const assigneeNames = new Map(
+        (usersResult.data || []).map((user) => [
+          user.id,
+          String(user.name || "").trim() || "Assigned user",
+        ])
+      );
+
+      const routedJobIds = new Set(
+        (routedJobsResult.data || []).map((row) => row.dispatch_job_id)
+      );
+
+      const formatSchedule = (
+        start: string | null,
+        end: string | null
+      ): string | null => {
+        if (!start) return null;
+
+        const startLabel = new Date(start).toLocaleString();
+        if (!end) return startLabel;
+
+        return `${startLabel} – ${new Date(end).toLocaleString()}`;
+      };
+
+      const assignments: AssignmentFocusItem[] = [];
+      const routes: RoutingFocusItem[] = [];
+      const executions: ExecutionFocusItem[] = [];
+
+      for (const job of jobRows || []) {
+        const customerName = job.contact_id
+          ? contactNames.get(job.contact_id) || null
+          : null;
+        const assigneeName = job.assigned_user_id
+          ? assigneeNames.get(job.assigned_user_id) || "Assigned"
+          : null;
+
+        if (!job.assigned_user_id) {
+          assignments.push({
+            id: `assign-${job.id}`,
+            jobId: job.id,
+            jobName: job.name,
+            customerName,
+            address: job.address,
+            scheduledWindow: formatSchedule(
+              job.scheduled_start,
+              job.scheduled_end
+            ),
+            priority: "medium",
+          });
+          continue;
+        }
+
+        if (
+          job.assigned_user_id &&
+          job.address?.trim() &&
+          !routedJobIds.has(job.id) &&
+          job.status !== "in_progress"
+        ) {
+          routes.push({
+            id: `route-${job.id}`,
+            jobId: job.id,
+            jobName: job.name,
+            address: job.address,
+            assigneeName,
+            reason: "needs_route",
+            priority: "medium",
+          });
+          continue;
+        }
+
+        if (
+          routedJobIds.has(job.id) ||
+          job.status === "scheduled" ||
+          job.status === "in_progress"
+        ) {
+          executions.push({
+            id: `execute-${job.id}`,
+            jobId: job.id,
+            jobName: job.name,
+            customerName,
+            address: job.address,
+            assigneeName,
+            status:
+              job.status === "in_progress"
+                ? "in_progress"
+                : job.status === "scheduled"
+                  ? "scheduled"
+                  : "ready",
+            priority: "medium",
+          });
+        }
+      }
+
+      setAssignmentItems(assignments);
+      setRoutingItems(routes);
+      setExecutionItems(executions);
+    } catch (loadError) {
+      console.error("Unable to load Dispatch Focus:", loadError);
+      setError(
+        loadError instanceof Error
+          ? loadError.message
+          : "Unable to load Dispatch Focus."
+      );
+      setAssignmentItems([]);
+      setRoutingItems([]);
+      setExecutionItems([]);
+      setWorkers([]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function assignWorker(jobId: string) {
+    const workerId = selectedWorkerByJob[jobId];
+
+    if (!workerId) {
+      setAssignmentActionError("Choose a worker before assigning this job.");
+      return;
+    }
+
+    setAssigningJobId(jobId);
+    setAssignmentActionError(null);
+    setRouteActionSuccess(null);
+
+    try {
+      const contextResponse = await fetch("/api/auth/current-context", {
+        cache: "no-store",
+      });
+
+      if (!contextResponse.ok) {
+        throw new Error("Unable to load the active organization.");
+      }
+
+      const context = await contextResponse.json();
+      const organizationId =
+        context?.organization?.id ||
+        context?.organization_id ||
+        context?.organizationId ||
+        null;
+
+      if (!organizationId) {
+        throw new Error("No active organization found.");
+      }
+
+      const { createClient } = await import("@/lib/supabase/client");
+      const supabase = createClient();
+
+      const { error: assignmentError } = await supabase
+        .from("business_dispatch_jobs")
+        .update({
+          assigned_user_id: workerId,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("organization_id", organizationId)
+        .eq("id", jobId);
+
+      if (assignmentError) throw assignmentError;
+
+      setSelectedWorkerByJob((current) => {
+        const next = { ...current };
+        delete next[jobId];
+        return next;
+      });
+
+      await loadFocusWork();
+    } catch (assignmentError) {
+      console.error("Unable to assign Dispatch worker:", assignmentError);
+      setAssignmentActionError(
+        assignmentError instanceof Error
+          ? assignmentError.message
+          : "Unable to assign Dispatch worker."
+      );
+    } finally {
+      setAssigningJobId(null);
+    }
+  }
+
+  async function routeJob(jobId: string) {
+    setRoutingJobId(jobId);
+    setRouteActionError(null);
+    setRouteActionSuccess(null);
+
+    try {
+      const response = await fetch("/api/business/integrations/routes/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jobIds: [jobId],
+        }),
+      });
+
+      const payload = await response.json().catch(() => null);
+
+      if (!response.ok || !payload?.success) {
+        throw new Error(payload?.error || "Unable to route Dispatch job.");
+      }
+
+      setRouteActionSuccess("Dispatch job routed successfully.");
+      await loadFocusWork();
+    } catch (routeError) {
+      console.error("Unable to route Dispatch job:", routeError);
+      setRouteActionError(
+        routeError instanceof Error
+          ? routeError.message
+          : "Unable to route Dispatch job."
+      );
+    } finally {
+      setRoutingJobId(null);
+    }
+  }
+
+  async function buildRoute() {
+    if (routingItems.length < 2) {
+      setRouteActionError("At least two routable Dispatch jobs are required.");
+      return;
+    }
+
+    setBuildingRoute(true);
+    setRouteActionError(null);
+    setRouteActionSuccess(null);
+
+    try {
+      const response = await fetch("/api/business/integrations/routes/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jobIds: routingItems.map((item) => item.jobId),
+        }),
+      });
+
+      const payload = await response.json().catch(() => null);
+
+      if (!response.ok || !payload?.success) {
+        throw new Error(payload?.error || "Unable to build Dispatch route.");
+      }
+
+      const routedCount = payload?.counts?.routedJobs ?? routingItems.length;
+      setRouteActionSuccess(
+        `Route built successfully for ${routedCount} job${routedCount === 1 ? "" : "s"}.`
+      );
+
+      await loadFocusWork();
+    } catch (routeError) {
+      console.error("Unable to build Dispatch route:", routeError);
+      setRouteActionError(
+        routeError instanceof Error
+          ? routeError.message
+          : "Unable to build Dispatch route."
+      );
+    } finally {
+      setBuildingRoute(false);
+    }
+  }
+
+  async function updateExecutionStatus(
+    jobId: string,
+    status: "in_progress" | "completed"
+  ) {
+    setExecutingJobId(jobId);
+    setExecutionActionError(null);
+    setExecutionActionSuccess(null);
+    setRouteActionSuccess(null);
+
+    try {
+      const contextResponse = await fetch("/api/auth/current-context", {
+        cache: "no-store",
+      });
+
+      if (!contextResponse.ok) {
+        throw new Error("Unable to load the active organization.");
+      }
+
+      const context = await contextResponse.json();
+      const organizationId =
+        context?.organization?.id ||
+        context?.organization_id ||
+        context?.organizationId ||
+        null;
+
+      if (!organizationId) {
+        throw new Error("No active organization found.");
+      }
+
+      const { createClient } = await import("@/lib/supabase/client");
+      const supabase = createClient();
+
+      const { error: executionError } = await supabase
+        .from("business_dispatch_jobs")
+        .update({
+          status,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("organization_id", organizationId)
+        .eq("id", jobId);
+
+      if (executionError) throw executionError;
+
+      setExecutionActionSuccess(
+        status === "in_progress"
+          ? "Dispatch job started."
+          : "Dispatch job completed."
+      );
+
+      await loadFocusWork();
+    } catch (executionError) {
+      console.error("Unable to update Dispatch execution:", executionError);
+      setExecutionActionError(
+        executionError instanceof Error
+          ? executionError.message
+          : "Unable to update Dispatch execution."
+      );
+    } finally {
+      setExecutingJobId(null);
+    }
+  }
+
+  useEffect(() => {
+    void loadFocusWork();
+  }, []);
 
   const allItems = useMemo(
     () => [...assignmentItems, ...routingItems, ...executionItems],
@@ -152,6 +604,42 @@ export default function BusinessDispatchFocusPage() {
         </div>
       </section>
 
+      {error ? (
+        <section className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">
+          {error}
+        </section>
+      ) : null}
+
+      {assignmentActionError ? (
+        <section className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">
+          {assignmentActionError}
+        </section>
+      ) : null}
+
+      {routeActionError ? (
+        <section className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">
+          {routeActionError}
+        </section>
+      ) : null}
+
+      {routeActionSuccess ? (
+        <section className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
+          {routeActionSuccess}
+        </section>
+      ) : null}
+
+      {executionActionError ? (
+        <section className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">
+          {executionActionError}
+        </section>
+      ) : null}
+
+      {executionActionSuccess ? (
+        <section className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
+          {executionActionSuccess}
+        </section>
+      ) : null}
+
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {[
           {
@@ -201,7 +689,7 @@ export default function BusinessDispatchFocusPage() {
         })}
       </section>
 
-      {!hasFocusWork ? (
+      {!loading && !hasFocusWork ? (
         <section className="rounded-3xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
           <div className="flex items-start gap-4">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-emerald-200 bg-white">
@@ -215,9 +703,9 @@ export default function BusinessDispatchFocusPage() {
                 No Dispatch actions are available yet
               </h2>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-emerald-800">
-                Dispatch persistence is not connected, so Focus has no real jobs
-                from which to derive assignment, routing, or execution work.
-                Nothing has been generated to make this queue look populated.
+                No current Dispatch jobs require assignment, routing, or
+                execution action. Nothing has been generated to make this queue
+                look populated.
               </p>
             </div>
           </div>
@@ -277,15 +765,49 @@ export default function BusinessDispatchFocusPage() {
                     </p>
                   ) : null}
 
-                  <button
-                    type="button"
-                    disabled
-                    className="mt-4 inline-flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-slate-200 px-3 py-2 text-sm font-semibold text-slate-500"
-                    title="Assignment actions activate with real Dispatch persistence."
-                  >
-                    <UserRoundCheck className="h-4 w-4" />
-                    Assign Worker
-                  </button>
+                  <div className="mt-4 space-y-2">
+                    <select
+                      value={selectedWorkerByJob[item.jobId] || ""}
+                      onChange={(event) =>
+                        setSelectedWorkerByJob((current) => ({
+                          ...current,
+                          [item.jobId]: event.target.value,
+                        }))
+                      }
+                      disabled={assigningJobId === item.jobId || workers.length === 0}
+                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-slate-400 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500"
+                    >
+                      <option value="">
+                        {workers.length > 0 ? "Choose worker…" : "No active team members"}
+                      </option>
+                      {workers.map((worker) => (
+                        <option key={worker.id} value={worker.id}>
+                          {worker.name}
+                        </option>
+                      ))}
+                    </select>
+
+                    <button
+                      type="button"
+                      onClick={() => void assignWorker(item.jobId)}
+                      disabled={
+                        assigningJobId === item.jobId ||
+                        !selectedWorkerByJob[item.jobId] ||
+                        workers.length === 0
+                      }
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-3 py-2 text-sm font-semibold !text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:!text-slate-500"
+                      style={
+                        assigningJobId === item.jobId ||
+                        !selectedWorkerByJob[item.jobId] ||
+                        workers.length === 0
+                          ? undefined
+                          : { color: "#ffffff" }
+                      }
+                    >
+                      <UserRoundCheck className="h-4 w-4" />
+                      {assigningJobId === item.jobId ? "Assigning…" : "Assign Worker"}
+                    </button>
+                  </div>
                 </article>
               ))
             )}
@@ -309,6 +831,25 @@ export default function BusinessDispatchFocusPage() {
           </div>
 
           <div className="mt-5 space-y-3">
+            {routingItems.length >= 2 ? (
+              <button
+                type="button"
+                onClick={() => void buildRoute()}
+                disabled={buildingRoute}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-3 py-2.5 text-sm font-semibold !text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+                style={{ color: "#ffffff" }}
+              >
+                <Navigation className="h-4 w-4" />
+                {buildingRoute
+                  ? "Building Route…"
+                  : `Build Route · ${routingItems.length} Jobs`}
+              </button>
+            ) : routingItems.length === 1 ? (
+              <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-800">
+                One routable job is ready. Route it below, or add another job for an optimized multi-stop route.
+              </div>
+            ) : null}
+
             {routingItems.length === 0 ? (
               <EmptyLane
                 icon={Navigation}
@@ -344,12 +885,13 @@ export default function BusinessDispatchFocusPage() {
 
                   <button
                     type="button"
-                    disabled
-                    className="mt-4 inline-flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-slate-200 px-3 py-2 text-sm font-semibold text-slate-500"
-                    title="Routing actions activate after the Business Dispatch adapter is connected."
+                    onClick={() => void routeJob(item.jobId)}
+                    disabled={routingJobId === item.jobId || buildingRoute}
+                    className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-3 py-2 text-sm font-semibold !text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+                    style={{ color: "#ffffff" }}
                   >
                     <Navigation className="h-4 w-4" />
-                    Build Route
+                    {routingJobId === item.jobId ? "Routing…" : "Route Job"}
                   </button>
                 </article>
               ))
@@ -407,15 +949,45 @@ export default function BusinessDispatchFocusPage() {
                     <span>{item.address}</span>
                   </div>
 
-                  <button
-                    type="button"
-                    disabled
-                    className="mt-4 inline-flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-slate-200 px-3 py-2 text-sm font-semibold text-slate-500"
-                    title="Execution controls activate with real Dispatch job state."
-                  >
-                    <Play className="h-4 w-4" />
-                    Open Job
-                  </button>
+                  <div className="mt-3 flex items-center justify-between gap-3">
+                    <span className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+                      {item.status === "in_progress"
+                        ? "In progress"
+                        : item.status === "scheduled"
+                          ? "Scheduled"
+                          : "Ready to execute"}
+                    </span>
+                  </div>
+
+                  {item.status === "in_progress" ? (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        void updateExecutionStatus(item.jobId, "completed")
+                      }
+                      disabled={executingJobId === item.jobId}
+                      className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-700 px-3 py-2 text-sm font-semibold !text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
+                      style={{ color: "#ffffff" }}
+                    >
+                      <CheckCircle2 className="h-4 w-4" />
+                      {executingJobId === item.jobId
+                        ? "Completing…"
+                        : "Complete Job"}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        void updateExecutionStatus(item.jobId, "in_progress")
+                      }
+                      disabled={executingJobId === item.jobId}
+                      className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-3 py-2 text-sm font-semibold !text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+                      style={{ color: "#ffffff" }}
+                    >
+                      <Play className="h-4 w-4" />
+                      {executingJobId === item.jobId ? "Starting…" : "Start Job"}
+                    </button>
+                  )}
                 </article>
               ))
             )}
@@ -434,18 +1006,21 @@ export default function BusinessDispatchFocusPage() {
                 Active execution
               </p>
               <h2 className="mt-1 text-lg font-semibold text-slate-950">
-                No active Dispatch job
+                {executionItems.find((item) => item.status === "in_progress")
+                  ?.jobName || "No active Dispatch job"}
               </h2>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-                When a real job enters execution, this surface can become the
-                live workspace for ownership, location, route context, progress,
-                and completion controls.
+                {executionItems.find((item) => item.status === "in_progress")
+                  ? `${executionItems.find((item) => item.status === "in_progress")?.assigneeName || "Assigned worker"} · ${executionItems.find((item) => item.status === "in_progress")?.address}`
+                  : "When a real job enters execution, this surface becomes the live workspace for ownership, location, progress, and completion."}
               </p>
             </div>
           </div>
 
           <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-medium text-slate-500">
-            Waiting for real execution state
+            {executionItems.some((item) => item.status === "in_progress")
+              ? "Job in progress"
+              : "Waiting for real execution state"}
           </div>
         </div>
       </section>

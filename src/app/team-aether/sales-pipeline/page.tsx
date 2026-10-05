@@ -21,6 +21,7 @@ type Campaign = {
   race: string;
   state: string;
   emails: number;
+  calls: number;
   owner: string;
   email: string;
   phone: string;
@@ -111,6 +112,7 @@ export default function TeamAetherSalesPage() {
       race: String(row.race || ""),
       state: String(row.state || ""),
       emails: Number(row.emails_sent || 0),
+      calls: Number(row.calls_made || 0),
       owner: String(row.owner || ""),
       email: String(row.email || ""),
       phone: String(row.phone || ""),
@@ -322,6 +324,7 @@ export default function TeamAetherSalesPage() {
           ),
           owner: "Tyler",
           emails_sent: 0,
+          calls_made: 0,
           notes: "",
           reply_received: false,
           demo_scheduled: false,
@@ -446,6 +449,7 @@ export default function TeamAetherSalesPage() {
               website: newCampaign.website.trim(),
               owner: newCampaign.owner,
               emails_sent: 0,
+              calls_made: 0,
               notes: newCampaign.notes.trim(),
               reply_received: false,
               demo_scheduled: false,
@@ -550,6 +554,7 @@ export default function TeamAetherSalesPage() {
               race: campaign.race,
               state: campaign.state,
               emails_sent: campaign.emails,
+              calls_made: campaign.calls,
               owner: campaign.owner,
               email: campaign.email,
               phone: campaign.phone,
@@ -579,6 +584,15 @@ export default function TeamAetherSalesPage() {
         !campaign.customer &&
         !campaign.archived &&
         nextEmails < 3,
+      last_activity: "Just now",
+    });
+  }
+
+  async function handleCalled(campaign: Campaign) {
+    if (campaign.calls >= 1) return;
+
+    await patchCampaign(campaign.id, {
+      calls_made: 1,
       last_activity: "Just now",
     });
   }
@@ -857,6 +871,7 @@ export default function TeamAetherSalesPage() {
                   <thead className="sticky top-0 z-10 bg-slate-50 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 shadow-sm lg:text-[10px]">
                     <tr>
                       <th className="px-5 py-4 lg:px-3.5 lg:py-2.5">Campaign</th>
+                      <th className="px-5 py-4 lg:px-3.5 lg:py-2.5">Call</th>
                       <th className="px-5 py-4 lg:px-3.5 lg:py-2.5">Emails</th>
                       <th className="px-5 py-4 lg:px-3.5 lg:py-2.5">Reply</th>
                       <th className="px-5 py-4 lg:px-3.5 lg:py-2.5">Demo</th>
@@ -902,6 +917,10 @@ export default function TeamAetherSalesPage() {
                                   </p>
                                 </div>
                               </div>
+                            </td>
+
+                            <td className="px-5 py-4 lg:px-3.5 lg:py-2.5">
+                              <ProgressDot active={campaign.calls >= 1} />
                             </td>
 
                             <td className="px-5 py-4 lg:px-3.5 lg:py-2.5">
@@ -956,7 +975,7 @@ export default function TeamAetherSalesPage() {
 
                           {expanded ? (
                             <tr className="bg-slate-50">
-                              <td colSpan={7} className="p-6 lg:p-4">
+                              <td colSpan={8} className="p-6 lg:p-4">
                                 <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:gap-5 lg:gap-5">
                                   <div>
                                     <div className="inline-flex rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.15em] text-slate-600 lg:text-[10px]">
@@ -1138,6 +1157,18 @@ export default function TeamAetherSalesPage() {
                                         {campaign.archived
                                           ? "Restore Campaign"
                                           : "Archive"}
+                                      </button>
+
+                                      <button
+                                        type="button"
+                                        disabled={campaign.calls >= 1 || campaign.archived}
+                                        onClick={(event) => {
+                                          event.stopPropagation();
+                                          handleCalled(campaign);
+                                        }}
+                                        className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-800 transition hover:border-slate-300 hover:bg-slate-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[12px]"
+                                      >
+                                        Called
                                       </button>
                                     </div>
                                   </div>

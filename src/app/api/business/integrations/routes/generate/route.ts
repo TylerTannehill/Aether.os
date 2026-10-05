@@ -11,15 +11,13 @@ export const dynamic = "force-dynamic";
 const PROVIDER = "routes";
 const MAX_INTERMEDIATE_WAYPOINTS = 25;
 
-type RouteContact = {
+type DispatchJobRow = {
   id: string;
-  first_name?: string | null;
-  last_name?: string | null;
-  address?: string | null;
-  city?: string | null;
-  state?: string | null;
-  zip?: string | null;
-  organization_id?: string | null;
+  name: string;
+  address: string;
+  contact_id?: string | null;
+  assigned_user_id?: string | null;
+  status: string;
 };
 
 function getAdminClient() {
@@ -36,21 +34,14 @@ function getAdminClient() {
   });
 }
 
-function formatAddress(contact: RouteContact) {
-  return [
-    contact.address?.trim(),
-    contact.city?.trim(),
-    contact.state?.trim(),
-    contact.zip?.trim(),
-  ]
-    .filter(Boolean)
-    .join(", ");
-}
+function parseGoogleDurationSeconds(value: unknown) {
+  if (typeof value !== "string") return null;
 
-function contactName(contact: RouteContact) {
-  return [contact.first_name?.trim(), contact.last_name?.trim()]
-    .filter(Boolean)
-    .join(" ") || "Unnamed contact";
+  const match = value.trim().match(/^([0-9]+(?:\.[0-9]+)?)s$/);
+  if (!match) return null;
+
+  const seconds = Number(match[1]);
+  return Number.isFinite(seconds) ? Math.round(seconds) : null;
 }
 
 export async function POST(request: NextRequest) {
@@ -65,12 +56,24 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json().catch(() => null);
-    const listId = String(body?.listId || "").trim();
+    const requestedJobIds: string[] = Array.isArray(body?.jobIds)
+      ? Array.from(
+          new Set<string>(
+            body.jobIds
+              .map((value: unknown) => String(value || "").trim())
+              .filter((value: string): value is string => value.length > 0),
+          ),
+        )
+      : [];
     const startAddress = String(body?.startAddress || "").trim();
+    const requestedRouteName = String(body?.routeName || "").trim();
 
-    if (!listId) {
+    if (requestedJobIds.length < 1) {
       return NextResponse.json(
-        { success: false, error: "A Dispatch list is required." },
+        {
+          success: false,
+          error: "At least one Dispatch job is required to generate a route.",
+        },
         { status: 400 },
       );
     }
@@ -109,7 +112,10 @@ export async function POST(request: NextRequest) {
       .maybeSingle();
 
     if (appUserError) {
-      console.error("[BUSINESS ROUTES GENERATE] Aether user lookup failed", appUserError);
+      console.error(
+        "[BUSINESS ROUTES GENERATE] Aether user lookup failed",
+        appUserError,
+      );
       return NextResponse.json(
         { success: false, error: appUserError.message },
         { status: 500 },
@@ -138,7 +144,10 @@ export async function POST(request: NextRequest) {
       .maybeSingle();
 
     if (membershipError) {
-      console.error("[BUSINESS ROUTES GENERATE] Membership lookup failed", membershipError);
+      console.error(
+        "[BUSINESS ROUTES GENERATE] Membership lookup failed",
+        membershipError,
+      );
       return NextResponse.json(
         { success: false, error: membershipError.message },
         { status: 500 },
@@ -168,111 +177,101 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { data: list, error: listError } = await databaseClient
-      .from("lists")
-      .select("id, name, type, organization_id")
-      .eq("id", listId)
+    const { data: jobRows, error: jobsError } = await databaseClient
+      .from("business_dispatch_jobs")
+      .select("id,name,address,contact_id,assigned_user_id,status")
       .eq("organization_id", organizationId)
-      .maybeSingle();
+      .in("id", requestedJobIds);
 
-    if (listError) {
-      console.error("[BUSINESS ROUTES GENERATE] List lookup failed", listError);
+    if (jobsError) {
+      console.error(
+        "[BUSINESS ROUTES GENERATE] Dispatch jobs lookup failed",
+        jobsError,
+      );
       return NextResponse.json(
-        { success: false, error: listError.message },
+        { success: false, error: jobsError.message },
         { status: 500 },
       );
     }
 
-    if (!list) {
+    const jobs = (jobRows ?? []) as DispatchJobRow[];
+    const jobsById = new Map(jobs.map((job) => [job.id, job]));
+
+    // Restore caller order before Google optimizes it.
+    const requestedJobs = requestedJobIds
+      .map((id) => jobsById.get(id))
+      .filter((job): job is DispatchJobRow => Boolean(job));
+
+    const missingJobIds = requestedJobIds.filter((id) => !jobsById.has(id));
+
+    if (missingJobIds.length > 0) {
       return NextResponse.json(
-        { success: false, error: "Dispatch list not found in active organization." },
+        {
+          success: false,
+          error:
+            "One or more Dispatch jobs were not found in the active organization.",
+          missingJobIds,
+        },
         { status: 404 },
       );
     }
 
-    if (String(list.type || "").toLowerCase() !== "dispatch") {
-      return NextResponse.json(
-        { success: false, error: "Routes can only be generated for Dispatch lists." },
-        { status: 400 },
-      );
-    }
-
-    const { data: memberships, error: contactsError } = await databaseClient
-      .from("list_contacts")
-      .select(
-        "contact_id, contacts(id, first_name, last_name, address, city, state, zip, organization_id)",
+    const invalidJobs = requestedJobs
+      .filter(
+        (job) =>
+          job.status === "completed" ||
+          !job.address ||
+          !job.address.trim(),
       )
-      .eq("list_id", listId);
-
-    if (contactsError) {
-      console.error("[BUSINESS ROUTES GENERATE] Contacts lookup failed", contactsError);
-      return NextResponse.json(
-        { success: false, error: contactsError.message },
-        { status: 500 },
-      );
-    }
-
-    const contacts = ((memberships ?? []) as any[])
-      .flatMap((row) => {
-        const linked = Array.isArray(row.contacts) ? row.contacts[0] : row.contacts;
-        return linked ? [linked as RouteContact] : [];
-      })
-      .filter((contact) => contact.organization_id === organizationId);
-
-    const validContacts = contacts
-      .map((contact) => ({
-        contact,
-        formattedAddress: formatAddress(contact),
-      }))
-      .filter(({ contact, formattedAddress }) => {
-        return Boolean(contact.address?.trim() && formattedAddress);
-      });
-
-    const skippedContacts = contacts
-      .filter((contact) => !contact.address?.trim())
-      .map((contact) => ({
-        id: contact.id,
-        name: contactName(contact),
-        reason: "Missing street address",
+      .map((job) => ({
+        id: job.id,
+        name: job.name,
+        reason:
+          job.status === "completed"
+            ? "Job is already completed"
+            : "Missing service address",
       }));
 
-    if (validContacts.length < 2) {
+    if (invalidJobs.length > 0) {
       return NextResponse.json(
         {
           success: false,
-          error: "At least two contacts with street addresses are required to generate a route.",
-          skippedContacts,
+          error:
+            "Every routed Dispatch job must be active and have a service address.",
+          invalidJobs,
         },
         { status: 400 },
       );
     }
 
-    /*
-      Google Routes supports up to 25 intermediate waypoints for this request shape.
-      We reserve the first and last valid contacts as route endpoints unless the
-      caller supplies a startAddress. Additional contacts beyond the supported
-      request size are returned as skipped rather than silently discarded.
-    */
-    const maxContacts = startAddress
+    const maxJobs = startAddress
       ? MAX_INTERMEDIATE_WAYPOINTS + 1
       : MAX_INTERMEDIATE_WAYPOINTS + 2;
 
-    const routableContacts = validContacts.slice(0, maxContacts);
-    const overflowContacts = validContacts.slice(maxContacts).map(({ contact }) => ({
-      id: contact.id,
-      name: contactName(contact),
-      reason: "Route exceeds the current waypoint limit",
+    if (requestedJobs.length > maxJobs) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `This route supports up to ${maxJobs} Dispatch jobs with the current Google Routes request shape.`,
+        },
+        { status: 400 },
+      );
+    }
+
+    const routableJobs = requestedJobs.map((job) => ({
+      job,
+      formattedAddress: job.address.trim(),
     }));
 
     const originAddress =
-      startAddress || routableContacts[0].formattedAddress;
+      startAddress || routableJobs[0].formattedAddress;
 
     const destinationEntry =
-      routableContacts[routableContacts.length - 1];
+      routableJobs[routableJobs.length - 1];
 
     const intermediateEntries = startAddress
-      ? routableContacts.slice(0, -1)
-      : routableContacts.slice(1, -1);
+      ? routableJobs.slice(0, -1)
+      : routableJobs.slice(1, -1);
 
     const googleResponse = await fetch(
       "https://routes.googleapis.com/directions/v2:computeRoutes",
@@ -309,17 +308,25 @@ export async function POST(request: NextRequest) {
         googlePayload?.message ||
         `Google Routes API returned HTTP ${googleResponse.status}.`;
 
-      console.error("[BUSINESS ROUTES GENERATE] Google API failure", googlePayload);
+      console.error(
+        "[BUSINESS ROUTES GENERATE] Google API failure",
+        googlePayload,
+      );
 
       return NextResponse.json(
         { success: false, error: googleMessage },
-        { status: googleResponse.status >= 400 && googleResponse.status < 500 ? 400 : 502 },
+        {
+          status:
+            googleResponse.status >= 400 && googleResponse.status < 500
+              ? 400
+              : 502,
+        },
       );
     }
 
-    const route = googlePayload?.routes?.[0];
+    const googleRoute = googlePayload?.routes?.[0];
 
-    if (!route) {
+    if (!googleRoute) {
       return NextResponse.json(
         { success: false, error: "Google Routes did not return a route." },
         { status: 502 },
@@ -327,55 +334,114 @@ export async function POST(request: NextRequest) {
     }
 
     const optimizedIndexes: number[] =
-      route.optimizedIntermediateWaypointIndex ?? [];
+      googleRoute.optimizedIntermediateWaypointIndex ?? [];
 
     const optimizedIntermediates =
       optimizedIndexes.length === intermediateEntries.length
         ? optimizedIndexes.map((index) => intermediateEntries[index])
         : intermediateEntries;
 
-    const orderedStops = [
-      ...(startAddress
-        ? []
-        : [
+    const orderedEntries =
+      routableJobs.length === 1
+        ? [
             {
-              ...routableContacts[0],
-              stopType: "origin" as const,
+              ...routableJobs[0],
+              stopType: "destination" as const,
             },
-          ]),
-      ...optimizedIntermediates.map((entry) => ({
-        ...entry,
-        stopType: "stop" as const,
-      })),
-      {
-        ...destinationEntry,
-        stopType: "destination" as const,
-      },
-    ].map(({ contact, formattedAddress, stopType }, index) => ({
-      order: index + 1,
-      contactId: contact.id,
-      name: contactName(contact),
-      address: formattedAddress,
-      stopType,
-    }));
+          ]
+        : [
+            ...(startAddress
+              ? []
+              : [
+                  {
+                    ...routableJobs[0],
+                    stopType: "origin" as const,
+                  },
+                ]),
+            ...optimizedIntermediates.map((entry) => ({
+              ...entry,
+              stopType: "stop" as const,
+            })),
+            {
+              ...destinationEntry,
+              stopType: "destination" as const,
+            },
+          ];
 
-    const routeOrderUpdates = orderedStops.map((stop) =>
-      databaseClient
-        .from("list_contacts")
-        .update({ sort_order: stop.order })
-        .eq("list_id", listId)
-        .eq("contact_id", stop.contactId),
+    const orderedStops = orderedEntries.map(
+      ({ job, formattedAddress, stopType }, index) => ({
+        order: index + 1,
+        jobId: job.id,
+        contactId: job.contact_id ?? null,
+        name: job.name,
+        address: formattedAddress,
+        stopType,
+      }),
     );
 
-    const routeOrderResults = await Promise.all(routeOrderUpdates);
-    const routeOrderError = routeOrderResults.find((result) => result.error)?.error;
+    const routeName =
+      requestedRouteName ||
+      `Dispatch Route ${new Date().toLocaleDateString("en-US")}`;
 
-    if (routeOrderError) {
-      console.error("[BUSINESS ROUTES GENERATE] Route order persistence failed", routeOrderError);
+    const durationSeconds = parseGoogleDurationSeconds(googleRoute.duration);
+
+    const { data: savedRoute, error: routeInsertError } = await databaseClient
+      .from("business_dispatch_routes")
+      .insert({
+        organization_id: organizationId,
+        name: routeName,
+        origin_address: originAddress,
+        total_distance_meters: googleRoute.distanceMeters ?? null,
+        total_duration_seconds: durationSeconds,
+        encoded_polyline: googleRoute.polyline?.encodedPolyline ?? null,
+        updated_at: new Date().toISOString(),
+      })
+      .select("id,name")
+      .single();
+
+    if (routeInsertError || !savedRoute) {
+      console.error(
+        "[BUSINESS ROUTES GENERATE] Route persistence failed",
+        routeInsertError,
+      );
       return NextResponse.json(
         {
           success: false,
-          error: `Route generated, but the optimized stop order could not be saved: ${routeOrderError.message}`,
+          error:
+            routeInsertError?.message ||
+            "Google generated the route, but Aether could not save it.",
+        },
+        { status: 500 },
+      );
+    }
+
+    const routeJobRows = orderedStops.map((stop) => ({
+      route_id: savedRoute.id,
+      dispatch_job_id: stop.jobId,
+      stop_order: stop.order,
+    }));
+
+    const { error: routeJobsInsertError } = await databaseClient
+      .from("business_dispatch_route_jobs")
+      .insert(routeJobRows);
+
+    if (routeJobsInsertError) {
+      console.error(
+        "[BUSINESS ROUTES GENERATE] Route stop persistence failed",
+        routeJobsInsertError,
+      );
+
+      // Avoid leaving behind a route with no trustworthy stop sequence.
+      await databaseClient
+        .from("business_dispatch_routes")
+        .delete()
+        .eq("id", savedRoute.id)
+        .eq("organization_id", organizationId);
+
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Google generated the route, but Aether could not save its stop order: ${routeJobsInsertError.message}`,
         },
         { status: 500 },
       );
@@ -386,24 +452,21 @@ export async function POST(request: NextRequest) {
       provider: PROVIDER,
       managedBy: "aether",
       organizationId,
-      list: {
-        id: list.id,
-        name: list.name,
-      },
       route: {
-        distanceMeters: route.distanceMeters ?? null,
-        duration: route.duration ?? null,
-        encodedPolyline: route.polyline?.encodedPolyline ?? null,
+        id: savedRoute.id,
+        name: savedRoute.name,
+        distanceMeters: googleRoute.distanceMeters ?? null,
+        duration: googleRoute.duration ?? null,
+        durationSeconds,
+        encodedPolyline: googleRoute.polyline?.encodedPolyline ?? null,
         originAddress,
         destinationAddress: destinationEntry.formattedAddress,
         orderedStops,
       },
       counts: {
-        totalContacts: contacts.length,
-        routedContacts: routableContacts.length,
-        skippedContacts: skippedContacts.length + overflowContacts.length,
+        requestedJobs: requestedJobs.length,
+        routedJobs: orderedStops.length,
       },
-      skippedContacts: [...skippedContacts, ...overflowContacts],
     });
   } catch (error: any) {
     console.error("[BUSINESS ROUTES GENERATE] Failed", error);
