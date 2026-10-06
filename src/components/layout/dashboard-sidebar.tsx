@@ -152,6 +152,12 @@ const businessNavItems: NavItem[] = [
     alwaysVisible: true,
   },
   {
+    title: "Finance",
+    href: "/business/finance",
+    icon: DollarSign,
+    alwaysVisible: true,
+  },
+  {
     title: "FAQ",
     href: "/business/faq",
     icon: BookOpen,
