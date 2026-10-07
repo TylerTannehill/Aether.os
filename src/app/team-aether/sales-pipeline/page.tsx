@@ -101,6 +101,7 @@ export default function TeamAetherSalesPage() {
   const [importError, setImportError] = useState("");
   const [loadingCampaigns, setLoadingCampaigns] = useState(true);
   const [pageError, setPageError] = useState("");
+  const [copiedEmailId, setCopiedEmailId] = useState<string | null>(null);
 
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
 
@@ -574,6 +575,17 @@ export default function TeamAetherSalesPage() {
     );
   }
 
+  async function handleCopyEmail(campaign: Campaign) {
+    if (!campaign.email) return;
+
+    await navigator.clipboard.writeText(campaign.email);
+    const copyKey = campaign.id || campaign.email;
+    setCopiedEmailId(copyKey);
+    setTimeout(() => {
+      setCopiedEmailId((current) => (current === copyKey ? null : current));
+    }, 1600);
+  }
+
   async function handleEmailSent(campaign: Campaign) {
     const nextEmails = Math.min(campaign.emails + 1, 3);
 
@@ -1010,10 +1022,29 @@ export default function TeamAetherSalesPage() {
                                               <option>Mike</option>
                                               <option>Robby</option>
                                             </select>
+                                          ) : label === "Email" ? (
+                                            <div className="mt-2 flex items-center gap-2 lg:mt-1.5">
+                                              <p className="min-w-0 flex-1 break-words text-sm font-semibold text-slate-900 lg:text-[12px]">
+                                                {value}
+                                              </p>
+                                              <button
+                                                type="button"
+                                                disabled={!campaign.email}
+                                                onClick={(event) => {
+                                                  event.stopPropagation();
+                                                  handleCopyEmail(campaign);
+                                                }}
+                                                className="shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:text-slate-400 lg:px-2.5 lg:py-1.5 lg:text-[10px]"
+                                              >
+                                                {copiedEmailId === (campaign.id || campaign.email)
+                                                  ? "Copied!"
+                                                  : "Copy Email"}
+                                              </button>
+                                            </div>
                                           ) : (
-                                          <p className="mt-2 break-words text-sm font-semibold text-slate-900 lg:mt-1.5 lg:text-[12px]">
-                                            {value}
-                                          </p>
+                                            <p className="mt-2 break-words text-sm font-semibold text-slate-900 lg:mt-1.5 lg:text-[12px]">
+                                              {value}
+                                            </p>
                                           )}
                                         </div>
                                       ))}
