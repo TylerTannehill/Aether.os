@@ -36,6 +36,7 @@ export async function GET() {
           context_mode,
           aether_tier,
           abe_stage,
+          product_context,
           status,
           scheduled_deletion_at,
           created_at
@@ -49,9 +50,46 @@ export async function GET() {
       );
     }
 
+    const businessOrganizationIds = (organizations || [])
+      .filter((organization) => organization.product_context === "business")
+      .map((organization) => organization.id);
+
+    let modulesByOrganization = new Map<string, string[]>();
+
+    if (businessOrganizationIds.length > 0) {
+      const { data: moduleRows, error: moduleError } = await serviceSupabase
+        .from("business_organization_modules")
+        .select("organization_id, module")
+        .in("organization_id", businessOrganizationIds)
+        .order("module", { ascending: true });
+
+      if (moduleError) {
+        return NextResponse.json(
+          { error: moduleError.message },
+          { status: 500 }
+        );
+      }
+
+      modulesByOrganization = new Map<string, string[]>();
+
+      for (const row of moduleRows || []) {
+        const current = modulesByOrganization.get(row.organization_id) || [];
+        current.push(row.module);
+        modulesByOrganization.set(row.organization_id, current);
+      }
+    }
+
+    const enrichedOrganizations = (organizations || []).map((organization) => ({
+      ...organization,
+      business_modules:
+        organization.product_context === "business"
+          ? modulesByOrganization.get(organization.id) || []
+          : [],
+    }));
+
     return NextResponse.json({
       success: true,
-      organizations,
+      organizations: enrichedOrganizations,
     });
   } catch (err: any) {
     return NextResponse.json(

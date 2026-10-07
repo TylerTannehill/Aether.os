@@ -25,6 +25,15 @@ import {
 } from "lucide-react";
 
 type OrganizationStatus = "active" | "suspended" | string;
+type BusinessModule = "crm" | "marketing" | "inventory" | "dispatch" | "finance";
+
+const BUSINESS_MODULE_OPTIONS: { value: BusinessModule; label: string }[] = [
+  { value: "crm", label: "CRM" },
+  { value: "marketing", label: "Marketing" },
+  { value: "inventory", label: "Inventory" },
+  { value: "dispatch", label: "Dispatch" },
+  { value: "finance", label: "Finance" },
+];
 
 type Organization = {
   id: string;
@@ -33,6 +42,8 @@ type Organization = {
   context_mode: string | null;
   aether_tier: string | null;
   abe_stage: string | null;
+  product_context: string | null;
+  business_modules: string[];
   status: OrganizationStatus | null;
   scheduled_deletion_at: string | null;
   created_at: string | null;
@@ -51,6 +62,7 @@ type OrganizationEditForm = {
   aether_tier: string;
   abe_stage: string;
   status: string;
+  business_modules: BusinessModule[];
 };
 
 type StatusFilter =
@@ -81,6 +93,21 @@ function formatDate(value: string | null) {
     day: "numeric",
     year: "numeric",
   }).format(date);
+}
+
+function isBusinessOrganization(organization: Organization) {
+  return organization.product_context === "business";
+}
+
+function formatBusinessModules(modules: string[] | null | undefined) {
+  if (!modules || modules.length === 0) return "No modules provisioned";
+
+  const order = ["crm", "marketing", "inventory", "dispatch", "finance"];
+
+  return [...modules]
+    .sort((a, b) => order.indexOf(a) - order.indexOf(b))
+    .map((module) => (module === "crm" ? "CRM" : formatLabel(module)))
+    .join(", ");
 }
 
 function statusStyles(organization: Organization) {
@@ -123,6 +150,7 @@ export default function TeamAetherOrganizationsPage() {
     aether_tier: "t3",
     abe_stage: "early",
     status: "active",
+    business_modules: [],
   });
 
   const selectedOrganization = useMemo(
@@ -238,6 +266,10 @@ export default function TeamAetherOrganizationsPage() {
       aether_tier: selectedOrganization.aether_tier || "t3",
       abe_stage: selectedOrganization.abe_stage || "early",
       status: selectedOrganization.status || "active",
+      business_modules: (selectedOrganization.business_modules || []).filter(
+        (module): module is BusinessModule =>
+          BUSINESS_MODULE_OPTIONS.some((option) => option.value === module)
+      ),
     });
 
     setEditing(true);
@@ -268,6 +300,9 @@ export default function TeamAetherOrganizationsPage() {
             aether_tier: editForm.aether_tier,
             abe_stage: editForm.abe_stage,
             status: editForm.status,
+            ...(isBusinessOrganization(selectedOrganization)
+              ? { business_modules: editForm.business_modules }
+              : {}),
           }),
         }
       );
@@ -618,9 +653,9 @@ export default function TeamAetherOrganizationsPage() {
                   <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 lg:text-[10px]">
                     <tr>
                       <th className="px-5 py-4 lg:px-3.5 lg:py-2.5">Organization</th>
-                      <th className="px-5 py-4 lg:px-3.5 lg:py-2.5">Tier</th>
-                      <th className="px-5 py-4 lg:px-3.5 lg:py-2.5">Context</th>
-                      <th className="px-5 py-4 lg:px-3.5 lg:py-2.5">Abe Stage</th>
+                      <th className="px-5 py-4 lg:px-3.5 lg:py-2.5">Product</th>
+                      <th className="px-5 py-4 lg:px-3.5 lg:py-2.5">Provisioning</th>
+                      <th className="px-5 py-4 lg:px-3.5 lg:py-2.5">Strategy</th>
                       <th className="px-5 py-4 lg:px-3.5 lg:py-2.5">Status</th>
                       <th className="px-5 py-4 lg:px-3.5 lg:py-2.5">Created</th>
                     </tr>
@@ -658,15 +693,23 @@ export default function TeamAetherOrganizationsPage() {
                           </td>
 
                           <td className="px-5 py-4 font-medium lg:px-3.5 lg:py-2.5">
-                            {formatLabel(organization.aether_tier)}
+                            {isBusinessOrganization(organization)
+                              ? "Business"
+                              : "Political"}
                           </td>
 
                           <td className="px-5 py-4 lg:px-3.5 lg:py-2.5">
-                            {formatLabel(organization.context_mode)}
+                            {isBusinessOrganization(organization)
+                              ? formatBusinessModules(organization.business_modules)
+                              : `${formatLabel(organization.aether_tier)} · ${formatLabel(
+                                  organization.context_mode
+                                )}`}
                           </td>
 
                           <td className="px-5 py-4 lg:px-3.5 lg:py-2.5">
-                            {formatLabel(organization.abe_stage)}
+                            {isBusinessOrganization(organization)
+                              ? "Business A.B.E."
+                              : formatLabel(organization.abe_stage)}
                           </td>
 
                           <td className="px-5 py-4 lg:px-3.5 lg:py-2.5">
@@ -765,35 +808,61 @@ export default function TeamAetherOrganizationsPage() {
                 </p>
               </div>
 
-              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 lg:text-[10px]">
-                  <Building2 className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
-                  Aether Tier
-                </div>
-                <p className="mt-3 text-sm font-semibold lg:mt-2 lg:text-[12px]">
-                  {formatLabel(selectedOrganization.aether_tier)}
-                </p>
-              </div>
+              {isBusinessOrganization(selectedOrganization) ? (
+                <>
+                  <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
+                    <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 lg:text-[10px]">
+                      <Building2 className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
+                      Product
+                    </div>
+                    <p className="mt-3 text-sm font-semibold lg:mt-2 lg:text-[12px]">
+                      Business
+                    </p>
+                  </div>
 
-              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 lg:text-[10px]">
-                  <Flag className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
-                  Context
-                </div>
-                <p className="mt-3 text-sm font-semibold lg:mt-2 lg:text-[12px]">
-                  {formatLabel(selectedOrganization.context_mode)}
-                </p>
-              </div>
+                  <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 sm:col-span-2 lg:col-span-2 lg:rounded-xl lg:p-3">
+                    <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 lg:text-[10px]">
+                      <Tag className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
+                      Provisioned Modules
+                    </div>
+                    <p className="mt-3 text-sm font-semibold lg:mt-2 lg:text-[12px]">
+                      {formatBusinessModules(selectedOrganization.business_modules)}
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
+                    <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 lg:text-[10px]">
+                      <Building2 className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
+                      Aether Tier
+                    </div>
+                    <p className="mt-3 text-sm font-semibold lg:mt-2 lg:text-[12px]">
+                      {formatLabel(selectedOrganization.aether_tier)}
+                    </p>
+                  </div>
 
-              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 lg:text-[10px]">
-                  <Sparkles className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
-                  Abe Stage
-                </div>
-                <p className="mt-3 text-sm font-semibold lg:mt-2 lg:text-[12px]">
-                  {formatLabel(selectedOrganization.abe_stage)}
-                </p>
-              </div>
+                  <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
+                    <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 lg:text-[10px]">
+                      <Flag className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
+                      Context
+                    </div>
+                    <p className="mt-3 text-sm font-semibold lg:mt-2 lg:text-[12px]">
+                      {formatLabel(selectedOrganization.context_mode)}
+                    </p>
+                  </div>
+
+                  <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
+                    <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 lg:text-[10px]">
+                      <Sparkles className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
+                      Abe Stage
+                    </div>
+                    <p className="mt-3 text-sm font-semibold lg:mt-2 lg:text-[12px]">
+                      {formatLabel(selectedOrganization.abe_stage)}
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
 
             {editing ? (
@@ -809,7 +878,7 @@ export default function TeamAetherOrganizationsPage() {
                   </h3>
 
                   <p className="mt-1 text-sm text-slate-500 lg:text-[12px]">
-                    These controls are visual only until the update API is connected.
+                    Update organization settings and provisioning from this control panel.
                   </p>
                 </div>
 
@@ -846,6 +915,8 @@ export default function TeamAetherOrganizationsPage() {
                     />
                   </label>
 
+                  {!isBusinessOrganization(selectedOrganization) ? (
+                    <>
                   <label className="block">
                     <span className="text-sm font-semibold text-slate-900 lg:text-[12px]">
                       Political / Design Context
@@ -906,6 +977,61 @@ export default function TeamAetherOrganizationsPage() {
                     </select>
                   </label>
 
+                    </>
+                  ) : (
+                    <div className="md:col-span-2 rounded-3xl border border-slate-200 bg-slate-50 p-5 lg:rounded-xl lg:p-4">
+                      <div className="flex flex-col gap-1">
+                        <p className="text-sm font-semibold text-slate-900 lg:text-[12px]">
+                          Business Provisioning
+                        </p>
+                        <p className="text-xs text-slate-500 lg:text-[10px]">
+                          Select the operational modules provisioned for this organization.
+                        </p>
+                      </div>
+
+                      <div className="mt-4 flex flex-wrap gap-2 lg:mt-3">
+                        {BUSINESS_MODULE_OPTIONS.map((option) => {
+                          const active = editForm.business_modules.includes(
+                            option.value
+                          );
+
+                          return (
+                            <button
+                              key={option.value}
+                              type="button"
+                              onClick={() =>
+                                setEditForm((current) => {
+                                  const currentlyActive =
+                                    current.business_modules.includes(option.value);
+
+                                  return {
+                                    ...current,
+                                    business_modules: currentlyActive
+                                      ? current.business_modules.filter(
+                                          (module) => module !== option.value
+                                        )
+                                      : [...current.business_modules, option.value],
+                                  };
+                                })
+                              }
+                              className={`rounded-2xl border px-4 py-2.5 text-sm font-semibold transition lg:rounded-xl lg:px-3 lg:py-2 lg:text-[12px] ${
+                                active
+                                  ? "border-slate-950 bg-slate-950 text-white"
+                                  : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-100"
+                              }`}
+                            >
+                              {option.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      <p className="mt-3 text-xs text-slate-500 lg:text-[10px]">
+                        At least one Business module must remain selected.
+                      </p>
+                    </div>
+                  )}
+
                   <label className="block">
                     <span className="text-sm font-semibold text-slate-900 lg:text-[12px]">
                       Organization Status
@@ -930,7 +1056,11 @@ export default function TeamAetherOrganizationsPage() {
                   <button
                     type="button"
                     onClick={() => void handleVisualSave()}
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 lg:rounded-xl lg:px-3.5 lg:py-2.5 lg:text-[12px]"
+                    disabled={
+                      isBusinessOrganization(selectedOrganization) &&
+                      editForm.business_modules.length === 0
+                    }
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 lg:rounded-xl lg:px-3.5 lg:py-2.5 lg:text-[12px]"
                   >
                     <Save className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
                     Save Changes

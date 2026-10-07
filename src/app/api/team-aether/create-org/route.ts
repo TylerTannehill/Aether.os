@@ -46,6 +46,28 @@ export async function POST(request: Request) {
       .trim()
       .toLowerCase();
 
+    const productContext = String(
+      body?.product_context || "political"
+    )
+      .trim()
+      .toLowerCase();
+
+    const allowedBusinessModules = [
+      "crm",
+      "marketing",
+      "inventory",
+      "dispatch",
+      "finance",
+    ];
+
+    const requestedBusinessModules = Array.isArray(body?.business_modules)
+      ? body.business_modules
+          .map((module: unknown) => String(module || "").trim().toLowerCase())
+          .filter((module: string) => allowedBusinessModules.includes(module))
+      : [];
+
+    const businessModules = [...new Set(requestedBusinessModules)];
+
     if (!name) {
       return NextResponse.json(
         { error: "Organization name is required." },
@@ -71,6 +93,22 @@ export async function POST(request: Request) {
     if (!allowedTiers.includes(aetherTier)) {
       return NextResponse.json(
         { error: "Invalid Aether tier." },
+        { status: 400 }
+      );
+    }
+
+    const allowedProductContexts = ["political", "business"];
+
+    if (!allowedProductContexts.includes(productContext)) {
+      return NextResponse.json(
+        { error: "Invalid product context." },
+        { status: 400 }
+      );
+    }
+
+    if (productContext === "business" && businessModules.length === 0) {
+      return NextResponse.json(
+        { error: "Select at least one Business module." },
         { status: 400 }
       );
     }
@@ -117,8 +155,9 @@ export async function POST(request: Request) {
         .insert({
           name,
           slug,
-          context_mode: contextMode,
-          aether_tier: aetherTier,
+          context_mode: productContext === "business" ? "default" : contextMode,
+          aether_tier: productContext === "business" ? "t3" : aetherTier,
+          product_context: productContext === "business" ? "business" : null,
         })
         .select()
         .single();
@@ -154,6 +193,28 @@ export async function POST(request: Request) {
         },
         { status: 500 }
       );
+    }
+
+    if (productContext === "business") {
+      const { error: moduleError } = await serviceSupabase
+        .from("business_organization_modules")
+        .insert(
+          businessModules.map((module) => ({
+            organization_id: organization.id,
+            module,
+          }))
+        );
+
+      if (moduleError) {
+        return NextResponse.json(
+          {
+            error:
+              moduleError.message ||
+              "Organization created but Business module provisioning failed.",
+          },
+          { status: 500 }
+        );
+      }
     }
 
     return NextResponse.json({

@@ -212,6 +212,27 @@ export async function GET() {
 
     const isDemoOrg = organization?.slug === "aether-demo-campaign";
 
+    let businessModules: string[] = [];
+
+    if (organization?.product_context === "business") {
+      const { data: moduleRows, error: moduleError } = await databaseClient
+        .from("business_organization_modules")
+        .select("module")
+        .eq("organization_id", resolvedOrganizationId)
+        .order("module", { ascending: true });
+
+      if (moduleError) {
+        return NextResponse.json(
+          { error: moduleError.message },
+          { status: 500 }
+        );
+      }
+
+      businessModules = (moduleRows || [])
+        .map((row) => String(row.module || "").trim().toLowerCase())
+        .filter(Boolean);
+    }
+
     const response = NextResponse.json({
       user: {
         id: user.id,
@@ -220,6 +241,7 @@ export async function GET() {
         name: appUser.name ?? null,
       },
       organization,
+      business_modules: businessModules,
       membership: {
         id: membership.id,
         user_id: membership.user_id,

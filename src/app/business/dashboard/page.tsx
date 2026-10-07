@@ -88,6 +88,14 @@ const businessTrendDepartments: BusinessTrendDepartment[] = [
   "Finance",
 ];
 
+const businessTrendModuleKeys: Record<BusinessTrendDepartment, string> = {
+  CRM: "crm",
+  Marketing: "marketing",
+  Inventory: "inventory",
+  Dispatch: "dispatch",
+  Finance: "finance",
+};
+
 const businessTrendCopy: Record<BusinessTrendDepartment, string> = {
   CRM: "Customer relationship activity and movement will trend here.",
   Marketing: "Audience, content, and marketing performance will trend here.",
@@ -99,6 +107,7 @@ const businessTrendCopy: Record<BusinessTrendDepartment, string> = {
 export default function BusinessDashboardPage() {
   const [activeTrendDepartment, setActiveTrendDepartment] =
     useState<BusinessTrendDepartment>("CRM");
+  const [businessModules, setBusinessModules] = useState<Set<string>>(new Set());
   const [crmInteractions, setCrmInteractions] = useState<number | null>(null);
   const [crmFollowUps, setCrmFollowUps] = useState<number | null>(null);
   const [marketingImpressions, setMarketingImpressions] = useState<number | null>(null);
@@ -126,6 +135,26 @@ export default function BusinessDashboardPage() {
         const context = await contextResponse.json();
         const organizationId = context?.organization?.id;
         if (!organizationId) return;
+
+        const provisionedModules = new Set<string>(
+          (context?.business_modules || [])
+            .map((module: unknown) => String(module || "").trim().toLowerCase())
+            .filter(Boolean)
+        );
+
+        if (!cancelled) {
+          setBusinessModules(provisionedModules);
+
+          const firstProvisionedDepartment = businessTrendDepartments.find((department) =>
+            provisionedModules.has(businessTrendModuleKeys[department])
+          );
+
+          setActiveTrendDepartment((currentDepartment) =>
+            provisionedModules.has(businessTrendModuleKeys[currentDepartment])
+              ? currentDepartment
+              : firstProvisionedDepartment ?? currentDepartment
+          );
+        }
 
         const supabase = createClient();
         const { count, error } = await supabase
@@ -294,6 +323,10 @@ export default function BusinessDashboardPage() {
     };
   }, []);
 
+  const provisionedTrendDepartments = businessTrendDepartments.filter((department) =>
+    businessModules.has(businessTrendModuleKeys[department])
+  );
+
   return (
     <div className="space-y-8 lg:space-y-6">
       <section className="rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-6 text-white shadow-sm lg:rounded-2xl lg:p-[18px]">
@@ -372,7 +405,7 @@ export default function BusinessDashboardPage() {
             </div>
 
             <div className="flex flex-wrap gap-2">
-              {businessTrendDepartments.map((department) => {
+              {provisionedTrendDepartments.map((department) => {
                 const isActive = activeTrendDepartment === department;
 
                 return (
@@ -1348,7 +1381,13 @@ export default function BusinessDashboardPage() {
             ["Inventory", "Available Inventory", "Items Needing Reorder"],
             ["Dispatch", "Jobs Completed", "Active Jobs"],
             ["Finance", "Net Cash Movement", "Outstanding Obligations"],
-          ].map(([department, metricOne, metricTwo]) => (
+          ]
+            .filter(([department]) =>
+              businessModules.has(
+                businessTrendModuleKeys[department as BusinessTrendDepartment]
+              )
+            )
+            .map(([department, metricOne, metricTwo]) => (
             <div
               key={department}
               className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm lg:rounded-2xl lg:p-[18px]"

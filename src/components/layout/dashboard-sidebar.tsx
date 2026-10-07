@@ -59,6 +59,7 @@ type CurrentContextResponse = {
     title?: string | null;
   } | null;
   roles?: OrgMemberRole[];
+  business_modules?: string[];
   recovered_context?: boolean;
   error?: string;
 };
@@ -276,6 +277,7 @@ export function DashboardSidebar() {
   const [contextMode, setContextMode] = useState("default");
   const [aetherTier, setAetherTier] = useState<AetherTier>("t3");
   const [productContext, setProductContext] = useState<string | null>(null);
+  const [businessModules, setBusinessModules] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     let mounted = true;
@@ -311,6 +313,13 @@ export function DashboardSidebar() {
         setContextMode(organizationContextMode);
         setAetherTier(organizationTier);
         setProductContext(data.organization?.product_context ?? null);
+        setBusinessModules(
+          new Set(
+            (data.business_modules || [])
+              .map((module) => String(module || "").trim().toLowerCase())
+              .filter(Boolean)
+          )
+        );
 
         const nextDepartments = new Set<string>();
 
@@ -356,6 +365,7 @@ export function DashboardSidebar() {
 
         setAllowedDepartments(new Set());
         setHasAdminAccess(false);
+        setBusinessModules(new Set());
       } finally {
         if (mounted) {
           setRoleLoading(false);
@@ -374,7 +384,33 @@ export function DashboardSidebar() {
 
   const visibleNavItems = useMemo(() => {
     if (isBusiness) {
-      return businessNavItems;
+      return businessNavItems.filter((item) => {
+        if (item.href === "/business/dashboard") return true;
+        if (item.href === "/business/faq") return true;
+        if (item.href === "/business/tools") return true;
+
+        if (item.href === "/business/crm") {
+          return businessModules.has("crm");
+        }
+
+        if (item.href === "/business/marketing") {
+          return businessModules.has("marketing");
+        }
+
+        if (item.href === "/business/inventory") {
+          return businessModules.has("inventory");
+        }
+
+        if (item.href === "/business/dispatch") {
+          return businessModules.has("dispatch");
+        }
+
+        if (item.href === "/business/finance") {
+          return businessModules.has("finance");
+        }
+
+        return false;
+      });
     }
 
     const tierFiltered = politicalNavItems.filter((item) => {
@@ -418,6 +454,7 @@ export function DashboardSidebar() {
     roleLoading,
     aetherTier,
     isBusiness,
+    businessModules,
   ]);
 
   async function handleLogout() {

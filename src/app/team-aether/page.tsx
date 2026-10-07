@@ -17,6 +17,17 @@ import {
 
 type PoliticalMode = "default" | "democrat" | "republican";
 type AetherTier = "t1" | "t2" | "t3";
+type ProductType = "political" | "business";
+type BusinessDeployment = "smb" | "enterprise";
+type BusinessModule = "crm" | "marketing" | "inventory" | "dispatch" | "finance";
+
+const businessModuleOptions: { key: BusinessModule; label: string; description: string }[] = [
+  { key: "crm", label: "CRM", description: "Customer relationships, lists, interactions, and follow-up work." },
+  { key: "marketing", label: "Marketing", description: "Marketing analytics, content, spend, and audience response." },
+  { key: "inventory", label: "Inventory", description: "Inventory state, purchasing, deliveries, receiving, and reorder pressure." },
+  { key: "dispatch", label: "Dispatch", description: "Jobs, worker assignment, routing, and execution." },
+  { key: "finance", label: "Finance", description: "Operational money movement, obligations, transactions, and financial attention." },
+];
 
 function slugify(value: string) {
   return value
@@ -30,8 +41,11 @@ function slugify(value: string) {
 export default function TeamAetherPage() {
   const [orgName, setOrgName] = useState("");
   const [adminEmail, setAdminEmail] = useState("");
+  const [productType, setProductType] = useState<ProductType>("political");
   const [mode, setMode] = useState<PoliticalMode>("default");
   const [tier, setTier] = useState<AetherTier>("t3");
+  const [businessDeployment, setBusinessDeployment] = useState<BusinessDeployment>("smb");
+  const [businessModules, setBusinessModules] = useState<Set<BusinessModule>>(new Set(["crm"]));
 
   const [created, setCreated] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -67,8 +81,11 @@ export default function TeamAetherPage() {
           body: JSON.stringify({
             name: orgName,
             admin_email: adminEmail,
+            product_context: productType,
             context_mode: mode,
             aether_tier: tier,
+            business_modules:
+              productType === "business" ? Array.from(businessModules) : [],
           }),
         }
       );
@@ -85,8 +102,11 @@ export default function TeamAetherPage() {
 
       setOrgName("");
       setAdminEmail("");
+      setProductType("political");
       setMode("default");
       setTier("t3");
+      setBusinessDeployment("smb");
+      setBusinessModules(new Set(["crm"]));
     } catch (err: any) {
       setError(
         err?.message || "Failed to create organization."
@@ -112,6 +132,25 @@ export default function TeamAetherPage() {
     }
 
     return "border-slate-900 bg-slate-900 text-white ring-2 ring-slate-200";
+  }
+
+  function selectBusinessDeployment(deployment: BusinessDeployment) {
+    setBusinessDeployment(deployment);
+
+    if (deployment === "enterprise") {
+      setBusinessModules(new Set(businessModuleOptions.map((option) => option.key)));
+    }
+  }
+
+  function toggleBusinessModule(module: BusinessModule) {
+    if (businessDeployment === "enterprise") return;
+
+    setBusinessModules((current) => {
+      const next = new Set(current);
+      if (next.has(module)) next.delete(module);
+      else next.add(module);
+      return next;
+    });
   }
 
   return (
@@ -238,7 +277,7 @@ export default function TeamAetherPage() {
             </h2>
 
             <p className="mt-2 text-sm text-slate-500 lg:mt-1.5 lg:text-[12px]">
-              Assign political undertones and future integration visibility.
+              Apply Political context or configure Business module visibility.
             </p>
           </div>
 
@@ -299,7 +338,7 @@ export default function TeamAetherPage() {
               <input
                 value={orgName}
                 onChange={(event) => setOrgName(event.target.value)}
-                placeholder="Example: Morgan for Congress"
+                placeholder="Example: Morgan for Congress or Acme Services"
                 className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-400 lg:mt-1.5 lg:rounded-xl lg:px-3 lg:py-2.5 lg:text-[12px] lg:rounded-xl lg:px-3 lg:py-2.5 lg:mt-1.5 lg:text-[12px]"
               />
             </label>
@@ -315,177 +354,194 @@ export default function TeamAetherPage() {
             </div>
           </div>
 
-          {/* MODE BUTTONS */}
+          {/* PRODUCT */}
           <div className="mt-8 lg:mt-6">
             <p className="text-sm font-semibold text-slate-900 lg:text-[12px]">
-              Political / Design Context
+              Product
             </p>
 
-            <div className="mt-3 grid gap-3 lg:grid-cols-3 lg:gap-2 lg:mt-2">
-              <button
-                type="button"
-                onClick={() => setMode("democrat")}
-                className={`rounded-3xl border p-5 text-left transition lg:rounded-xl lg:p-4 ${buttonStyles(
-                  "democrat"
-                )}`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold">Democrat</span>
+            <div className="mt-3 grid gap-3 md:grid-cols-2 lg:gap-2 lg:mt-2">
+              {([
+                ["political", "Political", "Campaign operating system with Political context and tier controls."],
+                ["business", "Business", "SMB or Enterprise operating system with provisioned Business modules."],
+              ] as const).map(([value, label, description]) => {
+                const active = productType === value;
 
-                  {mode === "democrat" ? (
-                    <CheckCircle2 className="h-5 w-5 lg:h-4 lg:w-4" />
-                  ) : null}
-                </div>
-
-                <p className="mt-3 text-sm opacity-80 lg:mt-2 lg:text-[12px]">
-                  Blue undertones and Democratic integration visibility.
-                </p>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setMode("republican")}
-                className={`rounded-3xl border p-5 text-left transition lg:rounded-xl lg:p-4 ${buttonStyles(
-                  "republican"
-                )}`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold">Republican</span>
-
-                  {mode === "republican" ? (
-                    <CheckCircle2 className="h-5 w-5 lg:h-4 lg:w-4" />
-                  ) : null}
-                </div>
-
-                <p className="mt-3 text-sm opacity-80 lg:mt-2 lg:text-[12px]">
-                  Red undertones and Republican integration visibility.
-                </p>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setMode("default")}
-                className={`rounded-3xl border p-5 text-left transition lg:rounded-xl lg:p-4 ${buttonStyles(
-                  "default"
-                )}`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold">Default</span>
-
-                  {mode === "default" ? (
-                    <CheckCircle2 className="h-5 w-5 lg:h-4 lg:w-4" />
-                  ) : null}
-                </div>
-
-                <p className="mt-3 text-sm opacity-80 lg:mt-2 lg:text-[12px]">
-                  Neutral red/white/blue undertones with full visibility.
-                </p>
-              </button>
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setProductType(value)}
+                    className={`rounded-3xl border p-5 text-left transition lg:rounded-xl lg:p-4 ${
+                      active
+                        ? "border-slate-900 bg-slate-900 text-white ring-2 ring-slate-200"
+                        : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold">{label}</span>
+                      {active ? <CheckCircle2 className="h-5 w-5 lg:h-4 lg:w-4" /> : null}
+                    </div>
+                    <p className="mt-3 text-sm opacity-80 lg:mt-2 lg:text-[12px]">
+                      {description}
+                    </p>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-
-          {/* TIER */}
-          <div className="mt-8 lg:mt-6">
-            <p className="text-sm font-semibold text-slate-900 lg:text-[12px]">
-              Aether Tier
-            </p>
-
-            <div className="mt-3 grid gap-3 lg:grid-cols-3 lg:gap-2 lg:mt-2">
-              <button
-                type="button"
-                onClick={() => setTier("t1")}
-                className={`rounded-3xl border p-5 text-left transition lg:rounded-xl lg:p-4 ${
-                  tier === "t1"
-                    ? "border-slate-900 bg-slate-900 text-white ring-2 ring-slate-200"
-                    : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold">T1</span>
-
-                  {tier === "t1" ? (
-                    <CheckCircle2 className="h-5 w-5 lg:h-4 lg:w-4" />
-                  ) : null}
-                </div>
-
-                <p className="mt-3 text-sm opacity-80 lg:mt-2 lg:text-[12px]">
-                  Ground campaign operating layer designed for underfunded local races,
-                  candidates, volunteers, and lean field-first operations.
+          {productType === "political" ? (
+            <>
+              {/* POLITICAL MODE */}
+              <div className="mt-8 lg:mt-6">
+                <p className="text-sm font-semibold text-slate-900 lg:text-[12px]">
+                  Political / Design Context
                 </p>
 
-                <div className="mt-4 space-y-2 text-xs opacity-80 lg:mt-3 lg:text-[10px]">
-                  <p>• Finance + Digital hidden from UI</p>
-                  <p>• Dashboard Abe hidden</p>
-                  <p>• Department Abe hidden</p>
-                  <p>• Focused on outreach, field, lists, contacts, and print</p>
-                  <p>• Best for local races, township campaigns, and small operations</p>
+                <div className="mt-3 grid gap-3 lg:grid-cols-3 lg:gap-2 lg:mt-2">
+                  {([
+                    ["democrat", "Democrat", "Blue undertones and Democratic integration visibility."],
+                    ["republican", "Republican", "Red undertones and Republican integration visibility."],
+                    ["default", "Default", "Neutral red/white/blue undertones with full visibility."],
+                  ] as const).map(([value, label, description]) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setMode(value)}
+                      className={`rounded-3xl border p-5 text-left transition lg:rounded-xl lg:p-4 ${buttonStyles(value)}`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold">{label}</span>
+                        {mode === value ? <CheckCircle2 className="h-5 w-5 lg:h-4 lg:w-4" /> : null}
+                      </div>
+                      <p className="mt-3 text-sm opacity-80 lg:mt-2 lg:text-[12px]">
+                        {description}
+                      </p>
+                    </button>
+                  ))}
                 </div>
-              </button>
+              </div>
 
-              <button
-                type="button"
-                onClick={() => setTier("t2")}
-                className={`rounded-3xl border p-5 text-left transition lg:rounded-xl lg:p-4 ${
-                  tier === "t2"
-                    ? "border-slate-900 bg-slate-900 text-white ring-2 ring-slate-200"
-                    : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold">T2</span>
-
-                  {tier === "t2" ? (
-                    <CheckCircle2 className="h-5 w-5 lg:h-4 lg:w-4" />
-                  ) : null}
-                </div>
-
-                <p className="mt-3 text-sm opacity-80 lg:mt-2 lg:text-[12px]">
-                  Full operational campaign workspace for growing teams running
-                  coordinated statewide or legislative operations.
+              {/* POLITICAL TIER */}
+              <div className="mt-8 lg:mt-6">
+                <p className="text-sm font-semibold text-slate-900 lg:text-[12px]">
+                  Aether Tier
                 </p>
 
-                <div className="mt-4 space-y-2 text-xs opacity-80 lg:mt-3 lg:text-[10px]">
-                  <p>• Dashboard Abe visible</p>
-                  <p>• Department Abe hidden</p>
-                  <p>• Finance + Digital fully visible</p>
-                  <p>• Integrations enabled</p>
-                  <p>• Best for state rep, state senate, mayoral, and medium-sized races</p>
+                <div className="mt-3 grid gap-3 lg:grid-cols-3 lg:gap-2 lg:mt-2">
+                  {([
+                    ["t1", "T1", "Ground campaign operating layer for lean local and field-first operations."],
+                    ["t2", "T2", "Full operational campaign workspace for growing coordinated teams."],
+                    ["t3", "T3", "Full strategic command infrastructure for high-scale campaign organizations."],
+                  ] as const).map(([value, label, description]) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setTier(value)}
+                      className={`rounded-3xl border p-5 text-left transition lg:rounded-xl lg:p-4 ${
+                        tier === value
+                          ? "border-slate-900 bg-slate-900 text-white ring-2 ring-slate-200"
+                          : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold">{label}</span>
+                        {tier === value ? <CheckCircle2 className="h-5 w-5 lg:h-4 lg:w-4" /> : null}
+                      </div>
+                      <p className="mt-3 text-sm opacity-80 lg:mt-2 lg:text-[12px]">
+                        {description}
+                      </p>
+                    </button>
+                  ))}
                 </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setTier("t3")}
-                className={`rounded-3xl border p-5 text-left transition lg:rounded-xl lg:p-4 ${
-                  tier === "t3"
-                    ? "border-slate-900 bg-slate-900 text-white ring-2 ring-slate-200"
-                    : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold">T3</span>
-
-                  {tier === "t3" ? (
-                    <CheckCircle2 className="h-5 w-5 lg:h-4 lg:w-4" />
-                  ) : null}
-                </div>
-
-                <p className="mt-3 text-sm opacity-80 lg:mt-2 lg:text-[12px]">
-                  Full strategic command infrastructure for high-scale campaign organizations
-                  operating across multiple departments and leadership layers.
+              </div>
+            </>
+          ) : (
+            <>
+              {/* BUSINESS DEPLOYMENT */}
+              <div className="mt-8 lg:mt-6">
+                <p className="text-sm font-semibold text-slate-900 lg:text-[12px]">
+                  Business Deployment
                 </p>
 
-                <div className="mt-4 space-y-2 text-xs opacity-80 lg:mt-3 lg:text-[10px]">
-                  <p>• Full Aether Political intelligence stack</p>
-                  <p>• Dashboard Abe + Department Abe visible</p>
-                  <p>• Tools workspace enabled</p>
-                  <p>• Full integrations + orchestration visibility</p>
-                  <p>• Best for congressional, senate, governor, PAC, and national-scale races</p>
+                <div className="mt-3 grid gap-3 md:grid-cols-2 lg:gap-2 lg:mt-2">
+                  {([
+                    ["smb", "SMB / À la carte", "Choose the Business modules included in this deployment."],
+                    ["enterprise", "Enterprise", "Provision the complete Business operating system."],
+                  ] as const).map(([value, label, description]) => {
+                    const active = businessDeployment === value;
+                    return (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => selectBusinessDeployment(value)}
+                        className={`rounded-3xl border p-5 text-left transition lg:rounded-xl lg:p-4 ${
+                          active
+                            ? "border-slate-900 bg-slate-900 text-white ring-2 ring-slate-200"
+                            : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold">{label}</span>
+                          {active ? <CheckCircle2 className="h-5 w-5 lg:h-4 lg:w-4" /> : null}
+                        </div>
+                        <p className="mt-3 text-sm opacity-80 lg:mt-2 lg:text-[12px]">
+                          {description}
+                        </p>
+                      </button>
+                    );
+                  })}
                 </div>
-              </button>
-            </div>
-          </div>
+              </div>
+
+              {/* BUSINESS MODULES */}
+              <div className="mt-8 lg:mt-6">
+                <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900 lg:text-[12px]">
+                      Provisioned Modules
+                    </p>
+                    <p className="mt-1 text-sm text-slate-500 lg:text-[12px]">
+                      Overview, Tools, and FAQ are included with every Business deployment.
+                    </p>
+                  </div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 lg:text-[10px]">
+                    {businessModules.size} of {businessModuleOptions.length} selected
+                  </p>
+                </div>
+
+                <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-5 lg:gap-2 lg:mt-2">
+                  {businessModuleOptions.map((option) => {
+                    const active = businessModules.has(option.key);
+                    const locked = businessDeployment === "enterprise";
+
+                    return (
+                      <button
+                        key={option.key}
+                        type="button"
+                        onClick={() => toggleBusinessModule(option.key)}
+                        disabled={locked}
+                        className={`rounded-3xl border p-5 text-left transition lg:rounded-xl lg:p-4 ${
+                          active
+                            ? "border-slate-900 bg-slate-900 text-white ring-2 ring-slate-200"
+                            : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
+                        } ${locked ? "cursor-default" : ""}`}
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-semibold">{option.label}</span>
+                          {active ? <CheckCircle2 className="h-5 w-5 shrink-0 lg:h-4 lg:w-4" /> : null}
+                        </div>
+                        <p className="mt-3 text-sm opacity-80 lg:mt-2 lg:text-[12px]">
+                          {option.description}
+                        </p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </>
+          )}
 
           {/* ADMIN */}
           <div className="mt-8 lg:mt-6">
