@@ -274,6 +274,7 @@ export function DashboardSidebar() {
   );
 
   const [hasAdminAccess, setHasAdminAccess] = useState(false);
+  const [businessAdminAccess, setBusinessAdminAccess] = useState(false);
   const [contextMode, setContextMode] = useState("default");
   const [aetherTier, setAetherTier] = useState<AetherTier>("t3");
   const [productContext, setProductContext] = useState<string | null>(null);
@@ -358,6 +359,10 @@ export function DashboardSidebar() {
 
         setAllowedDepartments(nextDepartments);
         setHasAdminAccess(hasRoleAdmin || hasBaseAdmin);
+        setBusinessAdminAccess(
+          data.organization?.product_context === "business" &&
+          normalizeRoleLevel(currentMember?.role) === "admin"
+        );
       } catch (error: any) {
         if (!mounted) return;
 
@@ -365,6 +370,7 @@ export function DashboardSidebar() {
 
         setAllowedDepartments(new Set());
         setHasAdminAccess(false);
+        setBusinessAdminAccess(false);
         setBusinessModules(new Set());
       } finally {
         if (mounted) {
@@ -389,27 +395,9 @@ export function DashboardSidebar() {
         if (item.href === "/business/faq") return true;
         if (item.href === "/business/tools") return true;
 
-        if (item.href === "/business/crm") {
-          return businessModules.has("crm");
-        }
-
-        if (item.href === "/business/marketing") {
-          return businessModules.has("marketing");
-        }
-
-        if (item.href === "/business/inventory") {
-          return businessModules.has("inventory");
-        }
-
-        if (item.href === "/business/dispatch") {
-          return businessModules.has("dispatch");
-        }
-
-        if (item.href === "/business/finance") {
-          return businessModules.has("finance");
-        }
-
-        return false;
+        const module = item.href.replace("/business/", "");
+        return businessModules.has(module) &&
+          (businessAdminAccess || allowedDepartments.has(module));
       });
     }
 
@@ -455,6 +443,7 @@ export function DashboardSidebar() {
     aetherTier,
     isBusiness,
     businessModules,
+    businessAdminAccess,
   ]);
 
   async function handleLogout() {

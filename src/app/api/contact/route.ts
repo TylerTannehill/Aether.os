@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 
 interface ContactRequest {
-  type: "demo" | "contact" | "support" | "security";
+  type: "demo" | "contact" | "support" | "security" | "module_request";
   name: string;
   email: string;
   organization?: string;
@@ -26,6 +26,7 @@ const subjectMap = {
   contact: "Contact Request",
   support: "Support Request",
   security: "Security Inquiry",
+  module_request: "Business Module Request",
 } as const;
 
 export async function POST(request: NextRequest) {

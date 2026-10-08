@@ -110,14 +110,21 @@ export default function BusinessDashboardPage() {
   const [businessModules, setBusinessModules] = useState<Set<string>>(new Set());
   const [crmInteractions, setCrmInteractions] = useState<number | null>(null);
   const [crmFollowUps, setCrmFollowUps] = useState<number | null>(null);
+  const [crmFocusListCount, setCrmFocusListCount] = useState<number | null>(null);
+  const [crmFocusFollowUpCount, setCrmFocusFollowUpCount] = useState<number | null>(null);
   const [marketingImpressions, setMarketingImpressions] = useState<number | null>(null);
   const [marketingEngagements, setMarketingEngagements] = useState<number | null>(null);
+  const [marketingContentStages, setMarketingContentStages] = useState<Record<string, number> | null>(null);
   const [inventoryAvailable, setInventoryAvailable] = useState<number | null>(null);
   const [inventoryReorderCount, setInventoryReorderCount] = useState<number | null>(null);
+  const [inventoryDraftOrders, setInventoryDraftOrders] = useState<number | null>(null);
+  const [inventoryPendingDeliveries, setInventoryPendingDeliveries] = useState<number | null>(null);
   const [dispatchCompletedCount, setDispatchCompletedCount] = useState<number | null>(null);
   const [dispatchActiveCount, setDispatchActiveCount] = useState<number | null>(null);
+  const [dispatchFocusLanes, setDispatchFocusLanes] = useState<{ assign: number; route: number; execute: number } | null>(null);
   const [financeNetCashMovement, setFinanceNetCashMovement] = useState<number | null>(null);
   const [financeOutstandingObligations, setFinanceOutstandingObligations] = useState<number | null>(null);
+  const [financeFocusLanes, setFinanceFocusLanes] = useState<{ receive: number; pay: number; review: number } | null>(null);
   const [crmTrendData, setCrmTrendData] = useState<CrmTrendPoint[]>([]);
   const [marketingTrendData, setMarketingTrendData] = useState<MarketingTrendPoint[]>([]);
   const [inventoryTrendData, setInventoryTrendData] = useState<InventoryTrendPoint[]>([]);
@@ -157,6 +164,20 @@ export default function BusinessDashboardPage() {
         }
 
         const supabase = createClient();
+        let contentStages: Record<string, number> | null = null;
+        if (provisionedModules.has("marketing")) {
+          const { data: contentRows, error: contentError } = await supabase
+            .from("business_marketing_content")
+            .select("stage")
+            .eq("organization_id", organizationId)
+            .is("archived_at", null);
+          if (contentError) throw contentError;
+          contentStages = {};
+          for (const row of contentRows ?? []) {
+            const stage = String(row.stage ?? "unknown").trim().toLowerCase() || "unknown";
+            contentStages[stage] = (contentStages[stage] ?? 0) + 1;
+          }
+        }
         const { count, error } = await supabase
           .from("business_interactions")
           .select("id", { count: "exact", head: true })
@@ -170,6 +191,22 @@ export default function BusinessDashboardPage() {
           .eq("organization_id", organizationId);
 
         if (followUpError) throw followUpError;
+
+        const { count: crmListCount, error: crmListError } = await supabase
+          .from("business_lists")
+          .select("id", { count: "exact", head: true })
+          .eq("organization_id", organizationId)
+          .eq("department", "CRM");
+
+        if (crmListError) throw crmListError;
+
+        const { count: crmFocusFollowUpTotal, error: crmFocusFollowUpError } = await supabase
+          .from("business_follow_ups")
+          .select("id", { count: "exact", head: true })
+          .eq("organization_id", organizationId)
+          .eq("department", "CRM");
+
+        if (crmFocusFollowUpError) throw crmFocusFollowUpError;
 
         const { data: impressionTotal, error: marketingError } = await supabase.rpc(
           "get_business_marketing_impressions",
@@ -199,6 +236,32 @@ export default function BusinessDashboardPage() {
 
         if (inventoryReorderError) throw inventoryReorderError;
 
+        let draftOrderCount: number | null = null;
+        let pendingDeliveryCount: number | null = null;
+        if (provisionedModules.has("inventory")) {
+          const { data: purchaseOrders, error: purchaseOrdersError } = await supabase
+            .from("business_purchase_orders")
+            .select("id, status")
+            .eq("organization_id", organizationId);
+          if (purchaseOrdersError) throw purchaseOrdersError;
+
+          draftOrderCount = (purchaseOrders ?? []).filter((order) => order.status === "draft").length;
+          const receivingOrderIds = (purchaseOrders ?? [])
+            .filter((order) => order.status === "ordered" || order.status === "partially_received")
+            .map((order) => order.id);
+
+          pendingDeliveryCount = 0;
+          if (receivingOrderIds.length > 0) {
+            const { count: deliveryCount, error: deliveryError } = await supabase
+              .from("business_inventory_deliveries")
+              .select("id", { count: "exact", head: true })
+              .in("purchase_order_id", receivingOrderIds)
+              .is("received_at", null);
+            if (deliveryError) throw deliveryError;
+            pendingDeliveryCount = deliveryCount ?? 0;
+          }
+        }
+
         const { data: dispatchCompletedTotal, error: dispatchCompletedError } =
           await supabase.rpc("get_business_dispatch_completed_count", {
             p_organization_id: organizationId,
@@ -213,6 +276,40 @@ export default function BusinessDashboardPage() {
 
         if (dispatchActiveError) throw dispatchActiveError;
 
+        let dispatchLanes: { assign: number; route: number; execute: number } | null = null;
+        if (provisionedModules.has("dispatch")) {
+          const { data: jobs, error: jobsError } = await supabase
+            .from("business_dispatch_jobs")
+            .select("id, status, assigned_user_id")
+            .eq("organization_id", organizationId);
+          if (jobsError) throw jobsError;
+
+          const { data: routes, error: routesError } = await supabase
+            .from("business_dispatch_routes")
+            .select("id")
+            .eq("organization_id", organizationId);
+          if (routesError) throw routesError;
+
+          const routeIds = (routes ?? []).map((route) => route.id);
+          const routedJobIds = new Set<string>();
+          if (routeIds.length > 0) {
+            const { data: memberships, error: membershipsError } = await supabase
+              .from("business_dispatch_route_jobs")
+              .select("dispatch_job_id")
+              .in("route_id", routeIds);
+            if (membershipsError) throw membershipsError;
+            for (const membership of memberships ?? []) routedJobIds.add(membership.dispatch_job_id);
+          }
+
+          dispatchLanes = { assign: 0, route: 0, execute: 0 };
+          for (const job of jobs ?? []) {
+            if (job.status === "completed") continue;
+            if (!job.assigned_user_id) dispatchLanes.assign += 1;
+            else if (!routedJobIds.has(job.id)) dispatchLanes.route += 1;
+            else dispatchLanes.execute += 1;
+          }
+        }
+
         const { data: financeNetCashTotal, error: financeNetCashError } =
           await supabase.rpc("get_business_finance_net_cash_movement", {
             p_organization_id: organizationId,
@@ -226,6 +323,38 @@ export default function BusinessDashboardPage() {
           });
 
         if (financeOutstandingError) throw financeOutstandingError;
+
+        let financeLanes: { receive: number; pay: number; review: number } | null = null;
+        if (provisionedModules.has("finance")) {
+          const { count: receiveCount, error: receiveError } = await supabase
+            .from("business_finance_obligations")
+            .select("id", { count: "exact", head: true })
+            .eq("organization_id", organizationId)
+            .eq("direction", "in")
+            .eq("status", "open");
+          if (receiveError) throw receiveError;
+
+          const { count: payCount, error: payError } = await supabase
+            .from("business_finance_obligations")
+            .select("id", { count: "exact", head: true })
+            .eq("organization_id", organizationId)
+            .eq("direction", "out")
+            .eq("status", "open");
+          if (payError) throw payError;
+
+          const { count: reviewCount, error: reviewError } = await supabase
+            .from("business_finance_transactions")
+            .select("id", { count: "exact", head: true })
+            .eq("organization_id", organizationId)
+            .eq("needs_review", true);
+          if (reviewError) throw reviewError;
+
+          financeLanes = {
+            receive: receiveCount ?? 0,
+            pay: payCount ?? 0,
+            review: reviewCount ?? 0,
+          };
+        }
 
         const { data: crmTrendRows, error: crmTrendError } = await supabase.rpc(
           "get_business_crm_trends",
@@ -265,14 +394,21 @@ export default function BusinessDashboardPage() {
         if (!cancelled) {
           setCrmInteractions(count ?? 0);
           setCrmFollowUps(followUpCount ?? 0);
+          setCrmFocusListCount(crmListCount ?? 0);
+          setCrmFocusFollowUpCount(crmFocusFollowUpTotal ?? 0);
           setMarketingImpressions(Number(impressionTotal ?? 0));
           setMarketingEngagements(Number(engagementTotal ?? 0));
+          setMarketingContentStages(contentStages);
           setInventoryAvailable(Number(inventoryAvailableTotal ?? 0));
           setInventoryReorderCount(Number(inventoryReorderTotal ?? 0));
+          setInventoryDraftOrders(draftOrderCount);
+          setInventoryPendingDeliveries(pendingDeliveryCount);
           setDispatchCompletedCount(Number(dispatchCompletedTotal ?? 0));
           setDispatchActiveCount(Number(dispatchActiveTotal ?? 0));
+          setDispatchFocusLanes(dispatchLanes);
           setFinanceNetCashMovement(Number(financeNetCashTotal ?? 0));
           setFinanceOutstandingObligations(Number(financeOutstandingTotal ?? 0));
+          setFinanceFocusLanes(financeLanes);
           setCrmTrendData(
             fillCrmTrendDates(
               ((crmTrendRows ?? []) as CrmTrendPoint[]).map((row) => ({
@@ -327,6 +463,231 @@ export default function BusinessDashboardPage() {
     businessModules.has(businessTrendModuleKeys[department])
   );
 
+  const abeMetricsReady =
+    businessModules.size > 0 &&
+    (!businessModules.has("crm") ||
+      (crmInteractions !== null &&
+        crmFollowUps !== null &&
+        crmFocusListCount !== null &&
+        crmFocusFollowUpCount !== null)) &&
+    (!businessModules.has("marketing") ||
+      (marketingImpressions !== null && marketingEngagements !== null && marketingContentStages !== null)) &&
+    (!businessModules.has("inventory") ||
+      (inventoryAvailable !== null && inventoryReorderCount !== null &&
+        inventoryDraftOrders !== null && inventoryPendingDeliveries !== null)) &&
+    (!businessModules.has("dispatch") ||
+      (dispatchCompletedCount !== null && dispatchActiveCount !== null && dispatchFocusLanes !== null)) &&
+    (!businessModules.has("finance") ||
+      (financeNetCashMovement !== null && financeOutstandingObligations !== null && financeFocusLanes !== null));
+
+  const abeBrief: string[] = [];
+
+  const formatAbeCurrency = (value: number) =>
+    value < 0
+      ? `-$${Math.abs(value).toLocaleString()}`
+      : `$${value.toLocaleString()}`;
+
+  if (abeMetricsReady) {
+    const activeModuleCount = businessModules.size;
+    const pressureAreas: string[] = [];
+
+    if (businessModules.has("crm") && Number(crmFollowUps) > 0) pressureAreas.push("CRM");
+    if (businessModules.has("inventory") && Number(inventoryReorderCount) > 0)
+      pressureAreas.push("Inventory");
+    if (businessModules.has("dispatch") && Number(dispatchActiveCount) > 0)
+      pressureAreas.push("Dispatch");
+    if (businessModules.has("finance") && Number(financeOutstandingObligations) > 0)
+      pressureAreas.push("Finance");
+
+    if (pressureAreas.length === 0) {
+      abeBrief.push(
+        `Across the ${activeModuleCount === 1 ? "provisioned area" : `${activeModuleCount} provisioned areas`} I can see, the current metrics do not show an immediate operational exception. Here is what the business is showing right now.`
+      );
+    } else if (pressureAreas.length === 1) {
+      abeBrief.push(
+        `The business is active, with the clearest current attention point showing in ${pressureAreas[0]}. The rest of the picture is best understood alongside that pressure rather than as a separate issue.`
+      );
+    } else {
+      const lastArea = pressureAreas[pressureAreas.length - 1];
+      const leadingAreas = pressureAreas.slice(0, -1).join(", ");
+      abeBrief.push(
+        `The business is carrying active work across several areas. Current attention is showing in ${leadingAreas} and ${lastArea}, while the remaining provisioned operations provide the broader context around that workload.`
+      );
+    }
+
+    if (businessModules.has("crm")) {
+      const interactions = Number(crmInteractions);
+      const followUps = Number(crmFollowUps);
+
+      if (interactions === 0 && followUps === 0) {
+        abeBrief.push(
+          "CRM is quiet right now. There are no recorded interactions or follow-ups yet, so there is not enough activity here to describe a customer-work pattern."
+        );
+      } else if (followUps === 0) {
+        abeBrief.push(
+          `CRM has recorded ${interactions.toLocaleString()} ${interactions === 1 ? "interaction" : "interactions"}, with no follow-ups currently recorded. Customer activity is present, but the metrics here are not showing a follow-up workload alongside it.`
+        );
+      } else if (interactions === 0) {
+        abeBrief.push(
+          `CRM has ${followUps.toLocaleString()} ${followUps === 1 ? "follow-up" : "follow-ups"} recorded even though no interactions are currently reflected in the dashboard count. That puts the visible CRM workload on follow-up activity rather than newly recorded interactions.`
+        );
+      } else {
+        abeBrief.push(
+          `CRM shows ${interactions.toLocaleString()} ${interactions === 1 ? "interaction" : "interactions"} and ${followUps.toLocaleString()} ${followUps === 1 ? "follow-up" : "follow-ups"}. Customer activity is being recorded, and there is still follow-up work sitting alongside that activity.`
+        );
+      }
+
+      const focusLists = Number(crmFocusListCount);
+      const focusFollowUps = Number(crmFocusFollowUpCount);
+
+      if (focusLists === 0 && focusFollowUps === 0) {
+        abeBrief.push(
+          "CRM Focus is not carrying any list work or CRM follow-up work right now. The high-level CRM activity exists without a current execution queue in those two lanes."
+        );
+      } else if (focusLists > 0 && focusFollowUps > 0) {
+        abeBrief.push(
+          `CRM Focus currently has ${focusLists.toLocaleString()} ${focusLists === 1 ? "list" : "lists"} available to work and ${focusFollowUps.toLocaleString()} CRM ${focusFollowUps === 1 ? "follow-up" : "follow-ups"} in the execution picture. The CRM workload is therefore split between list-based outreach and direct follow-up work.`
+        );
+      } else if (focusLists > 0) {
+        abeBrief.push(
+          `CRM Focus currently has ${focusLists.toLocaleString()} ${focusLists === 1 ? "list" : "lists"} available to work, with no CRM follow-ups in that execution view. The immediate CRM workload is concentrated in list-based work.`
+        );
+      } else {
+        abeBrief.push(
+          `CRM Focus currently has ${focusFollowUps.toLocaleString()} CRM ${focusFollowUps === 1 ? "follow-up" : "follow-ups"} in the execution picture, with no CRM lists currently represented there. The immediate CRM workload is concentrated in direct follow-up work.`
+        );
+      }
+    }
+
+    if (businessModules.has("marketing")) {
+      const impressions = Number(marketingImpressions);
+      const engagements = Number(marketingEngagements);
+      const engagementRate = impressions > 0 ? (engagements / impressions) * 100 : null;
+
+      if (impressions === 0 && engagements === 0) {
+        abeBrief.push(
+          "Marketing is not showing measurable audience activity yet. With no impressions or engagements recorded, there is not enough signal here to describe performance."
+        );
+      } else if (impressions > 0 && engagements === 0) {
+        abeBrief.push(
+          `Marketing has generated ${impressions.toLocaleString()} ${impressions === 1 ? "impression" : "impressions"}, but no engagements are recorded against that reach. The audience is being reached, while the current dashboard metrics are not yet showing interaction with that exposure.`
+        );
+      } else if (engagementRate !== null) {
+        abeBrief.push(
+          `Marketing has generated ${impressions.toLocaleString()} impressions and ${engagements.toLocaleString()} engagements, which puts recorded engagement at ${engagementRate.toFixed(1)}% of impressions. That gives the business a measurable audience-response baseline without assigning a good-or-bad judgment to the rate itself.`
+        );
+      } else {
+        abeBrief.push(
+          `Marketing has ${engagements.toLocaleString()} recorded ${engagements === 1 ? "engagement" : "engagements"}, but no impressions are currently reflected in the dashboard total. The activity is real, though the available metrics do not support a broader reach comparison yet.`
+        );
+      }
+
+      const stages = Object.entries(marketingContentStages ?? {});
+      const unpublished = stages.filter(([stage]) => stage !== "published");
+      const unpublishedCount = unpublished.reduce((total, [, count]) => total + count, 0);
+      const publishedCount = marketingContentStages?.published ?? 0;
+      const stageDetails = unpublished
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([stage, count]) => `${count.toLocaleString()} in ${stage.replace(/_/g, " ")}`)
+        .join(", ");
+      if (unpublishedCount === 0 && publishedCount === 0) {
+        abeBrief.push("Marketing Focus has no non-archived content in its publishing workflow yet.");
+      } else {
+        abeBrief.push(
+          `Marketing Focus has ${unpublishedCount.toLocaleString()} unpublished content ${unpublishedCount === 1 ? "item" : "items"}${stageDetails ? ` (${stageDetails})` : ""}, alongside ${publishedCount.toLocaleString()} published ${publishedCount === 1 ? "item" : "items"}. Unpublished content remains in the production workflow; published content has completed that stage.`
+        );
+      }
+    }
+
+    if (businessModules.has("inventory")) {
+      const available = Number(inventoryAvailable);
+      const reorderCount = Number(inventoryReorderCount);
+
+      if (reorderCount === 0) {
+        abeBrief.push(
+          `Inventory shows ${available.toLocaleString()} available ${available === 1 ? "unit" : "units"}, with no items currently flagged for reorder attention. Based on the dashboard metrics available here, replenishment pressure is not showing at the moment.`
+        );
+      } else if (reorderCount === 1) {
+        abeBrief.push(
+          `Inventory has ${available.toLocaleString()} available ${available === 1 ? "unit" : "units"}, with one item currently needing reorder attention. That does not establish a broad inventory problem, but it does identify a specific replenishment need inside the current stock picture.`
+        );
+      } else {
+        abeBrief.push(
+          `Inventory has ${available.toLocaleString()} available ${available === 1 ? "unit" : "units"}, while ${reorderCount.toLocaleString()} items currently need reorder attention. Replenishment pressure is therefore spread across multiple items rather than isolated to a single stock need.`
+        );
+      }
+
+      const draftOrders = Number(inventoryDraftOrders);
+      const pendingDeliveries = Number(inventoryPendingDeliveries);
+      abeBrief.push(
+        `Inventory Focus currently shows ${reorderCount.toLocaleString()} ${reorderCount === 1 ? "item" : "items"} needing reorder attention, ${draftOrders.toLocaleString()} draft purchase ${draftOrders === 1 ? "order" : "orders"}, and ${pendingDeliveries.toLocaleString()} unreceived ${pendingDeliveries === 1 ? "delivery" : "deliveries"} tied to ordered or partially received purchase orders. Draft orders remain in purchasing; unreceived deliveries remain in receiving.`
+      );
+    }
+
+    if (businessModules.has("dispatch")) {
+      const active = Number(dispatchActiveCount);
+      const completed = Number(dispatchCompletedCount);
+
+      if (active === 0 && completed === 0) {
+        abeBrief.push(
+          "Dispatch is quiet right now. There are no active or completed jobs reflected in the current dashboard metrics, so there is no visible job flow to interpret yet."
+        );
+      } else if (active === 0) {
+        abeBrief.push(
+          `Dispatch shows ${completed.toLocaleString()} completed ${completed === 1 ? "job" : "jobs"} and no active jobs. The visible workload has moved to completion, with nothing currently sitting in the active-job count.`
+        );
+      } else if (completed === 0) {
+        abeBrief.push(
+          `Dispatch is carrying ${active.toLocaleString()} active ${active === 1 ? "job" : "jobs"}, with no completed jobs recorded yet. The current job picture is therefore concentrated on work still in motion rather than completed execution.`
+        );
+      } else {
+        abeBrief.push(
+          `Dispatch has ${active.toLocaleString()} active ${active === 1 ? "job" : "jobs"} alongside ${completed.toLocaleString()} completed ${completed === 1 ? "job" : "jobs"}. Work is moving through the operation, with both active execution and completed output visible in the current picture.`
+        );
+      }
+
+      const lanes = dispatchFocusLanes;
+      if (lanes) {
+        abeBrief.push(
+          `Dispatch Focus currently has ${lanes.assign.toLocaleString()} ${lanes.assign === 1 ? "job" : "jobs"} awaiting assignment, ${lanes.route.toLocaleString()} assigned ${lanes.route === 1 ? "job" : "jobs"} awaiting routing, and ${lanes.execute.toLocaleString()} ${lanes.execute === 1 ? "job" : "jobs"} in the execution lane. Each unfinished job is counted in only one lane.`
+        );
+      }
+    }
+
+    if (businessModules.has("finance")) {
+      const outstanding = Number(financeOutstandingObligations);
+      const cashMovement = Number(financeNetCashMovement);
+
+      if (outstanding === 0 && cashMovement === 0) {
+        abeBrief.push(
+          "Finance is currently neutral in the metrics shown here. There is no net cash movement and no outstanding obligation balance reflected on the dashboard."
+        );
+      } else if (outstanding === 0) {
+        abeBrief.push(
+          `Finance shows ${formatAbeCurrency(cashMovement)} in net cash movement with no outstanding obligations. Money has moved through the business, while the current dashboard is not showing unresolved financial commitments alongside it.`
+        );
+      } else if (cashMovement === 0) {
+        abeBrief.push(
+          `Finance is carrying $${outstanding.toLocaleString()} in outstanding obligations while net cash movement is currently $0. The financial picture therefore includes commitments still in motion even though the dashboard is not showing net movement alongside them.`
+        );
+      } else {
+        abeBrief.push(
+          `Finance shows ${formatAbeCurrency(cashMovement)} in net cash movement and $${outstanding.toLocaleString()} in outstanding obligations. Money is moving through the business, but the current financial picture also includes commitments that remain unresolved.`
+        );
+      }
+
+      const lanes = financeFocusLanes;
+      if (lanes) {
+        abeBrief.push(
+          `Finance Focus currently has ${lanes.receive.toLocaleString()} incoming ${lanes.receive === 1 ? "obligation" : "obligations"} awaiting receipt, ${lanes.pay.toLocaleString()} outgoing ${lanes.pay === 1 ? "obligation" : "obligations"} awaiting payment, and ${lanes.review.toLocaleString()} ${lanes.review === 1 ? "transaction" : "transactions"} requiring review. Resolved obligations and transactions not flagged for review are excluded from these execution queues.`
+        );
+      }
+    }
+
+
+  }
+
+
   return (
     <div className="space-y-8 lg:space-y-6">
       <section className="rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-6 text-white shadow-sm lg:rounded-2xl lg:p-[18px]">
@@ -351,9 +712,10 @@ export default function BusinessDashboardPage() {
           <div className="flex flex-wrap items-center gap-3 lg:gap-2">
             <Link
               href="/business/dashboard/profile"
-              className="inline-flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-900 transition hover:bg-emerald-100 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
+              className="inline-flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold transition hover:bg-emerald-100 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
+              style={{ color: "#064e3b" }}
             >
-              <UserRound className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
+              <UserRound className="h-4 w-4 lg:h-3.5 lg:w-3.5" style={{ color: "#064e3b" }} />
               My Profile
             </Link>
 
@@ -376,13 +738,36 @@ export default function BusinessDashboardPage() {
           <div className="space-y-2">
             <p className="text-sm font-medium text-fuchsia-800 lg:text-[11px]">A.B.E.</p>
             <h2 className="text-2xl font-semibold text-fuchsia-950">
-              Business intelligence is taking shape.
+              A.B.E. Business Snapshot
             </h2>
-            <p className="max-w-3xl text-sm text-slate-700 lg:text-[11px]">
-              A.B.E. will interpret operational reality across CRM, Marketing, Inventory,
-              Dispatch, and Finance. For now, this space establishes the executive read
-              before the supporting analytics below.
-            </p>
+
+            {!abeMetricsReady ? (
+              <p className="max-w-3xl text-sm text-slate-700 lg:text-[11px]">
+                A.B.E. is loading the current state of this organization.
+              </p>
+            ) : (
+              <div className="max-w-4xl text-sm leading-6 text-slate-700 lg:text-[11px] lg:leading-5">
+                {abeBrief.map((statement, index) => {
+                  if (index === 0) {
+                    return (
+                      <p key={index} className="font-semibold">
+                        Understand how to handle your business today.
+                      </p>
+                    );
+                  }
+                  const isFocus = /^(CRM|Marketing|Inventory|Dispatch|Finance) Focus\b/.test(statement);
+                  const isMetrics = /^(CRM|Marketing|Inventory|Dispatch|Finance)\b/.test(statement) && !isFocus;
+                  return (
+                    <p
+                      key={index}
+                      className={`${isMetrics ? "font-semibold" : isFocus ? "italic text-slate-600" : ""} ${isFocus ? "mt-1" : "mt-3 first:mt-0"}`}
+                    >
+                      {statement}
+                    </p>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       </section>

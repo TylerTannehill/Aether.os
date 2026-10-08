@@ -8,6 +8,7 @@ import {
   Mail,
   Shield,
   Sparkles,
+  CheckCircle2,
   UserCircle2,
 } from "lucide-react";
 
@@ -28,6 +29,7 @@ type LiveProfile = {
   title: string;
   organizationName: string;
   status: ProfileStatus;
+  accessDepartments: string[];
 };
 
 const PROFILE_STATUS_OPTIONS: { value: ProfileStatus; label: string }[] = [
@@ -106,6 +108,9 @@ export default function BusinessProfilePage() {
   const [profileLoading, setProfileLoading] = useState(true);
   const [profileError, setProfileError] = useState("");
   const [profile, setProfile] = useState<LiveProfile | null>(null);
+  const [statusSaving, setStatusSaving] = useState(false);
+  const [statusError, setStatusError] = useState("");
+  const [statusSuccess, setStatusSuccess] = useState("");
 
   useEffect(() => {
     let isMounted = true;
@@ -138,6 +143,19 @@ export default function BusinessProfilePage() {
 
         if (!isMounted) return;
 
+        const provisioned: string[] = Array.isArray(data?.business_modules)
+          ? data.business_modules.map((value: unknown) => String(value).trim().toLowerCase())
+          : [];
+        const assigned: string[] = Array.isArray(data?.roles)
+          ? data.roles.map((entry: any) => String(entry?.department || "").trim().toLowerCase()).filter(Boolean)
+          : [];
+        const fallbackDepartment = String(membership?.department || "").trim().toLowerCase();
+        if (fallbackDepartment) assigned.push(fallbackDepartment);
+        const isAdmin = String(membership?.role || "").trim().toLowerCase() === "admin";
+        const accessDepartments = Array.from(new Set(isAdmin
+          ? provisioned
+          : assigned.filter((department) => provisioned.includes(department))));
+
         setProfile({
           email: String(user?.email || ""),
           name: displayName,
@@ -149,6 +167,7 @@ export default function BusinessProfilePage() {
             organization?.name || "No organization assigned yet"
           ),
           status: normalizeProfileStatus(membership?.profile_status),
+          accessDepartments,
         });
       } catch (error: any) {
         if (!isMounted) return;
@@ -178,9 +197,33 @@ export default function BusinessProfilePage() {
         title: "",
         organizationName: "Loading organization...",
         status: "active" as ProfileStatus,
+        accessDepartments: [],
       },
     [profile]
   );
+
+  async function changeStatus(nextStatus: ProfileStatus) {
+    if (!profile || statusSaving || nextStatus === profile.status) return;
+    setStatusSaving(true);
+    setStatusError("");
+    setStatusSuccess("");
+    try {
+      const response = await fetch("/api/profile/status", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: nextStatus }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result?.error || "Unable to update status.");
+      const savedStatus = normalizeProfileStatus(result?.membership?.profile_status);
+      setProfile((current) => current ? { ...current, status: savedStatus } : current);
+      setStatusSuccess(`Status updated to ${PROFILE_STATUS_OPTIONS.find((option) => option.value === savedStatus)?.label || savedStatus}.`);
+    } catch (error: any) {
+      setStatusError(error?.message || "Unable to update status.");
+    } finally {
+      setStatusSaving(false);
+    }
+  }
 
   const statusLabel =
     PROFILE_STATUS_OPTIONS.find((option) => option.value === identity.status)
@@ -315,17 +358,46 @@ export default function BusinessProfilePage() {
               </div>
             </div>
 
-            <div className="mt-5 flex min-h-64 items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center">
-              <div className="max-w-md">
-                <Sparkles className="mx-auto h-7 w-7 text-slate-400" />
-                <h3 className="mt-3 font-semibold text-slate-900">
-                  More profile controls will live here
-                </h3>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
-                  Preferences, notifications, execution context, and other
-                  personal controls will be connected as the Business
-                  experience develops.
-                </p>
+            <div className="mt-5 space-y-5">
+              <div>
+                <h3 className="font-semibold text-slate-900">My status</h3>
+                <p className="mt-1 text-sm text-slate-600">Choose how your team sees your availability.</p>
+                <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {PROFILE_STATUS_OPTIONS.map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => void changeStatus(option.value)}
+                      disabled={profileLoading || statusSaving || !profile}
+                      aria-pressed={identity.status === option.value}
+                      className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-3 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${identity.status === option.value ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-400"}`}
+                    >
+                      {identity.status === option.value && <CheckCircle2 className="h-4 w-4" />}
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+                {statusSaving && <p role="status" className="mt-3 text-sm text-slate-500">Saving status…</p>}
+                {statusError && <p role="alert" className="mt-3 text-sm text-rose-700">{statusError}</p>}
+                {statusSuccess && <p role="status" className="mt-3 text-sm text-emerald-700">{statusSuccess}</p>}
+              </div>
+              <div className="border-t border-slate-200 pt-5">
+                <h3 className="font-semibold text-slate-900">My department access</h3>
+                <p className="mt-1 text-sm text-slate-600">Departments available to you in this organization.</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {profileLoading ? (
+                    <span className="text-sm text-slate-500">Loading access…</span>
+                  ) : identity.accessDepartments.length ? (
+                    identity.accessDepartments.map((department) => (
+                      <span key={department} className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-medium capitalize text-slate-800">
+                        {department.replace(/_/g, " ")}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-sm text-slate-500">No provisioned department access found.</span>
+                  )}
+                </div>
+                <p className="mt-3 text-xs text-slate-500">{identity.role === "Admin" ? "Admins can access every provisioned Business department." : "General users can access only their assigned, provisioned Business departments."}</p>
               </div>
             </div>
           </div>
