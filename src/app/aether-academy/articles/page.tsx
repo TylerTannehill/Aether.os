@@ -4,12 +4,20 @@ export default function ArticlesPage() {
   return (
     <main className="min-h-screen bg-[linear-gradient(180deg,#10233e_0%,#0a1728_45%,#07111f_100%)] text-white">
       <div className="mx-auto max-w-4xl px-6 py-16 lg:py-10">
-        <Link
-          href="/aether-academy"
-          className="mb-8 inline-flex items-center justify-center rounded-xl border border-violet-400/40 bg-violet-400/10 px-6 py-3 font-semibold text-violet-300 transition hover:-translate-y-0.5 hover:border-violet-300 lg:mb-6 lg:px-5 lg:py-2.5 lg:text-sm"
-        >
-          ← Back to Aether Academy
-        </Link>
+        <div className="mb-8 flex flex-wrap items-center gap-3 lg:mb-6">
+          <Link
+            href="/aether-academy"
+            className="inline-flex items-center justify-center rounded-xl border border-violet-400/40 bg-violet-400/10 px-6 py-3 font-semibold text-violet-300 transition hover:-translate-y-0.5 hover:border-violet-300 lg:px-5 lg:py-2.5 lg:text-sm"
+          >
+            ← Back to Political Academy
+          </Link>
+          <Link
+            href="/aether-academy/business-academy"
+            className="inline-flex items-center justify-center rounded-xl border border-violet-400/40 bg-violet-400/10 px-6 py-3 font-semibold text-violet-300 transition hover:-translate-y-0.5 hover:border-violet-300 lg:px-5 lg:py-2.5 lg:text-sm"
+          >
+            ← Back to Business Academy
+          </Link>
+        </div>
 
         <h1 className="text-4xl font-bold lg:text-3xl">Articles</h1>
         <p className="mt-3 text-lg text-slate-300 lg:mt-2 lg:text-base">

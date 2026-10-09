@@ -4,21 +4,21 @@ const sections = [
   {
     title: "1. Information We Collect",
     body: [
-      "We collect information necessary to operate and support Aether. Depending on how your organization uses the Services, this may include account information such as names, email addresses, roles, departments, organization memberships, authentication identifiers, and account status; campaign and organization information; contacts, lists, notes, workflows, and operational records; files and data your organization uploads or imports; information received through integrations you choose to connect; technical and usage information used to operate, secure, troubleshoot, and improve the Services; and information you provide when communicating with Team Aether.",
+      "We collect information necessary to operate and support Aether. Depending on how your organization uses the Services, this may include account information such as names, email addresses, roles, departments, organization memberships, authentication identifiers, and account status; campaign and business organization information; contacts, customer and prospect records, lists, notes, workflows, and operational records; business finance, invoicing, inventory, dispatch, and marketing information where those features are used; files and data your organization uploads or imports; information received through integrations you choose to connect; technical and usage information used to operate, secure, troubleshoot, and improve the Services; and information you provide when communicating with Team Aether.",
       "The specific information processed by Aether depends on the features your organization chooses to use and the information its authorized users choose to provide."
     ]
   },
   {
     title: "2. How We Use Information",
     body: [
-      "We use information to provide and administer the Services; authenticate users; maintain campaign and organization context; process authorized imports and integrations; support campaign workflows; provide customer support; diagnose technical issues; maintain security and reliability; improve Aether; enforce our agreements; and comply with applicable legal obligations.",
-      "We do not sell campaign data. We do not treat campaign, contact, donor, supporter, volunteer, or operational data entrusted to Aether as an advertising product."
+      "We use information to provide and administer the Services; authenticate users; maintain campaign and organization context; process authorized imports and integrations; support campaign and business workflows; provide customer support; diagnose technical issues; maintain security and reliability; improve Aether; enforce our agreements; and comply with applicable legal obligations.",
+      "We do not sell campaign or business organization data. We do not treat campaign, voter, donor, supporter, volunteer, customer, prospect, employee, financial, or operational data entrusted to Aether as an advertising product."
     ]
   },
   {
     title: "3. Data Ownership",
     body: [
-      "Your organization retains ownership of the campaign and operational data it provides to Aether. Aether receives only the rights reasonably necessary to host, process, transmit, secure, back up, and otherwise handle that information for the purpose of providing and supporting the Services.",
+      "Your organization retains ownership of the campaign, business, and operational data it provides to Aether. Aether receives only the rights reasonably necessary to host, process, transmit, secure, back up, and otherwise handle that information for the purpose of providing and supporting the Services.",
       "Authorized users are responsible for ensuring that their organization has the right to collect, upload, import, use, and instruct Aether to process the information they place in the Services."
     ]
   },
@@ -52,8 +52,8 @@ const sections = [
   {
     title: "8. Data Retention, Export, and Account Closure",
     body: [
-      "Aether is built around the principle that your data is your data. Organizations may use available export tools to retrieve their data. Following cancellation or completion of yearly usage, Aether may retain organization data for up to 60 days to allow for export, reactivation, support, or orderly account closure, unless a longer period is required by law or specifically arranged with the organization.",
-      "Where offered, an organization may elect a separate paid data-storage option after its primary subscription or yearly usage ends. Information may also remain temporarily in backups, logs, or disaster-recovery systems until those systems cycle through their normal retention processes."
+      "Aether is built around the principle that your data is your data. Organizations may use available export tools to retrieve their data. Following cancellation or completion of a subscription or agreed service term, Aether may retain organization data for up to 60 days to allow for export, reactivation, support, or orderly account closure, unless a longer period is required by law or specifically arranged with the organization.",
+      "Where offered, an organization may elect a separate paid data-storage option after its primary subscription or agreed service term ends. Such options, where available, may differ between Political and Business offerings. Information may also remain temporarily in backups, logs, or disaster-recovery systems until those systems cycle through their normal retention processes."
     ]
   },
   {
@@ -72,13 +72,13 @@ const sections = [
   {
     title: "11. Children's Privacy",
     body: [
-      "The Services are designed for campaign and organizational use and are not directed to children under 13. Aether does not knowingly seek to collect personal information directly from children under 13 through account registration. If you believe a child has provided personal information directly to Aether inappropriately, please contact Team Aether."
+      "The Services are designed for campaign, business, and organizational use and are not directed to children under 13. Aether does not knowingly seek to collect personal information directly from children under 13 through account registration. If you believe a child has provided personal information directly to Aether inappropriately, please contact Team Aether."
     ]
   },
   {
-    title: "12. Campaign and Regulatory Responsibilities",
+    title: "12. Campaign, Business, and Regulatory Responsibilities",
     body: [
-      "Campaigns and political organizations may be subject to federal, state, local, or other requirements concerning voter, donor, supporter, employee, volunteer, financial, communications, and campaign records. Each organization is responsible for determining the laws, regulations, reporting obligations, consent requirements, and retention rules that apply to its activities. Aether provides operational software and does not replace an organization's legal, compliance, accounting, or campaign-finance advisers."
+      "Campaigns and political organizations may be subject to federal, state, local, or other requirements concerning voter, donor, supporter, employee, volunteer, financial, communications, and campaign records. Businesses may also have obligations involving customer and employee information, marketing communications, financial records, invoices, inventory, dispatch, and other operational data. Each organization is responsible for determining the laws, regulations, reporting obligations, consent requirements, and retention rules that apply to its activities. Aether provides operational software and does not replace an organization's legal, compliance, accounting, tax, or campaign-finance advisers."
     ]
   },
   {
@@ -90,7 +90,7 @@ const sections = [
   {
     title: "14. Questions and Privacy Requests",
     body: [
-      "If you have questions about this Privacy Policy, want to request access to or deletion of information associated with your account or organization, or need help understanding how Aether handles data, please contact Team Aether. Requests involving organization-controlled campaign data may require verification or coordination with the organization's administrator."
+      "If you have questions about this Privacy Policy, want to request access to or deletion of information associated with your account or organization, or need help understanding how Aether handles data, please contact Team Aether. Requests involving organization-controlled campaign or business data may require verification or coordination with the organization's administrator."
     ]
   }
 ];
@@ -103,19 +103,24 @@ export default function PrivacyPage() {
       <div className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent,rgba(7,17,31,0.35),transparent)]" />
 
       <div className="relative mx-auto max-w-4xl">
-        <Link href="/" className="mb-8 inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-violet-400/40 hover:bg-white/10 lg:mb-6 lg:gap-1.5 lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-xs">
-          <span>←</span><span>Back to Landing Page</span>
-        </Link>
+        <nav aria-label="Return to an Aether landing page" className="mb-8 flex flex-wrap gap-3 lg:mb-6">
+          <Link href="/" className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-violet-400/40 hover:bg-white/10 lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-xs">
+            <span>←</span><span>Return to Political</span>
+          </Link>
+          <Link href="/business-public" className="inline-flex items-center gap-2 rounded-2xl border border-violet-400/40 bg-violet-500/10 px-5 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-violet-500/20 lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-xs">
+            <span>←</span><span>Return to Business</span>
+          </Link>
+        </nav>
 
         <div className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-10 backdrop-blur-xl lg:rounded-2xl lg:p-7">
           <h1 className="text-5xl font-black tracking-tight lg:text-4xl">Privacy Policy</h1>
-          <p className="mt-4 text-sm font-semibold uppercase tracking-[0.2em] text-violet-300 lg:mt-3 lg:text-xs">Last Updated: September 3, 2026</p>
+          <p className="mt-4 text-sm font-semibold uppercase tracking-[0.2em] text-violet-300 lg:mt-3 lg:text-xs">Last Updated: October 9, 2026</p>
 
           <p className="mt-6 text-lg leading-8 text-slate-300 lg:mt-4 lg:text-base lg:leading-7">
-            Your campaign&apos;s data belongs to your campaign. Always. Aether exists to help campaigns organize, execute, and operate more effectively—not to sell or monetize the information entrusted to us.
+            Your organization&apos;s data belongs to your organization. Always. Whether you operate a political campaign or a business, Aether exists to help you organize, execute, and operate more effectively—not to sell or monetize the information entrusted to us.
           </p>
           <p className="mt-4 leading-8 text-slate-300 lg:mt-3 lg:text-sm lg:leading-6">
-            This Privacy Policy explains how Aether Systems LLC (&quot;Aether,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) collects, uses, stores, and protects information when you use Aether&apos;s websites, applications, Campaign Operating System, integrations, and related services (collectively, the &quot;Services&quot;).
+            This Privacy Policy explains how Aether Systems LLC (&quot;Aether,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) collects, uses, stores, and protects information when you use Aether&apos;s websites, applications, Political Operating System, Business Operating System, integrations, and related services (collectively, the &quot;Services&quot;).
           </p>
 
           <div className="mt-12 space-y-10 lg:mt-8 lg:space-y-7">
@@ -131,14 +136,14 @@ export default function PrivacyPage() {
 
           <div className="mt-12 rounded-2xl border border-violet-400/20 bg-violet-500/5 p-6 lg:mt-8 lg:rounded-xl lg:p-5">
             <p className="leading-7 text-slate-300 lg:text-sm lg:leading-6">
-              <strong className="text-white">Our operating principle:</strong> Aether exists to help campaigns use their information—not to turn their information into somebody else&apos;s product.
+              <strong className="text-white">Our operating principle:</strong> Aether exists to help campaigns and businesses use their information—not to turn their information into somebody else&apos;s product.
             </p>
           </div>
 
-          <div className="mt-12 flex justify-center lg:mt-8">
-            <Link href="/public-team-aether#contact-team-aether" className="rounded-xl bg-violet-600 px-6 py-3 font-bold text-white transition hover:bg-violet-500 lg:px-5 lg:py-2.5 lg:text-sm">
-              Contact Team Aether
-            </Link>
+          <div className="mt-12 flex flex-wrap justify-center gap-3 lg:mt-8">
+            <Link href="/" className="rounded-xl border border-white/20 bg-white/5 px-6 py-3 text-center font-bold text-white transition hover:bg-white/10 lg:px-5 lg:py-2.5 lg:text-sm">Return to Political</Link>
+            <Link href="/business-public" className="rounded-xl border border-violet-400/40 bg-violet-500/15 px-6 py-3 text-center font-bold text-white transition hover:bg-violet-500/25 lg:px-5 lg:py-2.5 lg:text-sm">Return to Business</Link>
+            <Link href="/public-team-aether#contact-team-aether" className="rounded-xl bg-violet-600 px-6 py-3 text-center font-bold text-white transition hover:bg-violet-500 lg:px-5 lg:py-2.5 lg:text-sm">Contact Team Aether</Link>
           </div>
         </div>
       </div>

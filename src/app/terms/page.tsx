@@ -8,24 +8,21 @@ export default function TermsPage() {
       <div className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent,rgba(7,17,31,0.35),transparent)]" />
 
       <div className="relative mx-auto max-w-4xl">
-        <Link
-          href="/"
-          className="mb-8 inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-violet-400/40 hover:bg-white/10 lg:mb-6 lg:gap-1.5 lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-xs"
-        >
-          <span>←</span>
-          <span>Back to Landing Page</span>
-        </Link>
+        <div className="mb-8 flex flex-wrap gap-3 lg:mb-6">
+          <Link href="/" className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:border-violet-400/40 hover:bg-white/10 lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-xs">← Return to Political</Link>
+          <Link href="/business-public" className="inline-flex items-center gap-2 rounded-2xl border border-violet-400/30 bg-violet-500/10 px-5 py-3 text-sm font-semibold text-white transition hover:border-violet-400/60 hover:bg-violet-500/20 lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-xs">← Return to Business</Link>
+        </div>
 
         <div className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-10 backdrop-blur-xl lg:rounded-2xl lg:p-7">
           <h1 className="text-5xl font-black tracking-tight lg:text-4xl">Terms of Service</h1>
 
           <p className="mt-4 text-sm font-semibold uppercase tracking-[0.2em] text-violet-300 lg:mt-3 lg:text-xs">
-            Last updated: September 3, 2026
+            Last updated: October 9, 2026
           </p>
 
           <p className="mt-6 text-lg leading-8 text-slate-300 lg:mt-4 lg:text-base lg:leading-7">
             These Terms of Service (&quot;Terms&quot;) govern access to and use of Aether&apos;s
-            websites, applications, Campaign Operating System, mobile software, integrations,
+            websites, applications, Political and Business operating systems, mobile software, integrations,
             and related services (collectively, the &quot;Services&quot;).
           </p>
 
@@ -41,14 +38,14 @@ export default function TermsPage() {
             <section>
               <h2 className="text-2xl font-bold lg:text-xl">1. Using Aether</h2>
               <p className="mt-4 leading-8 text-slate-300 lg:mt-3 lg:text-sm lg:leading-6">
-                Aether is designed to support lawful campaign and organizational operations.
+                Aether is designed to support lawful campaign, business, and organizational operations.
                 You may use the Services only in compliance with these Terms and applicable
                 federal, state, local, and other laws and regulations.
               </p>
               <p className="mt-4 leading-8 text-slate-300 lg:mt-3 lg:text-sm lg:leading-6">
                 You are responsible for determining whether Aether is appropriate for your
                 organization&apos;s needs and for the decisions, communications, filings,
-                expenditures, outreach, field activity, fundraising activity, and other actions
+                expenditures, outreach, field activity, fundraising activity, customer management, marketing, inventory, dispatch, financial operations, and other actions
                 your organization takes using information maintained or organized through Aether.
               </p>
             </section>
@@ -72,7 +69,7 @@ export default function TermsPage() {
             <section>
               <h2 className="text-2xl font-bold lg:text-xl">3. Your Data</h2>
               <p className="mt-4 leading-8 text-slate-300 lg:mt-3 lg:text-sm lg:leading-6">
-                Your campaign or organization retains ownership of the data and content it
+                Your campaign, business, or organization retains ownership of the data and content it
                 provides to Aether. Aether does not claim ownership of your campaign&apos;s
                 contacts, lists, notes, files, operational records, or other organization
                 content merely because that information is stored or processed through the
@@ -104,15 +101,15 @@ export default function TermsPage() {
                 support, or orderly account closure, unless a different period is required by
                 law or specifically arranged with the organization. Where offered, an
                 organization may elect a separate paid data-storage option after its primary
-                subscription or yearly usage ends.
+                subscription or yearly usage ends. Business and enterprise arrangements may specify different retention or storage terms.
               </p>
             </section>
 
             <section>
               <h2 className="text-2xl font-bold lg:text-xl">5. Subscriptions, Fees, and Promotions</h2>
               <p className="mt-4 leading-8 text-slate-300 lg:mt-3 lg:text-sm lg:leading-6">
-                Certain Services require a paid subscription, license, or other fee. Pricing,
-                billing periods, included features, and any applicable limits will be presented
+                Certain Services require a paid subscription, module license, enterprise agreement, or other fee. Pricing,
+                billing periods, selected Business modules, included features, and any applicable limits will be presented
                 when you purchase or activate the applicable Service. You agree to pay the fees
                 associated with the plan or service you select, together with applicable taxes
                 or charges.
@@ -135,7 +132,7 @@ export default function TermsPage() {
               <p className="mt-4 leading-8 text-slate-300 lg:mt-3 lg:text-sm lg:leading-6">
                 Aether may connect with or provide access to third-party platforms, websites,
                 APIs, applications, payment or fundraising systems, communications services,
-                mapping services, social platforms, cloud services, or other external products.
+                mapping services, social platforms, business tools, cloud services, or other external products.
                 Your use of a third-party service may also be governed by that provider&apos;s
                 terms and privacy policy.
               </p>
@@ -208,7 +205,7 @@ export default function TermsPage() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold lg:text-xl">9. Campaign, Election, and Compliance Responsibilities</h2>
+              <h2 className="text-2xl font-bold lg:text-xl">9. Campaign, Business, and Compliance Responsibilities</h2>
               <p className="mt-4 leading-8 text-slate-300 lg:mt-3 lg:text-sm lg:leading-6">
                 Aether provides operational software. Aether is not a law firm, accounting
                 firm, campaign-finance compliance firm, political committee, fundraising
@@ -394,6 +391,10 @@ export default function TermsPage() {
             >
               Contact Team Aether
             </Link>
+          </div>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <Link href="/" className="inline-flex items-center rounded-xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10">← Return to Political</Link>
+            <Link href="/business-public" className="inline-flex items-center rounded-xl border border-violet-400/30 bg-violet-500/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-violet-500/20">← Return to Business</Link>
           </div>
         </div>
       </div>

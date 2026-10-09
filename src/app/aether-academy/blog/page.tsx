@@ -20,12 +20,20 @@ export default function BlogPage() {
   return (
     <main className="min-h-screen bg-[linear-gradient(180deg,#10233e_0%,#0a1728_45%,#07111f_100%)] text-white">
       <div className="mx-auto max-w-4xl px-6 py-16 lg:py-10">
-        <Link
-          href="/aether-academy"
-          className="mb-8 inline-flex items-center rounded-xl border border-violet-400/40 bg-violet-400/10 px-6 py-3 font-semibold text-violet-300 transition hover:-translate-y-0.5 hover:border-violet-300 lg:mb-6 lg:px-5 lg:py-2.5 lg:text-sm"
-        >
-          ← Back to Aether Academy
-        </Link>
+        <div className="mb-8 flex flex-wrap gap-3 lg:mb-6">
+          <Link
+            href="/aether-academy"
+            className="inline-flex items-center rounded-xl border border-violet-400/40 bg-violet-400/10 px-6 py-3 font-semibold text-violet-300 transition hover:-translate-y-0.5 hover:border-violet-300 lg:px-5 lg:py-2.5 lg:text-sm"
+          >
+            ← Back to Political Academy
+          </Link>
+          <Link
+            href="/aether-academy/business-academy"
+            className="inline-flex items-center rounded-xl border border-violet-400/40 bg-violet-400/10 px-6 py-3 font-semibold text-violet-300 transition hover:-translate-y-0.5 hover:border-violet-300 lg:px-5 lg:py-2.5 lg:text-sm"
+          >
+            ← Back to Business Academy
+          </Link>
+        </div>
 
         <details className="group mt-10 rounded-2xl border border-white/10 bg-[#10233e]/75 shadow-xl shadow-black/20 lg:mt-7 lg:rounded-xl">
           <summary className="cursor-pointer list-none px-10 py-7 text-lg font-semibold text-white [&::-webkit-details-marker]:hidden lg:px-7 lg:py-5 lg:text-base">

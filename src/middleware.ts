@@ -29,6 +29,8 @@ export async function middleware(request: NextRequest) {
     '/aether-academy',
     '/aether-academy/comprehensive-guide',
     '/aether-academy/training-videos',
+    '/aether-academy/business-academy',
+    '/aether-academy/business-training-videos',
     '/aether-academy/articles',
     '/aether-academy/blog',
     '/aether-academy/patch-notes',
@@ -43,7 +45,10 @@ export async function middleware(request: NextRequest) {
     pathname === '/api/cron/analytics-sync' ||
     pathname.startsWith('/api/mobile/')
 
-  const isPublicRoute = publicRoutes.includes(pathname)
+  const isPublicRoute =
+    publicRoutes.includes(pathname) ||
+    pathname === '/business-public' ||
+    pathname.startsWith('/business-public/')
 
   const isPublicAsset =
     pathname.startsWith('/_next') ||

@@ -144,7 +144,7 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
       </div>
 
       <div className="relative z-10 mx-auto flex min-h-screen max-w-[1600px] flex-col px-6 py-8 lg:px-12">
-        <header className="flex items-center justify-between">
+        <header className="relative flex items-center justify-between">
           <Link
             href="/"
             className="inline-flex items-center transition hover:opacity-90"
@@ -156,7 +156,13 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
             />
           </Link>
 
-          <div className="flex items-start gap-4">
+          <div className="flex flex-wrap items-start justify-end gap-2">
+            <div className="inline-flex items-center rounded-2xl border border-violet-400/40 bg-white/[0.04] p-1 text-sm font-black uppercase tracking-[0.08em] shadow-xl shadow-violet-950/20 xl:absolute xl:left-1/2 xl:top-0 xl:-translate-x-1/2" aria-label="Choose Aether product">
+              <span aria-current="page" className="rounded-xl bg-violet-600 px-5 py-3 text-white">Political</span>
+              <Link href="/business-public" className="rounded-xl px-5 py-3 text-slate-300 transition hover:bg-violet-600/20 hover:text-white">Business</Link>
+            </div>
+            <div className="flex flex-col items-end gap-3">
+              <div className="flex items-center gap-2">
             <Link
               href="/campaign-directory"
               className="inline-flex items-center justify-center rounded-2xl border border-violet-400/70 bg-violet-700/20 px-7 py-4 text-sm font-black uppercase tracking-[0.08em] text-white shadow-xl shadow-violet-950/30 transition hover:bg-violet-600/30"
@@ -164,15 +170,15 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
               <span>Voter Portal</span>
             </Link>
 
-            <div className="flex flex-col items-center gap-3">
             <Link
               href="/login"
               className="inline-flex items-center gap-3 rounded-2xl border border-violet-400/70 bg-violet-700/20 px-7 py-4 text-sm font-black uppercase tracking-[0.08em] text-white shadow-xl shadow-violet-950/30 transition hover:bg-violet-600/30"
             >
               <span>Enter Aether</span>
             </Link>
+              </div>
 
-            <div className="flex items-center justify-center gap-3">
+            <div className="flex items-center justify-end gap-3">
               <a
                 href="https://apps.apple.com/us/app/aether-mobile/id6814591434"
                 target="_blank"

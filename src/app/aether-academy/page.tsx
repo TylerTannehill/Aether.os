@@ -100,8 +100,10 @@ const academySections = [
 ];
 
 const academyTabs = [
-  { label: "Learning Library", status: "active" },
-  { label: "Training Videos", status: "active", href: "/aether-academy/training-videos" },
+  { label: "Learning Library — Political", status: "active" },
+  { label: "Learning Library — Business", status: "active", href: "/aether-academy/business-academy" },
+  { label: "Training Videos — Political", status: "active", href: "/aether-academy/training-videos" },
+  { label: "Training Videos — Business", status: "active", href: "/aether-academy/business-training-videos" },
   { label: "Articles", status: "active", href: "/aether-academy/articles" },
   { label: "Blog", status: "active", href: "/aether-academy/blog" },
   { label: "Patch Notes", status: "active", href: "/aether-academy/patch-notes" },
@@ -155,18 +157,25 @@ export default function AetherAcademyPage() {
           </h1>
 
           <p className="mt-7 max-w-3xl text-lg leading-8 lg:text-base lg:leading-7 text-slate-300 sm:text-xl lg:mt-5 lg:text-base">
-            The official reference for understanding Aether Political. Explore
-            how the platform works, why it was built, and how each part of the
-            Campaign Operating System fits together.
+            The official learning center for Aether Political and Aether Business.
+            Explore how each operating system works, why it was built, and how
+            its workflows fit together.
           </p>
 
-          <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row lg:gap-3 lg:mt-7">
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-4 lg:gap-3 lg:mt-7">
             <a
               href="#library"
               className="inline-flex items-center justify-center rounded-xl bg-violet-600 px-7 py-3.5 font-bold text-slate-950 shadow-[0_14px_40px_rgba(139,92,246,0.22)] transition hover:-translate-y-0.5 hover:bg-violet-400 lg:px-5"
             >
-              Enter the Learning Library
+              Learning Library — Political
             </a>
+
+            <Link
+              href="/aether-academy/business-academy"
+              className="inline-flex items-center justify-center rounded-xl border border-violet-400/40 bg-violet-400/10 px-7 py-3.5 font-bold text-violet-300 transition hover:-translate-y-0.5 hover:border-violet-300 lg:px-5"
+            >
+              Learning Library — Business
+            </Link>
 
             <Link
               href="/login"
@@ -179,7 +188,14 @@ export default function AetherAcademyPage() {
               href="/"
               className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-white/5 px-7 py-3.5 font-semibold text-white transition hover:-translate-y-0.5 hover:border-violet-400/40 hover:bg-white/10 lg:px-5"
             >
-              Back to Landing Page
+              Back to Political
+            </Link>
+
+            <Link
+              href="/business-public"
+              className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-white/5 px-7 py-3.5 font-semibold text-white transition hover:-translate-y-0.5 hover:border-violet-400/40 hover:bg-white/10 lg:px-5"
+            >
+              Back to Business
             </Link>
           </div>
         </div>
@@ -244,10 +260,10 @@ export default function AetherAcademyPage() {
             </h2>
 
             <p className="mt-5 text-base leading-8 text-slate-300 lg:text-sm lg:leading-6 sm:text-lg lg:mt-3">
-              Aether Academy is not campaign consulting and it is not a sales
-              brochure. It is the official place to understand how Aether is
-              structured, what each feature is intended to do, and how campaign
-              teams can use the platform in real operational workflows.
+              Aether Academy is not a consulting service or a sales brochure. It is
+              the official place to understand how Aether Political and Aether
+              Business are structured, what each feature is intended to do,
+              and how organizations can use the platforms in real workflows.
             </p>
           </div>
         </div>
@@ -281,7 +297,7 @@ export default function AetherAcademyPage() {
           </p>
 
           <h2 className="mt-3 text-4xl font-black tracking-tight sm:text-5xl lg:mt-2 lg:text-3xl">
-            Learning Library
+            Learning Library — Political
           </h2>
 
           <p className="mt-5 max-w-4xl text-lg leading-8 lg:text-base lg:leading-7 text-slate-300 lg:mt-3 lg:text-base">
@@ -1497,7 +1513,7 @@ export default function AetherAcademyPage() {
           <div>
             <p className="font-black text-white">Aether Academy</p>
             <p className="mt-1 text-sm text-slate-500 lg:text-[12px]">
-              The official learning center for Aether Political.
+              The official learning center for Aether Political and Aether Business.
             </p>
           </div>
 
@@ -1505,7 +1521,13 @@ export default function AetherAcademyPage() {
             href="/"
             className="inline-flex items-center justify-center rounded-xl border border-violet-400/30 bg-violet-400/10 px-6 py-3 font-bold text-violet-300 transition hover:-translate-y-0.5 hover:bg-violet-400/15 lg:px-[18px] lg:py-2.5"
           >
-            ← Back to Landing Page
+            ← Back to Political
+          </Link>
+          <Link
+            href="/business-public"
+            className="sm:mr-20 inline-flex items-center justify-center rounded-xl border border-violet-400/30 bg-violet-400/10 px-6 py-3 font-bold text-violet-300 transition hover:-translate-y-0.5 hover:bg-violet-400/15 lg:px-[18px] lg:py-2.5"
+          >
+            ← Back to Business
           </Link>
         </div>
       </section>

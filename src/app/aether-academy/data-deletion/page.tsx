@@ -1,13 +1,13 @@
+import Link from "next/link";
+
 export default function DataDeletionPage() {
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-16 text-white">
       <div className="mx-auto max-w-3xl">
-        <a
-          href="/"
-          className="mb-10 inline-block text-sm text-slate-400 transition hover:text-white"
-        >
-          ← Back to Aether
-        </a>
+        <nav aria-label="Return to Aether product" className="mb-10 flex flex-wrap gap-3">
+          <Link href="/" className="rounded-xl border border-white/20 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10">← Return to Political</Link>
+          <Link href="/business-public" className="rounded-xl border border-white/20 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10">← Return to Business</Link>
+        </nav>
 
         <div className="mb-10">
           <p className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-blue-400">
@@ -15,7 +15,7 @@ export default function DataDeletionPage() {
           </p>
 
           <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-            Aether Mobile Data Deletion
+            Aether Account &amp; Data Deletion
           </h1>
 
           <p className="mt-5 text-lg leading-8 text-slate-300">
@@ -42,7 +42,7 @@ export default function DataDeletionPage() {
               You may also submit a deletion request directly to Aether Systems
               at{" "}
               <a
-                href="mailto:team@aetheros.pro?subject=Aether%20Mobile%20Data%20Deletion%20Request"
+                href="mailto:team@aetheros.pro?subject=Aether%20Account%20Data%20Deletion%20Request"
                 className="font-medium text-blue-400 underline underline-offset-4 hover:text-blue-300"
               >
                 team@aetheros.pro
@@ -70,7 +70,7 @@ export default function DataDeletionPage() {
 
           <section>
             <h2 className="mb-3 text-2xl font-semibold text-white">
-              Campaign data retention
+              Organization data retention
             </h2>
 
             <p className="leading-7">
@@ -105,6 +105,11 @@ export default function DataDeletionPage() {
             </p>
           </section>
         </div>
+
+        <nav aria-label="Return to Aether product" className="mb-10 flex flex-wrap gap-3">
+          <Link href="/" className="rounded-xl border border-white/20 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10">← Return to Political</Link>
+          <Link href="/business-public" className="rounded-xl border border-white/20 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10">← Return to Business</Link>
+        </nav>
 
         <footer className="mt-16 border-t border-slate-800 pt-8 text-sm text-slate-500">
           © {new Date().getFullYear()} Aether Systems LLC. All rights reserved.

@@ -9,12 +9,20 @@ export default function PatchNotesPage() {
   return (
     <main className="min-h-screen bg-[linear-gradient(180deg,#10233e_0%,#0a1728_45%,#07111f_100%)] text-white">
       <div className="mx-auto max-w-4xl px-6 py-10">
-        <Link
-          href="/aether-academy"
-          className="mb-8 inline-flex items-center rounded-xl border border-violet-400/40 bg-violet-400/10 px-6 py-3 font-semibold text-violet-300 transition hover:-translate-y-0.5 hover:border-violet-300 lg:mb-6 lg:px-5 lg:py-2.5 lg:text-sm"
-        >
-          ← Back to Aether Academy
-        </Link>
+        <div className="mb-8 flex flex-wrap gap-3 lg:mb-6">
+          <Link
+            href="/aether-academy"
+            className="inline-flex items-center rounded-xl border border-violet-400/40 bg-violet-400/10 px-6 py-3 font-semibold text-violet-300 transition hover:-translate-y-0.5 hover:border-violet-300 lg:px-5 lg:py-2.5 lg:text-sm"
+          >
+            ← Back to Political Academy
+          </Link>
+          <Link
+            href="/aether-academy/business-academy"
+            className="inline-flex items-center rounded-xl border border-violet-400/40 bg-violet-400/10 px-6 py-3 font-semibold text-violet-300 transition hover:-translate-y-0.5 hover:border-violet-300 lg:px-5 lg:py-2.5 lg:text-sm"
+          >
+            ← Back to Business Academy
+          </Link>
+        </div>
 
         <p className="text-sm uppercase tracking-[0.25em] text-violet-300">
           Product Changelog
@@ -30,11 +38,68 @@ export default function PatchNotesPage() {
           <p className="text-sm uppercase tracking-[0.2em] text-violet-300">
             Current Public Version
           </p>
-          <p className="mt-1 text-xl font-semibold text-white">Aether v1.7</p>
+          <p className="mt-1 text-xl font-semibold text-white">Aether v1.8</p>
           <p className="mt-1 text-slate-300">Live</p>
         </div>
 
         <details className="group mt-7 overflow-hidden rounded-2xl border border-violet-400/20 bg-[#10233e]/75 shadow-xl shadow-black/20 lg:rounded-xl" open>
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 transition hover:bg-white/[0.03] [&::-webkit-details-marker]:hidden lg:gap-3 lg:p-4">
+            <div>
+              <p className="text-sm uppercase tracking-[0.2em] text-violet-300">October 9, 2026</p>
+              <h2 className="mt-1 text-2xl font-semibold text-white">Aether v1.8 — Business Launch &amp; Platform Expansion</h2>
+              <p className="mt-1 text-sm text-slate-400">Aether Business launches publicly, alongside mobile, Political, Academy, and organization provisioning updates.</p>
+            </div>
+            <span className="shrink-0 text-2xl text-violet-300 transition-transform duration-200 group-open:rotate-180">↓</span>
+          </summary>
+          <div className="border-t border-white/10 p-5 md:p-6 lg:p-5">
+            <p className="text-sm leading-7 text-slate-300">Over ten working days, Team Aether developed and publicly introduced Aether Business, a dedicated Business Operating System. This release also expands Aether Mobile, improves Aether Political, and begins a broader educational experience across both products.</p>
+            <div className="mt-6 space-y-6 text-sm leading-6 text-slate-300">
+              <section>
+                <h3 className="text-xl font-semibold text-white">Aether Business — Public Launch</h3>
+                <ul className="mt-3 space-y-1.5">
+                  <li>✓ Introduced a modular Business Operating System with CRM, Marketing, Inventory, Dispatch, and Finance departments.</li>
+                  <li>✓ Established business dashboards, operational workflows, and departmental Focus Modes.</li>
+                  <li>✓ Introduced A.B.E. for Business, using deterministic interpretation of recorded operational data—not generative AI or autonomous decision-making.</li>
+                  <li>✓ Launched the public Aether Business website with product information and educational resources.</li>
+                </ul>
+              </section>
+              <section>
+                <h3 className="text-xl font-semibold text-white">Aether Mobile — Business &amp; Political</h3>
+                <ul className="mt-3 space-y-1.5">
+                  <li>✓ Expanded Aether Mobile to accommodate business organizations alongside political campaigns, with additional capabilities still in development.</li>
+                  <li>✓ Updated mobile access and navigation for the growing Aether ecosystem.</li>
+                  <li>✓ Added native text messaging for supported Aether Political contact workflows.</li>
+                  <li>✓ Added links to public campaign pages so people can view campaign information and statistics when a campaign chooses to share them.</li>
+                </ul>
+              </section>
+              <section>
+                <h3 className="text-xl font-semibold text-white">Aether Academy — Educational Expansion</h3>
+                <ul className="mt-3 space-y-1.5">
+                  <li>✓ Added a dedicated Business Learning Library alongside the Political Academy.</li>
+                  <li>✓ Published 18 Business educational guides covering the platform, departments, workflows, and administration.</li>
+                  <li>✓ Established a Business Training Videos library for upcoming walkthroughs.</li>
+                  <li>✓ Connected both Academies to shared Articles, Blog, and Patch Notes.</li>
+                </ul>
+                <p className="mt-3 italic text-slate-400">Additional Academy documentation and training materials will continue rolling out over the coming weeks.</p>
+              </section>
+              <section>
+                <h3 className="text-xl font-semibold text-white">Team Aether — Organization Provisioning</h3>
+                <ul className="mt-3 space-y-1.5">
+                  <li>✓ Expanded internal organization management and provisioning to support Aether Business.</li>
+                  <li>✓ Extended Team Aether's administrative dashboard to manage Political and Business organizations within the Aether ecosystem.</li>
+                </ul>
+              </section>
+            </div>
+            <div className="mt-7 border-t border-white/10 pt-5">
+              <p className="font-semibold text-white">Two products. One expanding ecosystem.</p>
+              <p className="mt-2 text-slate-300">Aether Political continues to evolve, Aether Business is now publicly introduced, and more improvements are underway.</p>
+              <p className="mt-4 font-semibold text-white">Clarity. Focus. Execution.</p>
+              <p className="mt-1 text-slate-400">— Team Aether</p>
+            </div>
+          </div>
+        </details>
+
+        <details className="group mt-7 overflow-hidden rounded-2xl border border-violet-400/20 bg-[#10233e]/75 shadow-xl shadow-black/20 lg:rounded-xl">
           <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 transition hover:bg-white/[0.03] [&::-webkit-details-marker]:hidden lg:gap-3 lg:p-4">
             <div>
               <p className="text-sm uppercase tracking-[0.2em] text-violet-300">

@@ -20,18 +20,18 @@ import {
 const principles = [
   "Secure by Design",
   "Role-Based Access",
-  "Campaign Isolation",
+  "Organization Separation",
   "Transparent Practices",
 ];
 
 const roles = [
   {
     title: "Admin",
-    description: "Complete campaign management and organization administration.",
+    description: "Organization administration and management within assigned permissions.",
   },
   {
     title: "Director",
-    description: "Department management, oversight, and execution.",
+    description: "Department oversight and execution within assigned permissions.",
   },
   {
     title: "General User",
@@ -79,13 +79,10 @@ export default function SecurityPage() {
         </div>
 
         <div className="relative mx-auto flex max-w-7xl flex-col gap-8 lg:gap-6">
-          <Link
-            href="/"
-            className="inline-flex w-fit items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-violet-400/40 hover:bg-white/10 lg:px-4 lg:py-2.5 lg:text-[12px] lg:rounded-xl"
-          >
-            <ArrowLeft className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
-            Back to Landing Page
-          </Link>
+          <nav aria-label="Return to an Aether product" className="flex flex-wrap gap-3">
+            <Link href="/" className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:border-violet-400/40 hover:bg-white/10 lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-xs"><ArrowLeft className="h-4 w-4" /> Return to Political</Link>
+            <Link href="/business-public" className="inline-flex items-center gap-2 rounded-2xl border border-violet-400/40 bg-violet-500/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-violet-500/20 lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-xs"><ArrowLeft className="h-4 w-4" /> Return to Business</Link>
+          </nav>
 
           <section className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-8 lg:p-9 lg:p-6 lg:rounded-2xl">
             <p className="text-xs font-bold uppercase tracking-[0.22em] text-violet-200 lg:text-[10px]">
@@ -93,12 +90,12 @@ export default function SecurityPage() {
             </p>
 
             <h1 className="mt-4 max-w-4xl text-5xl font-black leading-tight lg:text-5xl lg:mt-3 lg:text-4xl">
-              Protecting Campaign Data Through Secure Infrastructure,
+              Protecting Campaign and Business Data Through Secure Infrastructure,
               Transparent Practices, and Role-Based Access.
             </h1>
 
             <p className="mt-8 max-w-3xl text-lg leading-8 text-slate-300 lg:text-sm lg:leading-6 lg:text-base lg:leading-7 lg:mt-6 lg:text-base">
-              Campaigns trust Aether with operational information every day. We
+              Campaigns and businesses entrust Aether with operational information. We
               believe that trust is earned through secure design, transparent
               practices, and clear communication—not exaggerated claims or
               marketing buzzwords.
@@ -119,11 +116,11 @@ export default function SecurityPage() {
           <section className="grid gap-6 lg:grid-cols-2 lg:gap-4">
             <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-8 lg:p-6 lg:rounded-2xl">
               <Database className="h-10 w-10 text-violet-300 lg:h-8 lg:w-8" />
-              <h2 className="mt-5 text-3xl font-black lg:mt-4 lg:text-2xl">Campaign Isolation</h2>
+              <h2 className="mt-5 text-3xl font-black lg:mt-4 lg:text-2xl">Organization Separation</h2>
               <p className="mt-4 leading-8 text-slate-300 lg:text-sm lg:leading-6 lg:mt-3">
-                Every campaign operates inside its own organization. Campaign
-                data is isolated and cannot be accessed by other organizations
-                using Aether.
+                Political campaigns and businesses work within their respective Aether organizations.
+                Organization membership and access controls are designed to keep one customer's
+                records separate from those of other customers.
               </p>
             </div>
 
@@ -164,18 +161,18 @@ export default function SecurityPage() {
                 integration support, security response, and customer-requested assistance.
               </p>
               <p className="mt-4 leading-8 text-slate-300 lg:text-sm lg:leading-6 lg:mt-3">
-                That access does not transfer ownership of campaign data to Aether and is not
-                intended for unrelated inspection or modification of a campaign&apos;s information.
+                That access does not transfer ownership of customer organization data to Aether and is not
+                intended for unrelated inspection or modification of an organization&apos;s information.
               </p>
             </div>
 
             <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-8 lg:p-6 lg:rounded-2xl">
               <EyeOff className="h-10 w-10 text-violet-300 lg:h-8 lg:w-8" />
-              <h2 className="mt-5 text-3xl font-black lg:mt-4 lg:text-2xl">Data Use &amp; Campaign Separation</h2>
+              <h2 className="mt-5 text-3xl font-black lg:mt-4 lg:text-2xl">Data Use &amp; Organization Separation</h2>
               <p className="mt-4 leading-8 text-slate-300 lg:text-sm lg:leading-6 lg:mt-3">
-                Aether does not sell campaign data or use customer campaign data as an advertising
-                product. Data belonging to one campaign is not provided to another campaign simply
-                because both organizations use Aether.
+                Aether does not sell campaign or business operational data or use customer organization
+                data as an advertising product. Data belonging to one customer organization is not
+                shared with another simply because both use Aether.
               </p>
             </div>
           </section>
@@ -194,12 +191,11 @@ export default function SecurityPage() {
             <div className="rounded-[2rem] border border-violet-300/20 bg-[#efe7ff] p-8 text-[#32106b] lg:p-6 lg:rounded-2xl">
               <Shield className="h-10 w-10 lg:h-8 lg:w-8" />
               <h2 className="mt-5 text-3xl font-black lg:mt-4 lg:text-2xl">
-                Your campaign owns your campaign's data.
+                Your organization owns its data.
               </h2>
               <p className="mt-4 leading-8 lg:mt-3">
-                Aether exists to help campaigns organize, understand, and
-                execute—not to claim ownership of the information entrusted to
-                the platform.
+                Aether exists to help campaigns and businesses organize, understand, and
+                execute—not to claim ownership of information entrusted to the platform.
               </p>
             </div>
           </section>
@@ -209,16 +205,15 @@ export default function SecurityPage() {
               <KeyRound className="h-10 w-10 text-violet-300 lg:h-8 lg:w-8" />
               <h2 className="mt-5 text-3xl font-black lg:mt-4 lg:text-2xl">Connected Integrations</h2>
               <p className="mt-4 leading-8 text-slate-300 lg:text-sm lg:leading-6 lg:mt-3">
-                When a campaign connects a supported third-party service to Aether, Aether uses
+                When an organization connects a supported third-party service to Aether, Aether uses
                 provider-supported authorization mechanisms, including OAuth where implemented.
                 Aether accesses the information and capabilities authorized through that connection
-                to provide the integration features requested by the campaign.
+                to provide the integration features requested by the organization.
               </p>
               <p className="mt-4 leading-8 text-slate-300 lg:text-sm lg:leading-6 lg:mt-3">
                 Connected services remain subject to the permissions, security
-                practices, and policies of their respective providers. Campaign
-                leadership controls which supported integrations are connected to
-                its Aether organization.
+                practices, and policies of their respective providers. Authorized organization administrators control supported connections according to
+                their available permissions and product configuration.
               </p>
             </div>
 
@@ -226,21 +221,21 @@ export default function SecurityPage() {
               <Database className="h-10 w-10 lg:h-8 lg:w-8" />
               <h2 className="mt-5 text-3xl font-black lg:mt-4 lg:text-2xl">Your Data. Your Exit.</h2>
               <p className="mt-4 leading-8 lg:mt-3">
-                Your campaign data remains your data. Full means full: Aether&apos;s Full Data Export
-                provides the organization&apos;s saved Aether records in portable CSV form rather than
-                limiting the campaign to a simplified contacts export. The goal is portability, not
-                vendor lock-in.
+                Your organization retains ownership of the records it provides. Aether offers data
+                export capabilities, with available formats and included records depending on
+                the product and enabled features. Political organizations can use the Full Data
+                Export feature to retrieve supported saved records in portable CSV form.
               </p>
               <p className="mt-4 leading-8 lg:mt-3">
-                Following cancellation or completion of yearly usage, Aether may
-                retain campaign data for up to 60 days. We recommend exporting your
-                full data set before that grace period expires.
+                For Political, following cancellation or completion of yearly usage, Aether may
+                retain campaign data for up to 60 days. Business retention and export
+                arrangements depend on the applicable subscription or agreement. We recommend
+                exporting available records before the applicable access period ends.
               </p>
               <p className="mt-4 leading-8 lg:mt-3">
-                Campaigns that want to preserve their Aether data between campaign
-                cycles may keep their data stored in Aether for $5 per month until
-                the next campaign rather than allowing the post-subscription
-                retention period to expire.
+                Political campaigns may have the option to preserve their Aether data between
+                campaign cycles for $5 per month, where offered. This campaign-specific
+                option does not automatically apply to Business subscriptions.
               </p>
             </div>
           </section>
@@ -266,7 +261,7 @@ export default function SecurityPage() {
               <ServerCog className="h-10 w-10 text-violet-300 lg:h-8 lg:w-8" />
               <h2 className="mt-5 text-3xl font-black lg:mt-4 lg:text-2xl">Shared Responsibility</h2>
               <p className="mt-4 leading-8 text-slate-300 lg:text-sm lg:leading-6 lg:mt-3">
-                Campaign security also depends on campaign practices. Organizations should protect
+                Security also depends on each customer organization's practices. Organizations should protect
                 account credentials, remove users who no longer require access, assign roles
                 appropriately, secure connected third-party accounts, maintain independent data
                 exports, and promptly report suspected unauthorized access to Team Aether.
@@ -278,10 +273,10 @@ export default function SecurityPage() {
             <FileDown className="h-10 w-10 text-violet-300 lg:h-8 lg:w-8" />
             <h2 className="mt-5 text-4xl font-black lg:mt-4 lg:text-3xl">Security Without Lock-In</h2>
             <p className="mt-6 max-w-4xl leading-8 text-slate-300 lg:text-sm lg:leading-6 lg:mt-4">
-              Security should not require a campaign to surrender control of its own information.
+              Security should not require a campaign or business to surrender control of its own information.
               Aether combines organization isolation, authenticated access, role-based permissions,
               supported integration controls, administrative accountability, and full data export
-              so campaigns can operate inside Aether without giving up ownership of their data.
+              so organizations can operate inside Aether without giving up ownership of their data.
             </p>
           </section>
 
@@ -292,7 +287,7 @@ export default function SecurityPage() {
               We won't claim certifications we haven't earned. We won't make
               promises no software can honestly guarantee. As Aether grows,
               we'll continue strengthening security while remaining transparent
-              about how the platform protects campaign information.
+              about how the platform protects campaign and business information.
             </p>
           </section>
 
@@ -323,6 +318,10 @@ export default function SecurityPage() {
               </div>
             </form>)}
           </section>
+          <nav aria-label="Return to an Aether product" className="flex flex-wrap gap-3">
+            <Link href="/" className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:border-violet-400/40 hover:bg-white/10 lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-xs"><ArrowLeft className="h-4 w-4" /> Return to Political</Link>
+            <Link href="/business-public" className="inline-flex items-center gap-2 rounded-2xl border border-violet-400/40 bg-violet-500/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-violet-500/20 lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-xs"><ArrowLeft className="h-4 w-4" /> Return to Business</Link>
+          </nav>
         </div>
       </section>
     </main>
