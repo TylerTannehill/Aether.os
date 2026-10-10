@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { supabase } from "../../../../lib/supabase";
 import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
@@ -111,6 +112,8 @@ export default function BusinessProfilePage() {
   const [statusSaving, setStatusSaving] = useState(false);
   const [statusError, setStatusError] = useState("");
   const [statusSuccess, setStatusSuccess] = useState("");
+  const [taskCounts, setTaskCounts] = useState<{ incomplete: number; completed: number } | null>(null);
+  const [taskCountsError, setTaskCountsError] = useState("");
 
   useEffect(() => {
     let isMounted = true;
@@ -169,6 +172,53 @@ export default function BusinessProfilePage() {
           status: normalizeProfileStatus(membership?.profile_status),
           accessDepartments,
         });
+
+        // Reuse Projects & Tasks membership matching; task metrics are personal.
+        // Keep a metrics failure separate from the existing profile experience.
+        if (organization?.id) {
+          try {
+            const teamResponse = await fetch("/api/tools/team-status", { credentials: "include" });
+            if (!teamResponse.ok) throw new Error("Unable to load team membership.");
+            const teamData = await teamResponse.json();
+            if (String(teamData?.organization_id || "") !== String(organization.id)) {
+              throw new Error("Team organization does not match your current organization.");
+            }
+            const members = Array.isArray(teamData?.members) ? teamData.members : [];
+            const membershipId = String(membership?.id ?? "").trim();
+            const userId = String(user?.id ?? "").trim();
+            const authId = String(user?.auth_id ?? "").trim();
+            const self = members.find((member: any) =>
+              (membershipId && member.id === membershipId) ||
+              (userId && member.user_id === userId) ||
+              (authId && member.user_id === authId)
+            );
+            if (!self) throw new Error("Unable to identify your team membership.");
+
+            const [assignmentResult, workResult] = await Promise.all([
+              supabase.from("business_work_assignments")
+                .select("work_item_id")
+                .eq("organization_id", organization.id)
+                .eq("organization_member_id", self.id),
+              supabase.from("business_work_items")
+                .select("id,status")
+                .eq("organization_id", organization.id),
+            ]);
+            if (assignmentResult.error) throw assignmentResult.error;
+            if (workResult.error) throw workResult.error;
+            const assignedIds = new Set(
+              (assignmentResult.data ?? []).map((row: any) => String(row.work_item_id))
+            );
+            const assignedWork = (workResult.data ?? []).filter((row: any) => assignedIds.has(String(row.id)));
+            if (isMounted) {
+              setTaskCounts({
+                incomplete: assignedWork.filter((row: any) => row.status !== "done").length,
+                completed: assignedWork.filter((row: any) => row.status === "done").length,
+              });
+            }
+          } catch (taskError: any) {
+            if (isMounted) setTaskCountsError(taskError?.message || "Unable to load task counts.");
+          }
+        }
       } catch (error: any) {
         if (!isMounted) return;
         setProfileError(error?.message || "Failed to load profile.");
@@ -284,6 +334,20 @@ export default function BusinessProfilePage() {
               Overview
             </Link>
           </div>
+        </section>
+
+        <section aria-label="My task progress" className="grid gap-4 sm:grid-cols-2">
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">My Incomplete Tasks</p>
+            <p className="mt-3 text-3xl font-semibold text-slate-950">{taskCounts ? taskCounts.incomplete : "—"}</p>
+            <p className="mt-2 text-xs text-slate-500">Assigned work that is not completed</p>
+          </div>
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">My Completed Tasks</p>
+            <p className="mt-3 text-3xl font-semibold text-slate-950">{taskCounts ? taskCounts.completed : "—"}</p>
+            <p className="mt-2 text-xs text-slate-500">Assigned work marked completed</p>
+          </div>
+          {taskCountsError ? <p className="text-sm text-rose-700 sm:col-span-2" role="alert">Task counts unavailable: {taskCountsError}</p> : null}
         </section>
 
         <section className="grid gap-6 lg:grid-cols-2">

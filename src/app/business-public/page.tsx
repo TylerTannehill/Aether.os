@@ -14,11 +14,11 @@ const features = [
 ];
 
 export default function BusinessPublicPage() {
-  // Provisional until the Business public documentation is published.
-  const aiPrompt = `I'm evaluating Aether Business, a business operating system.
-Website: https://aetheros.pro/business-public
+  const aiPrompt = `I'm evaluating business management software and found a SaaS called Aether Business.
+URL: aetheros.pro/business-public
+URL: aetheros.pro/aether-academy/business-comprehensive-guide
 
-Please review the publicly available Business landing page. Assess the value proposition, clarity, and unanswered questions for a prospective business customer. Distinguish verified information from claims that still need supporting documentation. Do not assume unreleased Business pages or capabilities exist.`;
+Please take a deep dive on aetheros.pro/business-public & aetheros.pro/aether-academy/business-comprehensive-guide and all of the public Business pages and give me your feedback.`;
   const [promptCopied, setPromptCopied] = useState(false);
 
   const copyAiPrompt = async () => {
@@ -32,13 +32,13 @@ Please review the publicly available Business landing page. Assess the value pro
   };
 
   const openAiWithCopiedPrompt = async (url: string) => {
-    // Open synchronously to avoid popup blockers while clipboard access resolves.
-    window.open(url, "_blank", "noopener,noreferrer");
     try {
       await navigator.clipboard.writeText(aiPrompt);
     } catch {
-      // Users can still use Copy Prompt separately.
+      // The AI platform still opens if clipboard access is unavailable.
     }
+
+    window.open(url, "_blank", "noopener,noreferrer");
   };
   const [easterEggClicks, setEasterEggClicks] = useState(0);
   const [easterEggOpen, setEasterEggOpen] = useState(false);
@@ -62,7 +62,7 @@ Please review the publicly available Business landing page. Assess the value pro
       <div className="relative z-10 mx-auto max-w-[1600px] px-6 py-8 lg:px-12">
         <header className="relative flex flex-col gap-6 lg:min-h-[220px] lg:flex-row lg:items-center lg:justify-between">
           <Link href="/business-public" aria-label="Aether Business home" className="inline-flex shrink-0 self-start lg:self-auto">
-            <img src="/aether-logo-full.png" alt="Aether OS" className="h-[170px] w-auto object-contain drop-shadow-[0_0_45px_rgba(139,92,246,0.45)] lg:h-[220px]" />
+            <img src="/aether-logo-full.png" alt="Aether OS" className="h-[212.5px] w-auto object-contain drop-shadow-[0_0_45px_rgba(139,92,246,0.45)] lg:h-[275px] lg:-my-[27.5px]" />
           </Link>
 
           <nav aria-label="Aether products" className="inline-flex w-fit items-center rounded-2xl border border-violet-400/40 bg-white/[0.04] p-1 text-sm font-black uppercase tracking-[0.08em] shadow-xl shadow-violet-950/20 lg:absolute lg:left-1/2 lg:top-0 lg:-translate-x-1/2">
@@ -165,7 +165,7 @@ Please review the publicly available Business landing page. Assess the value pro
                 ].map(({ name, detail }) => (
                   <div key={name} className="flex items-start gap-3 text-sm leading-6 text-slate-200"><CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-violet-300" /><span><span className="font-semibold text-white">{name}</span> — {detail}</span></div>
                 ))}
-                <div className="flex items-start gap-3 pt-2 text-sm leading-6 text-slate-300"><CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-emerald-400" /><span>Business Overview, Tools, and FAQ included as standard.</span></div>
+                <div className="flex items-start gap-3 pt-2 text-sm leading-6 text-slate-300"><CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-emerald-400" /><span>Business Overview, Projects & Tasks, Tools, and FAQ included as standard.</span></div>
               </div>
               <Link href="/business-public/sales" className="mt-auto inline-flex w-full items-center justify-center rounded-xl border border-violet-300/50 bg-white/[0.04] px-6 py-3 text-sm font-black uppercase tracking-[0.08em] transition hover:bg-violet-500/15">Learn More</Link>
             </article>
@@ -204,28 +204,62 @@ Please review the publicly available Business landing page. Assess the value pro
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-300">Independent Perspective</p>
             <h2 className="mx-auto mt-5 max-w-4xl text-4xl font-semibold tracking-tight text-white lg:text-6xl">Ask your favorite AI about us.</h2>
             <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-slate-300">
-              Don&apos;t take our word for it. Ask your preferred AI to review Aether Business&apos;s public landing page and share its assessment. We&apos;ll expand the prompt as more Business documentation goes live.
+              Don&apos;t take our word for it. Ask your favorite AI to explore Aether Business&apos;s public landing page and comprehensive guide, then give you its feedback.
             </p>
             <div className="mx-auto mt-10 grid max-w-5xl gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {[
-                { name: "ChatGPT", url: "https://chatgpt.com/" },
-                { name: "Gemini", url: "https://gemini.google.com/app" },
-                { name: "Claude", url: "https://claude.ai/new" },
-                { name: "Grok", url: "https://grok.com/" },
-                { name: "Perplexity", url: "https://www.perplexity.ai/" },
-                { name: "Copilot", url: "https://copilot.microsoft.com/" },
-              ].map(({ name, url }) => (
-                <button
-                  key={name}
-                  type="button"
-                  onClick={() => openAiWithCopiedPrompt(url)}
-                  className="inline-flex min-w-0 items-center justify-center gap-3 rounded-2xl border border-violet-300/60 bg-gradient-to-b from-violet-500 to-violet-800 px-8 py-5 text-base font-black uppercase tracking-[0.08em] text-white shadow-2xl shadow-violet-950/40 transition hover:from-violet-400 hover:to-violet-700"
-                >
-                  Ask {name}
-                </button>
-              ))}
+              <a
+                href="https://chatgpt.com/?q=I%27m%20evaluating%20business%20management%20software%20and%20found%20a%20SaaS%20called%20Aether%20Business.%0AURL%3A%20aetheros.pro%2Fbusiness-public%0AURL%3A%20aetheros.pro%2Faether-academy%2Fbusiness-comprehensive-guide%0A%0APlease%20take%20a%20deep%20dive%20on%20aetheros.pro%2Fbusiness-public%20%26%20aetheros.pro%2Faether-academy%2Fbusiness-comprehensive-guide%20and%20all%20of%20the%20public%20Business%20pages%20and%20give%20me%20your%20feedback."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-w-0 items-center justify-center gap-3 rounded-2xl border border-violet-300/60 bg-gradient-to-b from-violet-500 to-violet-800 px-8 py-5 text-base font-black uppercase tracking-[0.08em] text-white shadow-2xl shadow-violet-950/40 transition hover:from-violet-400 hover:to-violet-700"
+              >
+                Ask ChatGPT
+              </a>
+
+              <button
+                type="button"
+                onClick={() => openAiWithCopiedPrompt("https://gemini.google.com/app")}
+                className="inline-flex min-w-0 items-center justify-center gap-3 rounded-2xl border border-violet-300/60 bg-gradient-to-b from-violet-500 to-violet-800 px-8 py-5 text-base font-black uppercase tracking-[0.08em] text-white shadow-2xl shadow-violet-950/40 transition hover:from-violet-400 hover:to-violet-700"
+              >
+                Ask Gemini
+              </button>
+
+              <a
+                href="https://claude.ai/new?q=I%27m%20evaluating%20business%20management%20software%20and%20found%20a%20SaaS%20called%20Aether%20Business.%0AURL%3A%20aetheros.pro%2Fbusiness-public%0AURL%3A%20aetheros.pro%2Faether-academy%2Fbusiness-comprehensive-guide%0A%0APlease%20take%20a%20deep%20dive%20on%20aetheros.pro%2Fbusiness-public%20%26%20aetheros.pro%2Faether-academy%2Fbusiness-comprehensive-guide%20and%20all%20of%20the%20public%20Business%20pages%20and%20give%20me%20your%20feedback."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-w-0 items-center justify-center gap-3 rounded-2xl border border-violet-300/60 bg-gradient-to-b from-violet-500 to-violet-800 px-8 py-5 text-base font-black uppercase tracking-[0.08em] text-white shadow-2xl shadow-violet-950/40 transition hover:from-violet-400 hover:to-violet-700"
+              >
+                Ask Claude
+              </a>
+
+              <a
+                href="https://grok.com/?q=I%27m%20evaluating%20business%20management%20software%20and%20found%20a%20SaaS%20called%20Aether%20Business.%0AURL%3A%20aetheros.pro%2Fbusiness-public%0AURL%3A%20aetheros.pro%2Faether-academy%2Fbusiness-comprehensive-guide%0A%0APlease%20take%20a%20deep%20dive%20on%20aetheros.pro%2Fbusiness-public%20%26%20aetheros.pro%2Faether-academy%2Fbusiness-comprehensive-guide%20and%20all%20of%20the%20public%20Business%20pages%20and%20give%20me%20your%20feedback."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-w-0 items-center justify-center gap-3 rounded-2xl border border-violet-300/60 bg-gradient-to-b from-violet-500 to-violet-800 px-8 py-5 text-base font-black uppercase tracking-[0.08em] text-white shadow-2xl shadow-violet-950/40 transition hover:from-violet-400 hover:to-violet-700"
+              >
+                Ask Grok
+              </a>
+
+              <a
+                href="https://www.perplexity.ai/search?q=I%27m%20evaluating%20business%20management%20software%20and%20found%20a%20SaaS%20called%20Aether%20Business.%0AURL%3A%20aetheros.pro%2Fbusiness-public%0AURL%3A%20aetheros.pro%2Faether-academy%2Fbusiness-comprehensive-guide%0A%0APlease%20take%20a%20deep%20dive%20on%20aetheros.pro%2Fbusiness-public%20%26%20aetheros.pro%2Faether-academy%2Fbusiness-comprehensive-guide%20and%20all%20of%20the%20public%20Business%20pages%20and%20give%20me%20your%20feedback."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-w-0 items-center justify-center gap-3 rounded-2xl border border-violet-300/60 bg-gradient-to-b from-violet-500 to-violet-800 px-8 py-5 text-base font-black uppercase tracking-[0.08em] text-white shadow-2xl shadow-violet-950/40 transition hover:from-violet-400 hover:to-violet-700"
+              >
+                Ask Perplexity
+              </a>
+
+              <a
+                href="https://copilot.microsoft.com/?q=I%27m%20evaluating%20business%20management%20software%20and%20found%20a%20SaaS%20called%20Aether%20Business.%0AURL%3A%20aetheros.pro%2Fbusiness-public%0AURL%3A%20aetheros.pro%2Faether-academy%2Fbusiness-comprehensive-guide%0A%0APlease%20take%20a%20deep%20dive%20on%20aetheros.pro%2Fbusiness-public%20%26%20aetheros.pro%2Faether-academy%2Fbusiness-comprehensive-guide%20and%20all%20of%20the%20public%20Business%20pages%20and%20give%20me%20your%20feedback."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-w-0 items-center justify-center gap-3 rounded-2xl border border-violet-300/60 bg-gradient-to-b from-violet-500 to-violet-800 px-8 py-5 text-base font-black uppercase tracking-[0.08em] text-white shadow-2xl shadow-violet-950/40 transition hover:from-violet-400 hover:to-violet-700"
+              >
+                Ask Copilot
+              </a>
             </div>
-            <p className="mt-5 text-sm text-slate-400">The prompt is copied to your clipboard when you select an AI. Paste it into the new conversation.</p>
             <div className="mt-6 flex justify-center">
               <button
                 type="button"
@@ -249,6 +283,7 @@ Please review the publicly available Business landing page. Assess the value pro
                 <a href="https://apps.apple.com/us/app/aether-mobile/id6814591434" target="_blank" rel="noopener noreferrer">Apple App Store</a>
                 <a href="https://play.google.com/store/apps/details?id=pro.aetheros.mobile" target="_blank" rel="noopener noreferrer">Google Play Store</a>
                 <Link href="/aether-academy/business-academy">Aether Academy</Link>
+                <Link href="/aether-academy/business-comprehensive-guide">Documentation</Link>
               </div>
             </div>
             <div>

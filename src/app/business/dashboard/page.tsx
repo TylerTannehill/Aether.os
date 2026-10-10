@@ -108,6 +108,7 @@ export default function BusinessDashboardPage() {
   const [activeTrendDepartment, setActiveTrendDepartment] =
     useState<BusinessTrendDepartment>("CRM");
   const [businessModules, setBusinessModules] = useState<Set<string>>(new Set());
+  const [workSummary, setWorkSummary] = useState<{ open: number; completed: number; blocked: number } | null>(null);
   const [crmInteractions, setCrmInteractions] = useState<number | null>(null);
   const [crmFollowUps, setCrmFollowUps] = useState<number | null>(null);
   const [crmFocusListCount, setCrmFocusListCount] = useState<number | null>(null);
@@ -164,6 +165,26 @@ export default function BusinessDashboardPage() {
         }
 
         const supabase = createClient();
+        // Base Business feature: Projects & Tasks is not gated by department provisioning.
+        // Load independently so a failure here never interrupts existing dashboard metrics.
+        void (async () => {
+          const { data, error } = await supabase
+            .from("business_work_items")
+            .select("status")
+            .eq("organization_id", organizationId);
+          if (error) {
+            console.error("Failed to load Projects & Tasks snapshot", error);
+            return;
+          }
+          if (!cancelled) {
+            const statuses = (data ?? []).map((item) => String(item.status ?? "").toLowerCase());
+            setWorkSummary({
+              open: statuses.filter((status) => status !== "done").length,
+              completed: statuses.filter((status) => status === "done").length,
+              blocked: statuses.filter((status) => status === "blocked").length,
+            });
+          }
+        })();
         let contentStages: Record<string, number> | null = null;
         if (provisionedModules.has("marketing")) {
           const { data: contentRows, error: contentError } = await supabase
@@ -684,7 +705,14 @@ export default function BusinessDashboardPage() {
       }
     }
 
-
+    if (workSummary !== null) {
+      const { open, completed, blocked } = workSummary;
+      abeBrief.push(
+        open === 0 && completed === 0
+          ? "Projects & Tasks has no recorded work items yet."
+          : `Projects & Tasks shows ${open.toLocaleString()} unfinished ${open === 1 ? "task" : "tasks"} and ${completed.toLocaleString()} completed ${completed === 1 ? "task" : "tasks"}${blocked > 0 ? `, including ${blocked.toLocaleString()} currently blocked` : ""}.`
+      );
+    }
   }
 
 

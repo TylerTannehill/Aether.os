@@ -44,7 +44,7 @@ type ParsedCampaignCsv = {
 function ProgressDot({ active }: { active: boolean }) {
   return (
     <span
-      className={`inline-flex h-3 w-3 rounded-full border lg:h-2.5 lg:w-2.5 ${
+      className={`pipeline-progress-dot ${active ? "pipeline-progress-dot-active" : "pipeline-progress-dot-inactive"} inline-flex h-3 w-3 rounded-full border lg:h-2.5 lg:w-2.5 ${
         active
           ? "border-slate-950 bg-slate-950"
           : "border-slate-300 bg-white"
@@ -76,6 +76,7 @@ function BooleanStatus({
 }
 
 export default function TeamAetherSalesPage() {
+  const [nightMode, setNightMode] = useState(false);
   const [expandedCampaignId, setExpandedCampaignId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] =
@@ -164,6 +165,26 @@ export default function TeamAetherSalesPage() {
   useEffect(() => {
     loadCampaigns();
   }, []);
+
+  useEffect(() => {
+    try {
+      setNightMode(window.localStorage.getItem("aether-sales-pipeline-night-mode") === "true");
+    } catch {
+      // Browser storage may be unavailable.
+    }
+  }, []);
+
+  function toggleNightMode() {
+    setNightMode((current) => {
+      const next = !current;
+      try {
+        window.localStorage.setItem("aether-sales-pipeline-night-mode", String(next));
+      } catch {
+        // The toggle still works for this visit.
+      }
+      return next;
+    });
+  }
 
   function normalizeFieldName(value: string) {
     return value
@@ -708,7 +729,64 @@ export default function TeamAetherSalesPage() {
   }, [activeFilter, campaigns, search]);
 
   return (
-    <main className="min-h-screen bg-slate-100 p-6 text-slate-950 lg:p-6 lg:p-4">
+    <>
+
+      <style jsx global>{`
+        /* Scoped to this pipeline page; the operational logic is unchanged. */
+        .pipeline-night { background-color: #0b1220 !important; color: #e2e8f0 !important; }
+        .pipeline-night [class~="bg-white"] { background-color: #1e293b !important; }
+        .pipeline-night [class~="bg-slate-100"] { background-color: #111c2e !important; }
+        .pipeline-night [class~="bg-slate-50"] { background-color: #162235 !important; }
+        .pipeline-night [class~="bg-amber-50"] { background-color: #342918 !important; }
+        .pipeline-night [class~="bg-blue-50"] { background-color: #142b45 !important; }
+        .pipeline-night [class~="bg-emerald-50"] { background-color: #12372f !important; }
+        .pipeline-night [class~="bg-rose-50"] { background-color: #3c202b !important; }
+        .pipeline-night [class~="text-slate-950"],
+        .pipeline-night [class~="text-slate-900"],
+        .pipeline-night [class~="text-slate-800"] { color: #f1f5f9 !important; }
+        .pipeline-night [class~="text-slate-700"],
+        .pipeline-night [class~="text-slate-600"] { color: #cbd5e1 !important; }
+        .pipeline-night [class~="text-slate-500"],
+        .pipeline-night [class~="text-slate-400"] { color: #94a3b8 !important; }
+        .pipeline-night [class~="text-amber-950"],
+        .pipeline-night [class~="text-amber-700"] { color: #fcd34d !important; }
+        .pipeline-night [class~="text-blue-950"],
+        .pipeline-night [class~="text-blue-700"] { color: #93c5fd !important; }
+        .pipeline-night [class~="text-emerald-950"],
+        .pipeline-night [class~="text-emerald-800"],
+        .pipeline-night [class~="text-emerald-700"] { color: #6ee7b7 !important; }
+        .pipeline-night [class~="text-rose-800"] { color: #fda4af !important; }
+        .pipeline-night [class~="border-slate-200"],
+        .pipeline-night [class~="border-slate-300"] { border-color: #334155 !important; }
+        .pipeline-night [class~="border-amber-200"] { border-color: #785723 !important; }
+        .pipeline-night [class~="border-blue-200"] { border-color: #28527a !important; }
+        .pipeline-night [class~="border-emerald-200"] { border-color: #236451 !important; }
+        .pipeline-night [class~="border-rose-200"] { border-color: #753a4a !important; }
+        .pipeline-night [class~="divide-slate-200"] > :not([hidden]) ~ :not([hidden]) { border-color: #334155 !important; }
+        .pipeline-night input, .pipeline-night textarea, .pipeline-night select {
+          background-color: #0f1b2d !important;
+          color: #f1f5f9 !important;
+          border-color: #475569 !important;
+          color-scheme: dark;
+        }
+        .pipeline-night input::placeholder, .pipeline-night textarea::placeholder { color: #94a3b8; }
+        .pipeline-night tr:hover [class~="hover:bg-slate-50"],
+        .pipeline-night [class~="hover:bg-slate-50"]:hover,
+        .pipeline-night [class~="hover:bg-slate-100"]:hover { background-color: #29384e !important; }
+        /* Night-mode-only progress indicators: filled = bright, empty = outlined. */
+        .pipeline-night .pipeline-progress-dot-active {
+          background-color: #a5b4fc !important;
+          border-color: #c7d2fe !important;
+        }
+        .pipeline-night .pipeline-progress-dot-inactive {
+          background-color: transparent !important;
+          border-color: #64748b !important;
+        }
+        /* The active navigation tab has an intentional light background. */
+        .pipeline-night a[style*="color: rgb(0, 0, 0)"],
+        .pipeline-night a[style*="color: #000000"] { color: #000000 !important; }
+      `}</style>
+      <main className={`min-h-screen bg-slate-100 p-6 text-slate-950 lg:p-6 lg:p-4 ${nightMode ? "pipeline-night" : ""}`}>
       <div className="mx-auto max-w-7xl space-y-6 lg:space-y-4">
         <section className="rounded-[2rem] bg-slate-950 p-8 text-white lg:rounded-2xl lg:p-6">
           <div className="flex flex-col gap-8 lg:flex-row lg:justify-between lg:gap-5">
@@ -727,6 +805,9 @@ export default function TeamAetherSalesPage() {
             </div>
 
             <div className="grid grid-cols-2 gap-3 lg:w-[420px] lg:gap-2">
+              <button type="button" onClick={toggleNightMode} aria-pressed={nightMode} className="col-span-2 rounded-2xl border border-white/20 bg-white/10 px-4 py-2 text-center text-sm font-semibold text-white transition hover:bg-white/20 lg:rounded-xl">
+                {nightMode ? "☀ Light Mode" : "☾ Night Mode"}
+              </button>
               {[
                 { label: "Dashboard", href: "/team-aether/dashboard" },
                 {
@@ -1467,6 +1548,7 @@ export default function TeamAetherSalesPage() {
           </div>
         )}
       </div>
-    </main>
+      </main>
+    </>
   );
 }

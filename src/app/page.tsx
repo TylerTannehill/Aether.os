@@ -147,12 +147,12 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
         <header className="relative flex items-center justify-between">
           <Link
             href="/"
-            className="inline-flex items-center transition hover:opacity-90"
+            className="relative inline-flex h-[220px] shrink-0 items-center transition hover:opacity-90"
           >
             <img
               src="/aether-logo-full.png"
               alt="Aether OS"
-              className="h-[220px] w-auto object-contain drop-shadow-[0_0_45px_rgba(139,92,246,0.45)]"
+              className="absolute left-0 top-1/2 h-[275px] w-auto max-w-none -translate-y-1/2 object-contain drop-shadow-[0_0_45px_rgba(139,92,246,0.45)]"
             />
           </Link>
 

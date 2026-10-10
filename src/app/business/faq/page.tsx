@@ -48,9 +48,9 @@ export default function BusinessFAQPage() {
     ] },
     { question: "What does A.B.E. monitor?", answer: [
       "A.B.E. examines operational information from the departments enabled within an organization's Aether Business environment.",
-      "Depending on the organization's configuration, these may include CRM, Marketing, Inventory, Dispatch, and Finance.",
+      "Depending on the organization's configuration, these may include CRM, Marketing, Inventory, Dispatch, and Finance. A.B.E. can also summarize organization-wide Projects & Tasks activity, which is included with Aether Business.",
       "A.B.E. is designed to identify conditions such as changing activity levels, outstanding work, operational bottlenecks, inventory concerns, and other department-specific signals supported by the available records.",
-      "Its visibility is determined by the modules provisioned for the organization and the operational information those modules contain."
+      "Department-specific visibility depends on provisioned modules and available operational records. Projects & Tasks provides an additional standard, organization-wide work signal."
     ] },
     { question: "How is A.B.E. different from a traditional dashboard?", answer: [
       "A traditional dashboard tells you what happened. A.B.E. helps explain what deserves attention.",
@@ -107,7 +107,7 @@ export default function BusinessFAQPage() {
     ] },
     { question: "How does A.B.E. work within the Business Overview?", answer: [
       "The A.B.E. Business Snapshot interprets recorded operational information from the organization's enabled departments.",
-      "It examines conditions such as CRM follow-up activity, marketing performance and content status, inventory replenishment needs, dispatch workload, and outstanding financial obligations.",
+      "It examines conditions such as CRM follow-up activity, marketing performance and content status, inventory replenishment needs, dispatch workload, outstanding financial obligations, and overall Projects & Tasks activity.",
       "A.B.E. also incorporates information associated with departmental Focus workflows, helping connect broader business metrics with work awaiting attention.",
       "Its observations are generated through defined rules applied to operational records, not through generative artificial intelligence."
     ] },
@@ -409,6 +409,22 @@ export default function BusinessFAQPage() {
     { question: "Can I review imported data before saving it?", answer: ["Yes. Contacts shows row-level validity and contact details. Finance and Marketing show validation feedback and a preview of up to the first ten rows when the file passes validation. Review the information before confirming import."] },
     { question: "Does importing data automatically connect external services?", answer: ["No. CSV imports are manual data-ingestion workflows. Live integrations are configured separately through the Integrations Hub, and uploading a CSV does not authorize a Google, social media, or other external connection."] },
   ];
+  const projectsItems = [
+    { question: "What is Projects & Tasks?", answer: ["Projects & Tasks is the shared work-management environment included as a standard part of Aether Business, regardless of which optional departments an organization uses.", "The Work Command Center lets teams organize standalone tasks and larger projects, track progress, assign responsibility, and manage deadlines in one place."] },
+    { question: "How does the Work Command Center organize work?", answer: ["The All Work board groups top-level work items into four status lanes: To Do, In Progress, Blocked, and Completed.", "Each compact card summarizes the work item and, when it has nested tasks, shows the number completed and a progress indicator. Select a card to edit its details."] },
+    { question: "How do I create a project or task?", answer: ["Select New Work Item at the top of the Work Command Center, or Add item within a board lane.", "Enter a title and, as needed, a description, due date, status, and team-member assignment. A standalone task can become a larger project simply by adding nested steps beneath it."] },
+    { question: "What is the Project & Task Hierarchy?", answer: ["The hierarchy below the board is the detailed workspace for organizing parent tasks and their nested steps.", "Expand a parent to see its children, add new steps at any level, open an item to edit it, or change its status directly. Nested tasks can contain further nested tasks."] },
+    { question: "Does adding a nested task replace the parent task?", answer: ["No. The original work item keeps its own title, description, status, assignment, and dates.", "Nested steps are additional work beneath that item, allowing a project and its individual responsibilities to be tracked separately."] },
+    { question: "How is nested task progress calculated?", answer: ["For a parent with nested work, the board summarizes how many descendant tasks are completed out of the total nested tasks, including steps nested multiple levels deep.", "The progress bar helps employees assess the state of a project without expanding every step on the board. The full hierarchy remains available for detailed updates."] },
+    { question: "Can I assign tasks to other team members?", answer: ["Yes. Work items can be assigned to members of the active Business organization. Assignments are saved with the work item and appear in work summaries and responsibility highlights.", "The assignee is a real organization member, not merely a free-text label."] },
+    { question: "What does My Tasks show?", answer: ["My Tasks focuses on work assigned to the currently signed-in organization member, rather than requiring an employee to type their own name.", "Use All Work to return to the organization-wide board and hierarchy."] },
+    { question: "How are deadlines and completed work tracked?", answer: ["Work items can have due dates, completion dates, and statuses. The Work Command Center summarizes open steps, work due this week, overdue items, and completed steps.", "These indicators use the organization's saved work records to show current workload and progress."] },
+    { question: "What are Responsibility Highlights?", answer: ["Responsibility Highlights summarizes active assignments by team member and indicates whether assigned work is overdue.", "This gives managers and employees a quick view of ownership without opening each task individually."] },
+    { question: "Will my projects and tasks remain after refreshing the page?", answer: ["Yes. Projects and tasks are saved in the organization's Supabase-backed records and persist across page refreshes.", "Team assignments are also connected to organization members and saved with the relevant work."] },
+    { question: "Is Projects & Tasks an optional paid department or a separate Focus Mode?", answer: ["No. Projects & Tasks is a standard Business feature, not one of the five optional departmental modules.", "Its All Work board, My Tasks view, and expandable hierarchy provide the work-management experience directly, without a separate Projects & Tasks Focus Mode."] },
+    { question: "How does Projects & Tasks connect to A.B.E. and My Profile?", answer: ["The Business dashboard's A.B.E. summary can include an overall observation about Projects & Tasks based on recorded work activity.", "My Profile can show counts of incomplete and completed work associated with the signed-in employee. Projects & Tasks remains the place to review and manage the underlying work."] },
+  ];
+
   const adminItems = [
     { question: "What is Business Administration?", answer: ["Business Administration is the organization's control center for viewing team membership, provisioned Business modules, department access information, and operational activity. It also provides access to Team Management."] },
     { question: "What does the Administration dashboard show?", answer: ["It displays organization team members and their statuses, available Business modules, role and provisioning guidance, and current activity indicators for provisioned departments."] },
@@ -452,14 +468,18 @@ export default function BusinessFAQPage() {
       item.question.toLowerCase().includes(search) || item.answer.some((paragraph) => paragraph.toLowerCase().includes(search))
     ) : importsItems;
   }, [query]);
+  const filteredProjectsItems = useMemo(() => {
+    const search = query.trim().toLowerCase();
+    return search ? projectsItems.filter((item) => item.question.toLowerCase().includes(search) || item.answer.some((paragraph) => paragraph.toLowerCase().includes(search))) : projectsItems;
+  }, [query]);
   const filteredAdminItems = useMemo(() => {
     const search = query.trim().toLowerCase();
     return search ? adminItems.filter((item) =>
       item.question.toLowerCase().includes(search) || item.answer.some((paragraph) => paragraph.toLowerCase().includes(search))
     ) : adminItems;
   }, [query]);
-  const hasResults = filteredItems.length > 0 || filteredAbeItems.length > 0 || filteredOverviewItems.length > 0 || filteredFocusItems.length > 0 || filteredCrmItems.length > 0 || filteredDispatchItems.length > 0 || filteredFinanceItems.length > 0 || filteredInventoryItems.length > 0 || filteredMarketingItems.length > 0 || filteredToolsItems.length > 0 || filteredContactsItems.length > 0 || filteredListsItems.length > 0 || filteredImportsItems.length > 0 || filteredAdminItems.length > 0;
-  const totalQuestions = faqItems.length + abeItems.length + overviewItems.length + focusItems.length + crmItems.length + dispatchItems.length + financeItems.length + inventoryItems.length + marketingItems.length + toolsItems.length + contactsItems.length + listsItems.length + importsItems.length + adminItems.length;
+  const hasResults = filteredItems.length > 0 || filteredAbeItems.length > 0 || filteredOverviewItems.length > 0 || filteredFocusItems.length > 0 || filteredCrmItems.length > 0 || filteredDispatchItems.length > 0 || filteredFinanceItems.length > 0 || filteredInventoryItems.length > 0 || filteredMarketingItems.length > 0 || filteredToolsItems.length > 0 || filteredContactsItems.length > 0 || filteredListsItems.length > 0 || filteredImportsItems.length > 0 || filteredAdminItems.length > 0 || filteredProjectsItems.length > 0;
+  const totalQuestions = faqItems.length + abeItems.length + overviewItems.length + focusItems.length + crmItems.length + dispatchItems.length + financeItems.length + inventoryItems.length + marketingItems.length + toolsItems.length + contactsItems.length + listsItems.length + importsItems.length + adminItems.length + projectsItems.length;
   const [doctrineClicks, setDoctrineClicks] = useState(0);
   const [warningStage, setWarningStage] = useState<0 | 1 | 2 | 3 | 4>(0);
 
@@ -506,7 +526,7 @@ export default function BusinessFAQPage() {
 
           <div className="grid grid-cols-3 gap-3 rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur lg:min-w-[315px] lg:gap-2 lg:rounded-2xl lg:p-3">
             <div className="rounded-2xl bg-white/10 p-4 lg:rounded-xl lg:p-3">
-              <div className="text-3xl font-black lg:text-2xl">14</div>
+              <div className="text-3xl font-black lg:text-2xl">15</div>
               <div className="text-xs font-semibold uppercase tracking-wider text-slate-300 lg:text-[9px]">Sections</div>
             </div>
             <div className="rounded-2xl bg-white/10 p-4 lg:rounded-xl lg:p-3">
@@ -584,6 +604,10 @@ export default function BusinessFAQPage() {
                 <a href="#imports" className="mt-2 flex items-center justify-between rounded-xl border border-slate-100 px-3 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-200 hover:bg-slate-50 lg:px-2.5 lg:py-2 lg:text-[11px]">
                   <span>Business Data Imports</span>
                   <span className="rounded-full border border-fuchsia-200 bg-fuchsia-50 px-2 py-0.5 text-[10px] text-fuchsia-800">{importsItems.length}</span>
+                </a>
+                <a href="#projects" className="mt-2 flex items-center justify-between rounded-xl border border-slate-100 px-3 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-200 hover:bg-slate-50 lg:px-2.5 lg:py-2 lg:text-[11px]">
+                  <span>Projects &amp; Tasks</span>
+                  <span className="rounded-full border border-sky-200 bg-sky-50 px-2 py-0.5 text-[10px] text-sky-800">{projectsItems.length}</span>
                 </a>
                 <a href="#admin" className="mt-2 flex items-center justify-between rounded-xl border border-slate-100 px-3 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-200 hover:bg-slate-50 lg:px-2.5 lg:py-2 lg:text-[11px]">
                   <span>Administration, Team &amp; Profiles</span>
@@ -899,6 +923,29 @@ export default function BusinessFAQPage() {
                   </div>
                   <div className="space-y-4 lg:space-y-3">
                     {filteredImportsItems.map((item) => (
+                      <details key={item.question} className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm open:border-slate-300 lg:rounded-xl lg:p-4">
+                        <summary className="flex cursor-pointer list-none items-start justify-between gap-4">
+                          <h3 className="text-base font-black text-slate-950">{item.question}</h3>
+                          <span className="rounded-full border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-bold text-slate-500 transition group-open:rotate-45">+</span>
+                        </summary>
+                        <div className="mt-4 space-y-3 border-t border-slate-100 pt-4 lg:mt-3 lg:space-y-2 lg:pt-3">
+                          {item.answer.map((paragraph) => <p key={paragraph} className="text-sm leading-7 text-slate-700 lg:text-[11px] lg:leading-5">{paragraph}</p>)}
+                        </div>
+                      </details>
+                    ))}
+                  </div>
+                </section>
+              )}
+              {filteredProjectsItems.length > 0 && (
+                <section id="projects" className="scroll-mt-8 rounded-2xl border border-slate-200 bg-slate-50/70 p-5 shadow-sm sm:p-6 lg:p-[18px]">
+                  <div className="mb-6 border-b border-slate-200/70 pb-6 lg:mb-4 lg:pb-4">
+                    <div className="inline-flex rounded-full border border-slate-300 bg-slate-100 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-slate-800 lg:px-2.5 lg:py-0.5 lg:text-[9px]">Organization-wide Work Management</div>
+                    <h2 className="mt-3 text-3xl font-black tracking-tight text-slate-950 lg:mt-2 lg:text-2xl">Projects &amp; Tasks</h2>
+                    <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">Plan work, coordinate team responsibilities, manage nested projects, and track progress from start to finish.</p>
+                    <p className="mt-3 text-sm font-semibold text-slate-800">Every project has a plan. Every task has an owner.</p>
+                  </div>
+                  <div className="space-y-4 lg:space-y-3">
+                    {filteredProjectsItems.map((item) => (
                       <details key={item.question} className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm open:border-slate-300 lg:rounded-xl lg:p-4">
                         <summary className="flex cursor-pointer list-none items-start justify-between gap-4">
                           <h3 className="text-base font-black text-slate-950">{item.question}</h3>

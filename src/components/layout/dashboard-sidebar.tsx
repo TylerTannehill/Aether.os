@@ -18,6 +18,7 @@ import {
   ContactRound,
   Boxes,
   Truck,
+  ListTodo,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -156,6 +157,12 @@ const businessNavItems: NavItem[] = [
     title: "Finance",
     href: "/business/finance",
     icon: DollarSign,
+    alwaysVisible: true,
+  },
+  {
+    title: "Projects & Tasks",
+    href: "/business/projects",
+    icon: ListTodo,
     alwaysVisible: true,
   },
   {
@@ -392,6 +399,7 @@ export function DashboardSidebar() {
     if (isBusiness) {
       return businessNavItems.filter((item) => {
         if (item.href === "/business/dashboard") return true;
+        if (item.href === "/business/projects") return true;
         if (item.href === "/business/faq") return true;
         if (item.href === "/business/tools") return true;
 

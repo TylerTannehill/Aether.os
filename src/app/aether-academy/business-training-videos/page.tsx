@@ -14,6 +14,7 @@ const videos = [
   ["Inventory", "Understand stock availability, reorder watch, purchase orders, and incoming deliveries.", "inventory"],
   ["Dispatch", "Learn how to coordinate jobs, assignments, scheduling, and service locations.", "dispatch"],
   ["Finance", "Explore transactions, outstanding obligations, financial trends, and payment workflows.", "finance"],
+  ["Projects & Tasks", "Learn how to organize projects, nested tasks, Kanban statuses, team assignments, deadlines, progress, and My Tasks.", "projects-tasks"],
   ["Contacts", "Understand shared customer records and relationship information.", "contacts"],
   ["Lists", "See how organized lists support focused business workflows.", "lists"],
   ["Imports", "Learn how recorded and imported information contributes to operational visibility.", "imports"],

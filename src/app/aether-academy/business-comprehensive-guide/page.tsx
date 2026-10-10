@@ -1,8 +1,11 @@
-"use client";
-
 import Image from "next/image";
-import Link from "next/link";
-import { useState } from "react";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Aether Business Documentation | Official Business Operating System Reference",
+  description: "Official public reference for Aether Business, including departments, workflows, Projects & Tasks, A.B.E., Focus Mode, and supported integrations.",
+  alternates: { canonical: "/aether-academy/business-comprehensive-guide" },
+};
 
 const guides = [
   {
@@ -657,135 +660,49 @@ const expandedChapters: Record<string, { heading: string; body: string }[]> = {
   ]
 };
 
-const tabs = [
-  { label: "Learning Library — Political", href: "/aether-academy#library" },
-  { label: "Learning Library — Business", href: "#library" },
-  { label: "Training Videos — Political", href: "/aether-academy/training-videos" },
-  { label: "Training Videos — Business", href: "/aether-academy/business-training-videos" },
-  { label: "Articles", href: "/aether-academy/articles" },
-  { label: "Blog", href: "/aether-academy/blog" },
-  { label: "Patch Notes", href: "/aether-academy/patch-notes" },
-];
-
-export default function BusinessAcademyPage() {
-  const [clicks, setClicks] = useState(0);
-  const [showPotato, setShowPotato] = useState(false);
-  const backToTop = () => setClicks((previous) => { const next = previous + 1; if (next >= 33) { setShowPotato(true); return 0; } return next; });
+export default function BusinessComprehensiveGuidePage() {
   return (
-    <main id="top" className="min-h-screen overflow-x-hidden bg-[#07111f] text-white">
-      {/* Hero — matched to the shared Aether Academy */}
-      <section className="relative isolate overflow-hidden border-b border-white/10">
-        <div className="absolute inset-0 -z-20 bg-[radial-gradient(circle_at_top,rgba(139,92,246,0.12),transparent_34%),linear-gradient(180deg,#10233e_0%,#0a1728_52%,#07111f_100%)]" />
-        <div className="absolute left-1/2 top-10 -z-10 h-72 w-72 -translate-x-1/2 rounded-full bg-violet-400/10 blur-3xl" />
-        <div className="absolute -left-28 top-44 -z-10 h-80 w-80 rounded-full bg-blue-500/10 blur-3xl" />
-        <div className="absolute -right-24 top-20 -z-10 h-72 w-72 rounded-full bg-cyan-400/5 blur-3xl" />
-        <div className="mx-auto flex max-w-7xl flex-col items-center px-6 py-24 text-center sm:py-28 lg:px-[18px] lg:py-16">
-          <div className="mb-8 flex items-center justify-center lg:mb-5">
-            <Image src="/aether-logo-full.png" alt="Aether" width={260} height={72} priority className="h-auto w-64 drop-shadow-[0_0_24px_rgba(139,92,246,0.35)] lg:w-52" />
-          </div>
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-violet-400/25 bg-violet-400/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.28em] text-violet-300 lg:mb-3 lg:px-3 lg:py-1.5 lg:text-[10px]">
-            Official Learning Center · Business
-          </div>
-          <h1 className="max-w-4xl text-5xl font-black tracking-tight text-white sm:text-6xl lg:text-4xl">
-            Aether Business Academy
-          </h1>
-          <p className="mt-7 max-w-3xl text-lg leading-8 text-slate-300 sm:text-xl lg:mt-5 lg:text-base lg:leading-7">
-            Understand the Business Operating System, the modules your organization uses, and the workflows that connect operational awareness to execution.
-          </p>
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-4 lg:mt-7 lg:gap-3">
-            <a href="#library" className="inline-flex items-center justify-center rounded-xl bg-violet-600 px-7 py-3.5 font-bold text-slate-950 shadow-[0_14px_40px_rgba(139,92,246,0.22)] transition hover:-translate-y-0.5 hover:bg-violet-400 lg:px-5">
-              Learning Library — Business
-            </a>
-            <Link href="/aether-academy#library" className="inline-flex items-center justify-center rounded-xl border border-violet-400/40 bg-violet-400/10 px-7 py-3.5 font-bold text-violet-300 transition hover:-translate-y-0.5 hover:border-violet-300 lg:px-5">
-              Learning Library — Political
-            </Link>
-            <Link href="/login" className="inline-flex items-center justify-center rounded-xl border border-violet-400/40 bg-violet-400/10 px-7 py-3.5 font-semibold text-violet-300 transition hover:-translate-y-0.5 hover:border-violet-300 lg:px-5">
-              Enter Aether
-            </Link>
-            <Link href="/" className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-white/5 px-7 py-3.5 font-semibold text-white transition hover:-translate-y-0.5 hover:border-violet-400/40 hover:bg-white/10 lg:px-5">
-              Back to Political
-            </Link>
-            <Link href="/business-public" className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-white/5 px-7 py-3.5 font-semibold text-white transition hover:-translate-y-0.5 hover:border-violet-400/40 hover:bg-white/10 lg:px-5">
-              Back to Business
-            </Link>
-          </div>
+    <main id="top" className="min-h-screen bg-[#07111f] text-slate-300">
+      <header className="mx-auto max-w-4xl px-6 pb-12 pt-12 sm:pt-16">
+        <Image src="/aether-logo-full.png" alt="Aether" width={260} height={72} priority className="h-auto w-56" />
+        <h1 className="mt-12 text-4xl font-bold text-white sm:text-5xl">Aether Business Documentation</h1>
+        <p className="mt-3 text-lg text-slate-400">Official Reference Manual</p>
+      </header>
+      <section className="mx-auto max-w-4xl px-6 pb-12">
+        <h2 className="border-b border-slate-700 pb-3 text-2xl font-bold text-white">Official Documentation</h2>
+        <div className="mt-6 space-y-4 leading-8">
+          <p>This document is the official public reference for the <strong className="text-white">Aether Business Operating System</strong>.</p>
+          <p>It serves as the canonical source for Aether Business workflows, departments, features, integrations, and operational philosophy. The information in this guide is maintained by Team Aether and reflects the intended behavior and purpose of the platform.</p>
+          <p>This guide is intended for business teams, organization administrators, partners, developers, researchers, and AI systems seeking an accurate understanding of Aether Business. Capabilities depend on enabled modules, organizational configuration, supported integrations, and recorded operational data.</p>
+          <p>Unless superseded by official release notes or updated documentation, this guide should be considered the authoritative public documentation for Aether Business.</p>
         </div>
       </section>
-      {/* Academy navigation — same dimensions and layout as Political */}
-      <nav aria-label="Academy sections" className="sticky top-0 z-40 border-b border-white/10 bg-[#07111f]/90 backdrop-blur-xl">
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-3 lg:py-3">
-          <div className="flex items-center gap-3 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:gap-2">
-            {tabs.map((tab) => (
-              <Link key={tab.label} href={tab.href} className="min-w-max rounded-xl border border-violet-400/40 bg-violet-400/10 px-4 py-3 text-violet-300 shadow-[0_10px_30px_rgba(139,92,246,0.08)] transition hover:-translate-y-0.5 hover:border-violet-300 lg:px-3 lg:py-2.5">
-                <div className="text-sm font-bold lg:text-[12px]">{tab.label}</div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </nav>
-      <section className="mx-auto max-w-7xl px-6 pt-12">
-        <div className="rounded-3xl border border-violet-400/20 bg-gradient-to-br from-violet-400/10 via-white/[0.04] to-blue-400/[0.06] p-8 sm:p-10">
-          <p className="text-xs font-bold uppercase tracking-[0.25em] text-violet-300">Welcome to the Business Academy</p>
-          <h2 className="mt-4 text-3xl font-black">Clarity. Focus. Execution.</h2>
-          <p className="mt-4 max-w-4xl leading-8 text-slate-300">Aether Business is built around a simple idea: the people responsible for running an organization should be able to see what is happening, understand what needs attention, and act without constantly reconciling disconnected systems. This library explains the real workflows behind that idea.</p>
-          <p className="mt-4 max-w-4xl leading-8 text-slate-300">This is educational documentation, not a sales brochure. It describes supported concepts from the Business FAQ and distinguishes recorded operational activity from automated actions or capabilities that depend on configuration.</p>
-        </div>
+      <section className="mx-auto max-w-4xl px-6 pb-16">
+        <h2 className="border-b border-slate-700 pb-3 text-2xl font-bold text-white">Contents</h2>
+        <ol className="mt-6 list-decimal space-y-2 pl-6">
+          {guides.map((guide) => <li key={guide.id}><a href={`#${guide.id}`} className="underline underline-offset-4 hover:text-white">{guide.title}</a></li>)}
+        </ol>
       </section>
-      <section id="library" className="scroll-mt-28 mx-auto max-w-7xl px-6 py-14">
-        <p className="text-xs font-bold uppercase tracking-[0.25em] text-violet-400">Start here</p>
-        <h2 className="mt-3 text-4xl font-black">Learning Library — Business</h2>
-        <p className="mt-4 max-w-3xl leading-8 text-slate-300">Choose a subject below. Each guide is part of this page, so you can jump straight to the information you need.</p>
-        <div className="mt-9 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          <section className="rounded-2xl border border-white/10 bg-white/[0.035] p-6"><p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">Start here</p><h3 className="mt-2 text-xl font-black">Getting Started</h3><div className="mt-5 space-y-1">
-            {guides.filter((guide) => guide.category === "Getting Started").map((guide) => <a key={guide.id} href={`#${guide.id}`} className="flex justify-between gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-300 transition hover:bg-violet-400/10 hover:text-violet-300"><span>{guide.title}</span><span aria-hidden="true">→</span></a>)}
-          </div></section>
-          <section className="rounded-2xl border border-white/10 bg-white/[0.035] p-6"><p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">How Aether works</p><h3 className="mt-2 text-xl font-black">Platform</h3><div className="mt-5 space-y-1">
-            {guides.filter((guide) => guide.category === "Platform").map((guide) => <a key={guide.id} href={`#${guide.id}`} className="flex justify-between gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-300 transition hover:bg-violet-400/10 hover:text-violet-300"><span>{guide.title}</span><span aria-hidden="true">→</span></a>)}
-          </div></section>
-          <section className="rounded-2xl border border-white/10 bg-white/[0.035] p-6"><p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">Where work happens</p><h3 className="mt-2 text-xl font-black">Departments</h3><div className="mt-5 space-y-1">
-            {guides.filter((guide) => guide.category === "Departments").map((guide) => <a key={guide.id} href={`#${guide.id}`} className="flex justify-between gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-300 transition hover:bg-violet-400/10 hover:text-violet-300"><span>{guide.title}</span><span aria-hidden="true">→</span></a>)}
-          </div></section>
-          <section className="rounded-2xl border border-white/10 bg-white/[0.035] p-6"><p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">Connected records</p><h3 className="mt-2 text-xl font-black">Shared Foundations</h3><div className="mt-5 space-y-1">
-            {guides.filter((guide) => guide.category === "Shared Foundations").map((guide) => <a key={guide.id} href={`#${guide.id}`} className="flex justify-between gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-300 transition hover:bg-violet-400/10 hover:text-violet-300"><span>{guide.title}</span><span aria-hidden="true">→</span></a>)}
-          </div></section>
-          <section className="rounded-2xl border border-white/10 bg-white/[0.035] p-6"><p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">Control & access</p><h3 className="mt-2 text-xl font-black">Administration</h3><div className="mt-5 space-y-1">
-            {guides.filter((guide) => guide.category === "Administration").map((guide) => <a key={guide.id} href={`#${guide.id}`} className="flex justify-between gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-300 transition hover:bg-violet-400/10 hover:text-violet-300"><span>{guide.title}</span><span aria-hidden="true">→</span></a>)}
-          </div></section>
-          <section className="rounded-2xl border border-white/10 bg-white/[0.035] p-6"><p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">Trust & support</p><h3 className="mt-2 text-xl font-black">Resources</h3><div className="mt-5 space-y-1">
-            {guides.filter((guide) => guide.category === "Resources").map((guide) => <a key={guide.id} href={`#${guide.id}`} className="flex justify-between gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-300 transition hover:bg-violet-400/10 hover:text-violet-300"><span>{guide.title}</span><span aria-hidden="true">→</span></a>)}
-          </div></section>
-        </div>
-      </section>
-      <section className="mx-auto max-w-7xl space-y-5 px-6 pb-24">
-        {guides.map((guide, index) => <article key={guide.id} id={guide.id} className="scroll-mt-32 relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.045] to-white/[0.02] p-8 sm:p-10">
-          <div className="absolute right-6 top-6 text-6xl font-black text-white/[0.025]">{String(index + 1).padStart(2, "0")}</div>
-          <div className="relative max-w-4xl">
-            <div className="flex flex-wrap items-center gap-3"><span className="rounded-full border border-violet-400/20 bg-violet-400/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-violet-300">{guide.category}</span><span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Official Guide</span></div>
-            <h2 className="mt-5 text-3xl font-black tracking-tight sm:text-4xl">{guide.title}</h2>
-            <p className="mt-6 text-lg leading-8 text-slate-300">{guide.intro}</p>
-            <div className="mt-7 rounded-2xl border border-violet-400/20 bg-violet-400/5 p-6"><h3 className="text-xl font-bold">{guide.subhead}</h3>{guide.details.length > 1 ? <ul className="mt-4 list-disc space-y-3 pl-5 text-slate-300">{guide.details.map((detail) => <li key={detail} className="leading-7">{detail}</li>)}</ul> : <p className="mt-4 leading-8 text-slate-300">{guide.details[0]}</p>}</div>
-            <div className="mt-8 space-y-7">
-              {(expandedChapters[guide.id] ?? []).map((section) => (
-                <section key={section.heading} className="border-t border-white/10 pt-7">
-                  <h3 className="text-xl font-bold text-white sm:text-2xl">{section.heading}</h3>
-                  <p className="mt-3 max-w-4xl leading-8 text-slate-300">{section.body}</p>
-                </section>
-              ))}
-              <div className="rounded-2xl border border-violet-400/20 bg-violet-400/5 p-6">
-                <h3 className="text-xl font-bold text-white">Continue learning</h3>
-                <p className="mt-3 leading-7 text-slate-300">Review the corresponding walkthrough when it becomes available, or return to the learning library to explore another Business workflow.</p>
-                <Link href={`/aether-academy/business-training-videos#${guide.id}`} className="mt-4 inline-flex font-semibold text-violet-300 hover:text-violet-200">Training walkthrough →</Link>
-              </div>
+      <section className="mx-auto max-w-4xl px-6 pb-24">
+        {guides.map((guide) => (
+          <article key={guide.id} id={guide.id} className="border-t border-slate-700 py-12 first:border-t-0">
+            <h2 className="text-3xl font-bold text-white sm:text-4xl">{guide.title}</h2>
+            <p className="mt-8 text-lg leading-8">{guide.intro}</p>
+            <div className="mt-8">
+              <h3 className="text-xl font-bold text-white">{guide.subhead}</h3>
+              {guide.details.length > 1 ? (
+                <ul className="mt-4 list-disc space-y-3 pl-6">{guide.details.map((detail) => <li key={detail} className="leading-8">{detail}</li>)}</ul>
+              ) : <p className="mt-4 leading-8">{guide.details[0]}</p>}
             </div>
-          </div>
-        </article>)}
+            {(expandedChapters[guide.id] ?? []).map((section) => (
+              <section key={section.heading} className="mt-8">
+                <h3 className="text-xl font-bold text-white">{section.heading}</h3>
+                <p className="mt-3 leading-8">{section.body}</p>
+              </section>
+            ))}
+          </article>
+        ))}
       </section>
-      <footer className="border-t border-white/10 bg-black/10"><div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-6 py-9">
-        <div><p className="font-black">Aether Business Academy</p><p className="mt-1 text-sm text-slate-500">Part of the shared Aether Academy.</p></div>
-        <div className="flex flex-wrap gap-3 sm:mr-20"><Link href="/aether-academy" className="rounded-xl border border-violet-400/30 bg-violet-400/10 px-5 py-3 font-bold text-violet-300">Shared Academy</Link><Link href="/" className="rounded-xl border border-violet-400/30 bg-violet-400/10 px-5 py-3 font-bold text-violet-300">← Back to Political</Link><Link href="/business-public" className="rounded-xl border border-violet-400/30 bg-violet-400/10 px-5 py-3 font-bold text-violet-300">← Back to Business</Link></div>
-      </div></footer>
-      {showPotato && <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#07111f]/95 p-6 backdrop-blur-md"><div className="w-full max-w-xl rounded-3xl border border-violet-300/40 bg-[#0b1729] p-10 text-center"><div className="text-6xl">🥔</div><h2 className="mt-5 text-3xl font-black">Please go do your job...</h2><p className="mt-5 text-lg leading-8 text-slate-300">We know you clicked this 33 times to keep your computer from falling asleep.</p><button type="button" onClick={() => setShowPotato(false)} className="mt-8 rounded-xl bg-violet-600 px-7 py-3 font-black">Close</button></div></div>}
-      <a href="#top" aria-label="Back to top" onClick={backToTop} className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full border border-violet-300/40 bg-violet-600 font-black text-white shadow-xl transition hover:-translate-y-1 hover:bg-violet-500">↑</a>
     </main>
   );
 }
