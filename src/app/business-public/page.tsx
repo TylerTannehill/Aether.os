@@ -60,19 +60,19 @@ Please take a deep dive on aetheros.pro/business-public & aetheros.pro/aether-ac
         <div className="absolute bottom-[-180px] right-[-160px] h-[560px] w-[560px] rounded-full bg-blue-600/20 blur-3xl" />
       </div>
       <div className="relative z-10 mx-auto max-w-[1600px] px-6 py-8 lg:px-12">
-        <header className="relative flex flex-col gap-6 lg:min-h-[220px] lg:flex-row lg:items-center lg:justify-between">
-          <Link href="/business-public" aria-label="Aether Business home" className="inline-flex shrink-0 self-start lg:self-auto">
-            <img src="/aether-logo-full.png" alt="Aether OS" className="h-[212.5px] w-auto object-contain drop-shadow-[0_0_45px_rgba(139,92,246,0.45)] lg:h-[275px] lg:-my-[27.5px]" />
+        <header className="relative flex flex-col items-center gap-4 lg:min-h-[220px] lg:flex-row lg:items-center lg:justify-between lg:gap-6">
+          <Link href="/business-public" aria-label="Aether Business home" className="inline-flex w-full shrink-0 justify-center lg:w-auto lg:justify-start">
+            <img src="/aether-logo-full.png" alt="Aether OS" className="h-auto w-full max-w-[280px] object-contain drop-shadow-[0_0_45px_rgba(139,92,246,0.45)] lg:h-[275px] lg:w-auto lg:max-w-none lg:-my-[27.5px]" />
           </Link>
 
-          <nav aria-label="Aether products" className="inline-flex w-fit items-center rounded-2xl border border-violet-400/40 bg-white/[0.04] p-1 text-sm font-black uppercase tracking-[0.08em] shadow-xl shadow-violet-950/20 lg:absolute lg:left-1/2 lg:top-0 lg:-translate-x-1/2">
+          <nav aria-label="Aether products" className="inline-flex w-fit max-w-full items-center rounded-2xl border border-violet-400/40 bg-white/[0.04] p-1 text-sm font-black uppercase tracking-[0.08em] shadow-xl shadow-violet-950/20 lg:absolute lg:left-1/2 lg:top-0 lg:-translate-x-1/2">
             <Link href="/" className="rounded-xl px-5 py-3 text-slate-300 transition hover:bg-violet-600/20 hover:text-white">Political</Link>
             <span aria-current="page" className="rounded-xl bg-violet-600 px-5 py-3 text-white">Business</span>
           </nav>
 
-          <div className="flex flex-col items-start gap-3 lg:items-end">
+          <div className="flex w-full flex-col items-center gap-3 lg:w-auto lg:items-end">
             <Link href="/login" className="inline-flex items-center justify-center rounded-2xl border border-violet-400/70 bg-violet-700/20 px-7 py-4 text-sm font-black uppercase tracking-[0.08em] text-white shadow-xl shadow-violet-950/30 transition hover:bg-violet-600/30">Enter Aether</Link>
-            <div className="flex items-center justify-end gap-3">
+            <div className="flex flex-wrap items-center justify-center gap-3 lg:justify-end">
               <a href="https://apps.apple.com/us/app/aether-mobile/id6814591434" target="_blank" rel="noopener noreferrer" aria-label="Download Aether Mobile on the App Store" className="inline-flex transition hover:scale-[1.03] hover:opacity-90"><img src="/apple-appstore.png" alt="Download on the App Store" className="h-[44px] w-auto object-contain" /></a>
               <a href="https://play.google.com/store/apps/details?id=pro.aetheros.mobile" target="_blank" rel="noopener noreferrer" aria-label="Get Aether Mobile on Google Play" className="inline-flex transition hover:scale-[1.03] hover:opacity-90"><img src="/google-play.png" alt="Get it on Google Play" className="h-[44px] w-auto object-contain" /></a>
             </div>
