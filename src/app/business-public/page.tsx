@@ -62,7 +62,7 @@ Please take a deep dive on aetheros.pro/business-public & aetheros.pro/aether-ac
       <div className="relative z-10 mx-auto max-w-[1600px] px-6 py-8 lg:px-12">
         <header className="relative flex flex-col items-center gap-4 lg:min-h-[220px] lg:flex-row lg:items-center lg:justify-between lg:gap-6">
           <Link href="/business-public" aria-label="Aether Business home" className="inline-flex w-full shrink-0 justify-center lg:w-auto lg:justify-start">
-            <img src="/aether-logo-full.png" alt="Aether OS" className="h-auto w-full max-w-[280px] object-contain drop-shadow-[0_0_45px_rgba(139,92,246,0.45)] lg:h-[275px] lg:w-auto lg:max-w-none lg:-my-[27.5px]" />
+            <img src="/aether-logo-full.png" alt="Aether OS" className="h-auto w-full max-w-[350px] object-contain drop-shadow-[0_0_45px_rgba(139,92,246,0.45)] lg:h-[275px] lg:w-auto lg:max-w-none lg:-my-[27.5px]" />
           </Link>
 
           <nav aria-label="Aether products" className="inline-flex w-fit max-w-full items-center rounded-2xl border border-violet-400/40 bg-white/[0.04] p-1 text-sm font-black uppercase tracking-[0.08em] shadow-xl shadow-violet-950/20 lg:absolute lg:left-1/2 lg:top-0 lg:-translate-x-1/2">

@@ -147,12 +147,12 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
         <header className="relative flex flex-col items-center gap-3 lg:flex-row lg:items-center lg:justify-between lg:gap-0">
           <Link
             href="/"
-            className="relative inline-flex h-[145px] w-full shrink-0 items-center justify-center transition hover:opacity-90 lg:h-[220px] lg:w-auto lg:justify-start"
+            className="relative inline-flex w-full shrink-0 items-center justify-center transition hover:opacity-90 lg:h-[220px] lg:w-auto lg:justify-start"
           >
             <img
               src="/aether-logo-full.png"
               alt="Aether OS"
-              className="h-[155px] w-auto max-w-full object-contain drop-shadow-[0_0_45px_rgba(139,92,246,0.45)] lg:absolute lg:left-0 lg:top-1/2 lg:h-[275px] lg:max-w-none lg:-translate-y-1/2"
+              className="h-auto w-full max-w-[350px] object-contain drop-shadow-[0_0_45px_rgba(139,92,246,0.45)] lg:absolute lg:left-0 lg:top-1/2 lg:h-[275px] lg:max-w-none lg:-translate-y-1/2"
             />
           </Link>
 
