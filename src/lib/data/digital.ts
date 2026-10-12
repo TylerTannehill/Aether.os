@@ -388,38 +388,106 @@ export async function getDigitalPlatformRows(): Promise<DigitalPlatformRow[]> {
   return getLegacyDigitalMetricRows(organizationId);
 }
 
+type DigitalSummaryRow = {
+  platform: string;
+  impressions: number | string | null;
+  engagement: number | string | null;
+  spend: number | string | null;
+  positive_sentiment: number | string | null;
+  negative_sentiment: number | string | null;
+  ctr_sum: number | string | null;
+  row_count: number | string | null;
+};
+
 export async function getDigitalSnapshot(): Promise<DigitalSnapshot> {
-  const rows = await getDigitalPlatformRows();
+  let organizationId: string;
+  try {
+    organizationId = await getActiveOrganizationId();
+  } catch (error) {
+    console.error("Failed to resolve active campaign for digital snapshot", error);
+    return {
+      impressions: 0, engagement: 0, spend: 0,
+      positiveSentiment: 0, negativeSentiment: 0,
+      bestPlatform: "No platform data",
+      issue: "No digital issues detected yet.",
+    };
+  }
 
-  const impressions = rows.reduce(
-    (sum, row) => sum + toNumber(row.impressions),
-    0
+  // Overview uses server-side aggregation; detailed Digital pages keep their
+  // existing getDigitalPlatformRows() behavior.
+  const { data, error } = await supabase.rpc(
+    "get_political_digital_analytics_summary",
+    { p_organization_id: organizationId }
   );
 
-  const engagement = rows.reduce(
-    (sum, row) => sum + toNumber(row.engagement),
-    0
-  );
+  if (error) {
+    console.error("Failed to load aggregated digital snapshot", {
+      organizationId, error,
+    });
+    throw new Error("Unable to load digital analytics summary.");
+  }
 
-  const spend = rows.reduce((sum, row) => sum + toNumber(row.spend), 0);
+  const summaries = (data ?? []) as DigitalSummaryRow[];
 
-  const positiveSentiment = rows.reduce(
-    (sum, row) => sum + toNumber(row.positive_sentiment),
-    0
-  );
+  // Match the previous legacy fallback when no analytics events exist.
+  if (summaries.length === 0) {
+    const legacyRows = await getLegacyDigitalMetricRows(organizationId);
+    return {
+      impressions: legacyRows.reduce((sum, row) => sum + toNumber(row.impressions), 0),
+      engagement: legacyRows.reduce((sum, row) => sum + toNumber(row.engagement), 0),
+      spend: legacyRows.reduce((sum, row) => sum + toNumber(row.spend), 0),
+      positiveSentiment: legacyRows.reduce((sum, row) => sum + toNumber(row.positive_sentiment), 0),
+      negativeSentiment: legacyRows.reduce((sum, row) => sum + toNumber(row.negative_sentiment), 0),
+      bestPlatform: determineBestPlatform(legacyRows),
+      issue: determineBiggestIssue(legacyRows),
+    };
+  }
 
-  const negativeSentiment = rows.reduce(
-    (sum, row) => sum + toNumber(row.negative_sentiment),
-    0
-  );
+  // Grouping has already been done by PostgreSQL. Use row_count for the
+  // same per-record averages used by the original ranking/issue functions.
+  const ranked = [...summaries].sort((a, b) => {
+    const score = (r: DigitalSummaryRow) =>
+      toNumber(r.engagement) +
+      toNumber(r.impressions) / 100 +
+      (toNumber(r.row_count) ? toNumber(r.ctr_sum) / toNumber(r.row_count) : 0) * 100;
+    return score(b) - score(a);
+  });
+  const weakestSentiment = [...summaries]
+    .filter(r => toNumber(r.positive_sentiment) > 0 || toNumber(r.negative_sentiment) > 0)
+    .sort((a, b) => {
+      const net = (r: DigitalSummaryRow) =>
+        (toNumber(r.positive_sentiment) - toNumber(r.negative_sentiment)) /
+        Math.max(toNumber(r.row_count), 1);
+      return net(a) - net(b);
+    })[0];
+  const leastEfficientSpend = [...summaries]
+    .filter(r => toNumber(r.spend) > 0)
+    .sort((a, b) =>
+      toNumber(a.engagement) / Math.max(toNumber(a.spend), 1) -
+      toNumber(b.engagement) / Math.max(toNumber(b.spend), 1)
+    )[0];
+
+  let issue = "Digital metrics are active and no obvious platform pressure is visible yet.";
+  if (weakestSentiment && leastEfficientSpend) {
+    issue = normalizePlatform(weakestSentiment.platform) === normalizePlatform(leastEfficientSpend.platform)
+      ? `${platformLabel(weakestSentiment.platform)} is showing the most pressure on sentiment and efficiency.`
+      : `${platformLabel(leastEfficientSpend.platform)} needs efficiency review, while ${platformLabel(weakestSentiment.platform)} needs sentiment attention.`;
+  } else if (weakestSentiment) {
+    issue = `${platformLabel(weakestSentiment.platform)} needs sentiment attention.`;
+  } else if (leastEfficientSpend) {
+    issue = `${platformLabel(leastEfficientSpend.platform)} needs efficiency review.`;
+  }
+
+  const sum = (key: keyof DigitalSummaryRow) =>
+    summaries.reduce((total, row) => total + toNumber(row[key]), 0);
 
   return {
-    impressions,
-    engagement,
-    spend,
-    positiveSentiment,
-    negativeSentiment,
-    bestPlatform: determineBestPlatform(rows),
-    issue: determineBiggestIssue(rows),
+    impressions: sum("impressions"),
+    engagement: sum("engagement"),
+    spend: sum("spend"),
+    positiveSentiment: sum("positive_sentiment"),
+    negativeSentiment: sum("negative_sentiment"),
+    bestPlatform: platformLabel(ranked[0]?.platform),
+    issue,
   };
 }

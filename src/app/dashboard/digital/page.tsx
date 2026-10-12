@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
 import { useEffect, useMemo, useState } from "react";
 import {
   BarChart3,
@@ -52,10 +53,9 @@ type PlatformMetric = {
 type ContentItem = {
   id: string;
   title: string;
-  platform: PlatformKey;
-  status: "drafting" | "review" | "scheduled" | "live";
-  publish_at?: string | null;
-  owner: string;
+  platform: string;
+  stage: "drafting" | "review" | "revision" | "testing" | "preparing";
+  dueAt: string | null;
 };
 
 type FocusTask = {
@@ -364,19 +364,12 @@ function platformTone(platform: PlatformKey) {
   }
 }
 
-function statusTone(status: ContentItem["status"]) {
-  switch (status) {
-    case "drafting":
-      return "bg-slate-100 text-slate-700 border border-slate-200";
-    case "review":
-      return "bg-amber-100 text-amber-800 border border-amber-200";
-    case "scheduled":
-      return "bg-sky-100 text-sky-700 border border-sky-200";
-    case "live":
-      return "bg-emerald-100 text-emerald-700 border border-emerald-200";
-    default:
-      return "bg-slate-100 text-slate-700 border border-slate-200";
-  }
+function statusTone(stage: ContentItem["stage"]) {
+  if (stage === "review" || stage === "revision")
+    return "bg-amber-100 text-amber-800 border border-amber-200";
+  if (stage === "preparing" || stage === "testing")
+    return "bg-sky-100 text-sky-700 border border-sky-200";
+  return "bg-slate-100 text-slate-700 border border-slate-200";
 }
 
 function priorityTone(priority: FocusTask["priority"]) {
@@ -442,6 +435,9 @@ export default function DigitalDashboardPage() {
   const [trendView, setTrendView] = useState<TrendView>("impressions");
   const [digitalRows, setDigitalRows] = useState<DigitalPlatformRow[]>([]);
   const [digitalLoading, setDigitalLoading] = useState(true);
+  const [contentPipeline, setContentPipeline] = useState<ContentItem[]>([]);
+  const [contentLoading, setContentLoading] = useState(true);
+  const [contentError, setContentError] = useState("");
   const [isDemoOrg, setIsDemoOrg] = useState(false);
 
   const [selectedTaskId, setSelectedTaskId] = useState("");
@@ -524,11 +520,56 @@ export default function DigitalDashboardPage() {
     return buildPlatformMetrics(digitalRows);
   }, [digitalRows]);
 
-  const contentPipeline = useMemo<ContentItem[]>(() => {
-    return [];
+  // Content Schedule is a read-only view of active Political Digital Focus content.
+  useEffect(() => {
+    let mounted = true;
+    async function loadContentPipeline() {
+      try {
+        const contextResponse = await fetch("/api/auth/current-context", {
+          credentials: "include",
+          cache: "no-store",
+        });
+        if (!contextResponse.ok) throw new Error("Unable to load campaign context.");
+        const context = await contextResponse.json();
+        const organizationId =
+          context?.organization?.id ?? context?.membership?.organization_id;
+        if (!organizationId) throw new Error("No active campaign found.");
+
+        const { data, error } = await createClient()
+          .from("political_digital_content")
+          .select("id,title,platform,stage,overall_due_date,draft_due_date,review_due_date,publish_at,published_at,overall_completed_at")
+          .eq("organization_id", organizationId)
+          .is("archived_at", null)
+          .is("published_at", null)
+          .is("overall_completed_at", null)
+          .neq("stage", "published")
+          .order("created_at", { ascending: false });
+        if (error) throw error;
+        if (!mounted) return;
+        setContentPipeline((data ?? []).map((item) => ({
+          id: item.id,
+          title: item.title,
+          platform: item.platform,
+          stage: item.stage as ContentItem["stage"],
+          dueAt: item.stage === "drafting"
+            ? item.draft_due_date ?? item.overall_due_date
+            : item.stage === "review" || item.stage === "revision"
+            ? item.review_due_date ?? item.overall_due_date
+            : item.publish_at ?? item.overall_due_date,
+        })));
+        setContentError("");
+      } catch (error) {
+        console.error("Failed to load Political Digital content schedule:", error);
+        if (mounted) setContentError("Could not load the content schedule.");
+      } finally {
+        if (mounted) setContentLoading(false);
+      }
+    }
+    loadContentPipeline();
+    return () => { mounted = false; };
   }, []);
 
-    const focusQueue = useMemo<FocusTask[]>(() => {
+  const focusQueue = useMemo<FocusTask[]>(() => {
     return buildFocusQueueFromMetrics(platformMetrics);
   }, [platformMetrics]);
 
@@ -809,17 +850,7 @@ export default function DigitalDashboardPage() {
     );
   }, [platformMetrics, demoRole]);
 
-  const visibleContentPipeline = useMemo(() => {
-    if (demoRole === "admin") {
-      return contentPipeline;
-    }
-
-    if (demoRole === "director") {
-      return contentPipeline.slice(0, 3);
-    }
-
-    return contentPipeline.slice(0, 2);
-  }, [contentPipeline, demoRole]);
+  const visibleContentPipeline = contentPipeline;
     const visibleFocusQueue = useMemo(() => {
     if (demoRole === "admin") {
       return focusQueue;
@@ -1256,16 +1287,16 @@ export default function DigitalDashboardPage() {
 
           <div className="mt-4 space-y-2 text-sm text-slate-700 lg:mt-3 lg:space-y-1.5 lg:text-[11px]">
             <div>
-              Drafting: {contentPipeline.filter((i) => i.status === "drafting").length}
+              Drafting: {0}
             </div>
             <div>
-              Review: {contentPipeline.filter((i) => i.status === "review").length}
+              Review: {0}
             </div>
             <div>
               Scheduled:{" "}
-              {contentPipeline.filter((i) => i.status === "scheduled").length}
+              {0}
             </div>
-            <div>Live: {contentPipeline.filter((i) => i.status === "live").length}</div>
+            <div>Live: {0}</div>
           </div>
         </div>
 
@@ -1528,67 +1559,32 @@ export default function DigitalDashboardPage() {
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr] lg:gap-4">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
-          <div className="mb-6 flex items-center justify-between lg:mb-4">
+        <div className="flex h-[276px] min-h-0 flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:rounded-2xl lg:p-[18px]">
+          <div className="mb-6 flex shrink-0 items-center justify-between lg:mb-4">
             <div>
-              <p className="text-sm font-medium text-slate-500 lg:text-[11px]">
-                Content Pipeline
-              </p>
-              <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">
-                {demoRole === "general_user"
-                  ? "Active Content Schedule"
-                  : "Content Schedule"}
-              </h2>
+              <p className="text-sm font-medium text-slate-500 lg:text-[11px]">Content Pipeline</p>
+              <h2 className="text-xl font-semibold text-slate-900 lg:text-lg">Content Schedule</h2>
             </div>
-
             <Clock3 className="h-5 w-5 lg:h-4 lg:w-4 text-slate-500" />
           </div>
-
-          <div className="space-y-4 lg:space-y-3">
-            {visibleContentPipeline.length === 0 ? (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 lg:rounded-xl lg:p-3 lg:text-[11px]">
-                No live content pipeline items are connected yet.
-              </div>
-            ) : null}
-
-            {visibleContentPipeline.map((item) => (
-              <div
-                key={item.id}
-                className="rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3"
-              >
-                <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between lg:gap-2">
-                  <div>
-                    <p className="font-semibold text-slate-900">{item.title}</p>
-                    {demoRole !== "general_user" ? (
-                      <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
-                        Owner: {item.owner}
-                      </p>
-                    ) : null}
-                    <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
-                      {item.publish_at
-                        ? `Publish: ${item.publish_at}`
-                        : "No publish time set"}
-                    </p>
-                  </div>
-
-                  <div className="flex flex-wrap gap-2">
-                    <span
-                      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold lg:px-2.5 lg:py-0.5 lg:text-[9px] ${platformTone(
-                        item.platform
-                      )}`}
-                    >
-                      {item.platform}
-                    </span>
-
-                    <span
-                      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold lg:px-2.5 lg:py-0.5 lg:text-[9px] ${statusTone(
-                        item.status
-                      )}`}
-                    >
-                      {item.status}
-                    </span>
-                  </div>
+          <div className="min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
+            {contentLoading ? (
+              <p className="rounded-xl bg-slate-50 p-3 text-sm text-slate-600">Loading content in progress...</p>
+            ) : contentError ? (
+              <p className="rounded-xl bg-rose-50 p-3 text-sm text-rose-700">{contentError}</p>
+            ) : visibleContentPipeline.length === 0 ? (
+              <p className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600">No content currently in progress.</p>
+            ) : visibleContentPipeline.map((item) => (
+              <div key={item.id} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
+                <div className="flex items-start justify-between gap-2">
+                  <p className="min-w-0 break-words text-sm font-semibold text-slate-900">{item.title}</p>
+                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize ${statusTone(item.stage)}`}>
+                    {item.stage}
+                  </span>
                 </div>
+                <p className="mt-1 text-xs text-slate-500">
+                  {item.platform} {item.dueAt ? `· Due ${new Date(item.dueAt).toLocaleDateString()}` : "· No due date"}
+                </p>
               </div>
             ))}
           </div>
@@ -1651,18 +1647,7 @@ export default function DigitalDashboardPage() {
             ))}
           </div>
 
-          <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 lg:mt-4 lg:rounded-xl lg:p-3">
-            <p className="text-sm font-semibold text-amber-900 lg:text-[11px]">
-              Touchpoint Intent
-            </p>
-            <p className="mt-2 text-sm text-amber-800 lg:mt-1.5 lg:text-[11px]">
-              {demoRole === "admin"
-                ? "Today&apos;s touchpoints should narrow attention to content creation, spend movement, and response handling based on what is actually performing."
-                : demoRole === "director"
-                ? "Today&apos;s touchpoints should help lane leaders manage content pressure, spend shifts, and weaker response lanes."
-                : "Today&apos;s touchpoints should keep the next content, spend, and response actions clear and easy to work."}
-            </p>
-          </div>
+
         </div>
       </section>
 

@@ -427,15 +427,11 @@ export default function BusinessContactsPage() {
               Build a Contact Segment
             </h2>
             <p className="mt-1 max-w-3xl text-sm text-slate-500 lg:text-[11px]">
-              This workspace will become the deep filtering surface for Business
-              contacts. Filtered customer records can then be selected, assigned,
-              or organized into executable lists.
+              Search Business contacts, select matching records, and add them to an
+              existing list or create a new one.
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-600 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]">
-            Contact data not connected yet
-          </div>
         </div>
 
         <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr] lg:gap-3">
@@ -444,34 +440,56 @@ export default function BusinessContactsPage() {
               Search + Customer Filters
             </p>
 
-            <div className="grid gap-3 md:grid-cols-4 lg:gap-2">
-              <div className="relative md:col-span-2">
-                <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                <input
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Search contacts..."
-                  className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm text-slate-700 outline-none transition focus:border-slate-400 lg:rounded-xl lg:py-2 lg:pl-9 lg:pr-3 lg:text-[11px]"
-                />
-              </div>
-
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <input
-                disabled
-                placeholder="Location"
-                className="cursor-not-allowed rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-400 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
-              />
-
-              <input
-                disabled
-                placeholder="Owner"
-                className="cursor-not-allowed rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-400 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[11px]"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Search contacts by name, email, company, or location..."
+                className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm text-slate-700 outline-none transition focus:border-slate-400 lg:rounded-xl lg:py-2 lg:pl-9 lg:pr-3 lg:text-[11px]"
               />
             </div>
 
-            <div className="mt-3 rounded-2xl border border-dashed border-slate-200 bg-white p-4 text-sm text-slate-500 lg:rounded-xl lg:p-3 lg:text-[11px]">
-              Search is live against Business contacts. Location, owner, and deeper
-              Business-native segmentation will be connected incrementally. Political
-              donor, party, FEC, and campaign-tier filters are intentionally not inherited.
+            <div className="mt-3 max-h-72 space-y-2 overflow-y-auto" aria-live="polite">
+              {loading ? (
+                <p className="rounded-xl bg-white p-4 text-sm text-slate-500">Loading contacts...</p>
+              ) : loadError ? (
+                <p className="rounded-xl bg-white p-4 text-sm text-rose-700">Unable to load contacts: {loadError}</p>
+              ) : !search.trim() ? (
+                <p className="rounded-xl bg-white p-4 text-sm text-slate-500">
+                  Search for a contact above to select records for a list.
+                </p>
+              ) : filteredContacts.length === 0 ? (
+                <p className="rounded-xl bg-white p-4 text-sm text-slate-500">
+                  No matching contacts found.
+                </p>
+              ) : (
+                filteredContacts.map((contact) => (
+                  <label
+                    key={contact.id}
+                    className="flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 transition hover:border-slate-300"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedContactIds.includes(contact.id)}
+                      onChange={() => toggleContactSelection(contact.id)}
+                      disabled={quickAddSaving || creatingList}
+                      aria-label={`Select ${contactName(contact)}`}
+                      className="h-4 w-4 shrink-0 rounded border-slate-300"
+                    />
+                    <span className="min-w-0">
+                      <span className="block text-sm font-semibold text-slate-900 lg:text-[11px]">
+                        {contactName(contact)}
+                      </span>
+                      <span className="block truncate text-xs text-slate-500 lg:text-[10px]">
+                        {[contact.company, contact.email, contactLocation(contact)]
+                          .filter((value) => value && value !== "Not provided")
+                          .join(" · ") || "No additional details"}
+                      </span>
+                    </span>
+                  </label>
+                ))
+              )}
             </div>
           </div>
 
@@ -597,8 +615,7 @@ export default function BusinessContactsPage() {
               Contact Records
             </h2>
             <p className="mt-1 text-sm text-slate-500 lg:text-[11px]">
-              The filtered customer work surface. Individual records will open the
-              canonical Business Contact Profile at /business/contacts/[id].
+              Review customer records, select contacts for lists, or open a contact profile.
             </p>
           </div>
 
@@ -639,7 +656,7 @@ export default function BusinessContactsPage() {
           <table className="w-full min-w-[900px] border-separate border-spacing-0">
             <thead className="bg-white">
               <tr>
-                {["Select", "Contact", "Email", "Phone", "Location", "Owner", "Relationship", "Action"].map(
+                {["Select", "Contact", "Email", "Phone", "Location", "Owner", "Action"].map(
                   (heading) => (
                     <th
                       key={heading}
@@ -654,13 +671,13 @@ export default function BusinessContactsPage() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={8} className="bg-white px-6 py-12 text-center text-sm text-slate-500 lg:text-[11px]">
+                  <td colSpan={7} className="bg-white px-6 py-12 text-center text-sm text-slate-500 lg:text-[11px]">
                     Loading Business contacts...
                   </td>
                 </tr>
               ) : loadError ? (
                 <tr>
-                  <td colSpan={8} className="bg-white px-6 py-12 text-center">
+                  <td colSpan={7} className="bg-white px-6 py-12 text-center">
                     <p className="text-sm font-semibold text-rose-700 lg:text-[11px]">
                       Business contacts could not be loaded.
                     </p>
@@ -669,7 +686,7 @@ export default function BusinessContactsPage() {
                 </tr>
               ) : filteredContacts.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="bg-white px-6 py-12 text-center lg:px-4 lg:py-10">
+                  <td colSpan={7} className="bg-white px-6 py-12 text-center lg:px-4 lg:py-10">
                     <div className="mx-auto flex max-w-lg flex-col items-center">
                       <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-500 lg:h-10 lg:w-10 lg:rounded-xl">
                         <Users className="h-5 w-5 lg:h-4 lg:w-4" />
@@ -709,9 +726,6 @@ export default function BusinessContactsPage() {
                     </td>
                     <td className="border-t border-slate-200 px-4 py-4 text-sm text-slate-600 lg:px-3 lg:py-3 lg:text-[10px]">
                       {contact.owner_user_id ? "Assigned" : "Unassigned"}
-                    </td>
-                    <td className="border-t border-slate-200 px-4 py-4 text-sm text-slate-400 lg:px-3 lg:py-3 lg:text-[10px]">
-                      Not connected
                     </td>
                     <td className="border-t border-slate-200 px-4 py-4 lg:px-3 lg:py-3">
                       <Link
