@@ -6,6 +6,54 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   return [
     {
+      url: `${baseUrl}/ecosystem`,
+      lastModified,
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/political-public`,
+      lastModified,
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/political-public/explore-abe`,
+      lastModified,
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/political-public/faq`,
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/political-public/political-abe`,
+      lastModified,
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/political-public/sales`,
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/political-public/team-aether`,
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/aether-academy/business-comprehensive-guide`,
+      lastModified,
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
+    {
       url: baseUrl,
       lastModified,
       changeFrequency: "weekly",
