@@ -12,6 +12,7 @@ export async function middleware(request: NextRequest) {
   const publicRoutes = [
     '/',
     '/login',
+    '/login-social',
     '/ecosystem',
     '/terms',
     '/privacy',
@@ -38,6 +39,8 @@ export async function middleware(request: NextRequest) {
     '/aether-academy/patch-notes',
     '/aether-academy/data-deletion',
   ]
+
+  const isSocialRoute = pathname === '/social' || pathname.startsWith('/social/')
 
   const isPublicApiRoute =
     pathname === '/api/contact' ||
@@ -86,12 +89,12 @@ export async function middleware(request: NextRequest) {
 
   if (!user && !isPublicRoute) {
     const url = request.nextUrl.clone()
-    url.pathname = '/login'
+    url.pathname = isSocialRoute ? '/login-social' : '/login'
     return NextResponse.redirect(url)
   }
 
 
-  if (user && !isPublicRoute) {
+  if (user && !isPublicRoute && !isSocialRoute) {
     const organizationId = request.cookies.get('active_organization_id')?.value
 
     if (organizationId) {

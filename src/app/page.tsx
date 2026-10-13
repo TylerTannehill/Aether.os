@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Building2, GraduationCap, Landmark, Sparkles, Users, UserRound, X, ArrowRight } from "lucide-react";
 
 const footerGroups = [
@@ -41,10 +42,22 @@ const footerGroups = [
 ];
 
 export default function HomePage() {
+  const router = useRouter();
+  const [infographicClicks, setInfographicClicks] = useState(0);
   const [socialClicks, setSocialClicks] = useState(0);
   const [comingSoon, setComingSoon] = useState<"Social" | "Personal" | null>(null);
   const [easterEggClicks, setEasterEggClicks] = useState(0);
   const [easterEggOpen, setEasterEggOpen] = useState(false);
+
+  const handleInfographicClick = () => {
+    const nextClicks = infographicClicks + 1;
+    if (nextClicks >= 3) {
+      setInfographicClicks(0);
+      router.push("/login-social");
+      return;
+    }
+    setInfographicClicks(nextClicks);
+  };
 
   const handleEasterEggClick = () => {
     const nextClicks = easterEggClicks + 1;
@@ -139,6 +152,7 @@ export default function HomePage() {
         <section aria-label="Aether ecosystem vision" className="mx-auto w-full max-w-5xl pb-12">
           <div className="rounded-[1.6rem] border border-violet-400/20 bg-gradient-to-br from-violet-500/10 via-white/[0.03] to-blue-500/10 px-5 py-7 shadow-xl shadow-black/10 backdrop-blur-xl sm:px-9 sm:py-9">
             <img
+              onClick={handleInfographicClick}
               src="/infographic.png"
               alt="The Aether Ecosystem: Political, Business, Social, Personal, and Academy connected around Aether OS, with the vision and what it means for people and organizations."
               className="block h-auto w-full object-contain"
