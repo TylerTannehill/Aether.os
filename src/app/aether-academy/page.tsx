@@ -185,7 +185,7 @@ export default function AetherAcademyPage() {
             </Link>
 
             <Link
-              href="/"
+              href="/political-public"
               className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-white/5 px-7 py-3.5 font-semibold text-white transition hover:-translate-y-0.5 hover:border-violet-400/40 hover:bg-white/10 lg:px-5"
             >
               Back to Political
