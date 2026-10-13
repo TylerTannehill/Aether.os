@@ -9,7 +9,8 @@ export default function TermsPage() {
 
       <div className="relative mx-auto max-w-4xl">
         <div className="mb-8 flex flex-wrap gap-3 lg:mb-6">
-          <Link href="/" className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:border-violet-400/40 hover:bg-white/10 lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-xs">← Return to Political</Link>
+          <Link href="/" className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:border-violet-400/40 hover:bg-white/10 lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-xs">← Return to Landing Page</Link>
+          <Link href="/political-public" className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:border-violet-400/40 hover:bg-white/10 lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-xs">← Return to Political</Link>
           <Link href="/business-public" className="inline-flex items-center gap-2 rounded-2xl border border-violet-400/30 bg-violet-500/10 px-5 py-3 text-sm font-semibold text-white transition hover:border-violet-400/60 hover:bg-violet-500/20 lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-xs">← Return to Business</Link>
         </div>
 
@@ -386,14 +387,15 @@ export default function TermsPage() {
 
           <div className="mt-12 flex justify-center lg:mt-8">
             <Link
-              href="/public-team-aether#contact-team-aether"
+              href="/political-public/team-aether#contact-team-aether"
               className="rounded-xl bg-violet-600 px-6 py-3 font-bold text-white transition hover:bg-violet-500 lg:px-5 lg:py-2.5 lg:text-sm"
             >
               Contact Team Aether
             </Link>
           </div>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Link href="/" className="inline-flex items-center rounded-xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10">← Return to Political</Link>
+            <Link href="/" className="inline-flex items-center rounded-xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10">← Return to Landing Page</Link>
+            <Link href="/political-public" className="inline-flex items-center rounded-xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10">← Return to Political</Link>
             <Link href="/business-public" className="inline-flex items-center rounded-xl border border-violet-400/30 bg-violet-500/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-violet-500/20">← Return to Business</Link>
           </div>
         </div>

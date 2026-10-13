@@ -86,13 +86,11 @@ export default function SupportPage() {
       <div className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent,rgba(7,17,31,0.35),transparent)]" />
 
       <div className="relative mx-auto max-w-4xl">
-        <Link
-          href="/"
-          className="mb-8 inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-violet-400/40 hover:bg-white/10 lg:mb-6 lg:gap-1.5 lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-xs"
-        >
-          <span>←</span>
-          <span>Back to Landing Page</span>
-        </Link>
+        <nav aria-label="Return to an Aether landing page" className="mb-8 flex flex-wrap gap-3 lg:mb-6">
+          <Link href="/" className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-violet-400/40 hover:bg-white/10 lg:gap-1.5 lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-xs"><span>←</span><span>Return to Landing Page</span></Link>
+          <Link href="/political-public" className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-violet-400/40 hover:bg-white/10 lg:gap-1.5 lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-xs"><span>←</span><span>Return to Political</span></Link>
+          <Link href="/business-public" className="inline-flex items-center gap-2 rounded-2xl border border-violet-400/40 bg-violet-500/10 px-5 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-violet-500/20 lg:gap-1.5 lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-xs"><span>←</span><span>Return to Business</span></Link>
+        </nav>
 
         <div className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-10 backdrop-blur-xl lg:rounded-2xl lg:p-7">
           <h1 className="text-5xl font-black tracking-tight lg:text-4xl">Support</h1>

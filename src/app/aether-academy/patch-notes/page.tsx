@@ -38,11 +38,67 @@ export default function PatchNotesPage() {
           <p className="text-sm uppercase tracking-[0.2em] text-violet-300">
             Current Public Version
           </p>
-          <p className="mt-1 text-xl font-semibold text-white">Aether v1.8</p>
+          <p className="mt-1 text-xl font-semibold text-white">Aether v1.9</p>
           <p className="mt-1 text-slate-300">Live</p>
         </div>
 
         <details className="group mt-7 overflow-hidden rounded-2xl border border-violet-400/20 bg-[#10233e]/75 shadow-xl shadow-black/20 lg:rounded-xl" open>
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 transition hover:bg-white/[0.03] [&::-webkit-details-marker]:hidden lg:gap-3 lg:p-4">
+            <div>
+              <p className="text-sm uppercase tracking-[0.2em] text-violet-300">October 13, 2026</p>
+              <h2 className="mt-1 text-2xl font-semibold text-white">Aether v1.9 — Ecosystem &amp; Operations Expansion</h2>
+              <p className="mt-1 text-sm text-slate-400">Projects &amp; Tasks for Business, Political Digital improvements, and a refreshed public ecosystem experience.</p>
+            </div>
+            <span className="shrink-0 text-2xl text-violet-300 transition-transform duration-200 group-open:rotate-180">↓</span>
+          </summary>
+          <div className="border-t border-white/10 p-5 md:p-6 lg:p-5">
+            <p className="text-sm leading-7 text-slate-300">This release introduces collaborative project management across Aether Business, improves digital operations for political campaigns, and makes the broader Aether ecosystem easier to discover and understand.</p>
+            <div className="mt-6 space-y-6 text-sm leading-6 text-slate-300">
+              <section>
+                <h3 className="text-xl font-semibold text-white">Aether Business — Projects &amp; Tasks</h3>
+                <ul className="mt-3 space-y-1.5">
+                  <li>✓ Introduced Projects &amp; Tasks as a standard module included with every Aether Business subscription.</li>
+                  <li>✓ Added individual task and goal management to help teams organize responsibilities and track progress.</li>
+                  <li>✓ Added collaborative projects with multiple contributors to coordinate larger initiatives.</li>
+                  <li>✓ Added nested tasks so larger projects can be organized into smaller, manageable steps.</li>
+                </ul>
+              </section>
+              <section>
+                <h3 className="text-xl font-semibold text-white">Aether Political — Digital Operations</h3>
+                <ul className="mt-3 space-y-1.5">
+                  <li>✓ Reduced Digital Analytics page load times for faster access to campaign performance information.</li>
+                  <li>✓ Refreshed Digital Focus Mode to improve reliability, responsiveness, and day-to-day workflow usability.</li>
+                  <li>✓ Improved consistency between digital reporting and the department&apos;s execution experience.</li>
+                </ul>
+              </section>
+              <section>
+                <h3 className="text-xl font-semibold text-white">Aether Ecosystem — Public Experience</h3>
+                <ul className="mt-3 space-y-1.5">
+                  <li>✓ Introduced a dedicated Ecosystem page explaining Aether Political, Aether Business, and Aether Academy.</li>
+                  <li>✓ Added in-development previews for Aether Social and Aether Personal.</li>
+                  <li>✓ Updated homepage product cards with clearer interactive styling and separate paths for learning about each product or visiting its landing page.</li>
+                  <li>✓ Refreshed the ecosystem infographic with a cleaner visual presentation and integrated descriptions.</li>
+                </ul>
+              </section>
+              <section>
+                <h3 className="text-xl font-semibold text-white">Team Aether — Outreach &amp; Website Operations</h3>
+                <ul className="mt-3 space-y-1.5">
+                  <li>✓ Refined political outreach messaging and demonstration pathways.</li>
+                  <li>✓ Highlighted Academy resources as an additional way for prospective customers to learn about Aether.</li>
+                  <li>✓ Reviewed internal public-site engagement tracking and supporting website operations.</li>
+                </ul>
+              </section>
+            </div>
+            <div className="mt-7 border-t border-white/10 pt-5">
+              <p className="font-semibold text-white">More ways to plan, execute, and explore.</p>
+              <p className="mt-2 text-slate-300">Across Political, Business, and Academy, Aether continues to bring clarity and coordination to everyday work.</p>
+              <p className="mt-4 font-semibold text-white">Clarity. Focus. Execution.</p>
+              <p className="mt-1 text-slate-400">— Team Aether</p>
+            </div>
+          </div>
+        </details>
+
+        <details className="group mt-7 overflow-hidden rounded-2xl border border-violet-400/20 bg-[#10233e]/75 shadow-xl shadow-black/20 lg:rounded-xl">
           <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 transition hover:bg-white/[0.03] [&::-webkit-details-marker]:hidden lg:gap-3 lg:p-4">
             <div>
               <p className="text-sm uppercase tracking-[0.2em] text-violet-300">October 9, 2026</p>

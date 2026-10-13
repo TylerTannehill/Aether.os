@@ -105,6 +105,9 @@ export default function PrivacyPage() {
       <div className="relative mx-auto max-w-4xl">
         <nav aria-label="Return to an Aether landing page" className="mb-8 flex flex-wrap gap-3 lg:mb-6">
           <Link href="/" className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-violet-400/40 hover:bg-white/10 lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-xs">
+            <span>←</span><span>Return to Landing Page</span>
+          </Link>
+          <Link href="/political-public" className="inline-flex items-center gap-2 rounded-2xl border border-violet-400/40 bg-violet-500/10 px-5 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-violet-500/20 lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-xs">
             <span>←</span><span>Return to Political</span>
           </Link>
           <Link href="/business-public" className="inline-flex items-center gap-2 rounded-2xl border border-violet-400/40 bg-violet-500/10 px-5 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-violet-500/20 lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-xs">
@@ -141,7 +144,8 @@ export default function PrivacyPage() {
           </div>
 
           <div className="mt-12 flex flex-wrap justify-center gap-3 lg:mt-8">
-            <Link href="/" className="rounded-xl border border-white/20 bg-white/5 px-6 py-3 text-center font-bold text-white transition hover:bg-white/10 lg:px-5 lg:py-2.5 lg:text-sm">Return to Political</Link>
+            <Link href="/" className="rounded-xl border border-white/20 bg-white/5 px-6 py-3 text-center font-bold text-white transition hover:bg-white/10 lg:px-5 lg:py-2.5 lg:text-sm">Return to Landing Page</Link>
+            <Link href="/political-public" className="rounded-xl border border-violet-400/40 bg-violet-500/15 px-6 py-3 text-center font-bold text-white transition hover:bg-violet-500/25 lg:px-5 lg:py-2.5 lg:text-sm">Return to Political</Link>
             <Link href="/business-public" className="rounded-xl border border-violet-400/40 bg-violet-500/15 px-6 py-3 text-center font-bold text-white transition hover:bg-violet-500/25 lg:px-5 lg:py-2.5 lg:text-sm">Return to Business</Link>
             <Link href="/public-team-aether#contact-team-aether" className="rounded-xl bg-violet-600 px-6 py-3 text-center font-bold text-white transition hover:bg-violet-500 lg:px-5 lg:py-2.5 lg:text-sm">Contact Team Aether</Link>
           </div>

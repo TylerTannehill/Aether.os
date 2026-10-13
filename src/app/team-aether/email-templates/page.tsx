@@ -24,7 +24,7 @@ Thanks for your time!
 
 — Team Aether`,
     cta: "Explore Aether",
-    url: "https://aetheros.pro",
+    url: "https://aetheros.pro/political-public",
   },
   {
     title: "Email 2 - Follow Up",
@@ -32,35 +32,43 @@ Thanks for your time!
     headline: "A simpler way to run the work behind the campaign.",
     body: `Hi {{First Name}},
 
-Just checking back in to see if you've had a chance to look at Aether.
+I wanted to follow up and see if you've had a chance to take a look at Aether.
 
-Aether was built for the people doing the work behind the campaign — bringing the moving pieces of campaign operations into one place without adding another complicated system to manage.
+We built Aether to bring the moving pieces of campaign operations together, helping teams spend less time managing disconnected tools and more time focusing on the work that matters.
 
-Aether Academy walks through the platform if you'd like to explore on your own. Or just reply and we'd be happy to schedule a quick demo.
+But sometimes it's easier to see how something works than to read about it.
+
+If you're interested, we'd be happy to walk you through Aether, answer your questions, and show you how the platform could fit your campaign.
+
+You can request a demo directly through our website, whenever you're ready.
 
 Thanks again!
 
 — Team Aether`,
-    cta: "Visit Aether Academy",
-    url: "https://aetheros.pro/aether-academy",
+    cta: "Request an Aether Demo",
+    url: "https://aetheros.pro/political-public/explore-abe",
   },
   {
     title: "Email 3 - Final Follow Up",
     subject: "One last note about Aether",
-    headline: "Built by campaign people. Built for campaign people.",
+    headline: "There's another way to explore Aether.",
     body: `Hi {{First Name}},
 
-I wanted to reach out one last time.
+We've tried showing you Aether, and you may have explored our pages or thought about scheduling a demo.
 
-Aether was built specifically for campaign teams to simplify day-to-day operations across Finance, Field, Outreach, Digital, Print, Contacts, and Lists.
+But did you know we have an entire Academy designed to show you how Aether works?
 
-If you'd like to see what Aether could look like for {{Campaign}}, we'd love to schedule a demo.
+Aether Academy gives you a chance to explore the platform at your own pace and see how its tools support the day-to-day work of a campaign.
 
-Either way, best of luck this campaign season.
+If you'd rather start with an overview, you can also visit our campaign platform page.
+
+Thanks again for your time, and best of luck with your campaign!
 
 — Team Aether`,
-    cta: "Explore Aether",
-    url: "https://aetheros.pro",
+    cta: "Visit Aether Academy",
+    url: "https://aetheros.pro/aether-academy",
+    secondaryCta: "Explore Aether",
+    secondaryUrl: "https://aetheros.pro/political-public",
   },
   {
     title: "Demo Scheduling",
@@ -78,7 +86,7 @@ Looking forward to meeting you!
 
 — Team Aether`,
     cta: "Explore Aether Before Your Demo",
-    url: "https://aetheros.pro",
+    url: "https://aetheros.pro/political-public",
   },
   {
     title: "Provisioned",
@@ -98,13 +106,13 @@ Temporary Password:
 {{Password}}
 
 Login:
-https://aetheros.pro
+https://aetheros.pro/political-public
 
 Welcome to Team Aether!
 
 — Team Aether`,
     cta: "Log In to Aether",
-    url: "https://aetheros.pro",
+    url: "https://aetheros.pro/political-public",
   },
 ];
 
@@ -125,14 +133,14 @@ function emailHtml(t: typeof templates[number]) {
       <div style="font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;color:#7c3aed;">TEAM AETHER</div>
       <h1 style="margin:10px 0 22px;font-family:Arial,Helvetica,sans-serif;font-size:28px;line-height:1.2;color:#0f172a;">${esc(t.headline)}</h1>
       ${paragraphs}
-      <table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0 8px;"><tr><td style="background:#0f172a;border-radius:12px;"><a href="${t.url}" style="display:inline-block;padding:13px 20px;font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;color:#fff;text-decoration:none;">${esc(t.cta)}</a></td></tr></table>
+      <table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0 8px;"><tr><td style="padding:0 10px 10px 0;"><table role="presentation" cellpadding="0" cellspacing="0"><tr><td style="background:#0f172a;border-radius:12px;"><a href="${t.url}" style="display:inline-block;padding:13px 20px;font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;color:#fff;text-decoration:none;">${esc(t.cta)}</a></td></tr></table></td>${"secondaryCta" in t && t.secondaryCta ? `<td style="padding:0 0 10px;"><table role="presentation" cellpadding="0" cellspacing="0"><tr><td style="background:#475569;border-radius:12px;"><a href="${t.secondaryUrl}" style="display:inline-block;padding:13px 20px;font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;color:#fff;text-decoration:none;">${esc(t.secondaryCta)}</a></td></tr></table></td>` : ""}</tr></table>
     </td></tr>
     <tr><td style="padding:22px 38px 30px;border-top:1px solid #e2e8f0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.6;color:#64748b;">Clarity. Focus. Execution.<br>Aether Systems LLC · <a href="https://aetheros.pro" style="color:#64748b;">aetheros.pro</a></td></tr>
   </table></td></tr></table></body></html>`;
 }
 
 function plainText(t: typeof templates[number]) {
-  return `${t.body}\n\n${t.cta}: ${t.url}\n\nClarity. Focus. Execution.\nAether Systems LLC\nhttps://aetheros.pro`;
+  return `${t.body}\n\n${t.cta}: ${t.url}${"secondaryCta" in t && t.secondaryCta ? `\n${t.secondaryCta}: ${t.secondaryUrl}` : ""}\n\nClarity. Focus. Execution.\nAether Systems LLC\nhttps://aetheros.pro`;
 }
 
 export default function EmailTemplatesPage() {

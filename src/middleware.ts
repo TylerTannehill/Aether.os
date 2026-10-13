@@ -12,6 +12,7 @@ export async function middleware(request: NextRequest) {
   const publicRoutes = [
     '/',
     '/login',
+    '/ecosystem',
     '/terms',
     '/privacy',
     '/update-password',
@@ -49,7 +50,9 @@ export async function middleware(request: NextRequest) {
   const isPublicRoute =
     publicRoutes.includes(pathname) ||
     pathname === '/business-public' ||
-    pathname.startsWith('/business-public/')
+    pathname.startsWith('/business-public/') ||
+    pathname === '/political-public' ||
+    pathname.startsWith('/political-public/')
 
   const isPublicAsset =
     pathname.startsWith('/_next') ||

@@ -80,7 +80,8 @@ export default function SecurityPage() {
 
         <div className="relative mx-auto flex max-w-7xl flex-col gap-8 lg:gap-6">
           <nav aria-label="Return to an Aether product" className="flex flex-wrap gap-3">
-            <Link href="/" className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:border-violet-400/40 hover:bg-white/10 lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-xs"><ArrowLeft className="h-4 w-4" /> Return to Political</Link>
+            <Link href="/" className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:border-violet-400/40 hover:bg-white/10 lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-xs"><ArrowLeft className="h-4 w-4" /> Return to Landing Page</Link>
+             <Link href="/political-public" className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:border-violet-400/40 hover:bg-white/10 lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-xs"><ArrowLeft className="h-4 w-4" /> Return to Political</Link>
             <Link href="/business-public" className="inline-flex items-center gap-2 rounded-2xl border border-violet-400/40 bg-violet-500/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-violet-500/20 lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-xs"><ArrowLeft className="h-4 w-4" /> Return to Business</Link>
           </nav>
 
@@ -319,7 +320,8 @@ export default function SecurityPage() {
             </form>)}
           </section>
           <nav aria-label="Return to an Aether product" className="flex flex-wrap gap-3">
-            <Link href="/" className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:border-violet-400/40 hover:bg-white/10 lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-xs"><ArrowLeft className="h-4 w-4" /> Return to Political</Link>
+            <Link href="/" className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:border-violet-400/40 hover:bg-white/10 lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-xs"><ArrowLeft className="h-4 w-4" /> Return to Landing Page</Link>
+             <Link href="/political-public" className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:border-violet-400/40 hover:bg-white/10 lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-xs"><ArrowLeft className="h-4 w-4" /> Return to Political</Link>
             <Link href="/business-public" className="inline-flex items-center gap-2 rounded-2xl border border-violet-400/40 bg-violet-500/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-violet-500/20 lg:rounded-xl lg:px-4 lg:py-2.5 lg:text-xs"><ArrowLeft className="h-4 w-4" /> Return to Business</Link>
           </nav>
         </div>
