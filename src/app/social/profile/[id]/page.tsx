@@ -499,7 +499,7 @@ export default function SocialPublicProfilePage() {
                     <p className="break-words text-sm font-semibold text-white">{item.company_name}</p>
                     <p className="mt-1 break-words text-sm text-slate-300">{item.job_title}</p>
                     <p className="mt-1 text-xs text-slate-400">{monthLabel(item.start_date)} – {item.is_current ? 'Present' : monthLabel(item.end_date)}</p>
-                    {ownProfile && <Link href={`/social/profile/professional#experience-${item.id}`} className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-violet-300 hover:text-violet-200">Learn more about my experience here <ArrowRight className="h-3.5 w-3.5" /></Link>}
+                    <Link href={`/social/profile/${profile.id}/professional#experience-${item.id}`} className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-violet-300 hover:text-violet-200">Learn more about this experience <ArrowRight className="h-3.5 w-3.5" /></Link>
                   </article>
                 ))}
               </div>
