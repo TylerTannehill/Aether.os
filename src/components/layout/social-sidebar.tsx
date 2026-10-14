@@ -6,14 +6,14 @@ import { usePathname } from "next/navigation";
 import { BookOpen, BriefcaseBusiness, House, UsersRound, UserRound } from "lucide-react";
 
 const plannedSections = [
-  { title: "Network", icon: UsersRound },
   { title: "Jobs", icon: BriefcaseBusiness },
-  { title: "Profile", icon: UserRound },
 ];
 
 export function SocialSidebar() {
   const pathname = usePathname();
   const homeActive = pathname === "/social";
+  const networkActive = pathname === "/social/network" || pathname.startsWith("/social/network/");
+  const profileActive = pathname === "/social/profile" || pathname.startsWith("/social/profile/");
 
   return (
     <aside className="flex h-screen w-full max-w-[280px] flex-col overflow-hidden border-r border-slate-800/70 bg-slate-950 text-white lg:max-w-[210px]">
@@ -48,6 +48,14 @@ export function SocialSidebar() {
             <House className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
             Home
           </Link>
+          <Link
+            href="/social/network"
+            aria-current={networkActive ? "page" : undefined}
+            className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-all lg:gap-2.5 lg:rounded-xl lg:px-3 lg:py-2.5 lg:text-[11px] ${networkActive ? "bg-black/55 text-white" : "text-slate-300 hover:bg-white/10 hover:text-white"}`}
+          >
+            <UsersRound className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
+            Network
+          </Link>
           {plannedSections.map(({ title, icon: Icon }) => (
             <div
               key={title}
@@ -61,6 +69,14 @@ export function SocialSidebar() {
               <span className="text-[9px] uppercase tracking-wide">Soon</span>
             </div>
           ))}
+          <Link
+            href="/social/profile"
+            aria-current={profileActive ? "page" : undefined}
+            className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-all lg:gap-2.5 lg:rounded-xl lg:px-3 lg:py-2.5 lg:text-[11px] ${profileActive ? "bg-black/55 text-white" : "text-slate-300 hover:bg-white/10 hover:text-white"}`}
+          >
+            <UserRound className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
+            Profile
+          </Link>
           <Link
             href="/aether-academy"
             className="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-slate-300 transition-all hover:bg-white/10 hover:text-white lg:gap-2.5 lg:rounded-xl lg:px-3 lg:py-2.5 lg:text-[11px]"
