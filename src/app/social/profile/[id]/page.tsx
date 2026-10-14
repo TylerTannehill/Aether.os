@@ -1,16 +1,48 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { ArrowLeft, AtSign, BriefcaseBusiness, Check, LockKeyhole, Loader2, ShieldCheck, UserRound, UserRoundPlus, X } from 'lucide-react'
+import { ArrowLeft, ArrowRight, AtSign, BriefcaseBusiness, Check, Heart, LockKeyhole, Loader2, Music2, Pause, Play, ShieldCheck, UserRound, UserRoundPlus, X } from 'lucide-react'
 
 type PublicProfile = {
   id: string
   display_name: string | null
   username: string | null
   bio: string | null
+  avatar_path: string | null
+}
+
+type ExperiencePreview = {
+  id: string
+  company_name: string
+  job_title: string
+  start_date: string
+  end_date: string | null
+  is_current: boolean
+}
+
+type EducationPreview = {
+  id: string
+  entry_type: 'high_school' | 'college' | 'certification'
+  institution_name: string
+  degree: string | null
+  field_of_study: string | null
+  issuing_organization: string | null
+  start_date: string | null
+  end_date: string | null
+  issue_date: string | null
+  expiration_date: string | null
+  credential_url: string | null
+  description: string | null
+  display_order: number
+}
+
+function monthLabel(value: string | null) {
+  if (!value) return 'Present'
+  const [year, month] = value.split('-').map(Number)
+  return new Date(year, month - 1, 1).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
 }
 
 type Connection = {
@@ -22,11 +54,38 @@ type Connection = {
   recipient_grants_personal: boolean
 }
 
+type SocialContext = 'professional' | 'personal'
+type SocialPost = { id: string; author_id: string; context: SocialContext; content: string; created_at: string }
+type PersonalDetails = { profile_id: string; bio: string | null; avatar_path: string | null; jam_url: string | null }
+type JamTrack = { title: string; artist: string; artwork: string | null; preview: string | null }
+
+function appleTrackId(url: string): string | null {
+  try {
+    const parsed = new URL(url)
+    if (parsed.protocol !== 'https:' || !/(^|\.)music\.apple\.com$/i.test(parsed.hostname)) return null
+    const id = parsed.searchParams.get('i') || parsed.pathname.match(/\/(?:id)(\d+)(?:\/)?$/)?.[1]
+    return id && /^\d+$/.test(id) ? id : null
+  } catch { return null }
+}
+
+function postBody(content: string) {
+  return content.split(/(https?:\/\/[^\s]+)/g).map((part, index) => {
+    if (!/^https?:\/\//i.test(part)) return <span key={index}>{part}</span>
+    const url = part.replace(/[),.!?;:]+$/, '')
+    const tail = part.slice(url.length)
+    return <span key={index}><a href={url} target="_blank" rel="noopener noreferrer" className="break-all text-violet-300 underline underline-offset-2 hover:text-violet-200">{url}</a>{tail}</span>
+  })
+}
+
 export default function SocialPublicProfilePage() {
   const params = useParams<{ id: string }>()
   const id = params.id
   const [supabase] = useState(() => createClient())
   const [profile, setProfile] = useState<PublicProfile | null>(null)
+  const [experience, setExperience] = useState<ExperiencePreview[]>([])
+  const [education, setEducation] = useState<EducationPreview[]>([])
+  const [experienceError, setExperienceError] = useState('')
+  const [educationError, setEducationError] = useState('')
   const [ownProfile, setOwnProfile] = useState(false)
   const [hasMyProfile, setHasMyProfile] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -37,6 +96,18 @@ export default function SocialPublicProfilePage() {
   const [connectionBusy, setConnectionBusy] = useState(false)
   const [connectionError, setConnectionError] = useState('')
   const [connectionNotice, setConnectionNotice] = useState('')
+  const [context, setContext] = useState<SocialContext>('professional')
+  const [posts, setPosts] = useState<SocialPost[]>([])
+  const [postsLoading, setPostsLoading] = useState(false)
+  const [postsError, setPostsError] = useState('')
+  const [personalDetails, setPersonalDetails] = useState<PersonalDetails | null>(null)
+  const [personalError, setPersonalError] = useState('')
+  const [jamTrack, setJamTrack] = useState<JamTrack | null>(null)
+  const [jamLoading, setJamLoading] = useState(false)
+  const [jamError, setJamError] = useState('')
+  const [jamPlaying, setJamPlaying] = useState(false)
+  const jamAudioRef = useRef<HTMLAudioElement | null>(null)
+
 
   useEffect(() => {
     let active = true
@@ -45,12 +116,20 @@ export default function SocialPublicProfilePage() {
       setLoading(true)
       setError('')
       setProfile(null)
+      setExperience([])
+      setEducation([])
+      setExperienceError('')
+      setEducationError('')
       setOwnProfile(false)
       setHasMyProfile(false)
       setMyProfileId(null)
       setConnection(null)
       setConnectionError('')
       setConnectionNotice('')
+      setContext('professional')
+      setPersonalDetails(null)
+      setPersonalError('')
+      setPosts([])
 
       if (!id || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
         setError('This profile link is invalid.')
@@ -67,7 +146,7 @@ export default function SocialPublicProfilePage() {
 
       const { data, error: profileError } = await supabase
         .from('social_profiles')
-        .select('id, display_name, username, bio')
+        .select('id, display_name, username, bio, avatar_path')
         .eq('id', id)
         .maybeSingle()
 
@@ -78,6 +157,29 @@ export default function SocialPublicProfilePage() {
         setError('This Social profile was not found or is not available to you.')
       } else {
         setProfile(data as PublicProfile)
+        const [positionsResult, educationResult] = await Promise.all([
+          supabase.from('social_professional_experience')
+            .select('id, company_name, job_title, start_date, end_date, is_current')
+            .eq('profile_id', data.id)
+            .order('is_current', { ascending: false })
+            .order('start_date', { ascending: false }),
+          supabase.from('social_professional_education')
+            .select('id, entry_type, institution_name, degree, field_of_study, issuing_organization, start_date, end_date, issue_date, expiration_date, credential_url, description, display_order')
+            .eq('profile_id', data.id)
+            .order('display_order', { ascending: true }),
+        ])
+        if (!active) return
+        if (positionsResult.error) setExperienceError('Experience unavailable right now.')
+        else setExperience((positionsResult.data ?? []) as ExperiencePreview[])
+        if (educationResult.error) setEducationError('Education unavailable right now.')
+        else setEducation(((educationResult.data ?? []) as EducationPreview[]).sort((a, b) => {
+          const aDate = a.entry_type === 'certification' ? a.issue_date : a.start_date
+          const bDate = b.entry_type === 'certification' ? b.issue_date : b.start_date
+          if (!aDate && !bDate) return a.display_order - b.display_order
+          if (!aDate) return 1
+          if (!bDate) return -1
+          return bDate.localeCompare(aDate) || a.display_order - b.display_order
+        }))
         const { data: mine, error: mineError } = await supabase
           .from('social_profiles')
           .select('id')
@@ -113,6 +215,116 @@ export default function SocialPublicProfilePage() {
     void loadProfile()
     return () => { active = false }
   }, [id, supabase])
+
+  const canViewPersonal = ownProfile || Boolean(
+    connection?.status === 'accepted' && myProfileId && (
+      (connection.requester_id === profile?.id && connection.recipient_id === myProfileId && connection.requester_grants_personal) ||
+      (connection.recipient_id === profile?.id && connection.requester_id === myProfileId && connection.recipient_grants_personal)
+    )
+  )
+
+  useEffect(() => {
+    let active = true
+    if (!profile || loading) return
+    if (context === 'personal' && !canViewPersonal) {
+      setPosts([])
+      setPersonalDetails(null)
+      setPostsError('')
+      setPostsLoading(false)
+      return
+    }
+    setPostsLoading(true)
+    setPostsError('')
+    setPosts([])
+    async function loadPosts() {
+      const result = await supabase.from('social_posts')
+        .select('id, author_id, context, content, created_at')
+        .eq('author_id', profile!.id)
+        .eq('context', context)
+        .order('created_at', { ascending: false })
+        .limit(100)
+      if (!active) return
+      if (result.error) setPostsError('Unable to load posts: ' + result.error.message)
+      else setPosts((result.data ?? []) as SocialPost[])
+      setPostsLoading(false)
+    }
+    void loadPosts()
+    return () => { active = false }
+  }, [supabase, profile, loading, context, canViewPersonal])
+
+  useEffect(() => {
+    let active = true
+    if (!profile || loading || context !== 'personal' || !canViewPersonal) {
+      setPersonalDetails(null)
+      setPersonalError('')
+      return
+    }
+    async function loadPersonal() {
+      const result = await supabase.from('social_personal_profiles')
+        .select('profile_id, bio, avatar_path, jam_url')
+        .eq('profile_id', profile!.id)
+        .maybeSingle()
+      if (!active) return
+      if (result.error) setPersonalError('Personal profile details are not available to this viewer.')
+      else { setPersonalDetails((result.data as PersonalDetails | null) ?? null); setPersonalError('') }
+    }
+    void loadPersonal()
+    return () => { active = false }
+  }, [supabase, profile, loading, context, canViewPersonal])
+
+  useEffect(() => {
+    const url = context === 'personal' && canViewPersonal ? personalDetails?.jam_url?.trim() : null
+    jamAudioRef.current?.pause()
+    jamAudioRef.current = null
+    setJamPlaying(false)
+    setJamTrack(null)
+    setJamError('')
+    if (!url) { setJamLoading(false); return }
+    const trackId = appleTrackId(url)
+    if (!trackId) { setJamError('This Apple Music link does not contain a song ID.'); setJamLoading(false); return }
+
+    const controller = new AbortController()
+    setJamLoading(true)
+    async function loadJam() {
+      try {
+        const response = await fetch(`https://itunes.apple.com/lookup?id=${encodeURIComponent(trackId!)}&entity=song`, { signal: controller.signal })
+        if (!response.ok) throw new Error('Apple Music lookup unavailable.')
+        const result = await response.json()
+        const song = (result.results as Array<Record<string, unknown>> | undefined)?.find(item => item.kind === 'song' && String(item.trackId) === trackId)
+        if (!song) throw new Error('Song details are not available for this link.')
+        const artwork = typeof song.artworkUrl100 === 'string' ? song.artworkUrl100.replace(/100x100bb/, '200x200bb') : null
+        const preview = typeof song.previewUrl === 'string' && song.previewUrl.startsWith('https://') ? song.previewUrl : null
+        if (!controller.signal.aborted) setJamTrack({
+          title: String(song.trackName || 'Untitled song'),
+          artist: String(song.artistName || 'Unknown artist'),
+          artwork,
+          preview,
+        })
+      } catch (err) {
+        if (!controller.signal.aborted) setJamError(err instanceof Error ? err.message : 'Unable to load this jam.')
+      } finally {
+        if (!controller.signal.aborted) setJamLoading(false)
+      }
+    }
+    void loadJam()
+    return () => { controller.abort(); jamAudioRef.current?.pause(); jamAudioRef.current = null }
+  }, [context, canViewPersonal, personalDetails?.jam_url])
+
+  async function toggleJam() {
+    if (!jamTrack?.preview || !canViewPersonal || context !== 'personal') return
+    if (jamPlaying) { jamAudioRef.current?.pause(); setJamPlaying(false); return }
+    try {
+      if (!jamAudioRef.current) {
+        const audio = new Audio(jamTrack.preview)
+        audio.onended = () => setJamPlaying(false)
+        audio.onerror = () => { setJamPlaying(false); setJamError('The preview could not be played.') }
+        jamAudioRef.current = audio
+      }
+      await jamAudioRef.current.play()
+      setJamPlaying(true)
+      setJamError('')
+    } catch { setJamPlaying(false); setJamError('The preview could not be played.') }
+  }
 
   async function refreshConnection(mine: string, other: string) {
     const { data, error: fetchError } = await supabase
@@ -169,6 +381,12 @@ export default function SocialPublicProfilePage() {
     }
   }
 
+  const currentPosition = experience.find(item => item.is_current && item.job_title && item.company_name)
+
+  const avatarUrl = profile?.avatar_path
+    ? supabase.storage.from('social-avatars').getPublicUrl(profile.avatar_path).data.publicUrl
+    : null
+
   return (
     <main className="mx-auto w-full max-w-4xl px-4 py-8 text-slate-100 sm:px-6">
       <Link href="/social/network" className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-violet-300 transition hover:text-violet-200">
@@ -188,34 +406,158 @@ export default function SocialPublicProfilePage() {
       ) : profile ? (
         <div className="space-y-5">
           <article className="overflow-hidden rounded-2xl border border-white/10 bg-[#101b30] shadow-xl">
-            <div className="h-28 bg-gradient-to-r from-violet-700/70 via-indigo-700/50 to-blue-700/50 sm:h-36" />
-            <div className="px-5 pb-8 sm:px-8">
-              <div className="-mt-10 mb-5 flex items-end justify-between gap-3">
-                <div className="flex h-20 w-20 items-center justify-center rounded-full border-4 border-[#101b30] bg-[#253451] text-violet-200">
-                  <UserRound className="h-9 w-9" aria-hidden="true" />
+            <div className={`flex h-16 items-center justify-end px-3 sm:h-20 sm:px-5 ${context === 'personal' ? 'bg-gradient-to-r from-fuchsia-800 via-violet-800 to-indigo-800' : 'bg-gradient-to-r from-violet-700 via-indigo-700 to-blue-800'}`}>
+              <div className="inline-flex rounded-xl border border-slate-300 bg-white p-1 shadow-sm" role="group" aria-label="Profile context">
+                <button type="button" onClick={() => setContext('professional')} aria-pressed={context === 'professional'} className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold ${context === 'professional' ? 'bg-violet-700 text-white' : 'text-slate-600 hover:bg-slate-100'}`}><BriefcaseBusiness className="h-4 w-4" /> Professional</button>
+                <button type="button" onClick={() => setContext('personal')} aria-pressed={context === 'personal'} className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold ${context === 'personal' ? 'bg-violet-700 text-white' : 'text-slate-600 hover:bg-slate-100'}`}><Heart className="h-4 w-4" /> Personal</button>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 px-5 pb-5 sm:gap-6 sm:px-6">
+              <div className="-mt-12 h-28 w-28 shrink-0 overflow-hidden rounded-full border-4 border-[#101b30] bg-[#253451] text-violet-200 shadow-lg sm:-mt-14 sm:h-32 sm:w-32">
+                {(context === 'personal' && canViewPersonal && personalDetails?.avatar_path
+                  ? supabase.storage.from('social-avatars').getPublicUrl(personalDetails.avatar_path).data.publicUrl
+                  : context === 'professional' ? avatarUrl : null)
+                  ? <img src={context === 'personal' ? supabase.storage.from('social-avatars').getPublicUrl(personalDetails!.avatar_path!).data.publicUrl : avatarUrl!} alt={`${profile.display_name || 'Member'}'s ${context} profile picture`} className="h-full w-full object-cover" />
+                  : <div className="flex h-full w-full items-center justify-center"><UserRound className="h-12 w-12" /></div>}
+              </div>
+              <div className="min-w-0 flex-1 pt-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h1 className="break-words text-xl font-bold sm:text-2xl">{profile.display_name || 'Aether Social Member'}</h1>
+                  <span className="rounded-full border border-violet-400/30 bg-violet-500/10 px-2.5 py-1 text-xs font-semibold text-violet-200">{context === 'personal' ? 'Personal' : 'Professional'}</span>
                 </div>
-                {ownProfile && (
-                  <Link href="/social/profile" className="rounded-xl border border-white/20 px-4 py-2 text-sm font-semibold transition hover:bg-white/10">
-                    Edit My Profile
-                  </Link>
+                {(profile.username || currentPosition) && (
+                  <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-violet-300">
+                    {profile.username && <span className="inline-flex items-center gap-1"><AtSign className="h-3.5 w-3.5" /> {profile.username}</span>}
+                    {context === 'professional' && profile.username && currentPosition && <span className="text-slate-500">·</span>}
+                    {context === 'professional' && currentPosition && <span className="text-slate-300">{currentPosition.job_title} at {currentPosition.company_name}</span>}
+                  </p>
                 )}
+                {context === 'personal' && canViewPersonal && personalDetails?.jam_url && (
+                  <div className="mt-2 flex max-w-lg items-center gap-2.5" aria-label="My Jam">
+                    {jamTrack?.artwork ? (
+                      <img src={jamTrack.artwork} alt="Album artwork" className="h-10 w-10 shrink-0 rounded-md object-cover" />
+                    ) : (
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-violet-500/20 text-violet-200"><Music2 className="h-5 w-5" /></div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-fuchsia-300">My Jam</p>
+                      {jamLoading ? <p className="text-xs text-slate-300">Finding their song…</p> : jamTrack ? (
+                        <><p className="truncate text-xs font-semibold text-white" title={jamTrack.title}>{jamTrack.title}</p><p className="truncate text-[11px] text-slate-400" title={jamTrack.artist}>{jamTrack.artist}</p></>
+                      ) : <p className="text-xs text-slate-400">{jamError || 'Song unavailable'}</p>}
+                    </div>
+                    {jamTrack?.preview ? (
+                      <button type="button" onClick={() => void toggleJam()} aria-label={jamPlaying ? 'Pause My Jam' : 'Play My Jam'} title={jamPlaying ? 'Pause preview' : 'Play song preview'} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-violet-600 text-white transition hover:bg-violet-500">
+                        {jamPlaying ? <Pause className="h-4 w-4 fill-current" /> : <Play className="h-4 w-4 fill-current" />}
+                      </button>
+                    ) : jamLoading ? <Loader2 className="h-4 w-4 shrink-0 animate-spin text-violet-300" /> : null}
+                    {jamTrack && !jamTrack.preview && <span className="text-[10px] text-slate-400">No preview</span>}
+                  </div>
+                )}
+                {context === 'personal' && canViewPersonal && jamTrack && jamError && <p role="alert" className="mt-1 text-xs text-rose-300">{jamError}</p>}
               </div>
-              <div className="flex flex-wrap items-center gap-3">
-                <h1 className="text-2xl font-bold sm:text-3xl">{profile.display_name || 'Aether Social Member'}</h1>
-                <span className="inline-flex items-center gap-1 rounded-full border border-violet-400/30 bg-violet-500/10 px-3 py-1 text-xs font-semibold text-violet-200">
-                  <BriefcaseBusiness className="h-3.5 w-3.5" /> Professional
-                </span>
-              </div>
-              {profile.username && (
-                <p className="mt-2 flex items-center gap-1 text-sm text-violet-300">
-                  <AtSign className="h-4 w-4" aria-hidden="true" /> {profile.username}
-                </p>
-              )}
-              <p className="mt-6 whitespace-pre-wrap text-sm leading-7 text-slate-300">
-                {profile.bio || 'This member has not added a bio yet.'}
-              </p>
+              {ownProfile && <Link href="/social/profile" className="inline-flex shrink-0 items-center gap-2 self-start rounded-lg border border-white/20 px-3 py-2 text-xs font-semibold transition hover:bg-white/10">My Profile <ArrowRight className="h-3.5 w-3.5" /></Link>}
             </div>
           </article>
+
+          {context === 'personal' ? (
+            canViewPersonal ? (
+              <section className="rounded-2xl border border-white/10 bg-[#101b30] p-5 shadow-lg sm:p-6">
+                <h2 className="text-base font-bold">Bio</h2>
+                {personalError ? <p className="mt-3 text-sm text-amber-200">{personalError}</p> : <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-slate-300">{personalDetails?.bio || 'No personal bio available.'}</p>}
+              </section>
+            ) : (
+              <section className="rounded-2xl border border-white/10 bg-[#101b30] p-7 text-center shadow-lg">
+                <LockKeyhole className="mx-auto h-7 w-7 text-violet-300" />
+                <h2 className="mt-3 text-lg font-bold">Personal profile is private</h2>
+                <p className="mt-2 text-sm text-slate-300">This member has not granted you access to their Personal profile or posts.</p>
+              </section>
+            )
+          ) : <>
+          <section className="rounded-2xl border border-white/10 bg-[#101b30] p-5 shadow-lg sm:p-6">
+            <h2 className="text-base font-bold">About</h2>
+            <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-slate-300">{profile.bio || 'This member has not added a bio yet.'}</p>
+            <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-white/10 pt-3 text-xs text-slate-400">
+              <span className="inline-flex items-center gap-1.5 font-semibold text-violet-200"><ShieldCheck className="h-4 w-4" /> Aether Verified</span>
+              {(['Political', 'Business'] as const).map(category => (
+                <span key={category} className="inline-flex items-center gap-1.5" title={`${category} verification not yet connected`}>
+                  <span aria-label="Not verified" className="flex h-3.5 w-3.5 items-center justify-center rounded-full border border-slate-500 text-[10px]">—</span>
+                  <span className="text-slate-200">{category}</span> · Pending
+                </span>
+              ))}
+            </div>
+          </section>
+
+          <section className="min-w-0 rounded-2xl border border-white/10 bg-[#101b30] p-5 shadow-lg sm:p-6">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-base font-bold">Experience &amp; skills</h2>
+              {experience.length > 0 && <span className="text-xs text-slate-400">{experience.length} {experience.length === 1 ? 'position' : 'positions'}</span>}
+            </div>
+            {experienceError ? <p className="mt-3 text-sm text-amber-200">{experienceError}</p> : experience.length > 0 ? (
+              <div className="mt-3 grid grid-cols-1 gap-x-8 sm:grid-cols-2">
+                {experience.map(item => (
+                  <article id={`experience-${item.id}`} key={item.id} className="min-w-0 border-b border-white/10 py-3">
+                    <p className="break-words text-sm font-semibold text-white">{item.company_name}</p>
+                    <p className="mt-1 break-words text-sm text-slate-300">{item.job_title}</p>
+                    <p className="mt-1 text-xs text-slate-400">{monthLabel(item.start_date)} – {item.is_current ? 'Present' : monthLabel(item.end_date)}</p>
+                    {ownProfile && <Link href={`/social/profile/professional#experience-${item.id}`} className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-violet-300 hover:text-violet-200">Learn more about my experience here <ArrowRight className="h-3.5 w-3.5" /></Link>}
+                  </article>
+                ))}
+              </div>
+            ) : <p className="mt-3 text-sm text-slate-300">No professional experience added yet.</p>}
+          </section>
+
+          <section className="min-w-0 rounded-2xl border border-white/10 bg-[#101b30] p-5 shadow-lg sm:p-6">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-base font-bold">Education &amp; Certifications</h2>
+              {education.length > 0 && <span className="text-xs text-slate-400">{education.length} {education.length === 1 ? 'entry' : 'entries'}</span>}
+            </div>
+            {educationError ? <p className="mt-3 text-sm text-amber-200">{educationError}</p> : education.length > 0 ? (
+              <div className="mt-3 divide-y divide-white/10">
+                {education.map(item => (
+                  <article key={item.id} className="min-w-0 py-3 first:pt-0 last:pb-0">
+                    <p className="text-xs font-semibold text-violet-300">{item.entry_type === 'certification' ? 'Certification' : item.entry_type === 'college' ? 'College / University' : 'High School'}</p>
+                    <p className="mt-1 break-words text-sm font-semibold text-white">{item.institution_name}</p>
+                    {item.entry_type === 'college' && (item.degree || item.field_of_study) && <p className="mt-1 text-sm text-slate-300">{[item.degree, item.field_of_study].filter(Boolean).join(' · ')}</p>}
+                    {item.entry_type === 'certification' && item.issuing_organization && <p className="mt-1 text-sm text-slate-300">{item.issuing_organization}</p>}
+                    {(item.entry_type === 'certification' ? item.issue_date || item.expiration_date : item.start_date || item.end_date) && (
+                      <p className="mt-1 text-xs text-slate-400">{item.entry_type === 'certification'
+                        ? [item.issue_date ? `Issued ${monthLabel(item.issue_date)}` : null, item.expiration_date ? `Expires ${monthLabel(item.expiration_date)}` : null].filter(Boolean).join(' · ')
+                        : [item.start_date ? monthLabel(item.start_date) : null, item.end_date ? monthLabel(item.end_date) : null].filter(Boolean).join(' – ')}</p>
+                    )}
+                    {item.description && <p className="mt-2 whitespace-pre-wrap break-words text-sm text-slate-300">{item.description}</p>}
+                    {item.credential_url && /^https?:\/\//i.test(item.credential_url) && <a href={item.credential_url} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block text-xs font-semibold text-violet-300 hover:underline">View credential ↗</a>}
+                  </article>
+                ))}
+              </div>
+            ) : <p className="mt-3 text-sm text-slate-300">No education or certifications added yet.</p>}
+          </section>
+
+          </>}
+
+          {(context === 'professional' || canViewPersonal) && (
+            <section className="rounded-2xl border border-white/10 bg-[#101b30] p-5 shadow-lg sm:p-6">
+              <h2 className="text-base font-bold">{context === 'personal' ? 'Personal posts' : 'Professional posts'}</h2>
+              {postsLoading ? <p className="mt-4 flex items-center gap-2 text-sm text-slate-300"><Loader2 className="h-4 w-4 animate-spin" /> Loading posts...</p>
+                : postsError ? <p role="alert" className="mt-4 text-sm text-rose-300">{postsError}</p>
+                : posts.length === 0 ? <p className="mt-4 text-sm text-slate-400">No {context} posts yet.</p>
+                : <div className="mt-4 space-y-3">{posts.map(post => (
+                  <article key={post.id} className="rounded-xl border border-white/10 bg-white/5 p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#253451]">
+                        {(context === 'personal' ? personalDetails?.avatar_path : profile.avatar_path)
+                          ? <img src={supabase.storage.from('social-avatars').getPublicUrl((context === 'personal' ? personalDetails?.avatar_path : profile.avatar_path)!).data.publicUrl} alt="" className="h-full w-full object-cover" />
+                          : <UserRound className="h-5 w-5 text-violet-200" />}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-white">{profile.display_name || 'Aether Social Member'}</p>
+                        <p className="text-xs text-slate-400">{context === 'personal' ? 'Personal' : 'Professional'} · {new Date(post.created_at).toLocaleString()}</p>
+                      </div>
+                    </div>
+                    <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-slate-200">{postBody(post.content)}</p>
+                  </article>
+                ))}</div>}
+            </section>
+          )}
 
           {!ownProfile && (
             <section className="rounded-2xl border border-white/10 bg-[#101b30] p-5 shadow-xl sm:p-7" aria-labelledby="connection-heading">
@@ -286,7 +628,7 @@ export default function SocialPublicProfilePage() {
                           ? 'Revoke personal access' : 'Allow personal access'}
                       </button>
                     </div>
-                    <p className="mt-3 text-xs text-slate-400">Personal profile and post visibility will be enforced separately when those features launch.</p>
+                    <p className="mt-3 text-xs text-slate-400">Personal posts are visible only to people their author currently allows.</p>
                   </>
                 ) : (
                   <p className="mt-2 text-sm leading-6 text-slate-300">
