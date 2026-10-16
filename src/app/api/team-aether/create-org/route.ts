@@ -52,6 +52,24 @@ export async function POST(request: Request) {
       .trim()
       .toLowerCase();
 
+    // Political and Business include Needle; standalone Social may select either plan.
+    const requestedSocialPlan = String(body?.social_plan || "needle")
+      .trim()
+      .toLowerCase();
+
+    if (
+      productContext === "social" &&
+      !["needle", "haystack"].includes(requestedSocialPlan)
+    ) {
+      return NextResponse.json(
+        { error: "Invalid Social plan. Choose Needle or Haystack." },
+        { status: 400 }
+      );
+    }
+
+    const socialPlan =
+      productContext === "social" ? requestedSocialPlan : "needle";
+
     const allowedBusinessModules = [
       "crm",
       "marketing",
@@ -97,7 +115,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const allowedProductContexts = ["political", "business"];
+    const allowedProductContexts = ["political", "business", "social"];
 
     if (!allowedProductContexts.includes(productContext)) {
       return NextResponse.json(
@@ -155,9 +173,9 @@ export async function POST(request: Request) {
         .insert({
           name,
           slug,
-          context_mode: productContext === "business" ? "default" : contextMode,
-          aether_tier: productContext === "business" ? "t3" : aetherTier,
-          product_context: productContext === "business" ? "business" : null,
+          context_mode: productContext === "political" ? contextMode : "default",
+          aether_tier: productContext === "political" ? aetherTier : "t3",
+          product_context: productContext === "political" ? null : productContext,
         })
         .select()
         .single();
@@ -217,9 +235,30 @@ export async function POST(request: Request) {
       }
     }
 
+    // Persist Social access separately from the organization's primary product.
+    const { error: socialEntitlementError } = await serviceSupabase
+      .from("social_organization_entitlements")
+      .insert({
+        organization_id: organization.id,
+        plan: socialPlan,
+      });
+
+    if (socialEntitlementError) {
+      return NextResponse.json(
+        {
+          error:
+            "Organization created, but its Social entitlement could not be saved.",
+          details: socialEntitlementError.message,
+          organization_id: organization.id,
+        },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json({
       success: true,
       organization,
+      social_plan: socialPlan,
     });
   } catch (err: any) {
     return NextResponse.json(

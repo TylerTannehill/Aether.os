@@ -70,7 +70,24 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
+
+    // Individual Social sign-in clears only the previous employer selection.
+    // Leave the active organization and all other product contexts untouched.
+    if (body?.context === "individual") {
+      if (bearerToken) {
+        return NextResponse.json(
+          { error: "Individual Social mode requires a browser session" },
+          { status: 400 }
+        );
+      }
+
+      const response = NextResponse.json({ context: "individual" });
+      response.cookies.delete("social_employer_organization_id");
+      return response;
+    }
+
     const normalizedCampaign = normalizeCampaign(body?.campaign);
+    const requestedContext = body?.context === "employer" ? "employer" : "organization";
 
     if (!normalizedCampaign) {
       return NextResponse.json(
@@ -151,10 +168,43 @@ export async function POST(request: Request) {
       );
     }
 
+    // Employer mode is opt-in. Ordinary organization logins retain their
+    // existing behavior. Never authorize an employer based on a client flag alone.
+    if (requestedContext === "employer") {
+      const employerRoles = new Set(["admin", "director"]);
+      if (!employerRoles.has(String(membership.role || "").toLowerCase())) {
+        return NextResponse.json(
+          { error: "Employer access requires an organization administrator or director" },
+          { status: 403 }
+        );
+      }
+
+      const { data: entitlement, error: entitlementError } = await databaseClient
+        .from("social_organization_entitlements")
+        .select("plan")
+        .eq("organization_id", organization.id)
+        .maybeSingle();
+
+      if (entitlementError) {
+        return NextResponse.json(
+          { error: "Unable to verify Social employer access" },
+          { status: 500 }
+        );
+      }
+
+      if (!entitlement || !["needle", "haystack"].includes(entitlement.plan)) {
+        return NextResponse.json(
+          { error: "Social employer access has not been provisioned for this organization" },
+          { status: 403 }
+        );
+      }
+    }
+
     const response = NextResponse.json({
       organization,
       membership,
       user: appUser,
+      context: requestedContext,
     });
 
     // Desktop uses the active organization cookie.
@@ -166,6 +216,17 @@ export async function POST(request: Request) {
         secure: process.env.NODE_ENV === "production",
         path: "/",
       });
+
+      if (requestedContext === "employer") {
+        response.cookies.set("social_employer_organization_id", organization.id, {
+          httpOnly: true,
+          sameSite: "lax",
+          secure: process.env.NODE_ENV === "production",
+          path: "/",
+        });
+      } else {
+        response.cookies.delete("social_employer_organization_id");
+      }
     }
 
     return response;

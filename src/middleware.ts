@@ -13,6 +13,7 @@ export async function middleware(request: NextRequest) {
     '/',
     '/login',
     '/login-social',
+    '/login-social/employer-login',
     '/ecosystem',
     '/terms',
     '/privacy',

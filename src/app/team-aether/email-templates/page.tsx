@@ -125,10 +125,10 @@ function emailHtml(t: typeof templates[number]) {
     `<p style="margin:0 0 18px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.7;color:#334155;">${esc(p).replace(/\n/g,"<br>")}</p>`
   ).join("");
 
-  return `<!doctype html><html><body style="margin:0;background:#f1f5f9;">
+  return `<!doctype html><html><head><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"></head><body style="margin:0;background:#f1f5f9;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;"><tr><td align="center" style="padding:28px 12px;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;background:#fff;border-radius:20px;overflow:hidden;">
-    <tr><td align="center" style="background:#050505;padding:28px 24px;"><img src="${LOGO}" alt="Aether" width="280" style="display:block;width:280px;max-width:100%;height:auto;border:0;"></td></tr>
+    <tr><td align="center" bgcolor="#050505" style="background-color:#050505;background-image:linear-gradient(#050505,#050505);padding:28px 24px;"><img src="${LOGO}" alt="Aether" width="280" style="display:block;width:280px;max-width:100%;height:auto;border:0;"></td></tr>
     <tr><td style="padding:36px 38px 28px;">
       <div style="font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;color:#7c3aed;">TEAM AETHER</div>
       <h1 style="margin:10px 0 22px;font-family:Arial,Helvetica,sans-serif;font-size:28px;line-height:1.2;color:#0f172a;">${esc(t.headline)}</h1>

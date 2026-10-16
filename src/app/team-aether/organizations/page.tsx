@@ -63,6 +63,7 @@ type OrganizationEditForm = {
   abe_stage: string;
   status: string;
   business_modules: BusinessModule[];
+  social_plan: "needle" | "haystack";
 };
 
 type StatusFilter =
@@ -93,6 +94,18 @@ function formatDate(value: string | null) {
     day: "numeric",
     year: "numeric",
   }).format(date);
+}
+
+function isSocialOrganization(organization: Organization) {
+  return organization.product_context === "social";
+}
+
+function isPoliticalOrganization(organization: Organization) {
+  return organization.product_context === null || organization.product_context === "political";
+}
+
+function productLabel(organization: Organization) {
+  return isSocialOrganization(organization) ? "Social Employer" : isBusinessOrganization(organization) ? "Business" : "Political";
 }
 
 function isBusinessOrganization(organization: Organization) {
@@ -143,6 +156,9 @@ export default function TeamAetherOrganizationsPage() {
   const [editing, setEditing] = useState(false);
   const [showDeletionForm, setShowDeletionForm] = useState(false);
   const [deletionReason, setDeletionReason] = useState("");
+  const [currentSocialPlan, setCurrentSocialPlan] = useState<"needle" | "haystack" | null>(null);
+  const [socialPlanLoading, setSocialPlanLoading] = useState(false);
+  const [socialPlanError, setSocialPlanError] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<OrganizationEditForm>({
     name: "",
     slug: "",
@@ -151,6 +167,7 @@ export default function TeamAetherOrganizationsPage() {
     abe_stage: "early",
     status: "active",
     business_modules: [],
+    social_plan: "needle",
   });
 
   const selectedOrganization = useMemo(
@@ -257,7 +274,7 @@ export default function TeamAetherOrganizationsPage() {
   }
 
   function beginEditing() {
-    if (!selectedOrganization) return;
+    if (!selectedOrganization || socialPlanLoading || !currentSocialPlan) return;
 
     setEditForm({
       name: selectedOrganization.name,
@@ -266,6 +283,7 @@ export default function TeamAetherOrganizationsPage() {
       aether_tier: selectedOrganization.aether_tier || "t3",
       abe_stage: selectedOrganization.abe_stage || "early",
       status: selectedOrganization.status || "active",
+      social_plan: currentSocialPlan || "needle",
       business_modules: (selectedOrganization.business_modules || []).filter(
         (module): module is BusinessModule =>
           BUSINESS_MODULE_OPTIONS.some((option) => option.value === module)
@@ -300,6 +318,7 @@ export default function TeamAetherOrganizationsPage() {
             aether_tier: editForm.aether_tier,
             abe_stage: editForm.abe_stage,
             status: editForm.status,
+            social_plan: editForm.social_plan,
             ...(isBusinessOrganization(selectedOrganization)
               ? { business_modules: editForm.business_modules }
               : {}),
@@ -314,6 +333,7 @@ export default function TeamAetherOrganizationsPage() {
       }
 
       await loadOrganizations(true);
+      setCurrentSocialPlan(editForm.social_plan);
       setEditing(false);
     } catch (err) {
       console.error(err);
@@ -410,6 +430,33 @@ export default function TeamAetherOrganizationsPage() {
   useEffect(() => {
     void loadOrganizations();
   }, []);
+
+  useEffect(() => {
+    if (!selectedOrganizationId) {
+      setCurrentSocialPlan(null);
+      setSocialPlanError(null);
+      return;
+    }
+    let cancelled = false;
+    setCurrentSocialPlan(null);
+    setSocialPlanLoading(true);
+    setSocialPlanError(null);
+    void (async () => {
+      try {
+        const response = await fetch(`/api/team-aether/organizations/${selectedOrganizationId}`, { cache: "no-store" });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "Unable to load Social plan.");
+        const plan = result.organization?.social_plan;
+        if (plan !== "needle" && plan !== "haystack") throw new Error("Social entitlement not returned by organization API.");
+        if (!cancelled) setCurrentSocialPlan(plan);
+      } catch (err) {
+        if (!cancelled) setSocialPlanError(err instanceof Error ? err.message : "Unable to load Social plan.");
+      } finally {
+        if (!cancelled) setSocialPlanLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [selectedOrganizationId]);
 
   return (
     <main className="min-h-screen bg-slate-100 p-4 text-slate-950 lg:p-6 lg:p-3">
@@ -693,23 +740,23 @@ export default function TeamAetherOrganizationsPage() {
                           </td>
 
                           <td className="px-5 py-4 font-medium lg:px-3.5 lg:py-2.5">
-                            {isBusinessOrganization(organization)
-                              ? "Business"
-                              : "Political"}
+                            {productLabel(organization)}
                           </td>
 
                           <td className="px-5 py-4 lg:px-3.5 lg:py-2.5">
-                            {isBusinessOrganization(organization)
-                              ? formatBusinessModules(organization.business_modules)
-                              : `${formatLabel(organization.aether_tier)} · ${formatLabel(
-                                  organization.context_mode
-                                )}`}
+                            {isSocialOrganization(organization)
+                              ? "Social employer"
+                              : isBusinessOrganization(organization)
+                                ? formatBusinessModules(organization.business_modules)
+                                : `${formatLabel(organization.aether_tier)} · ${formatLabel(organization.context_mode)}`}
                           </td>
 
                           <td className="px-5 py-4 lg:px-3.5 lg:py-2.5">
-                            {isBusinessOrganization(organization)
-                              ? "Business A.B.E."
-                              : formatLabel(organization.abe_stage)}
+                            {isSocialOrganization(organization)
+                              ? "—"
+                              : isBusinessOrganization(organization)
+                                ? "Business A.B.E."
+                                : formatLabel(organization.abe_stage)}
                           </td>
 
                           <td className="px-5 py-4 lg:px-3.5 lg:py-2.5">
@@ -768,6 +815,7 @@ export default function TeamAetherOrganizationsPage() {
                   <button
                     type="button"
                     onClick={beginEditing}
+                    disabled={socialPlanLoading || !currentSocialPlan}
                     className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 lg:rounded-xl lg:px-3 lg:py-2 lg:text-[12px]"
                   >
                     <Pencil className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
@@ -808,7 +856,12 @@ export default function TeamAetherOrganizationsPage() {
                 </p>
               </div>
 
-              {isBusinessOrganization(selectedOrganization) ? (
+              {isSocialOrganization(selectedOrganization) ? (
+                <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Product</p>
+                  <p className="mt-3 text-sm font-semibold">Social Employer</p>
+                </div>
+              ) : isBusinessOrganization(selectedOrganization) ? (
                 <>
                   <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
                     <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 lg:text-[10px]">
@@ -863,6 +916,11 @@ export default function TeamAetherOrganizationsPage() {
                   </div>
                 </>
               )}
+              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 lg:rounded-xl lg:p-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Social Plan</p>
+                <p className="mt-3 text-sm font-semibold">{socialPlanLoading ? "Loading..." : socialPlanError ? "Unavailable" : formatLabel(currentSocialPlan)}</p>
+                {socialPlanError ? <p className="mt-1 text-xs text-rose-700">{socialPlanError}</p> : null}
+              </div>
             </div>
 
             {editing ? (
@@ -915,7 +973,7 @@ export default function TeamAetherOrganizationsPage() {
                     />
                   </label>
 
-                  {!isBusinessOrganization(selectedOrganization) ? (
+                  {isPoliticalOrganization(selectedOrganization) ? (
                     <>
                   <label className="block">
                     <span className="text-sm font-semibold text-slate-900 lg:text-[12px]">
@@ -978,7 +1036,7 @@ export default function TeamAetherOrganizationsPage() {
                   </label>
 
                     </>
-                  ) : (
+                  ) : isBusinessOrganization(selectedOrganization) ? (
                     <div className="md:col-span-2 rounded-3xl border border-slate-200 bg-slate-50 p-5 lg:rounded-xl lg:p-4">
                       <div className="flex flex-col gap-1">
                         <p className="text-sm font-semibold text-slate-900 lg:text-[12px]">
@@ -1030,7 +1088,20 @@ export default function TeamAetherOrganizationsPage() {
                         At least one Business module must remain selected.
                       </p>
                     </div>
-                  )}
+                  ) : null}
+
+                  <label className="block md:col-span-2">
+                    <span className="text-sm font-semibold text-slate-900 lg:text-[12px]">Social Employer Plan</span>
+                    <select
+                      value={editForm.social_plan}
+                      onChange={(event) => setEditForm((current) => ({ ...current, social_plan: event.target.value as "needle" | "haystack" }))}
+                      className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm lg:rounded-xl"
+                    >
+                      <option value="needle">Needle{!isSocialOrganization(selectedOrganization) ? " — Included" : " — $100/month"}</option>
+                      <option value="haystack">Haystack{isSocialOrganization(selectedOrganization) ? " — $250/month" : " — Paid upgrade"}</option>
+                    </select>
+                    <p className="mt-2 text-xs text-slate-500">Downgrades change access, not existing organization data.</p>
+                  </label>
 
                   <label className="block">
                     <span className="text-sm font-semibold text-slate-900 lg:text-[12px]">

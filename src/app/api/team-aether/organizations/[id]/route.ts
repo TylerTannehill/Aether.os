@@ -17,6 +17,8 @@ const BUSINESS_MODULES = [
 
 type BusinessModule = (typeof BUSINESS_MODULES)[number];
 
+const SOCIAL_PLANS = ["needle", "haystack"] as const;
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -51,9 +53,22 @@ export async function GET(
       );
     }
 
+    const { data: entitlement, error: entitlementError } = await serviceSupabase
+      .from("social_organization_entitlements")
+      .select("plan")
+      .eq("organization_id", id)
+      .maybeSingle();
+
+    if (entitlementError) {
+      return NextResponse.json(
+        { error: entitlementError.message },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json({
       success: true,
-      organization: data,
+      organization: { ...data, social_plan: entitlement?.plan ?? "needle" },
     });
   } catch (err: any) {
     return NextResponse.json(
@@ -107,8 +122,19 @@ export async function PATCH(
 
     const isBusinessOrganization =
       existingOrganization.product_context === "business";
+    const isSocialOrganization =
+      existingOrganization.product_context === "social";
 
-    const updateData = isBusinessOrganization
+    if (body.social_plan !== undefined &&
+        (typeof body.social_plan !== "string" ||
+         !SOCIAL_PLANS.includes(body.social_plan.toLowerCase() as (typeof SOCIAL_PLANS)[number]))) {
+      return NextResponse.json(
+        { error: "Social plan must be needle or haystack." },
+        { status: 400 }
+      );
+    }
+
+    const updateData = isBusinessOrganization || isSocialOrganization
       ? {
           name: body.name,
           slug: body.slug,
@@ -211,6 +237,44 @@ export async function PATCH(
       );
     }
 
+    // Keep the product identity unchanged; Social is a separate entitlement.
+    // If this step fails, the organization update may already have succeeded.
+    if (body.social_plan !== undefined) {
+      const { error: entitlementWriteError } = await serviceSupabase
+        .from("social_organization_entitlements")
+        .upsert(
+          {
+            organization_id: id,
+            plan: body.social_plan.toLowerCase(),
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "organization_id" }
+        );
+
+      if (entitlementWriteError) {
+        return NextResponse.json(
+          {
+            error: "Organization settings may have been saved, but the Social plan update failed.",
+            details: entitlementWriteError.message,
+          },
+          { status: 500 }
+        );
+      }
+    }
+
+    const { data: entitlement, error: entitlementError } = await serviceSupabase
+      .from("social_organization_entitlements")
+      .select("plan")
+      .eq("organization_id", id)
+      .maybeSingle();
+
+    if (entitlementError) {
+      return NextResponse.json(
+        { error: entitlementError.message },
+        { status: 500 }
+      );
+    }
+
     let businessModules: string[] = [];
 
     if (isBusinessOrganization) {
@@ -236,6 +300,7 @@ export async function PATCH(
       organization: {
         ...data,
         business_modules: businessModules,
+        social_plan: entitlement?.plan ?? "needle",
       },
     });
   } catch (err: any) {

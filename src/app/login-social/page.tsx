@@ -39,6 +39,18 @@ export default function LoginPage() {
     }
   }
 
+  const selectIndividualSocialMode = async () => {
+    const response = await fetch('/api/auth/select-campaign', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ context: 'individual' }),
+    })
+    if (!response.ok) {
+      const result = await response.json().catch(() => null)
+      throw new Error(result?.error || 'Unable to select individual Social mode.')
+    }
+  }
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setMessage('')
@@ -57,6 +69,7 @@ export default function LoginPage() {
       if (!data.user) throw new Error('Could not verify your account.')
 
       await ensureSocialProfile(data.user.id)
+      await selectIndividualSocialMode()
       router.replace('/social')
       router.refresh()
     } catch (error) {
@@ -88,6 +101,7 @@ export default function LoginPage() {
       if (error) throw error
       if (data.session && data.user) {
         await ensureSocialProfile(data.user.id, displayName.trim())
+        await selectIndividualSocialMode()
         router.replace('/social')
         router.refresh()
       } else {
@@ -139,164 +153,85 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-black px-4 text-white">
-      <div className="w-full max-w-md space-y-6 rounded-lg border border-white/20 bg-white/5 p-6">
-        <div className="space-y-2">
-          <h1 className="text-2xl font-bold">{mode === 'register' ? 'Join Aether Social' : 'Login to Aether Social'}</h1>
+    <main className="relative flex min-h-[100svh] flex-col overflow-hidden bg-[#090e20] text-white">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_18%_15%,rgba(103,47,191,0.32),transparent_43%),radial-gradient(ellipse_at_88%_85%,rgba(45,93,196,0.20),transparent_43%)]" />
+      <header className="absolute inset-x-0 top-0 z-30 flex items-start justify-between px-5 py-2 sm:px-8">
+        <Link href="/" aria-label="Aether home" className="inline-flex items-center"><img src="/aether-logo-full.png" alt="Aether OS" className="h-28 w-auto max-w-[340px] object-contain drop-shadow-[0_0_25px_rgba(139,92,246,0.35)] sm:h-48" /></Link>
+        <Link href="/" className="relative z-40 inline-flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-violet-400/70 bg-violet-700/20 px-5 py-3 text-sm font-black uppercase tracking-[0.08em] text-white shadow-xl shadow-violet-950/30 transition hover:bg-violet-600/30">Back to Aether</Link>
+      </header>
 
-          <p className="text-sm text-white/70">
-            {mode === 'login'
-              ? 'Sign in with your email and password to continue.'
-              : mode === 'register'
-                ? 'Create your personal Aether Social account.'
-                : 'Enter your email and we’ll send a secure password reset link.'}
-          </p>
-        </div>
-
-        {message ? (
-          <div className="rounded border border-white/20 bg-white/10 p-3 text-sm text-white/80">
-            {message}
+      <div className="relative z-10 flex flex-1 items-start justify-center px-4 pb-4 pt-10 sm:pt-12">
+        <div className="w-full max-w-[390px]">
+          <div className="mb-4 text-center">
+            <p className="text-[10px] font-bold uppercase tracking-[0.44em] text-violet-300">Aether Social</p>
+            <h1 className="mt-1 text-2xl font-black tracking-tight sm:text-3xl">
+              {mode === 'register' ? 'Find your people.' : mode === 'reset' ? 'Reset your password.' : 'Welcome back.'}
+            </h1>
+            <p className="mt-1 text-sm font-semibold text-slate-200">
+              {mode === 'register' ? 'Your next connection starts here.' : mode === 'reset' ? 'We’ll send you a secure reset link.' : 'Your network. Your opportunities. Your space.'}
+            </p>
           </div>
-        ) : null}
 
-        {mode === 'login' || mode === 'register' ? (
-          <form onSubmit={mode === 'register' ? handleRegister : handleLogin} className="space-y-4">
-            {mode === 'register' && (
-              <div className="space-y-2">
-                <label htmlFor="display-name" className="block text-sm font-medium">Display Name</label>
-                <input id="display-name" type="text" value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  autoComplete="name" required
-                  className="w-full rounded border border-white bg-white px-3 py-2 text-black" />
+          <section className="rounded-[22px] border border-white/10 bg-white/[0.055] p-4 shadow-2xl shadow-black/30 backdrop-blur-xl sm:p-5">
+            {mode !== 'reset' && (
+              <div className="mb-4 grid grid-cols-2 rounded-xl bg-black/25 p-1">
+                <button type="button" onClick={() => { setMode('login'); setMessage('') }}
+                  className={`rounded-lg px-3 py-2 text-sm font-bold transition ${mode === 'login' ? 'bg-gradient-to-r from-violet-700 to-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}>Sign In</button>
+                <button type="button" onClick={() => { setMode('register'); setMessage('') }}
+                  className={`rounded-lg px-3 py-2 text-sm font-bold transition ${mode === 'register' ? 'bg-gradient-to-r from-violet-700 to-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}>Sign Up</button>
               </div>
             )}
-            <div className="space-y-2">
-              <label htmlFor="email" className="block text-sm font-medium">
-                Email
-              </label>
+            {message && <p role="status" className="mb-5 rounded-xl border border-violet-400/25 bg-violet-400/10 px-4 py-3 text-sm text-violet-100">{message}</p>}
 
-              <input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded border border-white bg-white px-3 py-2 text-black"
-                autoComplete="email"
-              />
-            </div>
+            {mode === 'reset' ? (
+              <form onSubmit={handlePasswordReset} className="space-y-3">
+                <label className="block text-xs font-semibold text-slate-300" htmlFor="reset-email">Email address</label>
+                <input id="reset-email" type="email" autoComplete="email" required placeholder="you@example.com"
+                  value={email} onChange={e => setEmail(e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-[#0c1327] px-3 py-2.5 text-sm text-white outline-none placeholder:text-slate-500 focus:border-violet-400" />
+                <button type="submit" disabled={resetLoading} className="w-full rounded-xl bg-gradient-to-r from-violet-700 to-indigo-600 px-4 py-3 text-sm font-bold transition hover:brightness-110 disabled:opacity-50">{resetLoading ? 'Sending…' : 'Send Reset Link'}</button>
+                <button type="button" onClick={() => { setMode('login'); setMessage('') }} className="w-full py-2 text-sm text-violet-300 hover:text-white">← Back to sign in</button>
+              </form>
+            ) : (
+              <form onSubmit={mode === 'register' ? handleRegister : handleLogin} className="space-y-3">
+                {mode === 'register' && <div>
+                  <label htmlFor="display-name" className="mb-1 block text-xs font-semibold text-slate-300">Display name</label>
+                  <input id="display-name" type="text" autoComplete="name" required value={displayName} onChange={e => setDisplayName(e.target.value)} placeholder="Your name"
+                    className="w-full rounded-xl border border-white/10 bg-[#0c1327] px-3 py-2.5 text-sm text-white outline-none placeholder:text-slate-500 focus:border-violet-400" />
+                </div>}
+                <div>
+                  <label htmlFor="email" className="mb-1 block text-xs font-semibold text-slate-300">Email address</label>
+                  <input id="email" type="email" autoComplete="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com"
+                    className="w-full rounded-xl border border-white/10 bg-[#0c1327] px-3 py-2.5 text-sm text-white outline-none placeholder:text-slate-500 focus:border-violet-400" />
+                </div>
+                <div>
+                  <div className="mb-1 flex items-center justify-between">
+                    <label htmlFor="password" className="text-xs font-semibold text-slate-300">Password</label>
+                    {mode === 'login' && <button type="button" onClick={() => { setMode('reset'); setMessage('') }} className="text-xs text-violet-300 hover:text-white">Forgot password?</button>}
+                  </div>
+                  <input id="password" type="password" required minLength={mode === 'register' ? 6 : undefined} autoComplete={mode === 'register' ? 'new-password' : 'current-password'} value={password} onChange={e => setPassword(e.target.value)} placeholder={mode === 'register' ? 'At least 6 characters' : 'Enter your password'}
+                    className="w-full rounded-xl border border-white/10 bg-[#0c1327] px-3 py-2.5 text-sm text-white outline-none placeholder:text-slate-500 focus:border-violet-400" />
+                </div>
+                <button type="submit" disabled={loading} className="mt-2 w-full rounded-xl bg-gradient-to-r from-violet-700 to-indigo-600 px-4 py-2.5 text-sm font-bold shadow-lg shadow-violet-950/40 transition hover:brightness-110 disabled:opacity-50">
+                  {loading ? 'Please wait…' : mode === 'register' ? 'Create Social Account →' : 'Enter Aether Social →'}
+                </button>
+              </form>
+            )}
+            <p className="mt-3 text-center text-[11px] leading-relaxed text-slate-500">
+              By continuing, you agree to our <Link href="/terms" className="text-slate-300 underline underline-offset-2 hover:text-white">Terms</Link> and <Link href="/privacy" className="text-slate-300 underline underline-offset-2 hover:text-white">Privacy Policy</Link>.
+            </p>
+          </section>
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between gap-3">
-                <label htmlFor="password" className="block text-sm font-medium">
-                  Password
-                </label>
-
-                {mode === 'login' && <button
-                  type="button"
-                  onClick={() => {
-                    setMode('reset')
-                    setMessage('')
-                  }}
-                  className="text-xs font-medium text-blue-400 underline underline-offset-2 hover:text-blue-300"
-                >
-                  Forgot password?
-                </button>}
-              </div>
-
-              <input
-                id="password"
-                type="password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded border border-white bg-white px-3 py-2 text-black"
-                autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full rounded bg-white px-4 py-2 text-black disabled:opacity-50"
-            >
-              {loading ? 'Please wait...' : mode === 'register' ? 'Create Account' : 'Log In'}
-            </button>
-            <button type="button" onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setMessage('') }}
-              className="w-full text-sm text-blue-400 underline underline-offset-2 hover:text-blue-300">
-              {mode === 'login' ? 'New here? Create an account' : 'Already have an account? Log in'}
-            </button>
-          </form>
-        ) : (
-          <form onSubmit={handlePasswordReset} className="space-y-4">
-            <div className="space-y-2">
-              <label htmlFor="reset-email" className="block text-sm font-medium">
-                Email
-              </label>
-
-              <input
-                id="reset-email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded border border-white bg-white px-3 py-2 text-black"
-                autoComplete="email"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={resetLoading}
-              className="w-full rounded bg-white px-4 py-2 text-black disabled:opacity-50"
-            >
-              {resetLoading ? 'Sending reset link...' : 'Send Reset Link'}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setMode('login')
-                setMessage('')
-              }}
-              className="w-full rounded border border-white/30 px-4 py-2 text-white transition hover:bg-white/10"
-            >
-              Back to Login
-            </button>
-          </form>
-        )}
-
-        <Link
-          href="/"
-          className="block w-full rounded border border-white/30 px-4 py-2 text-center text-sm font-medium text-white transition hover:bg-white/10"
-        >
-          Back to Landing Page
-        </Link>
-
-        <p className="text-center text-xs text-white/60">
-          By logging in, you agree to our{' '}
-
-          <Link
-            href="/terms"
-            style={{ color: '#3B82F6' }}
-            className="underline"
-          >
-            Terms
-          </Link>{' '}
-
-          and{' '}
-
-          <Link
-            href="/privacy"
-            style={{ color: '#3B82F6' }}
-            className="underline"
-          >
-            Privacy Policy
-          </Link>
-
-          .
-        </p>
+          <div className="mt-3 rounded-2xl border border-violet-400/20 bg-violet-500/[0.08] px-4 py-3 text-center">
+            <p className="text-sm font-bold text-white">Hiring for your organization?</p>
+            <p className="mt-1 text-xs text-slate-400">Already have an employer account, or want to create one?</p>
+            <Link href="/login-social/employer-login" className="mt-2 inline-flex items-center gap-1 text-sm font-bold text-violet-300 transition hover:text-white">
+              Employer Sign In &amp; Sign Up <span aria-hidden="true">↗</span>
+            </Link>
+          </div>
+        </div>
       </div>
-    </div>
+      <footer className="relative z-10 px-4 pb-2 text-center text-[10px] tracking-wide text-slate-600">© {new Date().getFullYear()} Aether Systems LLC</footer>
+    </main>
   )
 }

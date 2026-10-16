@@ -5,14 +5,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BookOpen, BriefcaseBusiness, House, UsersRound, UserRound } from "lucide-react";
 
-const plannedSections = [
-  { title: "Jobs", icon: BriefcaseBusiness },
-];
-
 export function SocialSidebar() {
   const pathname = usePathname();
   const homeActive = pathname === "/social";
   const networkActive = pathname === "/social/network" || pathname.startsWith("/social/network/");
+  const jobsActive = pathname === "/social/jobs" || pathname.startsWith("/social/jobs/");
   const profileActive = pathname === "/social/profile" || pathname.startsWith("/social/profile/");
 
   return (
@@ -56,19 +53,14 @@ export function SocialSidebar() {
             <UsersRound className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
             Network
           </Link>
-          {plannedSections.map(({ title, icon: Icon }) => (
-            <div
-              key={title}
-              aria-disabled="true"
-              className="flex cursor-not-allowed items-center justify-between gap-2 rounded-2xl px-4 py-3 text-sm text-slate-500 lg:rounded-xl lg:px-3 lg:py-2.5 lg:text-[11px]"
-            >
-              <span className="flex items-center gap-3 lg:gap-2.5">
-                <Icon className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
-                {title}
-              </span>
-              <span className="text-[9px] uppercase tracking-wide">Soon</span>
-            </div>
-          ))}
+          <Link
+            href="/social/jobs"
+            aria-current={jobsActive ? "page" : undefined}
+            className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-all lg:gap-2.5 lg:rounded-xl lg:px-3 lg:py-2.5 lg:text-[11px] ${jobsActive ? "bg-black/55 text-white" : "text-slate-300 hover:bg-white/10 hover:text-white"}`}
+          >
+            <BriefcaseBusiness className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
+            Jobs
+          </Link>
           <Link
             href="/social/profile"
             aria-current={profileActive ? "page" : undefined}

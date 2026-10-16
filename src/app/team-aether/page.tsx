@@ -17,7 +17,8 @@ import {
 
 type PoliticalMode = "default" | "democrat" | "republican";
 type AetherTier = "t1" | "t2" | "t3";
-type ProductType = "political" | "business";
+type ProductType = "political" | "business" | "social";
+type SocialPlan = "needle" | "haystack";
 type BusinessDeployment = "smb" | "enterprise";
 type BusinessModule = "crm" | "marketing" | "inventory" | "dispatch" | "finance";
 
@@ -44,6 +45,7 @@ export default function TeamAetherPage() {
   const [productType, setProductType] = useState<ProductType>("political");
   const [mode, setMode] = useState<PoliticalMode>("default");
   const [tier, setTier] = useState<AetherTier>("t3");
+  const [socialPlan, setSocialPlan] = useState<SocialPlan>("needle");
   const [businessDeployment, setBusinessDeployment] = useState<BusinessDeployment>("smb");
   const [businessModules, setBusinessModules] = useState<Set<BusinessModule>>(new Set(["crm"]));
 
@@ -86,6 +88,7 @@ export default function TeamAetherPage() {
             aether_tier: tier,
             business_modules:
               productType === "business" ? Array.from(businessModules) : [],
+            ...(productType === "social" ? { social_plan: socialPlan } : {}),
           }),
         }
       );
@@ -106,6 +109,7 @@ export default function TeamAetherPage() {
       setMode("default");
       setTier("t3");
       setBusinessDeployment("smb");
+      setSocialPlan("needle");
       setBusinessModules(new Set(["crm"]));
     } catch (err: any) {
       setError(
@@ -170,8 +174,8 @@ export default function TeamAetherPage() {
               </h1>
 
               <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300 lg:text-sm lg:mt-2 lg:text-[12px]">
-                Create campaign organizations, assign design context,
-                and provision the first org admin from one guarded workspace.
+                Create Political, Business, and Social organizations, configure
+                their provisioning, and assign the first org admin.
               </p>
             </div>
 
@@ -277,7 +281,7 @@ export default function TeamAetherPage() {
             </h2>
 
             <p className="mt-2 text-sm text-slate-500 lg:mt-1.5 lg:text-[12px]">
-              Apply Political context or configure Business module visibility.
+              Configure Political tiers, Business modules, or Social employer plans.
             </p>
           </div>
 
@@ -360,10 +364,11 @@ export default function TeamAetherPage() {
               Product
             </p>
 
-            <div className="mt-3 grid gap-3 md:grid-cols-2 lg:gap-2 lg:mt-2">
+            <div className="mt-3 grid gap-3 md:grid-cols-3 lg:gap-2 lg:mt-2">
               {([
                 ["political", "Political", "Campaign operating system with Political context and tier controls."],
                 ["business", "Business", "SMB or Enterprise operating system with provisioned Business modules."],
+                ["social", "Social Employer", "Employer workspace with Needle or Haystack job-posting plans."],
               ] as const).map(([value, label, description]) => {
                 const active = productType === value;
 
@@ -457,7 +462,7 @@ export default function TeamAetherPage() {
                 </div>
               </div>
             </>
-          ) : (
+          ) : productType === "business" ? (
             <>
               {/* BUSINESS DEPLOYMENT */}
               <div className="mt-8 lg:mt-6">
@@ -541,6 +546,36 @@ export default function TeamAetherPage() {
                 </div>
               </div>
             </>
+          ) : (
+            <div className="mt-8 lg:mt-6">
+              <p className="text-sm font-semibold text-slate-900 lg:text-[12px]">Social Employer Plan</p>
+              <p className="mt-1 text-sm text-slate-500 lg:text-[12px]">
+                Select the intended plan. Activating employer entitlements will be connected in a later backend step.
+              </p>
+              <div className="mt-3 grid gap-3 md:grid-cols-2 lg:gap-2 lg:mt-2">
+                {([
+                  ["needle", "Needle", "$100/month · Unlimited job-board postings."],
+                  ["haystack", "Haystack", "$250/month · Job-board postings plus professional-feed advertising."],
+                ] as const).map(([value, label, description]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setSocialPlan(value)}
+                    className={`rounded-3xl border p-5 text-left transition lg:rounded-xl lg:p-4 ${
+                      socialPlan === value
+                        ? "border-slate-900 bg-slate-900 text-white ring-2 ring-slate-200"
+                        : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold">{label}</span>
+                      {socialPlan === value ? <CheckCircle2 className="h-5 w-5 lg:h-4 lg:w-4" /> : null}
+                    </div>
+                    <p className="mt-3 text-sm opacity-80 lg:mt-2 lg:text-[12px]">{description}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
 
           {/* ADMIN */}
