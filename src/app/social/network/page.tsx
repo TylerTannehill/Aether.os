@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Search, UsersRound, UserRound, Loader2, ArrowRight, RefreshCw, Check, X, LockKeyhole } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { useSocialExperience } from "@/components/layout/social-shell";
 
 type SocialProfile = {
   id: string;
@@ -28,6 +29,9 @@ type IncomingRequest = {
 };
 
 export default function SocialNetworkPage() {
+  const experience = useSocialExperience();
+  const isEmployer = experience === "employer";
+  const isIndividual = experience === "individual";
   const [supabase] = useState(() => createClient());
   const [profiles, setProfiles] = useState<SocialProfile[]>([]);
   const [query, setQuery] = useState("");
@@ -65,7 +69,10 @@ export default function SocialNetworkPage() {
         .maybeSingle();
       if (!alive) return;
       setMyProfileId(myProfile?.id ?? null);
-      if (myProfileError) {
+      if (!isIndividual) {
+        setIncoming([]);
+        setMyPeople([]);
+      } else if (myProfileError) {
         setRequestError("Could not load your Social identity: " + myProfileError.message);
         setIncoming([]);
         setMyPeople([]);
@@ -113,10 +120,10 @@ export default function SocialNetworkPage() {
     }
     void loadProfiles();
     return () => { alive = false; };
-  }, [supabase, refreshCount]);
+  }, [supabase, refreshCount, isIndividual]);
 
   async function handleRequest(connectionId: string, action: "accept" | "decline") {
-    if (busyRequestId) return;
+    if (!isIndividual || busyRequestId) return;
     setBusyRequestId(connectionId);
     setRequestError("");
     setRequestNotice("");
@@ -166,16 +173,16 @@ export default function SocialNetworkPage() {
             <div className="min-w-0">
               <p className="text-xs font-bold uppercase tracking-[0.22em] text-violet-100/80">Aether Social</p>
               <h1 className="mt-2 flex items-center gap-3 text-3xl font-black tracking-tight text-white sm:text-4xl"><UsersRound className="h-9 w-9" /> Your Network</h1>
-              <p className="mt-2 text-sm text-violet-100">Build professional connections. Choose who gets to know you personally.</p>
+              <p className="mt-2 text-sm text-violet-100">{isEmployer ? "Discover professionals and explore their work." : "Build professional connections. Choose who gets to know you personally."}</p>
             </div>
-            <Link href="/social/network/manage" className="inline-flex shrink-0 items-center justify-center gap-2 self-start rounded-xl border border-white/25 bg-white/10 px-4 py-2.5 text-sm font-bold text-white transition hover:border-violet-300/60 hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-300 sm:self-center">
+            {isIndividual && <Link href="/social/network/manage" className="inline-flex shrink-0 items-center justify-center gap-2 self-start rounded-xl border border-white/25 bg-white/10 px-4 py-2.5 text-sm font-bold text-white transition hover:border-violet-300/60 hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-300 sm:self-center">
               Manage My Connections <ArrowRight className="h-4 w-4" />
-            </Link>
+            </Link>}
           </div>
         </div>
       </section>
 
-      <div className="mb-5 grid grid-cols-1 items-stretch gap-5 md:grid-cols-2">
+      {isIndividual && <div className="mb-5 grid grid-cols-1 items-stretch gap-5 md:grid-cols-2">
       <section className="flex h-[320px] min-w-0 flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#101b30] p-5 shadow-xl sm:p-6" aria-labelledby="incoming-requests-heading">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 id="incoming-requests-heading" className="flex items-center gap-2 text-lg font-bold">
@@ -257,7 +264,7 @@ export default function SocialNetworkPage() {
           </div>
         )}
       </section>
-      </div>
+      </div>}
 
       <section className="rounded-2xl border border-white/10 bg-[#101b30] p-5 shadow-xl sm:p-7">
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -325,7 +332,7 @@ export default function SocialNetworkPage() {
         ) : null}
       </section>
       <p className="mt-5 text-xs leading-6 text-slate-500">
-        Only Social profiles appear here, not every Political or Business user. Professional profiles remain discoverable whether or not you are connected.
+        {isEmployer ? "Employer experience shows professional discovery only. Personal profiles and sharing are unavailable to employers." : "Only Social profiles appear here, not every Political or Business user. Professional profiles remain discoverable whether or not you are connected."}
       </p>
     </main>
   );

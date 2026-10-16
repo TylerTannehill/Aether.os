@@ -1,7 +1,8 @@
 "use client";
 
 import { ReactNode, useEffect, useState } from "react";
-import { Check, Menu, Share2, X } from "lucide-react";
+import { BriefcaseBusiness, Check, Menu, Share2, X } from "lucide-react";
+import Link from "next/link";
 
 import { DashboardSidebar } from "@/components/layout/dashboard-sidebar";
 
@@ -116,7 +117,15 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
 
           <div className="hidden w-full grid-cols-[1fr_auto_1fr] items-center lg:grid">
-            <div />
+            <div className="flex justify-start">
+              <Link
+                href="/login-social/employer-login"
+                className="inline-flex h-9 items-center justify-center gap-2 rounded-xl border border-violet-200 bg-violet-50 px-3.5 text-xs font-bold text-violet-700 transition hover:border-violet-300 hover:bg-violet-100"
+              >
+                <BriefcaseBusiness className="h-4 w-4" />
+                <span>Post Jobs on Aether Social</span>
+              </Link>
+            </div>
 
             <p className="select-none text-sm font-black uppercase tracking-[0.45em] text-slate-700">
               <span onClick={() => handleEasterEggClick("clarity")}>CLARITY.</span>{" "}

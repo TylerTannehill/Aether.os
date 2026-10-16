@@ -12,6 +12,7 @@ import {
   Search,
   RefreshCw,
   SlidersHorizontal,
+  GraduationCap,
 } from "lucide-react";
 
 type Employer = { id: string; name: string; location: string | null; description: string | null };
@@ -70,6 +71,12 @@ export default function SocialJobsPage() {
   const [arrangement, setArrangement] = useState("all");
   const [employmentType, setEmploymentType] = useState("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [requestedJobId, setRequestedJobId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const requested = new URLSearchParams(window.location.search).get("job");
+    if (requested && /^[0-9a-f-]{36}$/i.test(requested)) setRequestedJobId(requested);
+  }, []);
 
   const loadJobs = useCallback(async () => {
     setLoading(true);
@@ -114,6 +121,17 @@ export default function SocialJobsPage() {
 
   useEffect(() => { void loadJobs(); }, [loadJobs]);
 
+  useEffect(() => {
+    if (loading || !requestedJobId) return;
+    if (jobs.some((job) => job.id === requestedJobId)) {
+      setQuery("");
+      setArrangement("all");
+      setEmploymentType("all");
+      setSelectedId(requestedJobId);
+    }
+    setRequestedJobId(null);
+  }, [loading, jobs, requestedJobId]);
+
   const filteredJobs = useMemo(() => jobs.filter((job) => {
     const employer = employers[job.employer_id];
     const haystack = [job.title, job.description, job.category, job.location, employer?.name].join(" ").toLowerCase();
@@ -134,6 +152,16 @@ export default function SocialJobsPage() {
             <BriefcaseBusiness className="h-9 w-9" /> Jobs
           </h1>
           <p className="mt-2 text-sm text-violet-100">Explore opportunities across businesses, campaigns, and beyond.</p>
+          </div>
+          <div className="flex flex-col items-start gap-2 sm:items-end">
+            <p className="text-sm font-medium text-violet-100">Expand your knowledge. Build your future.</p>
+            <a
+              href="/aether-academy"
+              className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-[#17132e] transition hover:bg-violet-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              <GraduationCap className="h-4 w-4" /> Explore Aether Academy
+              <ExternalLink className="h-4 w-4" />
+            </a>
           </div>
         </div>
       </section>
@@ -202,7 +230,7 @@ export default function SocialJobsPage() {
             ) : filteredJobs.map((job) => {
               const employer = employers[job.employer_id];
               return (
-                <button type="button" key={job.id} onClick={() => setSelectedId(job.id)}
+                <button type="button" key={job.id} onClick={() => { setSelectedId(job.id); window.history.replaceState(window.history.state, "", `/social/jobs?job=${encodeURIComponent(job.id)}`); }}
                   aria-pressed={selectedJob?.id === job.id}
                   className={`w-full rounded-2xl border bg-white p-5 text-left shadow-sm transition hover:border-violet-300 hover:shadow-md ${selectedJob?.id === job.id ? "border-violet-500 ring-2 ring-violet-100" : "border-slate-200"}`}>
                   <div className="flex items-start gap-3">

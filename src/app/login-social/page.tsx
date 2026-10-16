@@ -229,6 +229,12 @@ export default function LoginPage() {
               Employer Sign In &amp; Sign Up <span aria-hidden="true">↗</span>
             </Link>
           </div>
+          <div className="mt-3 rounded-2xl border border-violet-400/20 bg-violet-500/[0.08] px-4 py-3 text-center">
+            <p className="text-sm font-bold text-white">Want to buy ad space?</p>
+            <Link href="/login-social/ad-purchasing" className="mt-2 inline-flex items-center gap-1 text-sm font-bold text-violet-300 transition hover:text-white">
+              Contact Team Aether about Advertising <span aria-hidden="true">↗</span>
+            </Link>
+          </div>
         </div>
       </div>
       <footer className="relative z-10 px-4 pb-2 text-center text-[10px] tracking-wide text-slate-600">© {new Date().getFullYear()} Aether Systems LLC</footer>

@@ -67,7 +67,7 @@ async function resolveEmployer() {
   if (!employer) return { error: fail("No linked employer record found", 404) };
   if (employer.status !== "active") return { error: fail("Employer is not active", 403) };
 
-  return { admin, employerId: employer.id as string, authUserId: user.id };
+  return { admin, employerId: employer.id as string, authUserId: user.id, plan: entitlement.plan as string };
 }
 
 function parseListing(value: unknown): { data?: JobInput; error?: string } {
@@ -106,7 +106,10 @@ function parseListing(value: unknown): { data?: JobInput; error?: string } {
   return { data };
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  if (new URL(request.url).searchParams.get("promotions") === "1") {
+    return getPromotions();
+  }
   try {
     const access = await resolveEmployer();
     if (access.error) return access.error;
@@ -123,6 +126,7 @@ export async function POST(request: Request) {
     const access = await resolveEmployer();
     if (access.error) return access.error;
     const body = await request.json() as JobInput;
+    if (body.action === "promote_job") return publishPromotion(access, body);
     const parsed = parseListing(body);
     if (!parsed.data) return fail(parsed.error ?? "Invalid listing", 400);
     const status: JobStatus = body.status === "published" ? "published" : "draft";
@@ -178,4 +182,71 @@ export async function PATCH(request: Request) {
     if (error) return fail(`Unable to update listing: ${error.message}`, 500);
     return NextResponse.json({ listing: data }, { headers: { "Cache-Control": "no-store" } });
   } catch { return fail("Unable to update listing", 500); }
+}
+
+
+// Haystack feed promotions are handled by the existing employer-jobs API.
+// GET /api/social/employer-jobs?promotions=1
+// POST /api/social/employer-jobs { action: "promote_job", job_id: "..." }
+async function getPromotions() {
+  try {
+    const access = await resolveEmployer();
+    if (access.error) return access.error;
+    if (access.plan !== "haystack") return fail("Feed promotions require a Haystack plan", 403);
+
+    const { data, error } = await access.admin!.from("social_posts")
+      .select("job_id")
+      .eq("employer_id", access.employerId!)
+      .not("job_id", "is", null);
+    if (error) return fail("Unable to load feed promotion status", 500);
+    return NextResponse.json(
+      { promoted_job_ids: (data ?? []).map((row) => row.job_id) },
+      { headers: { "Cache-Control": "no-store" } }
+    );
+  } catch {
+    return fail("Unable to load feed promotion status", 500);
+  }
+}
+
+async function publishPromotion(
+  access: Awaited<ReturnType<typeof resolveEmployer>>,
+  body: JobInput
+) {
+  if (access.plan !== "haystack") return fail("Feed promotions require a Haystack plan", 403);
+  if (!validId(body.job_id)) return fail("A valid job ID is required", 400);
+
+  const { data: job, error: jobError } = await access.admin!.from("social_job_listings")
+    .select("id,employer_id,title,description,location,status")
+    .eq("id", body.job_id)
+    .eq("employer_id", access.employerId!)
+    .maybeSingle();
+  if (jobError) return fail("Unable to verify job listing", 500);
+  if (!job) return fail("Job listing not found for this employer", 404);
+  if (job.status !== "published") return fail("Only published jobs can be promoted", 400);
+
+  const title = String(job.title ?? "").trim();
+  const description = String(job.description ?? "").replace(/\s+/g, " ").trim();
+  if (!title || !description) return fail("Job listing is missing required content", 400);
+  const summary = description.length > 900 ? `${description.slice(0, 897)}...` : description;
+  const location = job.location ? `Location: ${String(job.location).trim()}\n` : "";
+  const content = `We're hiring: ${title}\n\n${summary}\n\n${location}Find this opportunity on Aether Social Jobs: https://aetheros.pro/social/jobs`;
+
+  const { data: post, error: insertError } = await access.admin!.from("social_posts")
+    .insert({
+      author_id: null,
+      employer_id: access.employerId,
+      job_id: job.id,
+      context: "professional",
+      content,
+    })
+    .select("id,job_id")
+    .single();
+  if (insertError) {
+    if (insertError.code === "23505") return fail("This job has already been promoted to the feed", 409);
+    return fail("Unable to publish job promotion", 500);
+  }
+  return NextResponse.json(
+    { post, promoted_job_id: job.id },
+    { status: 201, headers: { "Cache-Control": "no-store" } }
+  );
 }

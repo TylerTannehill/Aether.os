@@ -95,7 +95,10 @@ export default function SocialEmployersPublicPage() {
           <Link href="/" aria-label="Aether home" className="inline-flex items-center">
             <img src="/aether-logo-full.png" alt="Aether OS" className="h-20 w-auto object-contain drop-shadow-[0_0_25px_rgba(139,92,246,0.3)] lg:h-20" />
           </Link>
-          <Link href="/login-social" className="rounded-2xl border border-violet-400/70 bg-violet-700/20 px-4 py-3 text-xs font-black uppercase tracking-wider transition hover:bg-violet-600/30 sm:px-6 sm:text-sm">Aether Social Sign In</Link>
+          <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
+            <Link href="/login-social/ad-purchasing" className="rounded-2xl border border-white/20 bg-white/[0.06] px-4 py-3 text-xs font-black uppercase tracking-wider transition hover:border-violet-400/70 hover:bg-violet-600/20 sm:px-6 sm:text-sm">Advertise on Aether Social</Link>
+            <Link href="/login-social" className="rounded-2xl border border-violet-400/70 bg-violet-700/20 px-4 py-3 text-xs font-black uppercase tracking-wider transition hover:bg-violet-600/30 sm:px-6 sm:text-sm">Aether Social Sign In</Link>
+          </div>
         </header>
 
         <div className="grid flex-1 items-start gap-4 pb-2 lg:grid-cols-[0.9fr_1.1fr] lg:gap-5">

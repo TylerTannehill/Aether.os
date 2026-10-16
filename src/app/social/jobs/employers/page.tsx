@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, BriefcaseBusiness, Building2, Loader2, Plus, RefreshCw, Save, Send, X } from "lucide-react";
 
 type Employer = { id: string; name: string; employer_type: string; status: string };
+type EmployerPlan = { plan_code?: string; slug?: string; plan?: string; code?: string } | string | null;
 type Listing = {
   id: string; employer_id: string; title: string; description: string;
   category: string | null; location: string | null; work_arrangement: string | null;
@@ -42,6 +43,10 @@ function formFromJob(j: Listing): FormData {
 export default function SocialJobsEmployersPage() {
   const [employers, setEmployers] = useState<Employer[]>([]);
   const [employerId, setEmployerId] = useState("");
+  const [plan, setPlan] = useState<EmployerPlan>(null);
+  const [promotedJobIds, setPromotedJobIds] = useState<string[]>([]);
+  const [promotionStatusReady, setPromotionStatusReady] = useState(false);
+  const [promotingId, setPromotingId] = useState<string | null>(null);
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [working, setWorking] = useState(false);
@@ -49,10 +54,11 @@ export default function SocialJobsEmployersPage() {
   const [notice, setNotice] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
+  const [individualPreview, setIndividualPreview] = useState(false);
   const [form, setForm] = useState<FormData>({ ...blank });
 
   const load = useCallback(async () => {
-    setLoading(true); setError("");
+    setLoading(true); setError(""); setIndividualPreview(false);
     try {
       // Employer identity is resolved by the authenticated server endpoint.
       // Do not rediscover organization membership through browser-side queries.
@@ -61,15 +67,27 @@ export default function SocialJobsEmployersPage() {
         credentials: "same-origin",
         cache: "no-store",
       });
-      const result: { employer?: Employer; error?: string } = await response.json();
+      const result: { employer?: Employer; plan?: EmployerPlan; error?: string } = await response.json();
       if (!response.ok || !result.employer) {
+        // Individual sessions have no selected employer organization.
+        // Preview only the static management layout, never employer data.
+        if (response.status === 403 && result.error === "No active employer organization selected") {
+          setEmployers([]);
+          setEmployerId("");
+          setListings([]);
+          setIndividualPreview(true);
+          return;
+        }
         throw new Error(result.error || "Could not load employer access.");
       }
+      setIndividualPreview(false);
       setEmployers([result.employer]);
       setEmployerId(result.employer.id);
+      setPlan(result.plan ?? null);
     } catch (e) {
       setEmployers([]);
       setEmployerId("");
+      setPlan(null);
       setListings([]);
       setError(e instanceof Error ? e.message : "Could not load employer access.");
     } finally { setLoading(false); }
@@ -78,7 +96,7 @@ export default function SocialJobsEmployersPage() {
   useEffect(() => { void load(); }, [load]);
 
   const loadListings = useCallback(async () => {
-    if (!employerId) { setListings([]); return; }
+    if (!employerId) { setListings([]); setPromotedJobIds([]); setPromotionStatusReady(false); return; }
     try {
       const response = await fetch("/api/social/employer-jobs", {
         method: "GET", credentials: "same-origin", cache: "no-store",
@@ -86,6 +104,16 @@ export default function SocialJobsEmployersPage() {
       const result: { listings?: Listing[]; error?: string } = await response.json();
       if (!response.ok) throw new Error(result.error || "Unable to load job listings.");
       setListings(result.listings ?? []);
+      // The publishing endpoint supplies the authoritative already-promoted IDs.
+      setPromotionStatusReady(false);
+      try {
+        const promoResponse = await fetch("/api/social/employer-jobs?promotions=1", { method: "GET", credentials: "same-origin", cache: "no-store" });
+        if (promoResponse.ok) {
+          const promoResult: { promoted_job_ids?: string[] } = await promoResponse.json();
+          setPromotedJobIds(promoResult.promoted_job_ids ?? []);
+          setPromotionStatusReady(true);
+        }
+      } catch { /* Keep promotions disabled until the endpoint is available. */ }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unable to load job listings.");
     }
@@ -160,6 +188,27 @@ export default function SocialJobsEmployersPage() {
     setWorking(false);
   }
 
+  const currentPlan = typeof plan === "string" ? plan : (plan?.plan_code ?? plan?.slug ?? plan?.plan ?? plan?.code ?? "");
+  const isHaystack = currentPlan.toLowerCase() === "haystack";
+
+  async function promoteJob(job: Listing) {
+    if (!isHaystack || !promotionStatusReady || job.status !== "published" || promotedJobIds.includes(job.id) || working || promotingId) return;
+    setPromotingId(job.id); setError(""); setNotice("");
+    try {
+      const response = await fetch("/api/social/employer-jobs", {
+        method: "POST", credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "promote_job", job_id: job.id }),
+      });
+      const result: { error?: string } = await response.json();
+      if (!response.ok) throw new Error(result.error || "Could not promote this job.");
+      setPromotedJobIds(previous => previous.includes(job.id) ? previous : [...previous, job.id]);
+      setNotice(`“${job.title}” was posted to the Professional feed.`);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not promote this job.");
+    } finally { setPromotingId(null); }
+  }
+
   const currentEmployer = employers.find(e => e.id === employerId);
   return (
     <div className="mx-auto w-full max-w-6xl space-y-6 pb-12 text-slate-900">
@@ -174,7 +223,34 @@ export default function SocialJobsEmployersPage() {
       </section>
 
       {loading ? <div className="flex items-center justify-center rounded-2xl bg-white p-12 text-slate-600"><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Checking employer access…</div>
-      : employers.length === 0 ? <div className="rounded-2xl border border-slate-200 bg-white p-8"><h2 className="text-lg font-bold">No linked employer yet</h2><p className="mt-2 text-sm text-slate-600">Your active employer could not be loaded. See the error below, or sign in through the Social Employer login.</p></div>
+      : individualPreview ? (
+        <div className="space-y-5">
+          <section className="rounded-2xl border border-violet-200 bg-white p-6 shadow-sm sm:p-8">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-violet-700">Employer workspace preview</p>
+            <h2 className="mt-3 text-xl font-black text-slate-950">A look behind the scenes</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+              Employers use this space to create and manage their job postings. You're viewing a read-only preview as an Individual; posting and management actions are unavailable.
+            </p>
+          </section>
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+            <div className="flex items-center gap-3">
+              <Building2 className="h-5 w-5 text-violet-600" />
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Posting as</p>
+                <p className="font-bold text-slate-700">Employer accounts only</p>
+              </div>
+            </div>
+          </section>
+          <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+            <h2 className="text-xl font-black">Job postings</h2>
+            <div className="mt-5 rounded-2xl bg-slate-50 px-6 py-12 text-center">
+              <BriefcaseBusiness className="mx-auto h-9 w-9 text-violet-500" />
+              <h3 className="mt-3 font-bold">Employer management view</h3>
+              <p className="mt-2 text-sm text-slate-500">Private employer listings and drafts aren't available in this preview.</p>
+            </div>
+          </section>
+        </div>
+      ) : employers.length === 0 ? <div className="rounded-2xl border border-slate-200 bg-white p-8"><h2 className="text-lg font-bold">No linked employer yet</h2><p className="mt-2 text-sm text-slate-600">Your active employer could not be loaded. See the error below, or sign in through the Social Employer login.</p></div>
       : <>
         <section className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex items-center gap-3"><Building2 className="h-5 w-5 text-violet-600" /><div><p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Posting as</p>
@@ -213,6 +289,9 @@ export default function SocialJobsEmployersPage() {
               <div className="mt-4 flex flex-wrap gap-2">
                 <button onClick={() => startEdit(job)} className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold hover:bg-slate-50">Edit</button>
                 {["draft", "paused"].includes(job.status) && <button disabled={working} onClick={() => void changeStatus(job, "published")} className="rounded-lg bg-violet-700 px-3 py-2 text-xs font-bold text-white disabled:opacity-50">Publish</button>}
+                {isHaystack && job.status === "published" && (promotedJobIds.includes(job.id)
+                  ? <span className="inline-flex items-center rounded-lg border border-violet-200 bg-violet-50 px-3 py-2 text-xs font-bold text-violet-700">Posted in Feed</span>
+                  : <button disabled={working || !!promotingId || !promotionStatusReady} onClick={() => void promoteJob(job)} title={!promotionStatusReady ? "Feed promotion service is not available yet" : undefined} className="inline-flex items-center gap-1.5 rounded-lg bg-violet-700 px-3 py-2 text-xs font-bold text-white hover:bg-violet-800 disabled:cursor-not-allowed disabled:opacity-50">{promotingId === job.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />} Post in Feed</button>)}
                 {job.status === "published" && <button disabled={working} onClick={() => void changeStatus(job, "paused")} className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold disabled:opacity-50">Pause</button>}
                 {["published", "paused"].includes(job.status) && <button disabled={working} onClick={() => void changeStatus(job, "closed")} className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold disabled:opacity-50">Close</button>}
               </div>

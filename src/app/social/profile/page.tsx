@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { ArrowRight, AtSign, BriefcaseBusiness, Download, Heart, LockKeyhole, Loader2, Music2, Pause, Pencil, Play, ShieldCheck, UserRound } from 'lucide-react'
+import { ArrowRight, AtSign, BriefcaseBusiness, Download, Heart, LockKeyhole, Loader2, MessageCircle, Music2, Pause, Pencil, Play, Send, ShieldCheck, UserRound } from 'lucide-react'
 
 type ExperiencePreview = {
   id: string
@@ -54,6 +54,10 @@ type SocialPost = {
   created_at: string
 }
 
+type PostLike = { id: string; post_id: string; profile_id: string }
+type PostComment = { id: string; post_id: string; profile_id: string; content: string; created_at: string }
+type CommentAuthor = { id: string; display_name: string | null; username: string | null }
+
 function postParts(content: string) {
   return content.split(/(https?:\/\/[^\s<>]+)/g).map((part, index) => {
     if (!/^https?:\/\//i.test(part)) return <span key={index}>{part}</span>
@@ -93,6 +97,13 @@ export default function SocialProfilePage() {
   const [posts, setPosts] = useState<SocialPost[]>([])
   const [postsLoading, setPostsLoading] = useState(false)
   const [postsError, setPostsError] = useState('')
+  const [likes, setLikes] = useState<PostLike[]>([])
+  const [comments, setComments] = useState<PostComment[]>([])
+  const [commentAuthors, setCommentAuthors] = useState<Record<string, CommentAuthor>>({})
+  const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>({})
+  const [expandedComments, setExpandedComments] = useState<Record<string, boolean>>({})
+  const [engagementBusy, setEngagementBusy] = useState<string | null>(null)
+  const [engagementError, setEngagementError] = useState<Record<string, string>>({})
   const [experience, setExperience] = useState<ExperiencePreview[]>([])
   const [experienceError, setExperienceError] = useState('')
   const [education, setEducation] = useState<EducationPreview[]>([])
@@ -191,20 +202,94 @@ export default function SocialProfilePage() {
     async function loadPosts() {
       setPostsLoading(true)
       setPostsError('')
+      setPosts([])
+      setLikes([])
+      setComments([])
+      setCommentAuthors({})
       const { data, error: fetchError } = await supabase
         .from('social_posts')
         .select('id, author_id, context, content, created_at')
         .eq('author_id', profile!.id)
         .eq('context', context)
         .order('created_at', { ascending: false })
+        .limit(100)
       if (!active) return
-      setPosts(fetchError ? [] : (data ?? []) as SocialPost[])
-      if (fetchError) setPostsError('Unable to load your posts right now.')
-      setPostsLoading(false)
+      if (fetchError) {
+        setPostsError('Unable to load your posts right now.')
+        setPostsLoading(false)
+        return
+      }
+      const fetchedPosts = (data ?? []) as SocialPost[]
+      setPosts(fetchedPosts)
+      if (fetchedPosts.length) {
+        const ids = fetchedPosts.map(post => post.id)
+        const [likesResult, commentsResult] = await Promise.all([
+          supabase.from('social_post_likes').select('id, post_id, profile_id').in('post_id', ids).limit(10000),
+          supabase.from('social_post_comments').select('id, post_id, profile_id, content, created_at').in('post_id', ids).order('created_at', { ascending: true }).limit(10000),
+        ])
+        if (!active) return
+        if (likesResult.error || commentsResult.error) {
+          setPostsError('Posts loaded, but engagement is temporarily unavailable.')
+        } else {
+          setLikes((likesResult.data ?? []) as PostLike[])
+          const loadedComments = (commentsResult.data ?? []) as PostComment[]
+          setComments(loadedComments)
+          const authorIds = [...new Set(loadedComments.map(comment => comment.profile_id))]
+          if (authorIds.length) {
+            const authorsResult = await supabase.from('social_profiles').select('id, display_name, username').in('id', authorIds)
+            if (!active) return
+            if (!authorsResult.error) {
+              setCommentAuthors(Object.fromEntries(((authorsResult.data ?? []) as CommentAuthor[]).map(author => [author.id, author])))
+            }
+          }
+        }
+      }
+      if (active) setPostsLoading(false)
     }
     void loadPosts()
     return () => { active = false }
   }, [supabase, profile?.id, context])
+
+  async function toggleLike(postId: string) {
+    if (!profile || engagementBusy) return
+    setEngagementBusy(postId)
+    setEngagementError(previous => ({ ...previous, [postId]: '' }))
+    try {
+      const existing = likes.find(like => like.post_id === postId && like.profile_id === profile.id)
+      if (existing) {
+        const { error } = await supabase.from('social_post_likes').delete().eq('id', existing.id)
+        if (error) throw error
+        setLikes(previous => previous.filter(like => like.id !== existing.id))
+      } else {
+        const { data, error } = await supabase.from('social_post_likes')
+          .insert({ post_id: postId, profile_id: profile.id }).select('id, post_id, profile_id').single()
+        if (error) throw error
+        setLikes(previous => [...previous, data as PostLike])
+      }
+    } catch (error) {
+      setEngagementError(previous => ({ ...previous, [postId]: error instanceof Error ? error.message : 'Unable to update like.' }))
+    } finally { setEngagementBusy(null) }
+  }
+
+  async function submitComment(postId: string, event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const content = (commentDrafts[postId] || '').trim()
+    if (!profile || !content || content.length > 2000 || engagementBusy) return
+    setEngagementBusy(postId)
+    setEngagementError(previous => ({ ...previous, [postId]: '' }))
+    try {
+      const { data, error } = await supabase.from('social_post_comments')
+        .insert({ post_id: postId, profile_id: profile.id, content })
+        .select('id, post_id, profile_id, content, created_at').single()
+      if (error) throw error
+      setComments(previous => [...previous, data as PostComment])
+      setCommentAuthors(previous => ({ ...previous, [profile.id]: { id: profile.id, display_name: profile.display_name, username: profile.username } }))
+      setCommentDrafts(previous => ({ ...previous, [postId]: '' }))
+      setExpandedComments(previous => ({ ...previous, [postId]: true }))
+    } catch (error) {
+      setEngagementError(previous => ({ ...previous, [postId]: error instanceof Error ? error.message : 'Unable to post comment.' }))
+    } finally { setEngagementBusy(null) }
+  }
 
   useEffect(() => {
     const url = personalProfile?.jam_url?.trim()
@@ -362,6 +447,46 @@ export default function SocialProfilePage() {
                 </div>
               </div>
               <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-7 text-slate-200">{postParts(post.content)}</p>
+               <div className="mt-4 border-t border-white/10 pt-3">
+                 <div className="flex flex-wrap items-center gap-4">
+                   <button type="button" disabled={!profile || engagementBusy === post.id} onClick={() => void toggleLike(post.id)}
+                     aria-pressed={likes.some(like => like.post_id === post.id && like.profile_id === profile?.id)}
+                     className={`inline-flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-semibold transition disabled:opacity-50 ${likes.some(like => like.post_id === post.id && like.profile_id === profile?.id) ? 'text-violet-300' : 'text-slate-300 hover:text-violet-300'}`}>
+                     <Heart className={`h-4 w-4 ${likes.some(like => like.post_id === post.id && like.profile_id === profile?.id) ? 'fill-current' : ''}`} />
+                     {likes.filter(like => like.post_id === post.id).length} {likes.filter(like => like.post_id === post.id).length === 1 ? 'Like' : 'Likes'}
+                   </button>
+                   <button type="button" onClick={() => setExpandedComments(previous => ({ ...previous, [post.id]: !previous[post.id] }))}
+                     aria-expanded={Boolean(expandedComments[post.id])}
+                     className="inline-flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-semibold text-slate-300 hover:text-violet-300">
+                     <MessageCircle className="h-4 w-4" /> {comments.filter(comment => comment.post_id === post.id).length} Comments
+                   </button>
+                 </div>
+                 {engagementError[post.id] && <p role="alert" className="mt-2 text-xs text-rose-300">{engagementError[post.id]}</p>}
+                 {expandedComments[post.id] && <div className="mt-3 space-y-3 border-t border-white/10 pt-4">
+                   {comments.filter(comment => comment.post_id === post.id).map(comment => {
+                     const commenter = commentAuthors[comment.profile_id]
+                     return <div key={comment.id} className="rounded-xl bg-white/5 px-4 py-3">
+                       <div className="flex flex-wrap items-center justify-between gap-2">
+                         <Link href={`/social/profile/${comment.profile_id}${post.context === 'personal' ? '?view=personal' : ''}`} className="text-sm font-bold text-violet-300 hover:underline">
+                           {commenter?.display_name || commenter?.username || 'Aether member'}
+                         </Link>
+                         <span className="text-xs text-slate-400">{new Date(comment.created_at).toLocaleString()}</span>
+                       </div>
+                       <p className="mt-1 whitespace-pre-wrap break-words text-sm text-slate-200">{comment.content}</p>
+                     </div>
+                   })}
+                   <form onSubmit={event => void submitComment(post.id, event)} className="flex flex-col gap-2 sm:flex-row sm:items-end">
+                     <textarea rows={2} maxLength={2000} value={commentDrafts[post.id] || ''}
+                       onChange={event => setCommentDrafts(previous => ({ ...previous, [post.id]: event.target.value }))}
+                       placeholder="Write a comment..." aria-label="Write a comment"
+                       className="min-h-12 flex-1 resize-y rounded-xl border border-white/20 bg-[#16233a] px-3 py-2 text-sm text-white outline-none placeholder:text-slate-400 focus:border-violet-400" />
+                     <button type="submit" disabled={!profile || !commentDrafts[post.id]?.trim() || engagementBusy === post.id}
+                       className="inline-flex items-center justify-center gap-2 rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-violet-500 disabled:opacity-40">
+                       {engagementBusy === post.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />} Comment
+                     </button>
+                   </form>
+                 </div>}
+               </div>
             </article>
           ))}
         </div>

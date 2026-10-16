@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
+import { useParams, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { ArrowLeft, ArrowRight, AtSign, BriefcaseBusiness, Check, Heart, LockKeyhole, Loader2, Music2, Pause, Play, ShieldCheck, UserRound, UserRoundPlus, X } from 'lucide-react'
+import { useSocialExperience } from '@/components/layout/social-shell'
+import { ArrowLeft, ArrowRight, AtSign, BriefcaseBusiness, Check, Heart, LockKeyhole, Loader2, MessageCircle, Music2, Pause, Play, Send, ShieldCheck, UserRound, UserRoundPlus, X } from 'lucide-react'
 
 type PublicProfile = {
   id: string
@@ -56,6 +57,9 @@ type Connection = {
 
 type SocialContext = 'professional' | 'personal'
 type SocialPost = { id: string; author_id: string; context: SocialContext; content: string; created_at: string }
+type PostLike = { id: string; post_id: string; profile_id: string }
+type PostComment = { id: string; post_id: string; profile_id: string; content: string; created_at: string }
+type CommentAuthor = { id: string; display_name: string | null; username: string | null }
 type PersonalDetails = { profile_id: string; bio: string | null; avatar_path: string | null; jam_url: string | null }
 type JamTrack = { title: string; artist: string; artwork: string | null; preview: string | null }
 
@@ -80,6 +84,11 @@ function postBody(content: string) {
 export default function SocialPublicProfilePage() {
   const params = useParams<{ id: string }>()
   const id = params.id
+  const searchParams = useSearchParams()
+  const requestedPersonal = searchParams.get('view') === 'personal'
+  const experienceMode = useSocialExperience()
+  const isEmployer = experienceMode === 'employer'
+  const isIndividual = experienceMode === 'individual'
   const [supabase] = useState(() => createClient())
   const [profile, setProfile] = useState<PublicProfile | null>(null)
   const [experience, setExperience] = useState<ExperiencePreview[]>([])
@@ -100,6 +109,13 @@ export default function SocialPublicProfilePage() {
   const [posts, setPosts] = useState<SocialPost[]>([])
   const [postsLoading, setPostsLoading] = useState(false)
   const [postsError, setPostsError] = useState('')
+  const [likes, setLikes] = useState<PostLike[]>([])
+  const [comments, setComments] = useState<PostComment[]>([])
+  const [commentAuthors, setCommentAuthors] = useState<Record<string, CommentAuthor>>({})
+  const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>({})
+  const [expandedComments, setExpandedComments] = useState<Record<string, boolean>>({})
+  const [engagementBusy, setEngagementBusy] = useState<string | null>(null)
+  const [engagementError, setEngagementError] = useState<Record<string, string>>({})
   const [personalDetails, setPersonalDetails] = useState<PersonalDetails | null>(null)
   const [personalError, setPersonalError] = useState('')
   const [jamTrack, setJamTrack] = useState<JamTrack | null>(null)
@@ -192,7 +208,7 @@ export default function SocialPublicProfilePage() {
           setHasMyProfile(Boolean(mine))
           setOwnProfile(mine?.id === data.id)
           setMyProfileId(mine?.id ?? null)
-          if (mine?.id && mine.id !== data.id) {
+          if (isIndividual && mine?.id && mine.id !== data.id) {
             setConnectionLoading(true)
             const { data: relationships, error: connectionFetchError } = await supabase
               .from('social_connections')
@@ -214,18 +230,22 @@ export default function SocialPublicProfilePage() {
 
     void loadProfile()
     return () => { active = false }
-  }, [id, supabase])
+  }, [id, supabase, isIndividual])
 
-  const canViewPersonal = ownProfile || Boolean(
+  const canViewPersonal = isIndividual && (ownProfile || Boolean(
     connection?.status === 'accepted' && myProfileId && (
       (connection.requester_id === profile?.id && connection.recipient_id === myProfileId && connection.requester_grants_personal) ||
       (connection.recipient_id === profile?.id && connection.requester_id === myProfileId && connection.recipient_grants_personal)
     )
-  )
+  ))
+
+  useEffect(() => {
+    if (requestedPersonal && isIndividual && !loading && profile && canViewPersonal) setContext('personal')
+  }, [requestedPersonal, isIndividual, loading, profile, canViewPersonal])
 
   useEffect(() => {
     let active = true
-    if (!profile || loading) return
+    if (!profile || loading || !isIndividual && !isEmployer) return
     if (context === 'personal' && !canViewPersonal) {
       setPosts([])
       setPersonalDetails(null)
@@ -236,6 +256,9 @@ export default function SocialPublicProfilePage() {
     setPostsLoading(true)
     setPostsError('')
     setPosts([])
+    setLikes([])
+    setComments([])
+    setCommentAuthors({})
     async function loadPosts() {
       const result = await supabase.from('social_posts')
         .select('id, author_id, context, content, created_at')
@@ -250,11 +273,11 @@ export default function SocialPublicProfilePage() {
     }
     void loadPosts()
     return () => { active = false }
-  }, [supabase, profile, loading, context, canViewPersonal])
+  }, [supabase, profile, loading, context, canViewPersonal, isIndividual, isEmployer])
 
   useEffect(() => {
     let active = true
-    if (!profile || loading || context !== 'personal' || !canViewPersonal) {
+    if (!profile || loading || !isIndividual || context !== 'personal' || !canViewPersonal) {
       setPersonalDetails(null)
       setPersonalError('')
       return
@@ -270,7 +293,7 @@ export default function SocialPublicProfilePage() {
     }
     void loadPersonal()
     return () => { active = false }
-  }, [supabase, profile, loading, context, canViewPersonal])
+  }, [supabase, profile, loading, context, canViewPersonal, isIndividual, isEmployer])
 
   useEffect(() => {
     const url = context === 'personal' && canViewPersonal ? personalDetails?.jam_url?.trim() : null
@@ -337,7 +360,7 @@ export default function SocialPublicProfilePage() {
   }
 
   async function performConnectionAction(action: 'connect' | 'accept' | 'remove' | 'grant' | 'revoke') {
-    if (!myProfileId || !profile || connectionBusy) return
+    if (!isIndividual || !myProfileId || !profile || connectionBusy) return
     setConnectionBusy(true)
     setConnectionError('')
     setConnectionNotice('')
@@ -381,6 +404,41 @@ export default function SocialPublicProfilePage() {
     }
   }
 
+  async function toggleLike(postId: string) {
+    if (!isIndividual || !myProfileId || engagementBusy || (context === 'personal' && !canViewPersonal)) return
+    setEngagementBusy(postId)
+    setEngagementError(previous => ({ ...previous, [postId]: '' }))
+    const existing = likes.find(like => like.post_id === postId && like.profile_id === myProfileId)
+    const result = existing
+      ? await supabase.from('social_post_likes').delete().eq('id', existing.id)
+      : await supabase.from('social_post_likes').insert({ post_id: postId, profile_id: myProfileId }).select('id, post_id, profile_id').single()
+    if (result.error) setEngagementError(previous => ({ ...previous, [postId]: result.error!.message }))
+    else if (existing) setLikes(previous => previous.filter(like => like.id !== existing.id))
+    else if (result.data) setLikes(previous => [...previous, result.data as PostLike])
+    setEngagementBusy(null)
+  }
+
+  async function submitComment(postId: string, event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const content = (commentDrafts[postId] || '').trim()
+    if (!isIndividual || !myProfileId || !content || content.length > 2000 || engagementBusy || (context === 'personal' && !canViewPersonal)) return
+    setEngagementBusy(postId)
+    setEngagementError(previous => ({ ...previous, [postId]: '' }))
+    const { data, error: commentError } = await supabase.from('social_post_comments')
+      .insert({ post_id: postId, profile_id: myProfileId, content })
+      .select('id, post_id, profile_id, content, created_at').single()
+    if (commentError) setEngagementError(previous => ({ ...previous, [postId]: commentError.message }))
+    else if (data) {
+      setComments(previous => [...previous, data as PostComment])
+      // Use the signed-in individual's identity, not the viewed profile's identity.
+      const { data: mine } = await supabase.from('social_profiles').select('id, display_name, username').eq('id', myProfileId).maybeSingle()
+      if (mine) setCommentAuthors(previous => ({ ...previous, [myProfileId]: mine as CommentAuthor }))
+      setCommentDrafts(previous => ({ ...previous, [postId]: '' }))
+      setExpandedComments(previous => ({ ...previous, [postId]: true }))
+    }
+    setEngagementBusy(null)
+  }
+
   const currentPosition = experience.find(item => item.is_current && item.job_title && item.company_name)
 
   const avatarUrl = profile?.avatar_path
@@ -409,7 +467,7 @@ export default function SocialPublicProfilePage() {
             <div className={`flex h-16 items-center justify-end px-3 sm:h-20 sm:px-5 ${context === 'personal' ? 'bg-gradient-to-r from-fuchsia-800 via-violet-800 to-indigo-800' : 'bg-gradient-to-r from-violet-700 via-indigo-700 to-blue-800'}`}>
               <div className="inline-flex rounded-xl border border-slate-300 bg-white p-1 shadow-sm" role="group" aria-label="Profile context">
                 <button type="button" onClick={() => setContext('professional')} aria-pressed={context === 'professional'} className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold ${context === 'professional' ? 'bg-violet-700 text-white' : 'text-slate-600 hover:bg-slate-100'}`}><BriefcaseBusiness className="h-4 w-4" /> Professional</button>
-                <button type="button" onClick={() => setContext('personal')} aria-pressed={context === 'personal'} className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold ${context === 'personal' ? 'bg-violet-700 text-white' : 'text-slate-600 hover:bg-slate-100'}`}><Heart className="h-4 w-4" /> Personal</button>
+                {isIndividual && <button type="button" onClick={() => setContext('personal')} aria-pressed={context === 'personal'} className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold ${context === 'personal' ? 'bg-violet-700 text-white' : 'text-slate-600 hover:bg-slate-100'}`}><Heart className="h-4 w-4" /> Personal</button>}
               </div>
             </div>
             <div className="flex items-center gap-4 px-5 pb-5 sm:gap-6 sm:px-6">
@@ -455,11 +513,11 @@ export default function SocialPublicProfilePage() {
                 )}
                 {context === 'personal' && canViewPersonal && jamTrack && jamError && <p role="alert" className="mt-1 text-xs text-rose-300">{jamError}</p>}
               </div>
-              {ownProfile && <Link href="/social/profile" className="inline-flex shrink-0 items-center gap-2 self-start rounded-lg border border-white/20 px-3 py-2 text-xs font-semibold transition hover:bg-white/10">My Profile <ArrowRight className="h-3.5 w-3.5" /></Link>}
+              {isIndividual && ownProfile && <Link href="/social/profile" className="inline-flex shrink-0 items-center gap-2 self-start rounded-lg border border-white/20 px-3 py-2 text-xs font-semibold transition hover:bg-white/10">My Profile <ArrowRight className="h-3.5 w-3.5" /></Link>}
             </div>
           </article>
 
-          {context === 'personal' ? (
+          {isIndividual && context === 'personal' ? (
             canViewPersonal ? (
               <section className="rounded-2xl border border-white/10 bg-[#101b30] p-5 shadow-lg sm:p-6">
                 <h2 className="text-base font-bold">Bio</h2>
@@ -534,7 +592,7 @@ export default function SocialPublicProfilePage() {
 
           </>}
 
-          {(context === 'professional' || canViewPersonal) && (
+          {(isEmployer || isIndividual) && (context === 'professional' || canViewPersonal) && (
             <section className="rounded-2xl border border-white/10 bg-[#101b30] p-5 shadow-lg sm:p-6">
               <h2 className="text-base font-bold">{context === 'personal' ? 'Personal posts' : 'Professional posts'}</h2>
               {postsLoading ? <p className="mt-4 flex items-center gap-2 text-sm text-slate-300"><Loader2 className="h-4 w-4 animate-spin" /> Loading posts...</p>
@@ -554,12 +612,52 @@ export default function SocialPublicProfilePage() {
                       </div>
                     </div>
                     <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-slate-200">{postBody(post.content)}</p>
+                     {isIndividual && <div className="mt-4 border-t border-white/10 pt-3">
+                       <div className="flex flex-wrap items-center gap-4">
+                         <button type="button" disabled={!myProfileId || engagementBusy === post.id} onClick={() => void toggleLike(post.id)}
+                           aria-pressed={likes.some(like => like.post_id === post.id && like.profile_id === myProfileId)}
+                           className={`inline-flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-semibold transition disabled:opacity-50 ${likes.some(like => like.post_id === post.id && like.profile_id === myProfileId) ? 'text-violet-300' : 'text-slate-300 hover:text-violet-300'}`}>
+                           <Heart className={`h-4 w-4 ${likes.some(like => like.post_id === post.id && like.profile_id === myProfileId) ? 'fill-current' : ''}`} />
+                           {likes.filter(like => like.post_id === post.id).length} {likes.filter(like => like.post_id === post.id).length === 1 ? 'Like' : 'Likes'}
+                         </button>
+                         <button type="button" onClick={() => setExpandedComments(previous => ({ ...previous, [post.id]: !previous[post.id] }))}
+                           aria-expanded={Boolean(expandedComments[post.id])}
+                           className="inline-flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-semibold text-slate-300 hover:text-violet-300">
+                           <MessageCircle className="h-4 w-4" /> {comments.filter(comment => comment.post_id === post.id).length} Comments
+                         </button>
+                       </div>
+                       {engagementError[post.id] && <p role="alert" className="mt-2 text-xs text-rose-300">{engagementError[post.id]}</p>}
+                       {expandedComments[post.id] && <div className="mt-3 space-y-3 border-t border-white/10 pt-4">
+                         {comments.filter(comment => comment.post_id === post.id).map(comment => {
+                           const commenter = commentAuthors[comment.profile_id]
+                           return <div key={comment.id} className="rounded-xl bg-white/5 px-4 py-3">
+                             <div className="flex flex-wrap items-center justify-between gap-2">
+                               <Link href={`/social/profile/${comment.profile_id}${post.context === 'personal' ? '?view=personal' : ''}`} className="text-sm font-bold text-violet-300 hover:underline">
+                                 {commenter?.display_name || commenter?.username || 'Aether member'}
+                               </Link>
+                               <span className="text-xs text-slate-400">{new Date(comment.created_at).toLocaleString()}</span>
+                             </div>
+                             <p className="mt-1 whitespace-pre-wrap break-words text-sm text-slate-200">{comment.content}</p>
+                           </div>
+                         })}
+                         <form onSubmit={event => void submitComment(post.id, event)} className="flex flex-col gap-2 sm:flex-row sm:items-end">
+                           <textarea rows={2} maxLength={2000} value={commentDrafts[post.id] || ''}
+                             onChange={event => setCommentDrafts(previous => ({ ...previous, [post.id]: event.target.value }))}
+                             placeholder="Write a comment..." aria-label="Write a comment"
+                             className="min-h-12 flex-1 resize-y rounded-xl border border-white/20 bg-[#16233a] px-3 py-2 text-sm text-white outline-none placeholder:text-slate-400 focus:border-violet-400" />
+                           <button type="submit" disabled={!myProfileId || !commentDrafts[post.id]?.trim() || engagementBusy === post.id}
+                             className="inline-flex items-center justify-center gap-2 rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-violet-500 disabled:opacity-40">
+                             {engagementBusy === post.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />} Comment
+                           </button>
+                         </form>
+                       </div>}
+                     </div>}
                   </article>
                 ))}</div>}
             </section>
           )}
 
-          {!ownProfile && (
+          {isIndividual && !ownProfile && (
             <section className="rounded-2xl border border-white/10 bg-[#101b30] p-5 shadow-xl sm:p-7" aria-labelledby="connection-heading">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>

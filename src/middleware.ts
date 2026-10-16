@@ -14,6 +14,7 @@ export async function middleware(request: NextRequest) {
     '/login',
     '/login-social',
     '/login-social/employer-login',
+    '/login-social/ad-purchasing',
     '/ecosystem',
     '/terms',
     '/privacy',
