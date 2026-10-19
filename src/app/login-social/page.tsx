@@ -155,24 +155,14 @@ export default function LoginPage() {
   return (
     <main className="relative flex min-h-[100svh] flex-col overflow-hidden bg-[#090e20] text-white">
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_18%_15%,rgba(103,47,191,0.32),transparent_43%),radial-gradient(ellipse_at_88%_85%,rgba(45,93,196,0.20),transparent_43%)]" />
-      <header className="absolute inset-x-0 top-0 z-30 flex items-start justify-between px-5 py-2 sm:px-8">
-        <Link href="/" aria-label="Aether home" className="inline-flex items-center"><img src="/aether-logo-full.png" alt="Aether OS" className="h-28 w-auto max-w-[340px] object-contain drop-shadow-[0_0_25px_rgba(139,92,246,0.35)] sm:h-48" /></Link>
-        <Link href="/" className="relative z-40 inline-flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-violet-400/70 bg-violet-700/20 px-5 py-3 text-sm font-black uppercase tracking-[0.08em] text-white shadow-xl shadow-violet-950/30 transition hover:bg-violet-600/30">Back to Aether</Link>
+      <header className="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-start justify-between px-5 py-2 sm:px-8">
+        <Link href="/" aria-label="Aether home" className="pointer-events-auto inline-flex items-center"><img src="/social-branding-transparent.png" alt="Aether Social" className="h-28 w-auto max-w-[340px] object-contain drop-shadow-[0_0_25px_rgba(139,92,246,0.35)] sm:h-48" /></Link>
+        <Link href="/" className="pointer-events-auto relative z-40 inline-flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-violet-400/70 bg-violet-700/20 px-5 py-3 text-sm font-black uppercase tracking-[0.08em] text-white shadow-xl shadow-violet-950/30 transition hover:bg-violet-600/30">Back to Aether</Link>
       </header>
 
-      <div className="relative z-10 flex flex-1 items-start justify-center px-4 pb-4 pt-10 sm:pt-12">
+      <div className="relative z-10 flex flex-1 items-start justify-center px-4 pb-1 pt-16 sm:pt-20">
         <div className="w-full max-w-[390px]">
-          <div className="mb-4 text-center">
-            <p className="text-[10px] font-bold uppercase tracking-[0.44em] text-violet-300">Aether Social</p>
-            <h1 className="mt-1 text-2xl font-black tracking-tight sm:text-3xl">
-              {mode === 'register' ? 'Find your people.' : mode === 'reset' ? 'Reset your password.' : 'Welcome back.'}
-            </h1>
-            <p className="mt-1 text-sm font-semibold text-slate-200">
-              {mode === 'register' ? 'Your next connection starts here.' : mode === 'reset' ? 'We’ll send you a secure reset link.' : 'Your network. Your opportunities. Your space.'}
-            </p>
-          </div>
-
-          <section className="rounded-[22px] border border-white/10 bg-white/[0.055] p-4 shadow-2xl shadow-black/30 backdrop-blur-xl sm:p-5">
+          <section className="rounded-[22px] border border-white/10 bg-white/[0.055] p-4 shadow-2xl shadow-black/30 backdrop-blur-xl sm:p-4">
             {mode !== 'reset' && (
               <div className="mb-4 grid grid-cols-2 rounded-xl bg-black/25 p-1">
                 <button type="button" onClick={() => { setMode('login'); setMessage('') }}
@@ -184,7 +174,7 @@ export default function LoginPage() {
             {message && <p role="status" className="mb-5 rounded-xl border border-violet-400/25 bg-violet-400/10 px-4 py-3 text-sm text-violet-100">{message}</p>}
 
             {mode === 'reset' ? (
-              <form onSubmit={handlePasswordReset} className="space-y-3">
+              <form onSubmit={handlePasswordReset} className="space-y-2.5">
                 <label className="block text-xs font-semibold text-slate-300" htmlFor="reset-email">Email address</label>
                 <input id="reset-email" type="email" autoComplete="email" required placeholder="you@example.com"
                   value={email} onChange={e => setEmail(e.target.value)}
@@ -193,7 +183,7 @@ export default function LoginPage() {
                 <button type="button" onClick={() => { setMode('login'); setMessage('') }} className="w-full py-2 text-sm text-violet-300 hover:text-white">← Back to sign in</button>
               </form>
             ) : (
-              <form onSubmit={mode === 'register' ? handleRegister : handleLogin} className="space-y-3">
+              <form onSubmit={mode === 'register' ? handleRegister : handleLogin} className="space-y-2.5">
                 {mode === 'register' && <div>
                   <label htmlFor="display-name" className="mb-1 block text-xs font-semibold text-slate-300">Display name</label>
                   <input id="display-name" type="text" autoComplete="name" required value={displayName} onChange={e => setDisplayName(e.target.value)} placeholder="Your name"
@@ -218,18 +208,21 @@ export default function LoginPage() {
               </form>
             )}
             <p className="mt-3 text-center text-[11px] leading-relaxed text-slate-500">
-              By continuing, you agree to our <Link href="/terms" className="text-slate-300 underline underline-offset-2 hover:text-white">Terms</Link> and <Link href="/privacy" className="text-slate-300 underline underline-offset-2 hover:text-white">Privacy Policy</Link>.
+              By continuing, you agree to our{' '}
+              <Link href="/terms" className="cursor-pointer text-[12px] font-extrabold text-white underline decoration-violet-400 decoration-2 underline-offset-[3px] hover:text-violet-200">Terms</Link>
+              {' '}and{' '}
+              <Link href="/privacy" className="cursor-pointer text-[12px] font-extrabold text-white underline decoration-violet-400 decoration-2 underline-offset-[3px] hover:text-violet-200">Privacy Policy</Link>.
             </p>
           </section>
 
-          <div className="mt-3 rounded-2xl border border-violet-400/20 bg-violet-500/[0.08] px-4 py-3 text-center">
+          <div className="mt-2 rounded-2xl border border-violet-400/20 bg-violet-500/[0.08] px-4 py-2.5 text-center">
             <p className="text-sm font-bold text-white">Hiring for your organization?</p>
             <p className="mt-1 text-xs text-slate-400">Already have an employer account, or want to create one?</p>
             <Link href="/login-social/employer-login" className="mt-2 inline-flex items-center gap-1 text-sm font-bold text-violet-300 transition hover:text-white">
               Employer Sign In &amp; Sign Up <span aria-hidden="true">↗</span>
             </Link>
           </div>
-          <div className="mt-3 rounded-2xl border border-violet-400/20 bg-violet-500/[0.08] px-4 py-3 text-center">
+          <div className="mt-2 rounded-2xl border border-violet-400/20 bg-violet-500/[0.08] px-4 py-2.5 text-center">
             <p className="text-sm font-bold text-white">Want to buy ad space?</p>
             <Link href="/login-social/ad-purchasing" className="mt-2 inline-flex items-center gap-1 text-sm font-bold text-violet-300 transition hover:text-white">
               Contact Team Aether about Advertising <span aria-hidden="true">↗</span>

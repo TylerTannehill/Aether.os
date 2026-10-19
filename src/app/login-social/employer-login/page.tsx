@@ -92,9 +92,14 @@ export default function SocialEmployersPublicPage() {
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_12%_16%,rgba(103,47,191,0.34),transparent_42%),radial-gradient(ellipse_at_90%_85%,rgba(45,93,196,0.19),transparent_45%)]" />
       <div className="relative z-10 mx-auto flex min-h-[100svh] max-w-[1550px] flex-col px-5 py-4 sm:px-8 lg:py-2">
         <header className="flex shrink-0 items-center justify-between gap-4">
-          <Link href="/" aria-label="Aether home" className="inline-flex items-center">
-            <img src="/aether-logo-full.png" alt="Aether OS" className="h-20 w-auto object-contain drop-shadow-[0_0_25px_rgba(139,92,246,0.3)] lg:h-20" />
-          </Link>
+          <div className="flex h-14 shrink-0 items-center gap-2 sm:gap-3">
+            <Link href="/" aria-label="Aether home" className="inline-flex items-center">
+              <img src="/aether-logo-full.png" alt="Aether OS" className="block h-14 w-auto object-contain drop-shadow-[0_0_25px_rgba(139,92,246,0.3)]" />
+            </Link>
+            <Link href="/social-public" aria-label="Aether Social home" className="inline-flex items-center">
+              <img src="/social-branding-transparent.png" alt="Aether Social" className="block h-9 w-auto max-w-[95px] object-contain drop-shadow-[0_0_20px_rgba(139,92,246,0.35)] sm:h-10 sm:max-w-[110px]" />
+            </Link>
+          </div>
           <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
             <Link href="/login-social/ad-purchasing" className="rounded-2xl border border-white/20 bg-white/[0.06] px-4 py-3 text-xs font-black uppercase tracking-wider transition hover:border-violet-400/70 hover:bg-violet-600/20 sm:px-6 sm:text-sm">Advertise on Aether Social</Link>
             <Link href="/login-social" className="rounded-2xl border border-violet-400/70 bg-violet-700/20 px-4 py-3 text-xs font-black uppercase tracking-wider transition hover:bg-violet-600/30 sm:px-6 sm:text-sm">Aether Social Sign In</Link>
@@ -123,13 +128,12 @@ export default function SocialEmployersPublicPage() {
             <p className="mt-auto pt-3 text-center text-[11px] text-slate-500">Existing Aether Political and Business customers can continue using their current organization login.</p>
           </section>
 
-          <section className="flex min-h-0 flex-col gap-3">
+          <section className="flex min-h-0 flex-col gap-2">
             <div>
               <p className="text-[11px] font-black uppercase tracking-[0.3em] text-violet-300">Simple hiring. Clear pricing.</p>
               <h2 className="mt-1 text-xl font-black tracking-tight sm:text-2xl">Find talent. Grow your team.</h2>
-              <p className="mt-1 text-xs text-slate-400">Two straightforward ways to reach professionals on Aether Social.</p>
             </div>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-2 sm:grid-cols-2">
               <div className="rounded-2xl border border-white/15 bg-white/[0.045] p-3">
                 <BriefcaseBusiness className="h-6 w-6 text-violet-300" />
                 <h3 className="mt-1 text-lg font-black">Needle</h3>

@@ -23,6 +23,12 @@ const footerGroups = [
     ["Business FAQ", "/business-public/faq"],
     ["Team Aether", "/business-public/team-aether"],
   ] },
+  { title: "Aether Social", links: [
+    ["Social Overview", "/social-public"],
+    ["Individual Sign In & Sign Up", "/login-social"],
+    ["Employer Sign In & Sign Up", "/login-social/employer-login"],
+    ["Advertising", "/login-social/ad-purchasing"],
+  ] },
   { title: "Aether Academy", links: [
     ["Academy Home", "/aether-academy"],
     ["Political Guide", "/aether-academy/comprehensive-guide"],
@@ -53,7 +59,7 @@ export default function HomePage() {
     const nextClicks = infographicClicks + 1;
     if (nextClicks >= 3) {
       setInfographicClicks(0);
-      router.push("/login-social");
+      router.push("/social-public");
       return;
     }
     setInfographicClicks(nextClicks);
@@ -99,9 +105,14 @@ export default function HomePage() {
       <div className="relative z-10 mx-auto flex min-h-screen max-w-[1320px] flex-col px-5 py-5 lg:px-9">
         <header className="relative flex flex-col items-center pb-7 pt-0 lg:pb-9">
           <div className="relative flex w-full min-h-[190px] items-start justify-center sm:min-h-[215px] lg:min-h-[235px]">
-            <Link href="/" aria-label="Aether Systems homepage" className="absolute left-1/2 top-0 w-[310px] -translate-x-1/2 transition hover:opacity-95 sm:w-[390px] lg:w-[460px]">
-              <img src="/aether-logo-full.png" alt="Aether Systems" className="h-auto w-full object-contain drop-shadow-[0_0_35px_rgba(139,92,246,0.4)]" />
-            </Link>
+            <div className="absolute left-1/2 top-0 flex w-[min(62vw,650px)] -translate-x-1/2 items-center justify-center gap-2 sm:gap-5 lg:gap-8">
+              <Link href="/" aria-label="Aether Systems homepage" className="block w-[46%] shrink-0 transition hover:opacity-95">
+                <img src="/aether-logo-full.png" alt="Aether Systems" className="h-auto w-full origin-center scale-[1.30] translate-y-[10px] object-contain drop-shadow-[0_0_35px_rgba(139,92,246,0.4)]" />
+              </Link>
+              <div className="flex w-[46%] shrink-0 items-center justify-center" aria-label="Aether Social branding">
+                <img src="/social-branding-transparent.png" alt="Aether Social" className="h-auto w-full -translate-y-[12px] object-contain drop-shadow-[0_0_25px_rgba(168,85,247,0.25)]" />
+              </div>
+            </div>
             <div className="absolute left-0 top-0 flex flex-col items-start gap-2 sm:flex-row sm:items-center">
               <a href="https://apps.apple.com/us/app/aether-mobile/id6814591434" target="_blank" rel="noopener noreferrer" aria-label="Download Aether Mobile on the App Store" className="transition hover:opacity-85"><img src="/apple-appstore.png" alt="Download on the App Store" className="h-[30px] w-auto object-contain sm:h-[36px]" /></a>
               <a href="https://play.google.com/store/apps/details?id=pro.aetheros.mobile" target="_blank" rel="noopener noreferrer" aria-label="Get Aether Mobile on Google Play" className="transition hover:opacity-85"><img src="/google-play.png" alt="Get it on Google Play" className="h-[30px] w-auto object-contain sm:h-[36px]" /></a>
@@ -120,19 +131,19 @@ export default function HomePage() {
         <section aria-label="Explore Aether products" className="mx-auto w-full max-w-5xl pb-10">
           <div className="grid gap-3 md:grid-cols-2">
             <Link href="/political-public" className={liveButton}>
-              <span className="flex items-center justify-center gap-4"><Landmark className="h-6 w-6 shrink-0 text-violet-200" /><span><span className="block text-base font-black sm:text-lg">Aether Political</span><span className="mt-1 block text-sm text-violet-100">Explore the Political OS</span></span></span>
+              <span className="flex items-center justify-center gap-4"><img src="/aether-logo-full.png" alt="Aether.OS" className="h-[54px] w-[92px] shrink-0 scale-[2.05] translate-y-[6px] object-contain" /><span className="text-left"><span className="block text-base font-black sm:text-lg">Political</span><span className="mt-1 block text-sm text-violet-100">Explore the Political OS</span></span></span>
             </Link>
             <Link href="/business-public" className={liveButton}>
-              <span className="flex items-center justify-center gap-4"><Building2 className="h-6 w-6 shrink-0 text-violet-200" /><span><span className="block text-base font-black sm:text-lg">Aether Business</span><span className="mt-1 block text-sm text-violet-100">Explore the Business OS</span></span></span>
+              <span className="flex items-center justify-center gap-4"><img src="/aether-logo-full.png" alt="Aether.OS" className="h-[54px] w-[92px] shrink-0 scale-[2.05] translate-y-[6px] object-contain" /><span className="text-left"><span className="block text-base font-black sm:text-lg">Business</span><span className="mt-1 block text-sm text-violet-100">Explore the Business OS</span></span></span>
             </Link>
-            <button type="button" onClick={handleSocialClick} aria-label="Aether Social, in development" aria-disabled="true" className={dormantButton}>
-              <span className="flex items-center justify-center gap-4"><Users className="h-6 w-6 shrink-0" /><span><span className="block text-base font-black sm:text-lg">In Development</span><span className="mt-1 block text-sm">Aether Social · Coming Soon</span></span></span>
+            <button type="button" onClick={handleSocialClick} aria-label="Aether Social, coming soon" aria-disabled="true" className={dormantButton}>
+              <img src="/social-branding-transparent.png" alt="Aether Social · Coming Soon" className="h-[58px] w-auto max-w-[75%] scale-[1.45] object-contain opacity-90" />
             </button>
             <button type="button" onClick={() => setComingSoon("Personal")} aria-label="Aether Personal, in development" aria-disabled="true" className={dormantButton}>
               <span className="flex items-center justify-center gap-4"><UserRound className="h-6 w-6 shrink-0" /><span><span className="block text-base font-black sm:text-lg">In Development</span><span className="mt-1 block text-sm">Aether Personal · Coming Soon</span></span></span>
             </button>
             <Link href="/aether-academy" className="group mx-auto flex min-h-[66px] w-full max-w-[560px] items-center justify-center gap-4 rounded-[1.15rem] border border-violet-300/50 bg-gradient-to-r from-violet-600/30 via-violet-500/20 to-blue-600/25 px-6 py-2.5 text-center text-lg font-black transition hover:-translate-y-0.5 hover:border-violet-200 hover:bg-violet-500/25 sm:text-xl md:col-span-2">
-              <GraduationCap className="h-6 w-6" /> Aether Academy
+              <img src="/aether-logo-full.png" alt="Aether.OS" className="h-[54px] w-[92px] shrink-0 scale-[2.05] translate-y-[6px] object-contain" /><span>Academy</span>
             </Link>
           </div>
         </section>
@@ -142,7 +153,7 @@ export default function HomePage() {
           <div className="grid gap-3 md:grid-cols-2">
             <article className={clickableInfoCard}><Link href="/ecosystem#political" aria-label="Learn more about Aether Political" className="absolute inset-0 z-10 rounded-[1.1rem] focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-300" /><div className="flex items-start justify-between gap-3"><Landmark className="h-6 w-6 text-white" /><Link href="/political-public" className="relative z-20 inline-flex items-center gap-2 rounded-lg border border-white/85 bg-white/10 px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:border-white hover:bg-white/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Explore Political <ArrowRight className="h-4 w-4" aria-hidden="true" /></Link></div><h3 className="mt-2 text-base font-bold">Aether Political</h3><p className="mt-1.5 text-sm leading-5 text-slate-300">A connected operating environment for campaigns, bringing fundraising, field, outreach, digital, print, contacts, and execution together. Built to help teams see what matters and act on it.</p></article>
             <article className={clickableInfoCard}><Link href="/ecosystem#business" aria-label="Learn more about Aether Business" className="absolute inset-0 z-10 rounded-[1.1rem] focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-300" /><div className="flex items-start justify-between gap-3"><Building2 className="h-6 w-6 text-white" /><Link href="/business-public" className="relative z-20 inline-flex items-center gap-2 rounded-lg border border-white/85 bg-white/10 px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:border-white hover:bg-white/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Explore Business <ArrowRight className="h-4 w-4" aria-hidden="true" /></Link></div><h3 className="mt-2 text-base font-bold">Aether Business</h3><p className="mt-1.5 text-sm leading-5 text-slate-300">A practical operational home for businesses to connect customer relationships, marketing, finance, inventory, and dispatch. One workspace for clearer priorities and coordinated daily work.</p></article>
-            <article className={infoCard + " opacity-65"}><Users className="h-6 w-6 text-slate-400" /><h3 className="mt-2 text-base font-bold">Aether Social</h3><p className="mt-1.5 text-sm leading-5 text-slate-400">Under Development — Coming Soon.</p></article>
+            <article className={clickableInfoCard}><Link href="/ecosystem#social" aria-label="Learn more about Aether Social" className="absolute inset-0 z-10 rounded-[1.1rem] focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-300" /><div className="flex items-start justify-between gap-3"><Users className="h-6 w-6 text-white" /><Link href="/social-public" className="relative z-20 inline-flex items-center gap-2 rounded-lg border border-white/85 bg-white/10 px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:border-white hover:bg-white/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Explore Social <ArrowRight className="h-4 w-4" aria-hidden="true" /></Link></div><h3 className="mt-2 text-base font-bold">Aether Social</h3><p className="mt-1.5 text-sm leading-5 text-slate-300">Connect, share, and express yourself through two experiences: Professional and Personal. Build your professional presence and stay connected with the people who matter.</p></article>
             <article className={infoCard + " opacity-65"}><UserRound className="h-6 w-6 text-slate-400" /><h3 className="mt-2 text-base font-bold">Aether Personal</h3><p className="mt-1.5 text-sm leading-5 text-slate-400">Under Development — Coming Soon.</p></article>
             <article className={clickableInfoCard + " text-center md:col-span-2"}><Link href="/ecosystem#academy" aria-label="Learn more about Aether Academy" className="absolute inset-0 z-10 rounded-[1.1rem] focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-300" /><GraduationCap className="mx-auto h-7 w-7 text-white" /><h3 className="mt-2 text-base font-bold">Aether Academy</h3><p className="mx-auto mt-2 max-w-3xl text-sm leading-6 text-slate-300">Explore documentation, guides, and walkthroughs designed to help you understand the Aether platform and make confident use of its tools. Learning belongs alongside execution.</p><Link href="/aether-academy" className="relative z-20 mt-3 inline-flex items-center gap-2 rounded-lg border border-white/85 bg-white/10 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:border-white hover:bg-white/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Explore the Academy <ArrowRight className="h-4 w-4" aria-hidden="true" /></Link></article>
           </div>
@@ -170,7 +181,6 @@ export default function HomePage() {
                 </div>
               </div>
             ))}
-            <div className="opacity-55"><h3 className="text-sm font-bold text-white">Aether Social</h3><p className="mt-3 text-[13px] text-slate-400">Coming Soon</p></div>
             <div className="opacity-55"><h3 className="text-sm font-bold text-white">Aether Personal</h3><p className="mt-3 text-[13px] text-slate-400">Coming Soon</p></div>
           </div>
           <div className="mt-8 border-t border-white/10 pt-7">

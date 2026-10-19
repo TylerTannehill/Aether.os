@@ -12,6 +12,7 @@ type SocialProfile = {
   username: string | null
   bio: string | null
   avatar_path: string | null
+  linkedin_url: string | null
 }
 
 type Experience = {
@@ -123,6 +124,7 @@ export default function ProfessionalDetailsPage() {
   const [name, setName] = useState('')
   const [username, setUsername] = useState('')
   const [bio, setBio] = useState('')
+  const [linkedinUrl, setLinkedinUrl] = useState('')
   const avatarInputRef = useRef<HTMLInputElement>(null)
   const [avatarBusy, setAvatarBusy] = useState(false)
   const [avatarError, setAvatarError] = useState('')
@@ -161,7 +163,7 @@ export default function ProfessionalDetailsPage() {
         return
       }
       const { data: profile, error: profileError } = await supabase.from('social_profiles')
-        .select('id, auth_user_id, display_name, username, bio, avatar_path').eq('auth_user_id', auth.user.id).maybeSingle()
+        .select('id, auth_user_id, display_name, username, bio, avatar_path, linkedin_url').eq('auth_user_id', auth.user.id).maybeSingle()
       if (!active) return
       if (profileError) setError(profileError.message)
       else if (!profile) setError('Create your Social profile first.')
@@ -171,6 +173,7 @@ export default function ProfessionalDetailsPage() {
         setName(profile.display_name ?? '')
         setUsername(profile.username ?? '')
         setBio(profile.bio ?? '')
+        setLinkedinUrl(profile.linkedin_url ?? '')
         const { data, error: readError } = await supabase.from('social_professional_experience')
           .select('id, profile_id, company_name, job_title, employment_type, location, location_type, start_date, end_date, is_current, description')
           .eq('profile_id', profile.id).order('is_current', { ascending: false }).order('start_date', { ascending: false })
@@ -222,7 +225,7 @@ export default function ProfessionalDetailsPage() {
       const { data, error: updateError } = await supabase.from('social_profiles')
         .update({ avatar_path: newPath, updated_at: new Date().toISOString() })
         .eq('id', profile.id).eq('auth_user_id', auth.user.id)
-        .select('id, auth_user_id, display_name, username, bio, avatar_path').single()
+        .select('id, auth_user_id, display_name, username, bio, avatar_path, linkedin_url').single()
       if (updateError) {
         await supabase.storage.from('social-avatars').remove([newPath])
         throw new Error(updateError.message)
@@ -250,7 +253,7 @@ export default function ProfessionalDetailsPage() {
       const { data, error: updateError } = await supabase.from('social_profiles')
         .update({ avatar_path: null, updated_at: new Date().toISOString() })
         .eq('id', profile.id).eq('auth_user_id', auth.user.id)
-        .select('id, auth_user_id, display_name, username, bio, avatar_path').single()
+        .select('id, auth_user_id, display_name, username, bio, avatar_path, linkedin_url').single()
       if (updateError) throw new Error(updateError.message)
       setProfile(data as SocialProfile)
       if (oldPath.startsWith(`${profile.auth_user_id}/`)) {
@@ -274,6 +277,18 @@ export default function ProfessionalDetailsPage() {
     const cleanName = name.trim()
     const cleanUsername = username.trim().toLowerCase()
     const cleanBio = bio.trim()
+    const cleanLinkedinUrl = linkedinUrl.trim()
+    if (cleanLinkedinUrl) {
+      try {
+        const parsed = new URL(cleanLinkedinUrl)
+        if (parsed.protocol !== 'https:' || !['linkedin.com', 'www.linkedin.com'].includes(parsed.hostname.toLowerCase()) || !/^\/in\/[^/]+\/?$/.test(parsed.pathname)) {
+          throw new Error('Invalid LinkedIn profile URL')
+        }
+      } catch {
+        setError('Enter a valid LinkedIn profile URL, such as https://www.linkedin.com/in/your-name/')
+        return
+      }
+    }
     if (cleanUsername && !/^[a-z0-9_]{3,30}$/.test(cleanUsername)) {
       setError('Username must be 3–30 lowercase letters, numbers, or underscores.')
       return
@@ -292,15 +307,16 @@ export default function ProfessionalDetailsPage() {
     }
     const { data, error: updateError } = await supabase.from('social_profiles')
       .update({ display_name: cleanName || null, username: cleanUsername || null,
-        bio: cleanBio || null, updated_at: new Date().toISOString() })
+        bio: cleanBio || null, linkedin_url: cleanLinkedinUrl || null, updated_at: new Date().toISOString() })
       .eq('id', profile.id).eq('auth_user_id', auth.user.id)
-      .select('id, auth_user_id, display_name, username, bio, avatar_path').single()
+      .select('id, auth_user_id, display_name, username, bio, avatar_path, linkedin_url').single()
     if (updateError) setError(updateError.code === '23505' ? 'That username is already taken.' : updateError.message)
     else {
       setProfile(data as SocialProfile)
       setName(data.display_name ?? '')
       setUsername(data.username ?? '')
       setBio(data.bio ?? '')
+      setLinkedinUrl(data.linkedin_url ?? '')
       setIdentityEditing(false)
     }
     setProfileSaving(false)
@@ -311,6 +327,7 @@ export default function ProfessionalDetailsPage() {
     setName(profile.display_name ?? '')
     setUsername(profile.username ?? '')
     setBio(profile.bio ?? '')
+    setLinkedinUrl(profile.linkedin_url ?? '')
     setIdentityEditing(false)
     setError('')
   }
@@ -694,6 +711,9 @@ export default function ProfessionalDetailsPage() {
                 <div><label htmlFor="pro-bio" className={label}>Professional bio</label>
                   <textarea id="pro-bio" rows={4} maxLength={500} className={input} value={bio} onChange={e => setBio(e.target.value)} />
                   <p className="mt-1 text-right text-xs text-slate-500">{bio.length}/500</p></div>
+                 <div><label htmlFor="pro-linkedin" className={label}>LinkedIn profile URL (optional)</label>
+                   <input id="pro-linkedin" type="url" inputMode="url" maxLength={2000} autoCapitalize="none" spellCheck={false} className={input} value={linkedinUrl} onChange={e => setLinkedinUrl(e.target.value)} placeholder="https://www.linkedin.com/in/your-name/" />
+                   <p className="mt-1 text-xs text-slate-400">Paste your LinkedIn profile link. Clear the field and save to remove it.</p></div>
                 <div className="flex flex-wrap gap-2">
                   <button type="submit" disabled={profileSaving} className="inline-flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2 text-sm font-semibold hover:bg-violet-500 disabled:opacity-50">
                     {profileSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
@@ -712,6 +732,7 @@ export default function ProfessionalDetailsPage() {
                   <span className="font-semibold text-slate-200">{profile.display_name || 'No display name yet'}</span>
                   <span className="mx-2">·</span>
                   <span>{profile.username ? `@${profile.username}` : 'No username yet'}</span>
+                  {profile.linkedin_url && <p className="mt-2 break-all"><a href={profile.linkedin_url} target="_blank" rel="noopener noreferrer" className="font-semibold text-violet-300 hover:underline">LinkedIn profile ↗</a></p>}
                 </div>
               </div>
             )}

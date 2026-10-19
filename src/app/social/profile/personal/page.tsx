@@ -17,7 +17,23 @@ type PersonalProfile = {
   bio: string | null
   avatar_path: string | null
   jam_url: string | null
+  facebook_url: string | null
+  instagram_url: string | null
+  x_url: string | null
+  tiktok_url: string | null
+  youtube_url: string | null
+  website_url: string | null
 }
+
+type SocialKey = 'facebook' | 'instagram' | 'x' | 'tiktok' | 'youtube' | 'website'
+const socialFields: { key: SocialKey; label: string; placeholder: string; hosts?: string[] }[] = [
+  { key: 'facebook', label: 'Facebook', placeholder: 'https://www.facebook.com/yourname', hosts: ['facebook.com', 'www.facebook.com', 'm.facebook.com'] },
+  { key: 'instagram', label: 'Instagram', placeholder: 'https://www.instagram.com/yourname', hosts: ['instagram.com', 'www.instagram.com'] },
+  { key: 'x', label: 'X / Twitter', placeholder: 'https://x.com/yourname', hosts: ['x.com', 'www.x.com', 'twitter.com', 'www.twitter.com'] },
+  { key: 'tiktok', label: 'TikTok', placeholder: 'https://www.tiktok.com/@yourname', hosts: ['tiktok.com', 'www.tiktok.com'] },
+  { key: 'youtube', label: 'YouTube', placeholder: 'https://www.youtube.com/@yourname', hosts: ['youtube.com', 'www.youtube.com', 'm.youtube.com', 'youtu.be'] },
+  { key: 'website', label: 'Personal website', placeholder: 'https://yourwebsite.com' },
+]
 
 export default function PersonalProfileEditorPage() {
   const [supabase] = useState(() => createClient())
@@ -25,6 +41,9 @@ export default function PersonalProfileEditorPage() {
   const [personal, setPersonal] = useState<PersonalProfile | null>(null)
   const [bio, setBio] = useState('')
   const [jamUrl, setJamUrl] = useState('')
+  const [socialUrls, setSocialUrls] = useState<Record<SocialKey, string>>({ facebook: '', instagram: '', x: '', tiktok: '', youtube: '', website: '' })
+  const [savingSocials, setSavingSocials] = useState(false)
+  const [socialsError, setSocialsError] = useState('')
   const [savingJam, setSavingJam] = useState(false)
   const [jamError, setJamError] = useState('')
   const [loading, setLoading] = useState(true)
@@ -53,15 +72,16 @@ export default function PersonalProfileEditorPage() {
         if (!profile) throw new Error('Create your Social profile first.')
         const { data: details, error: detailsError } = await supabase
           .from('social_personal_profiles')
-          .select('profile_id, bio, avatar_path, jam_url')
+          .select('profile_id, bio, avatar_path, jam_url, facebook_url, instagram_url, x_url, tiktok_url, youtube_url, website_url')
           .eq('profile_id', profile.id)
           .maybeSingle()
         if (detailsError) throw new Error(detailsError.message)
         if (!active) return
         setIdentity(profile as Identity)
-        setPersonal((details as PersonalProfile | null) ?? { profile_id: profile.id, bio: null, avatar_path: null, jam_url: null })
+        setPersonal((details as PersonalProfile | null) ?? { profile_id: profile.id, bio: null, avatar_path: null, jam_url: null, facebook_url: null, instagram_url: null, x_url: null, tiktok_url: null, youtube_url: null, website_url: null })
         setBio(details?.bio ?? '')
         setJamUrl(details?.jam_url ?? '')
+        setSocialUrls({ facebook: details?.facebook_url ?? '', instagram: details?.instagram_url ?? '', x: details?.x_url ?? '', tiktok: details?.tiktok_url ?? '', youtube: details?.youtube_url ?? '', website: details?.website_url ?? '' })
       } catch (err) {
         if (active) setError(err instanceof Error ? err.message : 'Unable to load your personal profile.')
       } finally {
@@ -92,7 +112,7 @@ export default function PersonalProfileEditorPage() {
       const { data, error: saveError } = await supabase
         .from('social_personal_profiles')
         .upsert({ profile_id: owner.id, bio: cleanBio || null }, { onConflict: 'profile_id' })
-        .select('profile_id, bio, avatar_path, jam_url')
+        .select('profile_id, bio, avatar_path, jam_url, facebook_url, instagram_url, x_url, tiktok_url, youtube_url, website_url')
         .single()
       if (saveError) throw new Error(saveError.message)
       setPersonal(data as PersonalProfile)
@@ -126,7 +146,7 @@ export default function PersonalProfileEditorPage() {
       const { data, error: saveError } = await supabase
         .from('social_personal_profiles')
         .upsert({ profile_id: owner.id, jam_url: cleanUrl || null }, { onConflict: 'profile_id' })
-        .select('profile_id, bio, avatar_path, jam_url')
+        .select('profile_id, bio, avatar_path, jam_url, facebook_url, instagram_url, x_url, tiktok_url, youtube_url, website_url')
         .single()
       if (saveError) throw new Error(saveError.message)
       setPersonal(data as PersonalProfile)
@@ -136,6 +156,42 @@ export default function PersonalProfileEditorPage() {
     } finally {
       setSavingJam(false)
     }
+  }
+
+  async function saveSocials(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (!identity || savingSocials) return
+    setSocialsError('')
+    const cleaned = {} as Record<SocialKey, string | null>
+    for (const field of socialFields) {
+      const value = socialUrls[field.key].trim()
+      if (!value) { cleaned[field.key] = null; continue }
+      try {
+        const parsed = new URL(value)
+        if (parsed.protocol !== 'https:' || !parsed.hostname || (field.hosts && !field.hosts.includes(parsed.hostname.toLowerCase()))) {
+          throw new Error('Invalid URL')
+        }
+        cleaned[field.key] = parsed.toString()
+      } catch {
+        setSocialsError(`Enter a valid HTTPS ${field.label} URL, or leave the field blank.`)
+        return
+      }
+    }
+    setSavingSocials(true)
+    try {
+      const owner = await verifyOwner()
+      const { data, error: saveError } = await supabase.from('social_personal_profiles')
+        .upsert({ profile_id: owner.id, facebook_url: cleaned.facebook, instagram_url: cleaned.instagram,
+          x_url: cleaned.x, tiktok_url: cleaned.tiktok, youtube_url: cleaned.youtube, website_url: cleaned.website }, { onConflict: 'profile_id' })
+        .select('profile_id, bio, avatar_path, jam_url, facebook_url, instagram_url, x_url, tiktok_url, youtube_url, website_url')
+        .single()
+      if (saveError) throw new Error(saveError.message)
+      setPersonal(data as PersonalProfile)
+      setSocialUrls({ facebook: data.facebook_url ?? '', instagram: data.instagram_url ?? '',
+        x: data.x_url ?? '', tiktok: data.tiktok_url ?? '', youtube: data.youtube_url ?? '', website: data.website_url ?? '' })
+    } catch (err) {
+      setSocialsError(err instanceof Error ? err.message : 'Unable to save your social links.')
+    } finally { setSavingSocials(false) }
   }
 
   async function uploadPhoto(event: ChangeEvent<HTMLInputElement>) {
@@ -161,7 +217,7 @@ export default function PersonalProfileEditorPage() {
       const { data, error: saveError } = await supabase
         .from('social_personal_profiles')
         .upsert({ profile_id: owner.id, avatar_path: newPath }, { onConflict: 'profile_id' })
-        .select('profile_id, bio, avatar_path, jam_url')
+        .select('profile_id, bio, avatar_path, jam_url, facebook_url, instagram_url, x_url, tiktok_url, youtube_url, website_url')
         .single()
       if (saveError) {
         await supabase.storage.from('social-avatars').remove([newPath])
@@ -191,7 +247,7 @@ export default function PersonalProfileEditorPage() {
       const { data, error: saveError } = await supabase.from('social_personal_profiles')
         .update({ avatar_path: null })
         .eq('profile_id', owner.id)
-        .select('profile_id, bio, avatar_path, jam_url')
+        .select('profile_id, bio, avatar_path, jam_url, facebook_url, instagram_url, x_url, tiktok_url, youtube_url, website_url')
         .single()
       if (saveError) throw new Error(saveError.message)
       setPersonal(data as PersonalProfile)
@@ -272,6 +328,25 @@ export default function PersonalProfileEditorPage() {
               <button type="submit" disabled={savingJam} className="inline-flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2 text-sm font-semibold hover:bg-violet-500 disabled:opacity-50">
                 {savingJam ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
                 {savingJam ? 'Saving...' : 'Save My Jam'}
+              </button>
+            </form>
+          </section>
+          <section className="rounded-xl border border-white/10 bg-[#101b30] p-5">
+            <h2 className="mb-2 font-bold">My Socials</h2>
+            <p className="mb-4 text-xs text-slate-400">Add the places your personal connections can find you elsewhere. All fields are optional. Clear a field and save to remove that link.</p>
+            <form onSubmit={saveSocials} className="space-y-4">
+              {socialFields.map(field => (
+                <div key={field.key} className="space-y-1.5">
+                  <label htmlFor={`personal-social-${field.key}`} className="block text-xs font-semibold text-slate-300">{field.label}</label>
+                  <input id={`personal-social-${field.key}`} type="url" inputMode="url" value={socialUrls[field.key]}
+                    onChange={event => setSocialUrls(previous => ({ ...previous, [field.key]: event.target.value }))}
+                    className={fieldClass} placeholder={field.placeholder} />
+                </div>
+              ))}
+              {socialsError && <p role="alert" className="text-sm text-rose-300">{socialsError}</p>}
+              <button type="submit" disabled={savingSocials} className="inline-flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2 text-sm font-semibold hover:bg-violet-500 disabled:opacity-50">
+                {savingSocials ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                {savingSocials ? 'Saving...' : 'Save My Socials'}
               </button>
             </form>
           </section>

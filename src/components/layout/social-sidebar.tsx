@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, BriefcaseBusiness, Building2, ClipboardList, House, UsersRound, UserRound } from "lucide-react";
+import { BookOpen, BriefcaseBusiness, Building2, ClipboardList, House, MessageCircle, UsersRound, UserRound } from "lucide-react";
 import { useSocialExperience } from "@/components/layout/social-shell";
 
 export function SocialSidebar() {
@@ -12,6 +12,7 @@ export function SocialSidebar() {
   const isEmployer = experience === "employer";
 
   const homeActive = pathname === "/social";
+  const dmsActive = pathname === "/social/dms" || pathname.startsWith("/social/dms/");
   const networkActive = pathname === "/social/network" || pathname.startsWith("/social/network/");
   const manageJobsActive = pathname === "/social/jobs/employers" || pathname.startsWith("/social/jobs/employers/");
   const jobsActive = (pathname === "/social/jobs" || pathname.startsWith("/social/jobs/")) && !manageJobsActive;
@@ -27,8 +28,7 @@ export function SocialSidebar() {
       <div className="border-b border-white/10 bg-gradient-to-br from-slate-900 via-violet-950/70 to-slate-950 px-6 py-8 text-white lg:px-[18px] lg:py-6">
         <Link href="/social" className="block">
           <div className="flex flex-col items-center justify-center">
-            <Image src="/aether-logo-full.png" alt="Aether.os logo" width={180} height={120} className="h-auto w-[175px] object-contain lg:w-[131px]" priority />
-            <p className="mt-2 text-center text-sm font-medium text-slate-100 lg:mt-1.5 lg:text-[11px]">Aether Social</p>
+            <Image src="/social-branding-transparent.png" alt="Aether Social logo" width={320} height={180} className="h-auto w-[220px] object-contain lg:w-[174px]" priority />
           </div>
         </Link>
       </div>
@@ -67,6 +67,9 @@ export function SocialSidebar() {
               </Link>
               <Link href="/social/profile" aria-current={individualProfileActive ? "page" : undefined} className={linkClass(individualProfileActive)}>
                 <UserRound className={iconClass} /> Profile
+              </Link>
+              <Link href="/social/dms" aria-current={dmsActive ? "page" : undefined} className={linkClass(dmsActive)}>
+                <MessageCircle className={iconClass} /> DM&apos;s (Messages)
               </Link>
             </>
           )}

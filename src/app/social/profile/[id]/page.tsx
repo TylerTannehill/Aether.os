@@ -13,6 +13,7 @@ type PublicProfile = {
   username: string | null
   bio: string | null
   avatar_path: string | null
+  linkedin_url: string | null
 }
 
 type ExperiencePreview = {
@@ -60,7 +61,39 @@ type SocialPost = { id: string; author_id: string; context: SocialContext; conte
 type PostLike = { id: string; post_id: string; profile_id: string }
 type PostComment = { id: string; post_id: string; profile_id: string; content: string; created_at: string }
 type CommentAuthor = { id: string; display_name: string | null; username: string | null }
-type PersonalDetails = { profile_id: string; bio: string | null; avatar_path: string | null; jam_url: string | null }
+type PersonalDetails = {
+  profile_id: string
+  bio: string | null
+  avatar_path: string | null
+  jam_url: string | null
+  facebook_url: string | null
+  instagram_url: string | null
+  x_url: string | null
+  tiktok_url: string | null
+  youtube_url: string | null
+  website_url: string | null
+}
+
+type ExternalSocial = { label: string; url: string }
+
+function personalSocialLinks(details: PersonalDetails | null): ExternalSocial[] {
+  if (!details) return []
+  const candidates = [
+    ['Facebook', details.facebook_url],
+    ['Instagram', details.instagram_url],
+    ['X / Twitter', details.x_url],
+    ['TikTok', details.tiktok_url],
+    ['YouTube', details.youtube_url],
+    ['Website', details.website_url],
+  ] as const
+  return candidates.flatMap(([label, raw]) => {
+    if (!raw?.trim()) return []
+    try {
+      const url = new URL(raw.trim())
+      return url.protocol === 'https:' ? [{ label, url: url.toString() }] : []
+    } catch { return [] }
+  })
+}
 type JamTrack = { title: string; artist: string; artwork: string | null; preview: string | null }
 
 function appleTrackId(url: string): string | null {
@@ -118,6 +151,7 @@ export default function SocialPublicProfilePage() {
   const [engagementError, setEngagementError] = useState<Record<string, string>>({})
   const [personalDetails, setPersonalDetails] = useState<PersonalDetails | null>(null)
   const [personalError, setPersonalError] = useState('')
+  const [socialsOpen, setSocialsOpen] = useState(false)
   const [jamTrack, setJamTrack] = useState<JamTrack | null>(null)
   const [jamLoading, setJamLoading] = useState(false)
   const [jamError, setJamError] = useState('')
@@ -145,6 +179,7 @@ export default function SocialPublicProfilePage() {
       setContext('professional')
       setPersonalDetails(null)
       setPersonalError('')
+      setSocialsOpen(false)
       setPosts([])
 
       if (!id || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
@@ -162,7 +197,7 @@ export default function SocialPublicProfilePage() {
 
       const { data, error: profileError } = await supabase
         .from('social_profiles')
-        .select('id, display_name, username, bio, avatar_path')
+        .select('id, display_name, username, bio, avatar_path, linkedin_url')
         .eq('id', id)
         .maybeSingle()
 
@@ -284,7 +319,7 @@ export default function SocialPublicProfilePage() {
     }
     async function loadPersonal() {
       const result = await supabase.from('social_personal_profiles')
-        .select('profile_id, bio, avatar_path, jam_url')
+        .select('profile_id, bio, avatar_path, jam_url, facebook_url, instagram_url, x_url, tiktok_url, youtube_url, website_url')
         .eq('profile_id', profile!.id)
         .maybeSingle()
       if (!active) return
@@ -439,7 +474,18 @@ export default function SocialPublicProfilePage() {
     setEngagementBusy(null)
   }
 
+  const linkedinUrl = (() => {
+    const raw = profile?.linkedin_url?.trim()
+    if (!raw) return null
+    try {
+      const parsed = new URL(raw)
+      if (parsed.protocol !== 'https:' || !['linkedin.com', 'www.linkedin.com'].includes(parsed.hostname.toLowerCase())) return null
+      return parsed.toString()
+    } catch { return null }
+  })()
+
   const currentPosition = experience.find(item => item.is_current && item.job_title && item.company_name)
+  const socials = canViewPersonal && context === 'personal' ? personalSocialLinks(personalDetails) : []
 
   const avatarUrl = profile?.avatar_path
     ? supabase.storage.from('social-avatars').getPublicUrl(profile.avatar_path).data.publicUrl
@@ -483,11 +529,16 @@ export default function SocialPublicProfilePage() {
                   <h1 className="break-words text-xl font-bold sm:text-2xl">{profile.display_name || 'Aether Social Member'}</h1>
                   <span className="rounded-full border border-violet-400/30 bg-violet-500/10 px-2.5 py-1 text-xs font-semibold text-violet-200">{context === 'personal' ? 'Personal' : 'Professional'}</span>
                 </div>
-                {(profile.username || currentPosition) && (
+                {(profile.username || (context === 'professional' && (currentPosition || linkedinUrl))) && (
                   <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-violet-300">
                     {profile.username && <span className="inline-flex items-center gap-1"><AtSign className="h-3.5 w-3.5" /> {profile.username}</span>}
                     {context === 'professional' && profile.username && currentPosition && <span className="text-slate-500">·</span>}
                     {context === 'professional' && currentPosition && <span className="text-slate-300">{currentPosition.job_title} at {currentPosition.company_name}</span>}
+                    {context === 'professional' && linkedinUrl && (
+                      <a href={linkedinUrl} target="_blank" rel="noopener noreferrer" aria-label={`${profile.display_name || 'Member'} on LinkedIn`} title="View LinkedIn profile" className="inline-flex items-center text-violet-300 transition hover:text-white">
+                        <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.35V9h3.414v1.561h.049c.476-.9 1.637-1.85 3.37-1.85 3.602 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 1 1 0-4.124 2.062 2.062 0 0 1 0 4.124zM7.119 20.452H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" /></svg>
+                      </a>
+                    )}
                   </p>
                 )}
                 {context === 'personal' && canViewPersonal && personalDetails?.jam_url && (
@@ -513,7 +564,15 @@ export default function SocialPublicProfilePage() {
                 )}
                 {context === 'personal' && canViewPersonal && jamTrack && jamError && <p role="alert" className="mt-1 text-xs text-rose-300">{jamError}</p>}
               </div>
-              {isIndividual && ownProfile && <Link href="/social/profile" className="inline-flex shrink-0 items-center gap-2 self-start rounded-lg border border-white/20 px-3 py-2 text-xs font-semibold transition hover:bg-white/10">My Profile <ArrowRight className="h-3.5 w-3.5" /></Link>}
+              {isIndividual && context === 'personal' && canViewPersonal && (socials.length > 0 || ownProfile) && (
+                <div className="flex shrink-0 flex-col items-stretch gap-2 self-start pt-3">
+                  <button type="button" onClick={() => setSocialsOpen(true)} className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/20 px-3 py-2 text-xs font-semibold transition hover:bg-white/10">
+                    <AtSign className="h-3.5 w-3.5" /> My Socials
+                  </button>
+                  {ownProfile && <Link href="/social/profile" className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/20 px-3 py-2 text-xs font-semibold transition hover:bg-white/10">My Profile <ArrowRight className="h-3.5 w-3.5" /></Link>}
+                </div>
+              )}
+              {isIndividual && ownProfile && context !== 'personal' && <Link href="/social/profile" className="inline-flex shrink-0 items-center gap-2 self-start rounded-lg border border-white/20 px-3 py-2 text-xs font-semibold transition hover:bg-white/10">My Profile <ArrowRight className="h-3.5 w-3.5" /></Link>}
             </div>
           </article>
 
@@ -741,6 +800,26 @@ export default function SocialPublicProfilePage() {
           )}
         </div>
       ) : null}
+      {socialsOpen && context === 'personal' && canViewPersonal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4" onMouseDown={event => { if (event.target === event.currentTarget) setSocialsOpen(false) }}>
+          <section role="dialog" aria-modal="true" aria-labelledby="find-me-elsewhere-title" className="w-full max-w-md rounded-2xl border border-white/15 bg-[#101b30] p-6 shadow-2xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 id="find-me-elsewhere-title" className="text-xl font-bold text-white">Find Me Elsewhere</h2>
+                <p className="mt-1 text-sm text-slate-400">{profile?.display_name || 'This member'} around the web</p>
+              </div>
+              <button type="button" onClick={() => setSocialsOpen(false)} aria-label="Close social links" className="rounded-lg border border-white/20 p-2 text-slate-200 hover:bg-white/10"><X className="h-4 w-4" /></button>
+            </div>
+            {socials.length ? (
+              <div className="mt-5 grid gap-2">
+                {socials.map(link => <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-violet-200 transition hover:border-violet-400/40 hover:bg-white/10">
+                  {link.label}<ArrowRight className="h-4 w-4" />
+                </a>)}
+              </div>
+            ) : <p className="mt-5 text-sm text-slate-300">No social links have been added yet.</p>}
+          </section>
+        </div>
+      )}
     </main>
   )
 }
