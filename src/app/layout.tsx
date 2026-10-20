@@ -1,15 +1,16 @@
 import "./globals.css";
 import type { Metadata } from "next";
+import ecosystemOpenGraph from "./opengraph-ecosystem.png";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://aetheros.pro"),
 
   applicationName: "Aether",
 
-  title: "Aether | Campaign Operating System",
+  title: "Aether | Political, Business, Social & Academy",
 
   description:
-    "Deliver simplicity where campaigns have grown accustomed to complexity. Built by campaign people. Built for campaign people.",
+    "Explore the Aether ecosystem: campaign operations, business management, professional networking, and training through Aether Political, Business, Social, and Academy.",
 
   keywords: [
     "Aether",
@@ -41,6 +42,34 @@ export const metadata: Metadata = {
     "Political SaaS",
     "Campaign Platform",
     "Political Campaign Management",
+    "Aether Political",
+    "Aether Business",
+    "Aether Social",
+    "Aether Academy",
+    "Business Operating System",
+    "Business Management Software",
+    "Business Operations",
+    "Business CRM",
+    "Customer Relationship Management",
+    "Business Dispatch",
+    "Inventory Management",
+    "Project Management",
+    "Task Management",
+    "Business Marketing",
+    "Small Business Software",
+    "Professional Networking",
+    "Social Networking",
+    "Professional Profiles",
+    "Professional Connections",
+    "Personal Connections",
+    "Job Listings",
+    "Job Opportunities",
+    "Online Learning",
+    "Training Videos",
+    "Business Training",
+    "Campaign Training",
+    "Product Documentation",
+    "Aether Ecosystem",
   ],
 
   authors: [
@@ -67,17 +96,17 @@ export const metadata: Metadata = {
   },
 
   openGraph: {
-    title: "Aether | Campaign Operating System",
+    title: "Aether | Political, Business, Social & Academy",
     description:
-      "Deliver simplicity where campaigns have grown accustomed to complexity. Built by campaign people. Built for campaign people.",
+      "Explore the Aether ecosystem: campaign operations, business management, professional networking, and training through Aether Political, Business, Social, and Academy.",
     url: "https://aetheros.pro",
     siteName: "Aether",
     images: [
       {
-        url: "/opengraph-image.png",
-        width: 1200,
-        height: 630,
-        alt: "Aether Campaign Operating System",
+        url: ecosystemOpenGraph.src,
+        width: ecosystemOpenGraph.width,
+        height: ecosystemOpenGraph.height,
+        alt: "Aether ecosystem",
       },
     ],
     locale: "en_US",
@@ -86,10 +115,10 @@ export const metadata: Metadata = {
 
   twitter: {
     card: "summary_large_image",
-    title: "Aether | Campaign Operating System",
+    title: "Aether | Political, Business, Social & Academy",
     description:
-      "Deliver simplicity where campaigns have grown accustomed to complexity. Built by campaign people. Built for campaign people.",
-    images: ["/opengraph-image.png"],
+      "Explore the Aether ecosystem: campaign operations, business management, professional networking, and training through Aether Political, Business, Social, and Academy.",
+    images: [ecosystemOpenGraph.src],
   },
 
   robots: {
@@ -102,10 +131,6 @@ export const metadata: Metadata = {
       "max-snippet": -1,
       "max-video-preview": -1,
     },
-  },
-
-  alternates: {
-    canonical: "/",
   },
 
   category: "Technology",
@@ -122,27 +147,16 @@ const jsonLd = {
       url: "https://aetheros.pro",
       logo: "https://aetheros.pro/aether-logo-full.png",
       description:
-        "Aether Systems LLC develops Aether, the Campaign Operating System built by campaign people for campaign people.",
+        "Aether Systems LLC develops software and educational resources for political campaigns, businesses, professional networks, and communities.",
     },
     {
-      "@type": "SoftwareApplication",
-      "@id": "https://aetheros.pro/#software",
+      "@type": "WebSite",
+      "@id": "https://aetheros.pro/#website",
       name: "Aether",
-      applicationCategory: "BusinessApplication",
-      operatingSystem: "Web Browser",
       url: "https://aetheros.pro",
-      publisher: {
-        "@id": "https://aetheros.pro/#organization",
-      },
+      publisher: { "@id": "https://aetheros.pro/#organization" },
       description:
-        "Aether is a Campaign Operating System that helps campaign teams manage finance, field, outreach, digital, print, contacts, lists, analytics, and execution from a single platform.",
-      subjectOf: {
-        "@type": "WebPage",
-        name: "Aether Academy",
-        url: "https://aetheros.pro/aether-academy",
-        description:
-          "The official learning center and documentation library for Aether, providing training videos, articles, product updates, and educational resources about the Campaign Operating System.",
-      },
+        "The Aether ecosystem brings together Political, Business, Social, and Academy.",
     },
   ],
 };
