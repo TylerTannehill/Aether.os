@@ -4,9 +4,8 @@ export default function DataDeletionPage() {
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-16 text-white">
       <div className="mx-auto max-w-3xl">
-        <nav aria-label="Return to Aether product" className="mb-10 flex flex-wrap gap-3">
-          <Link href="/" className="rounded-xl border border-white/20 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10">← Return to Political</Link>
-          <Link href="/business-public" className="rounded-xl border border-white/20 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10">← Return to Business</Link>
+        <nav aria-label="Return to Aether Ecosystem" className="mb-10 flex flex-wrap gap-3">
+          <Link href="/" className="rounded-xl border border-white/20 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10">← Back to Aether Ecosystem</Link>
         </nav>
 
         <div className="mb-10">
@@ -106,9 +105,8 @@ export default function DataDeletionPage() {
           </section>
         </div>
 
-        <nav aria-label="Return to Aether product" className="mb-10 flex flex-wrap gap-3">
-          <Link href="/" className="rounded-xl border border-white/20 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10">← Return to Political</Link>
-          <Link href="/business-public" className="rounded-xl border border-white/20 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10">← Return to Business</Link>
+        <nav aria-label="Return to Aether Ecosystem" className="mb-10 flex flex-wrap gap-3">
+          <Link href="/" className="rounded-xl border border-white/20 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10">← Back to Aether Ecosystem</Link>
         </nav>
 
         <footer className="mt-16 border-t border-slate-800 pt-8 text-sm text-slate-500">

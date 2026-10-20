@@ -65,10 +65,9 @@ Please take a deep dive on aetheros.pro/business-public & aetheros.pro/aether-ac
             <img src="/aether-logo-full.png" alt="Aether OS" className="h-auto w-full max-w-[350px] object-contain drop-shadow-[0_0_45px_rgba(139,92,246,0.45)] lg:h-[275px] lg:w-auto lg:max-w-none lg:-my-[27.5px]" />
           </Link>
 
-          <nav aria-label="Aether products" className="inline-flex w-fit max-w-full items-center rounded-2xl border border-violet-400/40 bg-white/[0.04] p-1 text-sm font-black uppercase tracking-[0.08em] shadow-xl shadow-violet-950/20 lg:absolute lg:left-1/2 lg:top-0 lg:-translate-x-1/2">
-            <Link href="/" className="rounded-xl px-5 py-3 text-slate-300 transition hover:bg-violet-600/20 hover:text-white">Political</Link>
-            <span aria-current="page" className="rounded-xl bg-violet-600 px-5 py-3 text-white">Business</span>
-          </nav>
+          <Link href="/" className="inline-flex w-fit max-w-full items-center justify-center rounded-2xl border border-violet-400/40 bg-white/[0.04] px-6 py-4 text-sm font-black uppercase tracking-[0.08em] text-white shadow-xl shadow-violet-950/20 transition hover:border-violet-300/70 hover:bg-violet-600/20 lg:absolute lg:left-1/2 lg:top-0 lg:-translate-x-1/2">
+            Aether Ecosystem
+          </Link>
 
           <div className="flex w-full flex-col items-center gap-3 lg:w-auto lg:items-end">
             <Link href="/login" className="inline-flex items-center justify-center rounded-2xl border border-violet-400/70 bg-violet-700/20 px-7 py-4 text-sm font-black uppercase tracking-[0.08em] text-white shadow-xl shadow-violet-950/30 transition hover:bg-violet-600/30">Enter Aether</Link>
@@ -278,7 +277,6 @@ Please take a deep dive on aetheros.pro/business-public & aetheros.pro/aether-ac
               <h3 className="text-lg font-bold text-white">Explore</h3>
               <div className="mt-5 flex flex-col gap-3 text-sm text-slate-300">
                 <Link href="/business-public">Business Landing</Link>
-                <Link href="/">Aether Political</Link>
                 <Link href="/business-public/explore-abe">Explore Abe</Link>
                 <a href="https://apps.apple.com/us/app/aether-mobile/id6814591434" target="_blank" rel="noopener noreferrer">Apple App Store</a>
                 <a href="https://play.google.com/store/apps/details?id=pro.aetheros.mobile" target="_blank" rel="noopener noreferrer">Google Play Store</a>

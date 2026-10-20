@@ -157,10 +157,9 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
           </Link>
 
           <div className="flex w-full flex-col items-center gap-3 lg:w-auto lg:flex-row lg:flex-wrap lg:items-start lg:justify-end lg:gap-2">
-            <div className="inline-flex items-center rounded-2xl border border-violet-400/40 bg-white/[0.04] p-1 text-sm font-black uppercase tracking-[0.08em] shadow-xl shadow-violet-950/20 xl:absolute xl:left-1/2 xl:top-0 xl:-translate-x-1/2" aria-label="Choose Aether product">
-              <span aria-current="page" className="rounded-xl bg-violet-600 px-5 py-3 text-white">Political</span>
-              <Link href="/business-public" className="rounded-xl px-5 py-3 text-slate-300 transition hover:bg-violet-600/20 hover:text-white">Business</Link>
-            </div>
+            <Link href="/" className="inline-flex items-center justify-center rounded-2xl border border-violet-400/40 bg-white/[0.04] px-6 py-4 text-sm font-black uppercase tracking-[0.08em] text-white shadow-xl shadow-violet-950/20 transition hover:bg-violet-600/20 xl:absolute xl:left-1/2 xl:top-0 xl:-translate-x-1/2" aria-label="Explore Aether Ecosystem">
+              Aether Ecosystem
+            </Link>
             <div className="flex w-full flex-col items-center gap-3 lg:w-auto lg:items-end">
               <div className="flex w-full items-center justify-center gap-2 lg:w-auto">
             <Link
@@ -299,7 +298,7 @@ Please take a deep dive on aetheros.pro/aether-academy/comprehensive-guide & all
                   </Link>
 
                   <Link
-                    href="/aether-academy"
+                    href="/aether-academy/political-academy"
                     className="w-[180px] rounded-2xl border border-violet-200 bg-white px-5 py-3 text-center text-sm font-semibold text-violet-800 transition hover:bg-violet-50 lg:w-[160px] lg:py-2.5 2xl:w-[170px]"
                   >
                     Aether Academy

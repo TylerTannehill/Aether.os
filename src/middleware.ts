@@ -32,6 +32,7 @@ export async function middleware(request: NextRequest) {
 
     // Academy
     '/aether-academy',
+    '/aether-academy/political-academy',
     '/aether-academy/comprehensive-guide',
     '/aether-academy/business-comprehensive-guide',
     '/aether-academy/training-videos',

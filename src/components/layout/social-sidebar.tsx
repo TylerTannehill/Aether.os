@@ -2,12 +2,33 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { BookOpen, BriefcaseBusiness, Building2, ClipboardList, House, MessageCircle, UsersRound, UserRound } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
+import { BookOpen, BriefcaseBusiness, Building2, ClipboardList, House, MessageCircle, UsersRound, UserRound, LogOut } from "lucide-react";
 import { useSocialExperience } from "@/components/layout/social-shell";
+import { createClient } from "@/lib/supabase/client";
 
 export function SocialSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const [signingOut, setSigningOut] = useState(false);
+  const [signOutError, setSignOutError] = useState("");
+
+  const handleSignOut = async () => {
+    if (signingOut) return;
+    setSigningOut(true);
+    setSignOutError("");
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      router.replace("/login-social");
+      router.refresh();
+    } catch (error) {
+      setSignOutError(error instanceof Error ? error.message : "Unable to log out. Please try again.");
+      setSigningOut(false);
+    }
+  };
   const experience = useSocialExperience();
   const isEmployer = experience === "employer";
 
@@ -81,7 +102,15 @@ export function SocialSidebar() {
       </div>
 
       <div className="shrink-0 border-t border-white/10 bg-slate-950 px-4 py-4 lg:px-3">
-        <p className="text-center text-xs text-slate-500 lg:text-[10px]">Social · In development</p>
+        <button
+          type="button"
+          onClick={handleSignOut}
+          disabled={signingOut}
+          className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-slate-300 transition-all hover:bg-white/10 hover:text-white disabled:cursor-wait disabled:opacity-60 lg:gap-2.5 lg:rounded-xl lg:px-3 lg:py-2.5 lg:text-[11px]"
+        >
+          <LogOut className={iconClass} /> {signingOut ? "Logging out…" : "Log Out"}
+        </button>
+        {signOutError && <p role="alert" className="mt-2 px-3 text-xs text-rose-300">{signOutError}</p>}
       </div>
     </aside>
   );

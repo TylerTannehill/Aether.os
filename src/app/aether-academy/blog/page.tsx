@@ -25,13 +25,7 @@ export default function BlogPage() {
             href="/aether-academy"
             className="inline-flex items-center rounded-xl border border-violet-400/40 bg-violet-400/10 px-6 py-3 font-semibold text-violet-300 transition hover:-translate-y-0.5 hover:border-violet-300 lg:px-5 lg:py-2.5 lg:text-sm"
           >
-            ← Back to Political Academy
-          </Link>
-          <Link
-            href="/aether-academy/business-academy"
-            className="inline-flex items-center rounded-xl border border-violet-400/40 bg-violet-400/10 px-6 py-3 font-semibold text-violet-300 transition hover:-translate-y-0.5 hover:border-violet-300 lg:px-5 lg:py-2.5 lg:text-sm"
-          >
-            ← Back to Business Academy
+            ← Back to Aether Academy
           </Link>
         </div>
 

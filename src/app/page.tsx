@@ -31,7 +31,7 @@ const footerGroups = [
   ] },
   { title: "Aether Academy", links: [
     ["Academy Home", "/aether-academy"],
-    ["Political Guide", "/aether-academy/comprehensive-guide"],
+    ["Political Academy", "/aether-academy/political-academy"],
     ["Business Academy", "/aether-academy/business-academy"],
     ["Articles", "/aether-academy/articles"],
     ["Blog", "/aether-academy/blog"],

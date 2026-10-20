@@ -673,53 +673,33 @@ export default function BusinessAcademyPage() {
   const backToTop = () => setClicks((previous) => { const next = previous + 1; if (next >= 33) { setShowPotato(true); return 0; } return next; });
   return (
     <main id="top" className="min-h-screen overflow-x-hidden bg-[#07111f] text-white">
-      {/* Hero — matched to the shared Aether Academy */}
+      {/* Business Academy hero — mirrors Political Academy */}
       <section className="relative isolate overflow-hidden border-b border-white/10">
         <div className="absolute inset-0 -z-20 bg-[radial-gradient(circle_at_top,rgba(139,92,246,0.12),transparent_34%),linear-gradient(180deg,#10233e_0%,#0a1728_52%,#07111f_100%)]" />
         <div className="absolute left-1/2 top-10 -z-10 h-72 w-72 -translate-x-1/2 rounded-full bg-violet-400/10 blur-3xl" />
         <div className="absolute -left-28 top-44 -z-10 h-80 w-80 rounded-full bg-blue-500/10 blur-3xl" />
         <div className="absolute -right-24 top-20 -z-10 h-72 w-72 rounded-full bg-cyan-400/5 blur-3xl" />
-        <div className="mx-auto flex max-w-7xl flex-col items-center px-6 py-24 text-center sm:py-28 lg:px-[18px] lg:py-16">
-          <div className="mb-8 flex items-center justify-center lg:mb-5">
-            <Image src="/aether-logo-full.png" alt="Aether" width={260} height={72} priority className="h-auto w-64 drop-shadow-[0_0_24px_rgba(139,92,246,0.35)] lg:w-52" />
+        <div className="mx-auto flex max-w-7xl flex-col items-center px-6 pt-5 pb-10 text-center sm:pt-6 sm:pb-12 lg:px-[18px] lg:pt-4 lg:pb-8">
+          <div className="-mb-10 flex items-center justify-center sm:-mb-12 lg:-mb-14">
+            <Image src="/aether-logo-full.png" alt="Aether" width={420} height={140} priority className="h-auto w-80 sm:w-96 lg:w-[420px] drop-shadow-[0_0_24px_rgba(139,92,246,0.35)]" />
           </div>
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-violet-400/25 bg-violet-400/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.28em] text-violet-300 lg:mb-3 lg:px-3 lg:py-1.5 lg:text-[10px]">
-            Official Learning Center · Business
-          </div>
-          <h1 className="max-w-4xl text-5xl font-black tracking-tight text-white sm:text-6xl lg:text-4xl">
-            Aether Business Academy
-          </h1>
-          <p className="mt-7 max-w-3xl text-lg leading-8 text-slate-300 sm:text-xl lg:mt-5 lg:text-base lg:leading-7">
-            Understand the Business Operating System, the modules your organization uses, and the workflows that connect operational awareness to execution.
-          </p>
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-violet-400/25 bg-violet-400/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.28em] text-violet-300 lg:mb-3 lg:px-3 lg:py-1.5 lg:text-[10px]">Official Learning Center · Business</div>
+          <h1 className="max-w-4xl text-5xl font-black tracking-tight text-white sm:text-6xl lg:text-5xl">Aether Business Academy</h1>
+          <p className="mt-7 max-w-3xl text-lg leading-8 text-slate-300 sm:text-xl lg:mt-5 lg:text-base lg:leading-7">Understand the Business Operating System, the modules your organization uses, and the workflows that connect operational awareness to execution.</p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4 lg:mt-7 lg:gap-3">
-            <a href="#library" className="inline-flex items-center justify-center rounded-xl bg-violet-600 px-7 py-3.5 font-bold text-slate-950 shadow-[0_14px_40px_rgba(139,92,246,0.22)] transition hover:-translate-y-0.5 hover:bg-violet-400 lg:px-5">
-              Learning Library — Business
-            </a>
-            <Link href="/aether-academy#library" className="inline-flex items-center justify-center rounded-xl border border-violet-400/40 bg-violet-400/10 px-7 py-3.5 font-bold text-violet-300 transition hover:-translate-y-0.5 hover:border-violet-300 lg:px-5">
-              Learning Library — Political
-            </Link>
-            <Link href="/login" className="inline-flex items-center justify-center rounded-xl border border-violet-400/40 bg-violet-400/10 px-7 py-3.5 font-semibold text-violet-300 transition hover:-translate-y-0.5 hover:border-violet-300 lg:px-5">
-              Enter Aether
-            </Link>
-            <Link href="/" className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-white/5 px-7 py-3.5 font-semibold text-white transition hover:-translate-y-0.5 hover:border-violet-400/40 hover:bg-white/10 lg:px-5">
-              Back to Political
-            </Link>
-            <Link href="/business-public" className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-white/5 px-7 py-3.5 font-semibold text-white transition hover:-translate-y-0.5 hover:border-violet-400/40 hover:bg-white/10 lg:px-5">
-              Back to Business
-            </Link>
+            <a href="#library" className="inline-flex items-center justify-center rounded-xl bg-violet-600 px-7 py-3.5 font-bold text-white shadow-[0_14px_40px_rgba(139,92,246,0.22)] transition hover:-translate-y-0.5 hover:bg-violet-500 lg:px-5">Learning Library — Business</a>
+            <Link href="/aether-academy" className="inline-flex items-center justify-center rounded-xl border border-violet-400/40 bg-violet-400/10 px-7 py-3.5 font-semibold text-violet-200 transition hover:-translate-y-0.5 hover:border-violet-300 lg:px-5">← Back to Academy</Link>
+            <Link href="/login" className="inline-flex items-center justify-center rounded-xl border border-violet-400/40 bg-violet-400/10 px-7 py-3.5 font-semibold text-violet-300 transition hover:-translate-y-0.5 hover:border-violet-300 lg:px-5">Enter Aether</Link>
+            <Link href="/business-public" className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-white/5 px-7 py-3.5 font-semibold text-white transition hover:-translate-y-0.5 hover:border-violet-400/40 hover:bg-white/10 lg:px-5">Back to Business</Link>
           </div>
         </div>
       </section>
-      {/* Academy navigation — same dimensions and layout as Political */}
-      <nav aria-label="Academy sections" className="sticky top-0 z-40 border-b border-white/10 bg-[#07111f]/90 backdrop-blur-xl">
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-3 lg:py-3">
-          <div className="flex items-center gap-3 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:gap-2">
-            {tabs.map((tab) => (
-              <Link key={tab.label} href={tab.href} className="min-w-max rounded-xl border border-violet-400/40 bg-violet-400/10 px-4 py-3 text-violet-300 shadow-[0_10px_30px_rgba(139,92,246,0.08)] transition hover:-translate-y-0.5 hover:border-violet-300 lg:px-3 lg:py-2.5">
-                <div className="text-sm font-bold lg:text-[12px]">{tab.label}</div>
-              </Link>
-            ))}
+      {/* Academy Navigation — centered segmented toggle */}
+      <nav aria-label="Business Academy sections" className="sticky top-0 z-40 border-b border-white/10 bg-[#07111f]/90 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl justify-center px-4 py-3 sm:px-6">
+          <div className="inline-flex max-w-full items-center gap-1 rounded-2xl border border-violet-400/40 bg-white/[0.045] p-1 shadow-[0_10px_30px_rgba(139,92,246,0.08)]">
+            <a href="#library" aria-current="page" className="rounded-xl bg-violet-600 px-4 py-3 text-center text-sm font-bold text-white transition hover:bg-violet-500 sm:px-6">Learning Library — Business</a>
+            <Link href="/aether-academy/business-training-videos" className="rounded-xl px-4 py-3 text-center text-sm font-bold text-violet-200 transition hover:bg-violet-400/15 hover:text-white sm:px-6">Training Videos — Business</Link>
           </div>
         </div>
       </nav>

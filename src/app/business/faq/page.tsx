@@ -522,6 +522,21 @@ export default function BusinessFAQPage() {
               A modular operating system that meets businesses where they are,
               scales with their needs, and connects work across departments.
             </p>
+
+            <div className="mt-8 flex flex-wrap gap-4 lg:mt-6 lg:gap-3">
+              <a
+                href="/aether-academy"
+                className="inline-flex items-center justify-center rounded-xl border border-violet-400/40 bg-violet-400/10 px-6 py-3 font-semibold text-violet-300 transition hover:-translate-y-0.5 hover:border-violet-300 lg:px-4 lg:py-2 lg:text-sm"
+              >
+                Explore Aether Academy →
+              </a>
+              <a
+                href="/support"
+                className="inline-flex items-center justify-center rounded-xl border border-blue-400/40 bg-blue-400/10 px-6 py-3 font-semibold text-blue-300 transition hover:-translate-y-0.5 hover:border-blue-300 lg:px-4 lg:py-2 lg:text-sm"
+              >
+                Support →
+              </a>
+            </div>
           </div>
 
           <div className="grid grid-cols-3 gap-3 rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur lg:min-w-[315px] lg:gap-2 lg:rounded-2xl lg:p-3">
