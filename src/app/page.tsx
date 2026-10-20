@@ -118,7 +118,7 @@ export default function HomePage() {
                 centered side by side without overlapping either control. */}
             <div className="absolute inset-x-0 top-[88px] flex items-center justify-center gap-3 px-1 sm:top-[92px] sm:gap-6 lg:hidden">
               <Link href="/" aria-label="Aether Systems homepage" className="flex w-[45%] max-w-[180px] items-center justify-center transition hover:opacity-95">
-                <img src="/aether-logo-full.png" alt="Aether Systems" className="h-[82px] w-full object-contain drop-shadow-[0_0_25px_rgba(139,92,246,0.4)] sm:h-[100px]" />
+                <img src="/aether-logo-full.png" alt="Aether Systems" className="h-[82px] w-full origin-center scale-[1.85] object-contain drop-shadow-[0_0_25px_rgba(139,92,246,0.4)] sm:h-[100px] sm:scale-[1.65]" />
               </Link>
               <div className="flex w-[45%] max-w-[180px] items-center justify-center" aria-label="Aether Social branding">
                 <img src="/social-branding-transparent.png" alt="Aether Social" className="h-[82px] w-full object-contain drop-shadow-[0_0_25px_rgba(168,85,247,0.25)] sm:h-[100px]" />
