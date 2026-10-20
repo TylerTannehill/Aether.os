@@ -16,6 +16,22 @@ type PublicProfile = {
   linkedin_url: string | null
 }
 
+type AetherExperience = {
+  membership_id: string
+  product: 'Political' | 'Business'
+  role: string
+  months: number | null
+}
+
+function aetherRoleLabel(value: string) {
+  return value.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase())
+}
+
+function aetherDuration(months: number | null) {
+  if (months === null) return 'Duration unavailable'
+  return `${months} ${months === 1 ? 'month' : 'months'}`
+}
+
 type ExperiencePreview = {
   id: string
   company_name: string
@@ -57,7 +73,7 @@ type Connection = {
 }
 
 type SocialContext = 'professional' | 'personal'
-type SocialPost = { id: string; author_id: string; context: SocialContext; content: string; created_at: string }
+type SocialPost = { id: string; author_id: string; context: SocialContext; content: string; image_path: string | null; created_at: string }
 type PostLike = { id: string; post_id: string; profile_id: string }
 type PostComment = { id: string; post_id: string; profile_id: string; content: string; created_at: string }
 type CommentAuthor = { id: string; display_name: string | null; username: string | null }
@@ -128,6 +144,9 @@ export default function SocialPublicProfilePage() {
   const [education, setEducation] = useState<EducationPreview[]>([])
   const [experienceError, setExperienceError] = useState('')
   const [educationError, setEducationError] = useState('')
+  const [aetherExperience, setAetherExperience] = useState<AetherExperience[]>([])
+  const [aetherLoading, setAetherLoading] = useState(false)
+  const [aetherError, setAetherError] = useState('')
   const [ownProfile, setOwnProfile] = useState(false)
   const [hasMyProfile, setHasMyProfile] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -140,6 +159,8 @@ export default function SocialPublicProfilePage() {
   const [connectionNotice, setConnectionNotice] = useState('')
   const [context, setContext] = useState<SocialContext>('professional')
   const [posts, setPosts] = useState<SocialPost[]>([])
+  const [postImageUrls, setPostImageUrls] = useState<Record<string, string>>({})
+  const [expandedImage, setExpandedImage] = useState<string | null>(null)
   const [postsLoading, setPostsLoading] = useState(false)
   const [postsError, setPostsError] = useState('')
   const [likes, setLikes] = useState<PostLike[]>([])
@@ -267,6 +288,33 @@ export default function SocialPublicProfilePage() {
     return () => { active = false }
   }, [id, supabase, isIndividual])
 
+  useEffect(() => {
+    if (!profile?.id) {
+      setAetherExperience([])
+      setAetherError('')
+      return
+    }
+    let active = true
+    async function loadAetherExperience() {
+      setAetherLoading(true)
+      setAetherError('')
+      setAetherExperience([])
+      try {
+        // The server must scope this read to the requested public Social profile.
+        const response = await fetch(`/api/social/aether-verified?profile_id=${encodeURIComponent(profile!.id)}`, { cache: 'no-store' })
+        if (!response.ok) throw new Error('Verification details unavailable')
+        const result: { experience?: AetherExperience[] } = await response.json()
+        if (active) setAetherExperience(Array.isArray(result.experience) ? result.experience : [])
+      } catch {
+        if (active) setAetherError('Verification details unavailable right now.')
+      } finally {
+        if (active) setAetherLoading(false)
+      }
+    }
+    void loadAetherExperience()
+    return () => { active = false }
+  }, [profile?.id])
+
   const canViewPersonal = isIndividual && (ownProfile || Boolean(
     connection?.status === 'accepted' && myProfileId && (
       (connection.requester_id === profile?.id && connection.recipient_id === myProfileId && connection.requester_grants_personal) ||
@@ -296,14 +344,31 @@ export default function SocialPublicProfilePage() {
     setCommentAuthors({})
     async function loadPosts() {
       const result = await supabase.from('social_posts')
-        .select('id, author_id, context, content, created_at')
+        .select('id, author_id, context, content, image_path, created_at')
         .eq('author_id', profile!.id)
         .eq('context', context)
         .order('created_at', { ascending: false })
         .limit(100)
       if (!active) return
       if (result.error) setPostsError('Unable to load posts: ' + result.error.message)
-      else setPosts((result.data ?? []) as SocialPost[])
+       else {
+         const fetchedPosts = (result.data ?? []) as SocialPost[]
+         setPosts(fetchedPosts)
+         // Only request image URLs after the existing profile/context access checks.
+         const paths = [...new Set(fetchedPosts.map(post => post.image_path).filter((path): path is string => Boolean(path)))]
+         if (paths.length) {
+           const { data: signed, error: imageError } = await supabase.storage
+             .from('social-post-images').createSignedUrls(paths, 60 * 15)
+           if (!active) return
+           if (!imageError && signed) {
+             const urlByPath: Record<string, string> = {}
+             signed.forEach((item, index) => { if (item.signedUrl) urlByPath[paths[index]] = item.signedUrl })
+             setPostImageUrls(Object.fromEntries(fetchedPosts
+               .filter(post => post.image_path && urlByPath[post.image_path])
+               .map(post => [post.id, urlByPath[post.image_path!]])))
+           }
+         }
+       }
       setPostsLoading(false)
     }
     void loadPosts()
@@ -595,12 +660,22 @@ export default function SocialPublicProfilePage() {
             <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-slate-300">{profile.bio || 'This member has not added a bio yet.'}</p>
             <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-white/10 pt-3 text-xs text-slate-400">
               <span className="inline-flex items-center gap-1.5 font-semibold text-violet-200"><ShieldCheck className="h-4 w-4" /> Aether Verified</span>
-              {(['Political', 'Business'] as const).map(category => (
-                <span key={category} className="inline-flex items-center gap-1.5" title={`${category} verification not yet connected`}>
-                  <span aria-label="Not verified" className="flex h-3.5 w-3.5 items-center justify-center rounded-full border border-slate-500 text-[10px]">—</span>
-                  <span className="text-slate-200">{category}</span> · Pending
-                </span>
-              ))}
+              {aetherLoading ? (
+                <span className="inline-flex items-center gap-1.5"><Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading verification...</span>
+              ) : aetherError ? (
+                <span role="status" className="text-amber-200">{aetherError}</span>
+              ) : (['Political', 'Business'] as const).map(category => {
+                const entries = aetherExperience.filter(item => item.product === category)
+                return (
+                  <span key={category} className="inline-flex flex-wrap items-center gap-1.5">
+                    {entries.length ? <ShieldCheck className="h-3.5 w-3.5 text-emerald-300" aria-label="Verified" /> : <span aria-label="Not verified" className="flex h-3.5 w-3.5 items-center justify-center rounded-full border border-slate-500 text-[10px]">—</span>}
+                    <span className="text-slate-200">{category}</span>
+                    {entries.length ? (
+                      <span className="text-emerald-200">· {entries.map(item => `${aetherRoleLabel(item.role)} (${aetherDuration(item.months)})`).join(' · ')}</span>
+                    ) : ' · Pending'}
+                  </span>
+                )
+              })}
             </div>
           </section>
 
@@ -670,7 +745,13 @@ export default function SocialPublicProfilePage() {
                         <p className="text-xs text-slate-400">{context === 'personal' ? 'Personal' : 'Professional'} · {new Date(post.created_at).toLocaleString()}</p>
                       </div>
                     </div>
-                    <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-slate-200">{postBody(post.content)}</p>
+                     {post.content && <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-slate-200">{postBody(post.content)}</p>}
+                     {post.image_path && (postImageUrls[post.id] ? (
+                       <button type="button" onClick={() => setExpandedImage(postImageUrls[post.id])}
+                         aria-label="Enlarge post image" className="mt-3 block w-full max-w-2xl overflow-hidden rounded-xl border border-white/10 bg-black/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-400">
+                         <img src={postImageUrls[post.id]} alt="Post attachment" className="max-h-[520px] w-full object-contain" />
+                       </button>
+                     ) : <p className="mt-3 text-xs text-slate-400">Image unavailable.</p>)}
                      {isIndividual && <div className="mt-4 border-t border-white/10 pt-3">
                        <div className="flex flex-wrap items-center gap-4">
                          <button type="button" disabled={!myProfileId || engagementBusy === post.id} onClick={() => void toggleLike(post.id)}
@@ -800,6 +881,15 @@ export default function SocialPublicProfilePage() {
           )}
         </div>
       ) : null}
+       {expandedImage && (context === 'professional' || canViewPersonal) && (
+         <div role="dialog" aria-modal="true" aria-label="Enlarged post image"
+           className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 p-5"
+           onMouseDown={event => { if (event.target === event.currentTarget) setExpandedImage(null) }}>
+           <button type="button" onClick={() => setExpandedImage(null)} aria-label="Close image"
+             className="absolute right-5 top-5 rounded-full bg-white/15 p-3 text-white hover:bg-white/25"><X className="h-5 w-5" /></button>
+           <img src={expandedImage} alt="Enlarged post attachment" className="max-h-[90vh] max-w-full object-contain" />
+         </div>
+       )}
       {socialsOpen && context === 'personal' && canViewPersonal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4" onMouseDown={event => { if (event.target === event.currentTarget) setSocialsOpen(false) }}>
           <section role="dialog" aria-modal="true" aria-labelledby="find-me-elsewhere-title" className="w-full max-w-md rounded-2xl border border-white/15 bg-[#101b30] p-6 shadow-2xl">

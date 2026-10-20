@@ -30,6 +30,22 @@ type EducationPreview = {
   display_order: number
 }
 
+type AetherExperience = {
+  membership_id: string
+  product: 'Political' | 'Business'
+  role: string
+  months: number | null
+}
+
+function aetherRoleLabel(value: string) {
+  return value.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase())
+}
+
+function aetherDuration(months: number | null) {
+  if (months === null) return 'Duration unavailable'
+  return `${months} ${months === 1 ? 'month' : 'months'}`
+}
+
 type Profile = {
   id: string
   auth_user_id: string
@@ -58,6 +74,7 @@ type SocialPost = {
   author_id: string
   context: 'professional' | 'personal'
   content: string
+  image_path: string | null
   created_at: string
 }
 
@@ -103,6 +120,8 @@ export default function SocialProfilePage() {
   const [personalError, setPersonalError] = useState('')
   const [socialsOpen, setSocialsOpen] = useState(false)
   const [posts, setPosts] = useState<SocialPost[]>([])
+  const [postImageUrls, setPostImageUrls] = useState<Record<string, string>>({})
+  const [expandedImage, setExpandedImage] = useState<string | null>(null)
   const [postsLoading, setPostsLoading] = useState(false)
   const [postsError, setPostsError] = useState('')
   const [likes, setLikes] = useState<PostLike[]>([])
@@ -114,6 +133,9 @@ export default function SocialProfilePage() {
   const [engagementError, setEngagementError] = useState<Record<string, string>>({})
   const [experience, setExperience] = useState<ExperiencePreview[]>([])
   const [experienceError, setExperienceError] = useState('')
+  const [aetherExperience, setAetherExperience] = useState<AetherExperience[]>([])
+  const [aetherLoading, setAetherLoading] = useState(true)
+  const [aetherError, setAetherError] = useState('')
   const [education, setEducation] = useState<EducationPreview[]>([])
   const [educationError, setEducationError] = useState('')
   const [loading, setLoading] = useState(true)
@@ -207,16 +229,38 @@ export default function SocialProfilePage() {
   useEffect(() => {
     if (!profile?.id) return
     let active = true
+    async function loadAetherExperience() {
+      setAetherLoading(true)
+      setAetherError('')
+      try {
+        const response = await fetch('/api/social/aether-verified', { cache: 'no-store' })
+        if (!response.ok) throw new Error('Verification details unavailable')
+        const result: { experience?: AetherExperience[] } = await response.json()
+        if (active) setAetherExperience(Array.isArray(result.experience) ? result.experience : [])
+      } catch {
+        if (active) setAetherError('Verification details unavailable right now.')
+      } finally {
+        if (active) setAetherLoading(false)
+      }
+    }
+    void loadAetherExperience()
+    return () => { active = false }
+  }, [profile?.id])
+
+  useEffect(() => {
+    if (!profile?.id) return
+    let active = true
     async function loadPosts() {
       setPostsLoading(true)
       setPostsError('')
       setPosts([])
+      setPostImageUrls({})
       setLikes([])
       setComments([])
       setCommentAuthors({})
       const { data, error: fetchError } = await supabase
         .from('social_posts')
-        .select('id, author_id, context, content, created_at')
+        .select('id, author_id, context, content, image_path, created_at')
         .eq('author_id', profile!.id)
         .eq('context', context)
         .order('created_at', { ascending: false })
@@ -229,6 +273,20 @@ export default function SocialProfilePage() {
       }
       const fetchedPosts = (data ?? []) as SocialPost[]
       setPosts(fetchedPosts)
+      const imagePosts = fetchedPosts.filter(post => post.image_path)
+      if (imagePosts.length) {
+        const paths = [...new Set(imagePosts.map(post => post.image_path).filter((path): path is string => Boolean(path)))]
+        const { data: signed, error: imageError } = await supabase.storage
+          .from('social-post-images').createSignedUrls(paths, 60 * 15)
+        if (!active) return
+        if (!imageError && signed) {
+          const urlByPath: Record<string, string> = {}
+          signed.forEach((item, index) => { if (item.signedUrl) urlByPath[paths[index]] = item.signedUrl })
+          setPostImageUrls(Object.fromEntries(imagePosts
+            .filter(post => post.image_path && urlByPath[post.image_path])
+            .map(post => [post.id, urlByPath[post.image_path!]])))
+        }
+      }
       if (fetchedPosts.length) {
         const ids = fetchedPosts.map(post => post.id)
         const [likesResult, commentsResult] = await Promise.all([
@@ -470,7 +528,13 @@ export default function SocialProfilePage() {
                   <p className="text-xs text-slate-400">{post.context === 'personal' ? 'Personal' : 'Professional'} · {new Date(post.created_at).toLocaleString()}</p>
                 </div>
               </div>
-              <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-7 text-slate-200">{postParts(post.content)}</p>
+              {post.content && <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-7 text-slate-200">{postParts(post.content)}</p>}
+              {post.image_path && (postImageUrls[post.id] ? (
+                <button type="button" onClick={() => setExpandedImage(postImageUrls[post.id])}
+                  aria-label="Enlarge post image" className="mt-3 block w-full max-w-2xl overflow-hidden rounded-xl border border-white/10 bg-black/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-400">
+                  <img src={postImageUrls[post.id]} alt="Post attachment" className="max-h-[520px] w-full object-contain" />
+                </button>
+              ) : <p className="mt-3 text-xs text-slate-400">Image unavailable.</p>)}
                <div className="mt-4 border-t border-white/10 pt-3">
                  <div className="flex flex-wrap items-center gap-4">
                    <button type="button" disabled={!profile || engagementBusy === post.id} onClick={() => void toggleLike(post.id)}
@@ -665,12 +729,22 @@ export default function SocialProfilePage() {
                 </div>
                 <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-white/10 pt-3 text-xs text-slate-400">
                   <span className="inline-flex items-center gap-1.5 font-semibold text-violet-200"><ShieldCheck className="h-4 w-4" /> Aether Verified</span>
-                  {(['Political', 'Business'] as const).map(category => (
-                    <span key={category} className="inline-flex items-center gap-1.5" title={`${category} verification not yet connected`}>
-                      <span aria-label="Not verified" className="flex h-3.5 w-3.5 items-center justify-center rounded-full border border-slate-500 text-[10px]">—</span>
-                      <span className="text-slate-200">{category}</span> · Pending
-                    </span>
-                  ))}
+                  {aetherLoading ? (
+                    <span className="inline-flex items-center gap-1.5"><Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading verification...</span>
+                  ) : aetherError ? (
+                    <span role="status" className="text-amber-200">{aetherError}</span>
+                  ) : (['Political', 'Business'] as const).map(category => {
+                    const entries = aetherExperience.filter(item => item.product === category)
+                    return (
+                      <span key={category} className="inline-flex flex-wrap items-center gap-1.5">
+                        {entries.length ? <ShieldCheck className="h-3.5 w-3.5 text-emerald-300" aria-label="Verified" /> : <span aria-label="Not verified" className="flex h-3.5 w-3.5 items-center justify-center rounded-full border border-slate-500 text-[10px]">—</span>}
+                        <span className="text-slate-200">{category}</span>
+                        {entries.length ? (
+                          <span className="text-emerald-200">· {entries.map(item => `${aetherRoleLabel(item.role)} (${aetherDuration(item.months)})`).join(' · ')}</span>
+                        ) : ' · Pending'}
+                      </span>
+                    )
+                  })}
                 </div>
               </section>
               <section className="min-w-0 rounded-2xl border border-white/10 bg-[#101b30] p-5 shadow-lg sm:p-6">
@@ -728,6 +802,15 @@ export default function SocialProfilePage() {
               </section>
             </div>
             {profilePosts}
+        </div>
+      )}
+      {expandedImage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+          role="dialog" aria-modal="true" aria-label="Enlarged post image"
+          onMouseDown={event => { if (event.target === event.currentTarget) setExpandedImage(null) }}>
+          <button type="button" onClick={() => setExpandedImage(null)} aria-label="Close image"
+            className="absolute right-5 top-5 rounded-full bg-white/15 p-3 text-white hover:bg-white/25"><X className="h-5 w-5" /></button>
+          <img src={expandedImage} alt="Enlarged post attachment" className="max-h-[90vh] max-w-full object-contain" />
         </div>
       )}
       {socialsOpen && context === 'personal' && (

@@ -105,12 +105,23 @@ export default function HomePage() {
       <div className="relative z-10 mx-auto flex min-h-screen max-w-[1320px] flex-col px-5 py-5 lg:px-9">
         <header className="relative flex flex-col items-center pb-7 pt-0 lg:pb-9">
           <div className="relative flex w-full min-h-[190px] items-start justify-center sm:min-h-[215px] lg:min-h-[235px]">
-            <div className="absolute left-1/2 top-0 flex w-[min(62vw,650px)] -translate-x-1/2 items-center justify-center gap-2 sm:gap-5 lg:gap-8">
+            {/* Desktop branding: unchanged. */}
+            <div className="absolute left-1/2 top-0 hidden w-[min(62vw,650px)] -translate-x-1/2 items-center justify-center gap-2 sm:gap-5 lg:flex lg:gap-8">
               <Link href="/" aria-label="Aether Systems homepage" className="block w-[46%] shrink-0 transition hover:opacity-95">
                 <img src="/aether-logo-full.png" alt="Aether Systems" className="h-auto w-full origin-center scale-[1.30] translate-y-[10px] object-contain drop-shadow-[0_0_35px_rgba(139,92,246,0.4)]" />
               </Link>
               <div className="flex w-[46%] shrink-0 items-center justify-center" aria-label="Aether Social branding">
                 <img src="/social-branding-transparent.png" alt="Aether Social" className="h-auto w-full -translate-y-[12px] object-contain drop-shadow-[0_0_25px_rgba(168,85,247,0.25)]" />
+              </div>
+            </div>
+            {/* Mobile/tablet branding: below the store badges and Enter Aether,
+                centered side by side without overlapping either control. */}
+            <div className="absolute inset-x-0 top-[88px] flex items-center justify-center gap-3 px-1 sm:top-[92px] sm:gap-6 lg:hidden">
+              <Link href="/" aria-label="Aether Systems homepage" className="flex w-[45%] max-w-[180px] items-center justify-center transition hover:opacity-95">
+                <img src="/aether-logo-full.png" alt="Aether Systems" className="h-[82px] w-full object-contain drop-shadow-[0_0_25px_rgba(139,92,246,0.4)] sm:h-[100px]" />
+              </Link>
+              <div className="flex w-[45%] max-w-[180px] items-center justify-center" aria-label="Aether Social branding">
+                <img src="/social-branding-transparent.png" alt="Aether Social" className="h-[82px] w-full object-contain drop-shadow-[0_0_25px_rgba(168,85,247,0.25)] sm:h-[100px]" />
               </div>
             </div>
             <div className="absolute left-0 top-0 flex flex-col items-start gap-2 sm:flex-row sm:items-center">

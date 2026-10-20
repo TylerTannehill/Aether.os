@@ -13,6 +13,8 @@ import {
   MessageCircle,
   Moon,
   PenLine,
+  ImagePlus,
+  X,
   Loader2,
   Send,
   UserRound,
@@ -23,7 +25,7 @@ import {
 
 type SocialContext = "professional" | "personal";
 type SocialProfile = { id: string; display_name: string | null; username: string | null; avatar_path: string | null };
-type SocialPost = { id: string; author_id: string | null; employer_id: string | null; job_id: string | null; context: SocialContext; content: string; created_at: string };
+type SocialPost = { id: string; author_id: string | null; employer_id: string | null; job_id: string | null; context: SocialContext; content: string; image_path: string | null; created_at: string };
 type PromotedJob = { id: string; title: string; description: string; location: string | null; status: string; expires_at: string | null };
 type PostLike = { id: string; post_id: string; profile_id: string };
 type PostComment = { id: string; post_id: string; profile_id: string; content: string; created_at: string };
@@ -54,6 +56,10 @@ export default function SocialHomePage() {
   const [posts, setPosts] = useState<FeedPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [posting, setPosting] = useState(false);
+  const [imageDrafts, setImageDrafts] = useState<Partial<Record<SocialContext, File>>>({});
+  const [imagePreviews, setImagePreviews] = useState<Partial<Record<SocialContext, string>>>({});
+  const [expandedImage, setExpandedImage] = useState<string | null>(null);
+  const [imageUrls, setImageUrls] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [feedError, setFeedError] = useState<string | null>(null);
   const [likes, setLikes] = useState<PostLike[]>([]);
@@ -67,6 +73,40 @@ export default function SocialHomePage() {
   const avatarUrl = (path: string | null | undefined) => path
     ? supabase.storage.from("social-avatars").getPublicUrl(path).data.publicUrl
     : null;
+
+  useEffect(() => () => {
+    Object.values(imagePreviews).forEach(url => { if (url) URL.revokeObjectURL(url); });
+  }, [imagePreviews]);
+
+  function chooseImage(file: File | undefined) {
+    if (!file) return;
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      setError("Choose a JPG, PNG, or WebP image."); return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Images must be 5 MB or smaller."); return;
+    }
+    setError(null);
+    setImageDrafts(previous => ({ ...previous, [context]: file }));
+    setImagePreviews(previous => ({ ...previous, [context]: URL.createObjectURL(file) }));
+  }
+
+  function removeImage() {
+    setImageDrafts(previous => ({ ...previous, [context]: undefined }));
+    setImagePreviews(previous => ({ ...previous, [context]: undefined }));
+  }
+
+  // Private Storage objects require signed URLs, not getPublicUrl().
+  // Access to Personal images must additionally be enforced by Storage policies.
+  const loadImageUrls = useCallback(async (records: SocialPost[]) => {
+    const paths = [...new Set(records.map(post => post.image_path).filter((path): path is string => Boolean(path)))];
+    if (!paths.length) { setImageUrls({}); return; }
+    const results = await Promise.all(paths.map(async path => {
+      const { data, error } = await supabase.storage.from("social-post-images").createSignedUrl(path, 3600);
+      return [path, error ? null : data?.signedUrl ?? null] as const;
+    }));
+    setImageUrls(Object.fromEntries(results.filter((item): item is readonly [string, string] => Boolean(item[1]))));
+  }, [supabase]);
 
   useEffect(() => {
     let active = true;
@@ -95,11 +135,12 @@ export default function SocialHomePage() {
     setComments([]);
     setCommentAuthors({});
     const { data, error: postsError } = await supabase.from("social_posts")
-      .select("id, author_id, employer_id, job_id, context, content, created_at")
+      .select("id, author_id, employer_id, job_id, context, content, image_path, created_at")
       .eq("context", selected).order("created_at", { ascending: false }).limit(100);
     if (postsError) { setFeedError(postsError.message); setLoading(false); return; }
     const records = (data ?? []) as SocialPost[];
-    if (!records.length) { setLoading(false); return; }
+    if (!records.length) { setImageUrls({}); setLoading(false); return; }
+    await loadImageUrls(records);
     const ids = [...new Set(records.map((post) => post.author_id).filter((id): id is string => Boolean(id)))];
     const employerIds = [...new Set(records.map((post) => post.employer_id).filter((id): id is string => Boolean(id)))];
     const jobIds = [...new Set(records.map((post) => post.job_id).filter((id): id is string => Boolean(id)))];
@@ -159,7 +200,7 @@ export default function SocialHomePage() {
       }
     }
     setLoading(false);
-  }, [supabase, experience]);
+  }, [supabase, experience, loadImageUrls]);
 
   useEffect(() => {
     if (experience === "employer" || experience === "individual") {
@@ -171,16 +212,35 @@ export default function SocialHomePage() {
     event.preventDefault();
     if (experience !== "individual") return;
     const content = drafts[context].trim();
-    if (!me || !content || content.length > 5000 || posting) return;
+    const file = imageDrafts[context];
+    if (!me || (!content && !file) || content.length > 5000 || posting) return;
     setPosting(true);
     setError(null);
-    const { error: insertError } = await supabase.from("social_posts").insert({ author_id: me.id, context, content });
-    if (insertError) setError(insertError.message);
-    else {
-      setDrafts((previous) => ({ ...previous, [context]: "" }));
+    let uploadedPath: string | null = null;
+    let postSaved = false;
+    try {
+      if (file) {
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        if (authError || !user) throw new Error("Sign in again to upload images.");
+        const extension = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
+        uploadedPath = `${user.id}/${crypto.randomUUID()}.${extension}`;
+        const { error: uploadError } = await supabase.storage.from("social-post-images")
+          .upload(uploadedPath, file, { contentType: file.type, upsert: false });
+        if (uploadError) throw uploadError;
+      }
+      const { error: insertError } = await supabase.from("social_posts")
+        .insert({ author_id: me.id, context, content, image_path: uploadedPath });
+      if (insertError) throw insertError;
+      postSaved = true;
+      setDrafts(previous => ({ ...previous, [context]: "" }));
+      removeImage();
       await loadFeed(context);
+    } catch (err) {
+      if (uploadedPath && !postSaved) await supabase.storage.from("social-post-images").remove([uploadedPath]);
+      setError(err instanceof Error ? err.message : "Unable to publish post.");
+    } finally {
+      setPosting(false);
     }
-    setPosting(false);
   }
 
 
@@ -293,12 +353,24 @@ export default function SocialHomePage() {
                   placeholder={professional ? "Share a professional update..." : "What's on your mind?"}
                   className="min-h-24 w-full resize-y rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-violet-400 focus:ring-2 focus:ring-violet-100 disabled:opacity-60" />
               </div>
+              {imagePreviews[context] && (
+                <div className="relative mt-4 max-w-lg overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
+                  <img src={imagePreviews[context]} alt="Image preview" className="max-h-80 w-full object-contain" />
+                  <button type="button" onClick={removeImage} disabled={posting} aria-label="Remove selected image"
+                    className="absolute right-2 top-2 rounded-full bg-slate-950/80 p-2 text-white hover:bg-slate-950"><X className="h-4 w-4" /></button>
+                </div>
+              )}
               <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
                 <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
-                  <PenLine className="h-4 w-4" /> Text & links · {professional ? "Professional" : "Authorized personal viewers"}
+                  <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-violet-200 px-3 py-2 font-semibold text-violet-700 hover:bg-violet-50">
+                    <ImagePlus className="h-4 w-4" /> Add image
+                    <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={!me || posting}
+                      onChange={event => { chooseImage(event.target.files?.[0]); event.target.value = ""; }} />
+                  </label>
+                  <PenLine className="h-4 w-4" /> Caption optional · {professional ? "Professional" : "Authorized personal viewers"}
                   <span className="ml-2 text-slate-400">{drafts[context].length}/5000</span>
                 </div>
-                <button type="submit" disabled={!me || posting || !drafts[context].trim()}
+                <button type="submit" disabled={!me || posting || !drafts[context].trim() && !imageDrafts[context]}
                   className="inline-flex items-center gap-2 rounded-xl bg-violet-700 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-violet-800 disabled:cursor-not-allowed disabled:opacity-40">
                   {posting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />} Post
                 </button>
@@ -360,6 +432,12 @@ export default function SocialHomePage() {
                       </div>
                     </div>
                   ) : <p className="mt-4 whitespace-pre-wrap break-words text-sm leading-7 text-slate-800">{postContent(post.content)}</p>}
+                  {post.image_path && imageUrls[post.image_path] && (
+                    <button type="button" onClick={() => setExpandedImage(imageUrls[post.image_path!])}
+                      aria-label="Enlarge post image" className="mt-4 block w-full overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-600">
+                      <img src={imageUrls[post.image_path]} alt="Post attachment" className="max-h-[520px] w-full object-contain" />
+                    </button>
+                  )}
                   {!employerPost && post.author_id && !isEmployer && (
                     <div className="mt-5 border-t border-slate-100 pt-3">
                       <div className="flex items-center gap-4">
@@ -461,6 +539,14 @@ export default function SocialHomePage() {
           </Link>
         </aside>
       </div>
+      {expandedImage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+          onMouseDown={event => { if (event.target === event.currentTarget) setExpandedImage(null); }}>
+          <button type="button" onClick={() => setExpandedImage(null)} aria-label="Close image"
+            className="absolute right-5 top-5 rounded-full bg-white/15 p-3 text-white hover:bg-white/25"><X className="h-5 w-5" /></button>
+          <img src={expandedImage} alt="Enlarged post attachment" className="max-h-[90vh] max-w-full object-contain" />
+        </div>
+      )}
     </div>
   );
 }

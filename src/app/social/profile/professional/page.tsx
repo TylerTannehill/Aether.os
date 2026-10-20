@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { ArrowDown, ArrowLeft, Check, Loader2, Pencil, Plus, ShieldCheck, UserRound, Camera, Trash2, X } from 'lucide-react'
 
+type VerifiedExperience = { membership_id: string; product: 'Political' | 'Business'; role: string; months: number | null }
+
 type SocialProfile = {
   id: string
   auth_user_id: string
@@ -144,6 +146,13 @@ export default function ProfessionalDetailsPage() {
   const [editorOpen, setEditorOpen] = useState(false)
   const [fields, setFields] = useState<Fields>({ ...blank })
   const [error, setError] = useState('')
+  const [verified, setVerified] = useState<VerifiedExperience[]>([])
+  const [verifiedLoading, setVerifiedLoading] = useState(false)
+  const [verifiedBusy, setVerifiedBusy] = useState(false)
+  const [verifiedError, setVerifiedError] = useState('')
+  const [verifiedMessage, setVerifiedMessage] = useState('')
+  const [claimOrgId, setClaimOrgId] = useState('')
+  const [claimEmail, setClaimEmail] = useState('')
 
   async function refresh(id: string) {
     const { data, error: readError } = await supabase.from('social_professional_experience')
@@ -196,6 +205,52 @@ export default function ProfessionalDetailsPage() {
     void load()
     return () => { active = false }
   }, [supabase])
+
+  useEffect(() => {
+    if (!profileId) return
+    let active = true
+    async function loadVerified() {
+      setVerifiedLoading(true)
+      try {
+        const response = await fetch('/api/social/aether-verified', { cache: 'no-store' })
+        const payload = await response.json()
+        if (!response.ok) throw new Error(payload.error || 'Unable to load verification.')
+        if (active) setVerified(Array.isArray(payload.experience) ? payload.experience : [])
+      } catch (err) {
+        if (active) setVerifiedError(err instanceof Error ? err.message : 'Unable to load verification.')
+      } finally { if (active) setVerifiedLoading(false) }
+    }
+    void loadVerified()
+    return () => { active = false }
+  }, [profileId])
+
+  async function claimMembership(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (!profileId || verifiedBusy) return
+    setVerifiedBusy(true)
+    setVerifiedError('')
+    setVerifiedMessage('')
+    try {
+      const response = await fetch('/api/social/aether-verified', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ organization_slug: claimOrgId.trim(), email: claimEmail.trim() }),
+      })
+      const payload = await response.json()
+      if (!response.ok) throw new Error(payload.error || 'Unable to verify membership.')
+      setVerified(Array.isArray(payload.experience) ? payload.experience : [])
+      setClaimOrgId('')
+      setClaimEmail('')
+      setVerifiedMessage('Membership verified and added to your experience.')
+    } catch (err) { setVerifiedError(err instanceof Error ? err.message : 'Unable to verify membership.') }
+    finally { setVerifiedBusy(false) }
+  }
+
+  function roleLabel(role: string) {
+    return role.replace(/_/g, ' ').replace(/\b\w/g, letter => letter.toUpperCase())
+  }
+  function durationLabel(months: number | null) {
+    return months === null ? 'Duration unavailable' : months === 0 ? 'Less than 1 month' : `${months} ${months === 1 ? 'month' : 'months'}`
+  }
 
   async function uploadAvatar(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
@@ -736,44 +791,30 @@ export default function ProfessionalDetailsPage() {
                 </div>
               </div>
             )}
-            <div className="mt-5 border-t border-white/10 pt-4">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-100">
-                    <ShieldCheck className="h-4 w-4 text-violet-300" /> Aether Verified
-                  </h3>
-                  <p className="mt-1 text-xs text-slate-400">
-                    Political and Business experience verified through Aether organizations.
-                  </p>
-                </div>
-                <label className="inline-flex items-center gap-2 text-xs text-slate-300">
-                  <span>Show Aether Experience</span>
-                  <input
-                    type="checkbox"
-                    role="switch"
-                    checked={false}
-                    disabled
-                    aria-label="Show Aether Experience (not yet available)"
-                    className="h-4 w-4 accent-violet-500 disabled:opacity-50"
-                  />
-                </label>
-              </div>
-              <p className="mt-2 text-xs text-slate-400">
-                Off by default. Automatic verification and profile visibility are coming later.
-              </p>
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                {(['Political', 'Business'] as const).map(category => (
-                  <div key={category} className="rounded-lg border border-white/10 bg-slate-950/30 p-3">
-                    <div className="flex items-center gap-2">
-                      <span aria-label="Not verified" className="flex h-5 w-5 items-center justify-center rounded-full border border-slate-500 text-xs text-slate-400">—</span>
-                      <span className="text-sm font-semibold text-slate-100">{category} Experience</span>
-                    </div>
-                    <p className="mt-2 text-xs text-slate-400">Role: Not yet connected</p>
-                    <p className="mt-1 text-xs text-slate-400">Time: Not yet available</p>
-                  </div>
-                ))}
-              </div>
-            </div>
+             <div className="mt-5 border-t border-white/10 pt-4">
+               <h3 className="flex items-center gap-2 text-sm font-semibold"><ShieldCheck className="h-4 w-4 text-violet-300" /> Aether Verified</h3>
+               <p className="mt-1 text-xs text-slate-400">Claim your Political or Business membership using your organization login slug and membership email. Organization details stay private.</p>
+               {verifiedLoading && <p className="mt-3 flex items-center gap-2 text-xs"><Loader2 className="h-4 w-4 animate-spin" /> Loading verification…</p>}
+               <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                 {(['Political', 'Business'] as const).map(category => {
+                   const matches = verified.filter(item => item.product === category)
+                   return <div key={category} className="rounded-lg border border-white/10 bg-slate-950/30 p-3">
+                     <div className="flex items-center gap-2">{matches.length ? <Check className="h-4 w-4 text-emerald-300" /> : <span className="text-slate-400">—</span>}<span className="text-sm font-semibold">{category} Experience</span></div>
+                     {matches.length ? <div className="mt-2 space-y-2">{matches.map(item => <div key={item.membership_id} className="text-xs text-slate-300"><p>Role: {roleLabel(item.role)}</p><p className="mt-1">Membership: {durationLabel(item.months)}</p></div>)}</div> : <p className="mt-2 text-xs text-slate-400">Not yet verified</p>}
+                   </div>
+                 })}
+               </div>
+               <form onSubmit={claimMembership} className="mt-4 space-y-3 rounded-xl border border-violet-400/20 bg-violet-500/5 p-4">
+                 <h4 className="text-sm font-semibold">Add Aether experience</h4>
+                 <div className="grid gap-3 sm:grid-cols-2">
+                   <div><label htmlFor="verified-org" className={label}>Organization Slug</label><input id="verified-org" required maxLength={120} autoCapitalize="none" autoComplete="off" spellCheck={false} className={input} placeholder="aether-demo-campaign" value={claimOrgId} onChange={e => setClaimOrgId(e.target.value)} /></div>
+                   <div><label htmlFor="verified-email" className={label}>Membership email</label><input id="verified-email" type="email" required maxLength={254} autoCapitalize="none" className={input} placeholder="you@example.com" value={claimEmail} onChange={e => setClaimEmail(e.target.value)} /></div>
+                 </div>
+                 <button type="submit" disabled={!profileId || verifiedBusy} className="inline-flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2 text-sm font-semibold hover:bg-violet-500 disabled:opacity-50">{verifiedBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}{verifiedBusy ? 'Verifying…' : 'Verify membership'}</button>
+                 {verifiedError && <p role="alert" className="text-xs text-rose-300">{verifiedError}</p>}
+                 {verifiedMessage && <p role="status" className="text-xs text-emerald-300">{verifiedMessage}</p>}
+               </form>
+             </div>
           </section>}
           <section id="experience" className="scroll-mt-24 rounded-xl border border-white/10 bg-[#101b30] p-4 sm:p-5">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">

@@ -307,6 +307,7 @@ export async function POST(req: Request) {
       .insert({
         organization_id: activeOrganizationId,
         user_id: appUser.id,
+        membership_email: normalizedEmail,
         title: title || null,
         department: normalizedDepartment,
         role: normalizedMembershipRole,
