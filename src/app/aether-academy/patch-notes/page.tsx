@@ -32,11 +32,81 @@ export default function PatchNotesPage() {
           <p className="text-sm uppercase tracking-[0.2em] text-violet-300">
             Current Public Version
           </p>
-          <p className="mt-1 text-xl font-semibold text-white">Aether v1.9</p>
+          <p className="mt-1 text-xl font-semibold text-white">Aether v1.10</p>
           <p className="mt-1 text-slate-300">Live</p>
         </div>
 
         <details className="group mt-7 overflow-hidden rounded-2xl border border-violet-400/20 bg-[#10233e]/75 shadow-xl shadow-black/20 lg:rounded-xl" open>
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 transition hover:bg-white/[0.03] [&::-webkit-details-marker]:hidden lg:gap-3 lg:p-4">
+            <div>
+              <p className="text-sm uppercase tracking-[0.2em] text-violet-300">October 23, 2026</p>
+              <h2 className="mt-1 text-2xl font-semibold text-white">Aether v1.10 — Aether Social &amp; Ecosystem Expansion</h2>
+              <p className="mt-1 text-sm text-slate-400">A new social network, expanded public experiences, and a redesigned Academy across the Aether ecosystem.</p>
+            </div>
+            <span className="shrink-0 text-2xl text-violet-300 transition-transform duration-200 group-open:rotate-180">↓</span>
+          </summary>
+          <div className="border-t border-white/10 p-5 md:p-6 lg:p-5">
+            <p className="text-sm leading-7 text-slate-300">Version 1.10 marks a major expansion of the Aether ecosystem with the development of Aether Social: a dedicated social network that recognizes people have both professional and personal lives. Alongside the new product, Team Aether expanded its public websites, educational resources, and pathways for individuals, employers, and advertisers to explore the platform.</p>
+            <div className="mt-6 space-y-6 text-sm leading-6 text-slate-300">
+              <section>
+                <h3 className="text-xl font-semibold text-white">Aether Social — Network Built</h3>
+                <ul className="mt-3 space-y-1.5">
+                  <li>✓ Built Aether Social with distinct Professional and Personal profile experiences, feeds, and contexts.</li>
+                  <li>✓ Added member profiles, posts, photo sharing, likes, comments, and direct messaging.</li>
+                  <li>✓ Introduced personal-network controls so members can choose who can access their personal side and who may send direct messages.</li>
+                  <li>✓ Added network and connection experiences designed around meaningful professional and personal relationships.</li>
+                  <li>✓ Introduced My Jam for sharing music as part of the personal profile experience.</li>
+                </ul>
+              </section>
+              <section>
+                <h3 className="text-xl font-semibold text-white">Aether Social — Employers, Jobs &amp; Advertising</h3>
+                <ul className="mt-3 space-y-1.5">
+                  <li>✓ Developed dedicated employer access and job-posting management experiences.</li>
+                  <li>✓ Established employer offerings and presentation for Needle and Haystack job-posting plans.</li>
+                  <li>✓ Created advertising information and request pathways for organizations interested in reaching the Social community.</li>
+                  <li>✓ Built distinct entry points for members, employers, and advertisers.</li>
+                </ul>
+              </section>
+              <section>
+                <h3 className="text-xl font-semibold text-white">Aether Social — Mobile Submission</h3>
+                <ul className="mt-3 space-y-1.5">
+                  <li>✓ Prepared and submitted Aether Social mobile app builds for Apple App Store and Google Play review.</li>
+                  <li>✓ Completed store listing materials and supporting mobile presentation assets.</li>
+                  <li>✓ Advanced real-device testing and mobile experience refinements ahead of public distribution.</li>
+                </ul>
+                <p className="mt-3 rounded-xl border border-amber-300/20 bg-amber-300/5 p-3 text-slate-300"><span className="font-semibold text-white">Distribution status:</span> Aether Social has been built and submitted for review. Apple App Store and Google Play approval is pending; the Social app is not yet publicly available for download through those stores.</p>
+              </section>
+              <section>
+                <h3 className="text-xl font-semibold text-white">Aether Academy — Expanded Learning Center</h3>
+                <ul className="mt-3 space-y-1.5">
+                  <li>✓ Refreshed the Academy experience and navigation across the expanding Aether product family.</li>
+                  <li>✓ Created a dedicated Aether Social Learning Library with written guides covering profiles, feeds, privacy controls, messaging, employers, job opportunities, and advertising.</li>
+                  <li>✓ Published two focused Social training walkthroughs: one for members and one for employers.</li>
+                  <li>✓ Connected Social documentation to its training videos and relevant member and employer experiences.</li>
+                  <li>✓ Refined the public educational presentation across Political, Business, and Social.</li>
+                </ul>
+              </section>
+              <section>
+                <h3 className="text-xl font-semibold text-white">Aether Ecosystem — Public Pages &amp; Navigation</h3>
+                <ul className="mt-3 space-y-1.5">
+                  <li>✓ Reworked public-facing product pages and navigation to better explain the expanding Aether ecosystem.</li>
+                  <li>✓ Introduced Aether Social public information and sales experiences, including employer and advertising pathways.</li>
+                  <li>✓ Activated Aether Social as a first-class product destination on the Aether homepage.</li>
+                  <li>✓ Clarified mobile download information for Aether for Work while distinguishing Aether Social&apos;s pending store availability.</li>
+                  <li>✓ Preserved Aether Personal as a separate future product within the ecosystem.</li>
+                </ul>
+              </section>
+            </div>
+            <div className="mt-7 border-t border-white/10 pt-5">
+              <p className="font-semibold text-white">Different products. Shared foundation. Connected by you.</p>
+              <p className="mt-2 text-slate-300">Aether now extends beyond political campaigns and business operations into the ways people connect, communicate, and discover opportunities. Aether Social is built; public mobile distribution will follow store approval.</p>
+              <p className="mt-4 font-semibold text-white">Clarity. Focus. Execution.</p>
+              <p className="mt-1 text-slate-400">— Team Aether</p>
+            </div>
+          </div>
+        </details>
+
+        <details className="group mt-7 overflow-hidden rounded-2xl border border-violet-400/20 bg-[#10233e]/75 shadow-xl shadow-black/20 lg:rounded-xl">
           <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 transition hover:bg-white/[0.03] [&::-webkit-details-marker]:hidden lg:gap-3 lg:p-4">
             <div>
               <p className="text-sm uppercase tracking-[0.2em] text-violet-300">October 13, 2026</p>

@@ -4,7 +4,7 @@ import Link from "next/link";
 const academies = [
   { title: "Aether Political", description: "Campaign Operating System", href: "/aether-academy/political-academy", active: true },
   { title: "Aether Business", description: "Business Operating System", href: "/aether-academy/business-academy", active: true },
-  { title: "Aether Social", description: "Learning resources coming soon", active: false },
+  { title: "Aether Social", description: "Personal & Professional Networking", href: "/aether-academy/social-academy", active: true },
   { title: "Aether Personal", description: "Learning resources coming soon", active: false },
 ] as const;
 
