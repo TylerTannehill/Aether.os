@@ -150,9 +150,9 @@ export default function HomePage() {
             <Link href="/social-public" aria-label="Explore Aether Social" className={liveButton}>
               <img src="/social-branding-transparent.png" alt="Aether Social" className="h-[58px] w-auto max-w-[75%] scale-[1.45] object-contain" />
             </Link>
-            <button type="button" onClick={() => setComingSoon("Personal")} aria-label="Aether Personal, in development" aria-disabled="true" className={dormantButton}>
-              <span className="flex items-center justify-center gap-4"><UserRound className="h-6 w-6 shrink-0" /><span><span className="block text-base font-black sm:text-lg">In Development</span><span className="mt-1 block text-sm">Aether Personal · Coming Soon</span></span></span>
-            </button>
+            <div aria-label="Aether Personal — coming soon" className="flex min-h-[66px] w-full items-center justify-center overflow-hidden rounded-[1.15rem] border border-white/10 bg-black px-4 py-2.5 sm:px-5">
+              <img src="/aether-personal-logo.png" alt="Aether Personal — Coming Soon" className="h-[58px] w-auto max-w-[75%] scale-[1.45] object-contain" />
+            </div>
             <Link href="/aether-academy" className="group mx-auto flex min-h-[66px] w-full max-w-[560px] items-center justify-center gap-4 rounded-[1.15rem] border border-violet-300/50 bg-gradient-to-r from-violet-600/30 via-violet-500/20 to-blue-600/25 px-6 py-2.5 text-center text-lg font-black transition hover:-translate-y-0.5 hover:border-violet-200 hover:bg-violet-500/25 sm:text-xl md:col-span-2">
               <img src="/aether-logo-full.png" alt="Aether.OS" className="h-[54px] w-[92px] shrink-0 scale-[2.05] translate-y-[6px] object-contain" /><span>Academy</span>
             </Link>
