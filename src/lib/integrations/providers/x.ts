@@ -298,7 +298,24 @@ export class XProvider implements AnalyticsProvider {
       paginationToken = payload?.meta?.next_token;
     } while (paginationToken);
 
-    return posts.map((post) => {
+    // X pagination can return the same post more than once. The hourly
+    // analytics sync upserts by post ID, so duplicate IDs in a single batch
+    // would cause PostgreSQL to reject the entire batch.
+    // Keep the latest occurrence rather than summing cumulative metrics.
+    const uniquePosts = new Map<string, XPost>();
+    for (const post of posts) {
+      if (post.id) uniquePosts.set(post.id, post);
+    }
+
+    if (uniquePosts.size !== posts.length) {
+      console.info("X analytics: deduplicated posts before upsert", {
+        organizationId: connection.organization_id,
+        fetched: posts.length,
+        unique: uniquePosts.size,
+      });
+    }
+
+    return Array.from(uniquePosts.values()).map((post) => {
       const metrics = post.public_metrics || {};
 
       const engagements =
