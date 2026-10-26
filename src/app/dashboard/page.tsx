@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Activity,
   ArrowRight,
@@ -856,6 +856,12 @@ export default function DashboardPage() {
     recentCrossDomainSignals: [],
   });
   const [abeMemoryLoaded, setAbeMemoryLoaded] = useState(false);
+  const [abeMemoryLoadSucceeded, setAbeMemoryLoadSucceeded] = useState(false);
+  const [coreDataReady, setCoreDataReady] = useState(false);
+  const [digitalDataReady, setDigitalDataReady] = useState(false);
+  // A memory observation is written at most once per completed load.
+  const abeMemorySaveStarted = useRef(false);
+  const dashboardLoadGeneration = useRef(0);
   const [previousFollowThrough, setPreviousFollowThrough] =
     useState<FollowThroughSignals | null>(null);
 
@@ -907,6 +913,7 @@ export default function DashboardPage() {
       if (payload?.memory) {
         setAbeMemory(payload.memory);
       }
+      setAbeMemoryLoadSucceeded(true);
     } catch (error) {
       console.error("Failed to load Abe memory", error);
     } finally {
@@ -934,10 +941,12 @@ export default function DashboardPage() {
     }
   }
 
-  async function loadDigitalData() {
+  async function loadDigitalData(generation: number) {
     try {
       const liveDigitalSnapshot = await getDigitalSnapshot();
+      if (dashboardLoadGeneration.current !== generation) return;
       setDigitalSnapshot(liveDigitalSnapshot);
+      setDigitalDataReady(true);
     } catch (error) {
       console.error(
         "Digital snapshot failed after core dashboard load",
@@ -947,6 +956,10 @@ export default function DashboardPage() {
   }
 
   async function loadData() {
+    const generation = ++dashboardLoadGeneration.current;
+    abeMemorySaveStarted.current = false;
+    setCoreDataReady(false);
+    setDigitalDataReady(false);
     try {
       setLoading(true);
       setMessage("");
@@ -1032,10 +1045,12 @@ export default function DashboardPage() {
       setPrintSnapshot(livePrintSnapshot);
       setFinanceSnapshot(liveFinanceData.snapshot);
       setFinanceTrendData(liveFinanceData.trendData);
+      if (dashboardLoadGeneration.current !== generation) return;
+      setCoreDataReady(true);
 
       // Digital remains intentionally outside the critical startup path.
       // Leave its working data loader untouched.
-      void loadDigitalData();
+      void loadDigitalData(generation);
     } catch (err: any) {
       setMessage(err?.message || "Failed to load dashboard");
     } finally {
@@ -1818,22 +1833,23 @@ export default function DashboardPage() {
   ]);
 
   useEffect(() => {
-    if (!abeMemoryLoaded) return;
+    // Wait for successful core, Digital, and memory loads. Failed loads do not
+    // become false strategic observations in A.B.E.'s history.
+    if (!coreDataReady || !digitalDataReady || !abeMemoryLoaded || !abeMemoryLoadSucceeded) return;
+    if (abeMemorySaveStarted.current) return;
 
-    setAbeMemory((current) => {
-      const nextMemory = updateAbeMemory(current, abeBriefing);
-      persistAbeMemory(nextMemory);
-      return nextMemory;
-    });
+    // Set the guard synchronously before writing, including in React dev mode.
+    abeMemorySaveStarted.current = true;
+    const nextMemory = updateAbeMemory(abeMemory, abeBriefing);
+    setAbeMemory(nextMemory);
+    void persistAbeMemory(nextMemory);
   }, [
-    abeBriefing.health,
-    abeBriefing.campaignStatus,
-    abeBriefing.primaryLane,
-    abeBriefing.strongest,
-    abeBriefing.weakest,
-    abeBriefing.opportunityLane,
-    abeBriefing.crossDomainSignal,
+    coreDataReady,
+    digitalDataReady,
     abeMemoryLoaded,
+    abeMemoryLoadSucceeded,
+    abeBriefing,
+    abeMemory,
   ]);
 
   useEffect(() => {

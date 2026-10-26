@@ -413,21 +413,45 @@ export async function getDigitalSnapshot(): Promise<DigitalSnapshot> {
     };
   }
 
-  // Overview uses server-side aggregation; detailed Digital pages keep their
-  // existing getDigitalPlatformRows() behavior.
-  const { data, error } = await supabase.rpc(
-    "get_political_digital_analytics_summary",
-    { p_organization_id: organizationId }
-  );
+  // Overview uses daily roll-ups; detailed Digital pages retain their
+  // existing getDigitalPlatformRows() behavior for now.
+  // Read precomputed lifetime totals instead of scanning analytics_events.
+  // Roll-ups are refreshed by the scheduled database job.
+  const response = await fetch("/api/political/digital-rollups", {
+    method: "GET",
+    credentials: "include",
+    cache: "no-store",
+  });
 
-  if (error) {
-    console.error("Failed to load aggregated digital snapshot", {
-      organizationId, error,
+  const payload = await response.json().catch(() => null);
+  if (!response.ok || !Array.isArray(payload?.rows)) {
+    console.error("Failed to load digital roll-ups", {
+      organizationId,
+      status: response.status,
+      error: payload?.error ?? "Unexpected response",
     });
-    throw new Error("Unable to load digital analytics summary.");
+    throw new Error("Unable to load digital analytics roll-ups.");
   }
+  const data = payload.rows;
 
-  const summaries = (data ?? []) as DigitalSummaryRow[];
+  // Combine daily rows by platform while preserving the summary shape.
+  const grouped = new Map<string, DigitalSummaryRow>();
+  for (const row of data ?? []) {
+    const platform = platformLabel(row.political_platform);
+    const current = grouped.get(platform) ?? {
+      platform, impressions: 0, engagement: 0, spend: 0,
+      positive_sentiment: 0, negative_sentiment: 0, ctr_sum: 0, row_count: 0,
+    };
+    current.impressions = toNumber(current.impressions) + toNumber(row.impressions);
+    current.engagement = toNumber(current.engagement) + toNumber(row.engagements);
+    current.spend = toNumber(current.spend) + toNumber(row.spend);
+    current.positive_sentiment = toNumber(current.positive_sentiment) + toNumber(row.positive_sentiment);
+    current.negative_sentiment = toNumber(current.negative_sentiment) + toNumber(row.negative_sentiment);
+    current.ctr_sum = toNumber(current.ctr_sum) + toNumber(row.ctr_sum);
+    current.row_count = toNumber(current.row_count) + toNumber(row.row_count);
+    grouped.set(platform, current);
+  }
+  const summaries = Array.from(grouped.values());
 
   // Match the previous legacy fallback when no analytics events exist.
   if (summaries.length === 0) {

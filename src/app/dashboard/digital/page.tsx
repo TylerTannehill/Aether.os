@@ -27,7 +27,6 @@ import { getOrgContextTheme } from "@/lib/org-context-theme";
 import { buildDigitalBriefing } from "@/lib/abe/interpreters/digital";
 import { digitalAbeReady as isDigitalAbeReady } from "@/lib/abe/readiness";
 import {
-  getDigitalPlatformRows,
   type DigitalPlatformRow,
 } from "@/lib/data/digital";
 import {
@@ -38,6 +37,8 @@ import {
 
 type PlatformKey = "meta" | "instagram" | "x" | "tiktok" | "youtube" | "unknown";
 type TrendView = "impressions" | "engagement" | "spend" | "sentiment";
+
+type RollupDigitalRow = DigitalPlatformRow & { rollupCount: number };
 
 type PlatformMetric = {
   key: PlatformKey;
@@ -138,7 +139,7 @@ function platformLabelFromKey(key: PlatformKey, fallback?: string | null) {
   return fallback?.trim() || "Unknown";
 }
 
-function buildPlatformMetrics(rows: DigitalPlatformRow[]): PlatformMetric[] {
+function buildPlatformMetrics(rows: RollupDigitalRow[]): PlatformMetric[] {
   const grouped = new Map<
     PlatformKey,
     {
@@ -179,12 +180,12 @@ function buildPlatformMetrics(rows: DigitalPlatformRow[]): PlatformMetric[] {
     if (row.positive_sentiment !== null || row.negative_sentiment !== null) {
       existing.positiveTotal += toNumber(row.positive_sentiment);
       existing.negativeTotal += toNumber(row.negative_sentiment);
-      existing.sentimentRows += 1;
+      existing.sentimentRows += row.rollupCount;
     }
 
     if (row.ctr !== null) {
       existing.ctrTotal += toNumber(row.ctr);
-      existing.ctrRows += 1;
+      existing.ctrRows += row.rollupCount;
     }
 
     grouped.set(key, existing);
@@ -216,24 +217,34 @@ function buildPlatformMetrics(rows: DigitalPlatformRow[]): PlatformMetric[] {
     );
 }
 
-function buildChartData(rows: DigitalPlatformRow[]) {
-  return rows
-    .slice(0, 4)
-    .reverse()
-    .map((row, index) => ({
-      label: row.created_at
-        ? new Date(row.created_at).toLocaleDateString(undefined, {
-            month: "short",
-            day: "numeric",
-          })
-        : `Entry ${index + 1}`,
-      impressions: toNumber(row.impressions),
-      engagement: toNumber(row.engagement),
-      spend: toNumber(row.spend),
-      sentiment: Math.max(
-        0,
-        toNumber(row.positive_sentiment) - toNumber(row.negative_sentiment)
-      ),
+function buildChartData(rows: RollupDigitalRow[]) {
+  const byDate = new Map<string, {
+    label: string; impressions: number; engagement: number;
+    spend: number; sentimentTotal: number; count: number;
+  }>();
+  for (const row of rows) {
+    if (!row.created_at) continue;
+    const date = row.created_at.slice(0, 10);
+    const current = byDate.get(date) ?? {
+      label: new Date(`${date}T12:00:00`).toLocaleDateString(undefined, { month: "short", day: "numeric" }),
+      impressions: 0, engagement: 0, spend: 0, sentimentTotal: 0, count: 0,
+    };
+    current.impressions += toNumber(row.impressions);
+    current.engagement += toNumber(row.engagement);
+    current.spend += toNumber(row.spend);
+    current.sentimentTotal += toNumber(row.positive_sentiment) - toNumber(row.negative_sentiment);
+    current.count += row.rollupCount;
+    byDate.set(date, current);
+  }
+  return Array.from(byDate.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .slice(-4)
+    .map(([, item]) => ({
+      label: item.label,
+      impressions: item.impressions,
+      engagement: item.engagement,
+      spend: item.spend,
+      sentiment: Math.max(0, item.count ? item.sentimentTotal / item.count : 0),
     }));
 }
 
@@ -433,7 +444,7 @@ function canShowDepartmentAbe(tier: AetherTier) {
 
 export default function DigitalDashboardPage() {
   const [trendView, setTrendView] = useState<TrendView>("impressions");
-  const [digitalRows, setDigitalRows] = useState<DigitalPlatformRow[]>([]);
+  const [digitalRows, setDigitalRows] = useState<RollupDigitalRow[]>([]);
   const [digitalLoading, setDigitalLoading] = useState(true);
   const [contentPipeline, setContentPipeline] = useState<ContentItem[]>([]);
   const [contentLoading, setContentLoading] = useState(true);
@@ -491,7 +502,30 @@ export default function DigitalDashboardPage() {
     async function loadDigitalRows() {
       try {
         setDigitalLoading(true);
-        const rows = await getDigitalPlatformRows();
+        const response = await fetch("/api/political/digital-rollups", {
+          credentials: "include",
+          cache: "no-store",
+        });
+        const payload = await response.json().catch(() => null);
+        if (!response.ok || !Array.isArray(payload?.rows)) {
+          throw new Error(payload?.error || "Unable to load Digital roll-ups.");
+        }
+        const rows: RollupDigitalRow[] = payload.rows.map((row: Record<string, unknown>, index: number) => {
+          const count = Math.max(1, toNumber(row.row_count));
+          return {
+            id: `${String(row.metric_date ?? "unknown")}-${String(row.political_platform ?? "unknown")}-${index}`,
+            platform: String(row.political_platform ?? "Unknown"),
+            impressions: toNumber(row.impressions),
+            engagement: toNumber(row.engagements),
+            spend: toNumber(row.spend),
+            // Keep summed values; platform metric builder divides by original row counts.
+            positive_sentiment: toNumber(row.positive_sentiment),
+            negative_sentiment: toNumber(row.negative_sentiment),
+            ctr: toNumber(row.ctr_sum),
+            created_at: typeof row.metric_date === "string" ? row.metric_date : null,
+            rollupCount: count,
+          };
+        });
 
         if (!mounted) return;
 

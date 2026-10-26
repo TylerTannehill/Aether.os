@@ -68,7 +68,7 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/favicon.ico') ||
     pathname.match(/\.(.*)$/)
 
-  if (isPublicAsset || isPublicApiRoute) {
+  if (isPublicAsset || isPublicApiRoute || isPublicRoute) {
     return response
   }
 

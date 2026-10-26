@@ -142,55 +142,6 @@ function isFieldMaterialSupportName(value: string) {
   );
 }
 
-function normalizeFieldRow(row: Record<string, any>): FieldMetricRow {
-  return {
-    id: String(row.id),
-    turf_name:
-      row.turf_name ||
-      row.turf ||
-      row.route_name ||
-      row.segment ||
-      "Active Turf",
-    region:
-      row.region ||
-      row.area ||
-      row.zone ||
-      row.district ||
-      "Unassigned Region",
-    doors: toNumber(row.doors ?? row.households ?? row.knocks),
-    conversations: toNumber(
-      row.conversations ?? row.contacts ?? row.contact_rate
-    ),
-    ids: toNumber(row.ids ?? row.support_ids ?? row.identifications),
-    completion: toNumber(
-      row.completion ?? row.completion_rate ?? row.progress
-    ),
-    canvasser_name:
-      row.canvasser_name ||
-      row.owner ||
-      row.staff_name ||
-      "Unassigned",
-    created_at: row.metric_date ?? row.created_at ?? null,
-    linked_list_id: row.linked_list_id ?? row.list_id ?? null,
-    linked_list_name: row.linked_list_name ?? row.list_name ?? null,
-    source_type: row.source_type || "analytics",
-  };
-}
-
-function isFieldAnalyticsRow(row: Record<string, any>) {
-  const department = normalize(row.department);
-  const category = normalize(row.category);
-  const source = normalize(row.source);
-  const platform = normalize(row.platform);
-
-  return (
-    department === "field" ||
-    category === "field" ||
-    source === "field" ||
-    platform === "field"
-  );
-}
-
 function isLikelyFieldList(list: FieldListRow) {
   const type = normalize(list.type);
   const normalized = normalizeOperationalText(`${list.name || ""} ${list.type || ""}`);
@@ -385,43 +336,6 @@ function determineFieldIssue(rows: FieldMetricRow[]) {
   return `${weakestCompletionName} is lagging on completion, while ${weakestYieldName} needs better conversation yield.`;
 }
 
-async function getAnalyticsEventRows(
-  organizationId: string
-): Promise<FieldMetricRow[]> {
-  const { data, error } = await supabase
-    .from("analytics_events")
-    .select("*")
-    .eq("organization_id", organizationId)
-    .order("metric_date", { ascending: false });
-
-  if (error) {
-    console.error("Failed to load analytics_events for field metrics", {
-      organizationId,
-      error,
-    });
-
-    return [];
-  }
-
-  const rows = ((data as Record<string, any>[]) ?? [])
-    .filter(isFieldAnalyticsRow)
-    .map((row) =>
-      normalizeFieldRow({
-        ...row,
-        source_type: "analytics",
-      })
-    );
-
-  console.info("Field analytics_events loaded", {
-    organizationId,
-    rawCount: data?.length ?? 0,
-    fieldCount: rows.length,
-    sample: rows[0] ?? null,
-  });
-
-  return rows;
-}
-
 async function getLegacyFieldRows(
   organizationId: string
 ): Promise<FieldMetricRow[]> {
@@ -524,14 +438,15 @@ export async function getFieldMetricRows(
     return [];
   }
 
-  const [analyticsRows, legacyRows, fieldListRows] = await Promise.all([
-    getAnalyticsEventRows(organizationId),
+  // Field operational metrics come from field_metrics and field lists.
+  // Do not scan analytics_events here: that table contains large volumes
+  // of Digital records and the unfiltered query can time out the Dashboard.
+  const [legacyRows, fieldListRows] = await Promise.all([
     getLegacyFieldRows(organizationId),
     getTypedFieldListRows(organizationId),
   ]);
 
   return dedupeFieldRows([
-    ...analyticsRows,
     ...legacyRows,
     ...fieldListRows,
   ]);
