@@ -16,13 +16,28 @@ function failure(message: string, status: number) {
 
 export async function POST(request: Request) {
   try {
-    // Verify the signed-in Aether user.
+    // Accept a verified mobile Bearer token or the existing desktop cookie session.
+    // Never trust an unverified user ID supplied by the caller.
+    const authorization = request.headers.get("authorization");
+    const bearerToken = authorization?.match(/^Bearer\s+(.+)$/i)?.[1]?.trim();
     const supabase = await createClient();
+    const urlForAuth = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    if (bearerToken && (!urlForAuth || !anonKey)) {
+      console.error("Social deletion: Token verification configuration missing.");
+      return failure("Account deletion is temporarily unavailable.", 503);
+    }
+
+    const tokenVerifier = bearerToken
+      ? createSupabaseAdminClient(urlForAuth!, anonKey!, {
+          auth: { autoRefreshToken: false, persistSession: false },
+        })
+      : null;
+
+    const { data: { user }, error: authError } = bearerToken
+      ? await tokenVerifier!.auth.getUser(bearerToken)
+      : await supabase.auth.getUser();
 
     if (authError || !user) {
       return failure("Please sign in to delete your Social account.", 401);
