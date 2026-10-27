@@ -1,14 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 
+type ContactType = "demo" | "contact" | "support" | "security" | "module_request";
+
 interface ContactRequest {
-  type: "demo" | "contact" | "support" | "security" | "module_request";
+  type: ContactType;
   name: string;
   email: string;
   organization?: string;
   phone?: string;
   subject?: string;
   message: string;
+}
+
+interface SocialReportRequest {
+  type: "social_report";
+  postId: string;
+  reason: string;
 }
 
 const transporter = nodemailer.createTransport({
@@ -29,26 +37,128 @@ const subjectMap = {
   module_request: "Business Module Request",
 } as const;
 
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function jsonError(message: string, status: number) {
+  return NextResponse.json({ success: false, error: message }, { status });
+}
+
+async function handleSocialReport(request: NextRequest, body: SocialReportRequest) {
+  const token = request.headers.get("authorization")?.match(/^Bearer\s+(.+)$/i)?.[1];
+  if (!token) return jsonError("Sign in to report a post.", 401);
+
+  const postId = typeof body.postId === "string" ? body.postId.trim() : "";
+  const reason = typeof body.reason === "string" ? body.reason.trim() : "";
+  if (!UUID_PATTERN.test(postId) || !reason || reason.length > 2000) {
+    return jsonError("A valid post and a reason (up to 2,000 characters) are required.", 400);
+  }
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!supabaseUrl || !supabaseKey) {
+    console.error("Social report: Supabase server configuration is missing.");
+    return jsonError("Reporting is temporarily unavailable.", 503);
+  }
+
+  const authHeaders = { apikey: supabaseKey, authorization: `Bearer ${token}` };
+  const userResponse = await fetch(`${supabaseUrl}/auth/v1/user`, {
+    headers: authHeaders,
+    cache: "no-store",
+  });
+  if (!userResponse.ok) return jsonError("Your session has expired. Sign in again.", 401);
+  const user = (await userResponse.json()) as { id?: string; email?: string };
+  if (!user.id) return jsonError("Could not verify your account.", 401);
+
+  const reporterQuery = new URL(`${supabaseUrl}/rest/v1/social_profiles`);
+  reporterQuery.searchParams.set("select", "id,display_name,username");
+  reporterQuery.searchParams.set("auth_user_id", `eq.${user.id}`);
+  reporterQuery.searchParams.set("limit", "1");
+
+  const postQuery = new URL(`${supabaseUrl}/rest/v1/social_posts`);
+  postQuery.searchParams.set("select", "id,author_id,employer_id,context,content,created_at");
+  postQuery.searchParams.set("id", `eq.${postId}`);
+  postQuery.searchParams.set("limit", "1");
+
+  const [reporterResponse, postResponse] = await Promise.all([
+    fetch(reporterQuery.toString(), { headers: authHeaders, cache: "no-store" }),
+    fetch(postQuery.toString(), { headers: authHeaders, cache: "no-store" }),
+  ]);
+  if (!reporterResponse.ok || !postResponse.ok) {
+    return jsonError("Could not verify the reported post. Please try again.", 502);
+  }
+
+  const reporters = (await reporterResponse.json()) as Array<{
+    id: string; display_name: string | null; username: string | null;
+  }>;
+  const reportedPosts = (await postResponse.json()) as Array<{
+    id: string; author_id: string | null; employer_id: string | null;
+    context: string; content: string; created_at: string;
+  }>;
+  const reporter = reporters[0];
+  const post = reportedPosts[0];
+  if (!reporter) return jsonError("Social profile not found.", 403);
+  if (!post) return jsonError("Post not found.", 404);
+  if (post.author_id === reporter.id) return jsonError("You cannot report your own post.", 400);
+
+  const destination = "team@aetheros.pro";
+  await transporter.sendMail({
+    from: `"Aether Social" <${process.env.SMTP_USER}>`,
+    to: destination,
+    ...(user.email ? { replyTo: user.email } : {}),
+    subject: "Aether Social — Content Report",
+    text: [
+      "Aether Social — Content Report",
+      "",
+      `Reporter: ${reporter.display_name || reporter.username || "Aether member"}`,
+      `Reporter profile ID: ${reporter.id}`,
+      `Reporter email: ${user.email || "Unavailable"}`,
+      `Reported post ID: ${post.id}`,
+      `Reported author profile ID: ${post.author_id || "N/A"}`,
+      `Reported employer ID: ${post.employer_id || "N/A"}`,
+      `Feed: ${post.context}`,
+      `Posted: ${post.created_at}`,
+      "",
+      "Reason:",
+      reason,
+      "",
+      "Post content:",
+      post.content || "[No text — may contain an image]",
+      "",
+      "Review promptly; moderation action is not performed by this email endpoint.",
+    ].join("\n"),
+  });
+
+  return NextResponse.json({ success: true, message: "Report sent to Aether Social support." });
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const body: ContactRequest = await request.json();
+    const body = (await request.json()) as Partial<ContactRequest | SocialReportRequest>;
+    if (body?.type === "social_report") {
+      return await handleSocialReport(request, body as SocialReportRequest);
+    }
+
+    const contact = body as ContactRequest;
+    if (!contact || !Object.prototype.hasOwnProperty.call(subjectMap, contact.type)) {
+      return jsonError("Invalid contact request type.", 400);
+    }
 
     await transporter.sendMail({
       from: `"Aether Website" <${process.env.SMTP_USER}>`,
       to: process.env.CONTACT_EMAIL,
-      replyTo: body.email,
-      subject: subjectMap[body.type],
+      replyTo: contact.email,
+      subject: subjectMap[contact.type],
       text: `
-Type: ${subjectMap[body.type]}
+Type: ${subjectMap[contact.type]}
 
-Name: ${body.name}
-Email: ${body.email}
-Organization: ${body.organization ?? "N/A"}
-Phone: ${body.phone ?? "N/A"}
-Subject: ${body.subject ?? "N/A"}
+Name: ${contact.name}
+Email: ${contact.email}
+Organization: ${contact.organization ?? "N/A"}
+Phone: ${contact.phone ?? "N/A"}
+Subject: ${contact.subject ?? "N/A"}
 
 Message:
-${body.message}
+${contact.message}
       `,
     });
 
@@ -58,13 +168,6 @@ ${body.message}
     });
   } catch (error) {
     console.error("Contact API Error:", error);
-
-    return NextResponse.json(
-      {
-        success: false,
-        error: "Something went wrong.",
-      },
-      { status: 500 }
-    );
+    return jsonError("Something went wrong.", 500);
   }
 }

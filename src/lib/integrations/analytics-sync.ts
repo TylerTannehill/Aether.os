@@ -121,11 +121,31 @@ async function upsertRows(rows: AnalyticsEventRow[]) {
     );
   }
 
+  // PostgreSQL cannot update the same conflict target twice in one upsert.
+  // Keep the last occurrence of each provider record before writing the batch.
+  const uniqueRows = new Map<string, AnalyticsEventRow>();
+  for (const row of rowsWithIdentity) {
+    const key = JSON.stringify([
+      row.organization_id,
+      row.source,
+      row.platform,
+      row.external_id,
+    ]);
+    uniqueRows.set(key, row);
+  }
+  const deduplicatedRows = [...uniqueRows.values()];
+
+  if (deduplicatedRows.length !== rowsWithIdentity.length) {
+    console.warn(
+      `Analytics sync removed ${rowsWithIdentity.length - deduplicatedRows.length} duplicate row(s) before upsert.`
+    );
+  }
+
   const supabase = getAdminClient();
 
   const { data, error } = await supabase
     .from("analytics_events")
-    .upsert(rowsWithIdentity, {
+    .upsert(deduplicatedRows, {
       onConflict: "organization_id,source,platform,external_id",
     })
     .select("id");
@@ -134,7 +154,7 @@ async function upsertRows(rows: AnalyticsEventRow[]) {
     throw new Error(`Analytics upsert failed: ${error.message}`);
   }
 
-  return data?.length ?? rowsWithIdentity.length;
+  return data?.length ?? deduplicatedRows.length;
 }
 
 async function getConnectedIntegration(
