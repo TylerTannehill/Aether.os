@@ -47,6 +47,8 @@ export default function SocialNetworkPage() {
   const [requestError, setRequestError] = useState("");
   const [requestNotice, setRequestNotice] = useState("");
   const [busyRequestId, setBusyRequestId] = useState<string | null>(null);
+  const [blockedIds, setBlockedIds] = useState<string[]>([]);
+  const [blocksReady, setBlocksReady] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -55,6 +57,8 @@ export default function SocialNetworkPage() {
       setError("");
       setRequestError("");
       setPeopleError("");
+      setBlocksReady(false);
+      setBlockedIds([]);
       const { data: auth, error: authError } = await supabase.auth.getUser();
       if (!alive) return;
       if (authError || !auth.user) {
@@ -69,11 +73,30 @@ export default function SocialNetworkPage() {
         .maybeSingle();
       if (!alive) return;
       setMyProfileId(myProfile?.id ?? null);
+      // Hide both people you blocked and people who blocked you.
+      // Do not render discovery or connection actions until this check succeeds.
+      if (myProfileError) {
+        setError("Could not verify your Social profile. Please refresh and try again.");
+        setLoading(false);
+        return;
+      }
+      if (myProfile?.id) {
+        const { data: blockRows, error: blocksError } = await supabase
+          .from("social_user_blocks")
+          .select("blocker_id, blocked_id")
+          .or(`blocker_id.eq.${myProfile.id},blocked_id.eq.${myProfile.id}`);
+        if (!alive) return;
+        if (blocksError) {
+          setError("Could not check blocked members. Please refresh and try again.");
+          setLoading(false);
+          return;
+        }
+        setBlockedIds([...new Set((blockRows ?? []).map(row =>
+          row.blocker_id === myProfile.id ? row.blocked_id : row.blocker_id
+        ))]);
+      }
+      setBlocksReady(true);
       if (!isIndividual) {
-        setIncoming([]);
-        setMyPeople([]);
-      } else if (myProfileError) {
-        setRequestError("Could not load your Social identity: " + myProfileError.message);
         setIncoming([]);
         setMyPeople([]);
       } else if (myProfile) {
@@ -123,7 +146,9 @@ export default function SocialNetworkPage() {
   }, [supabase, refreshCount, isIndividual]);
 
   async function handleRequest(connectionId: string, action: "accept" | "decline") {
-    if (!isIndividual || busyRequestId) return;
+    if (!isIndividual || busyRequestId || !blocksReady || error) return;
+    const request = incoming.find(item => item.id === connectionId);
+    if (!request || blockedIds.includes(request.requester_id)) return;
     setBusyRequestId(connectionId);
     setRequestError("");
     setRequestNotice("");
@@ -140,30 +165,35 @@ export default function SocialNetworkPage() {
     setBusyRequestId(null);
   }
 
+  const blockedSet = useMemo(() => new Set(blockedIds), [blockedIds]);
+
   const profileById = useMemo(() => new Map(profiles.map((profile) => [profile.id, profile])), [profiles]);
 
   const filteredMyPeople = useMemo(() => {
     const needle = peopleQuery.trim().toLowerCase().replace(/^@/, "");
-    if (!needle) return myPeople;
     return myPeople.filter((grant) => {
       const personId = grant.requester_id === myProfileId ? grant.recipient_id : grant.requester_id;
+      if (blockedSet.has(personId)) return false;
+      if (!needle) return true;
       const person = profileById.get(personId);
       return (person?.display_name ?? "").toLowerCase().includes(needle) ||
         (person?.username ?? "").toLowerCase().includes(needle);
     });
-  }, [myPeople, peopleQuery, myProfileId, profileById]);
+  }, [myPeople, peopleQuery, myProfileId, profileById, blockedSet]);
 
   const matches = useMemo(() => {
     const needle = query.trim().toLowerCase().replace(/^@/, "");
     return profiles.filter((profile) => {
-      if (profile.auth_user_id === ownAuthId) return false;
+      if (profile.auth_user_id === ownAuthId || blockedSet.has(profile.id)) return false;
       if (!needle) return true;
       return (
         (profile.display_name ?? "").toLowerCase().includes(needle) ||
         (profile.username ?? "").toLowerCase().includes(needle)
       );
     });
-  }, [profiles, query, ownAuthId]);
+  }, [profiles, query, ownAuthId, blockedSet]);
+
+  const visibleIncoming = useMemo(() => incoming.filter(request => !blockedSet.has(request.requester_id)), [incoming, blockedSet]);
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 pb-8 pt-3 text-slate-100 sm:px-6 sm:pt-4">
@@ -182,12 +212,12 @@ export default function SocialNetworkPage() {
         </div>
       </section>
 
-      {isIndividual && <div className="mb-5 grid grid-cols-1 items-stretch gap-5 md:grid-cols-2">
+      {isIndividual && !error && blocksReady && <div className="mb-5 grid grid-cols-1 items-stretch gap-5 md:grid-cols-2">
       <section className="flex h-[320px] min-w-0 flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#101b30] p-5 shadow-xl sm:p-6" aria-labelledby="incoming-requests-heading">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 id="incoming-requests-heading" className="flex items-center gap-2 text-lg font-bold">
             <UsersRound className="h-5 w-5 text-violet-300" /> Incoming requests
-            {incoming.length > 0 && <span className="rounded-full bg-violet-500/20 px-2 py-0.5 text-xs text-violet-200">{incoming.length}</span>}
+            {visibleIncoming.length > 0 && <span className="rounded-full bg-violet-500/20 px-2 py-0.5 text-xs text-violet-200">{visibleIncoming.length}</span>}
           </h2>
           <button type="button" onClick={() => setRefreshCount((n) => n + 1)} disabled={loading || busyRequestId !== null}
             className="inline-flex items-center gap-2 rounded-lg border border-white/20 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:bg-white/10 disabled:opacity-50">
@@ -199,11 +229,11 @@ export default function SocialNetworkPage() {
         {requestNotice && <p role="status" className="mt-4 rounded-xl border border-emerald-400/30 bg-emerald-500/10 p-3 text-sm text-emerald-200">{requestNotice}</p>}
         {loading ? (
           <div className="mt-5 flex items-center gap-2 text-sm text-slate-400"><Loader2 className="h-4 w-4 animate-spin" /> Checking requests...</div>
-        ) : incoming.length === 0 ? (
+        ) : visibleIncoming.length === 0 ? (
           <p className="mt-5 rounded-xl border border-white/10 bg-white/[0.035] p-4 text-sm text-slate-400">No incoming connection requests right now.</p>
         ) : (
           <div className="mt-5 min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain pr-1">
-            {incoming.map((request) => {
+            {visibleIncoming.map((request) => {
               const sender = profileById.get(request.requester_id);
               const busy = busyRequestId === request.id;
               return (
@@ -243,7 +273,7 @@ export default function SocialNetworkPage() {
         {peopleError && <p role="alert" className="mt-4 text-sm text-rose-200">{peopleError}</p>}
         {loading ? (
           <p className="mt-5 flex items-center gap-2 text-sm text-slate-400"><Loader2 className="h-4 w-4 animate-spin" /> Loading your people...</p>
-        ) : myPeople.length === 0 && !peopleError ? (
+        ) : filteredMyPeople.length === 0 && !peopleError ? (
           <p className="mt-5 rounded-xl border border-white/10 bg-white/[0.035] p-4 text-sm text-slate-400">You haven't granted anyone personal access yet.</p>
         ) : (
           <div className="mt-4 min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1">
@@ -287,7 +317,7 @@ export default function SocialNetworkPage() {
           </p>
         )}
 
-        {loading ? (
+        {loading || !blocksReady ? (
           <div className="flex items-center gap-3 py-12 text-sm text-slate-400">
             <Loader2 className="h-5 w-5 animate-spin" /> Looking for people...
           </div>

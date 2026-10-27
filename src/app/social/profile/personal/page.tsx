@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Camera, Check, Loader2, UserRound } from 'lucide-react'
+import { ArrowLeft, Camera, Check, Loader2, Trash2, UserRound } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 type Identity = {
@@ -51,6 +51,10 @@ export default function PersonalProfileEditorPage() {
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
   const [photoError, setPhotoError] = useState('')
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [deleteConfirmation, setDeleteConfirmation] = useState('')
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -263,6 +267,29 @@ export default function PersonalProfileEditorPage() {
     }
   }
 
+  async function deleteSocialAccount() {
+    if (!identity || deleting || deleteConfirmation !== 'DELETE SOCIAL') return
+    setDeleting(true)
+    setDeleteError('')
+    try {
+      await verifyOwner()
+      const response = await fetch('/api/social/delete-account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirmation: 'DELETE SOCIAL' }),
+      })
+      const result = await response.json().catch(() => ({}))
+      if (!response.ok || result.success !== true) {
+        throw new Error(result.error || 'Unable to delete your Social account.')
+      }
+      await supabase.auth.signOut()
+      window.location.replace('/login-social')
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : 'Unable to delete your Social account.')
+      setDeleting(false)
+    }
+  }
+
   const photoUrl = personal?.avatar_path
     ? supabase.storage.from('social-avatars').getPublicUrl(personal.avatar_path).data.publicUrl
     : null
@@ -350,6 +377,33 @@ export default function PersonalProfileEditorPage() {
               </button>
             </form>
           </section>
+
+          <section className="rounded-xl border border-rose-500/30 bg-[#101b30] p-5">
+            <h2 className="flex items-center gap-2 font-bold text-rose-300"><Trash2 className="h-4 w-4" /> Delete Aether Social Account</h2>
+            <p className="mt-2 text-sm text-slate-300">Permanently delete your Aether Social profile and associated Social content. This does not delete your Political or Business memberships. Some records may be retained for safety or legal obligations.</p>
+            <button type="button" onClick={() => { setDeleteOpen(true); setDeleteConfirmation(''); setDeleteError('') }} className="mt-4 rounded-lg border border-rose-400/50 px-4 py-2 text-sm font-semibold text-rose-200 hover:bg-rose-500/10">
+              Delete Social Account
+            </button>
+          </section>
+        </div>
+      )}
+
+      {deleteOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" role="presentation">
+          <div role="dialog" aria-modal="true" aria-labelledby="delete-social-title" className="w-full max-w-md rounded-2xl border border-rose-400/40 bg-[#101b30] p-6 shadow-2xl">
+            <h2 id="delete-social-title" className="text-xl font-bold text-white">Permanently delete Social?</h2>
+            <p className="mt-3 text-sm text-slate-300">This permanently removes your Aether Social profile and associated Social content. You cannot undo this action. Your Political and Business access will not be deleted.</p>
+            <label htmlFor="delete-social-confirm" className="mt-5 block text-sm font-semibold text-slate-200">Type DELETE SOCIAL to confirm</label>
+            <input id="delete-social-confirm" autoComplete="off" value={deleteConfirmation} disabled={deleting} onChange={e => setDeleteConfirmation(e.target.value)} className="mt-2 w-full rounded-lg border border-white/20 bg-slate-950/70 px-3 py-3 text-sm text-white outline-none focus:border-rose-400" />
+            {deleteError && <p role="alert" className="mt-3 text-sm text-rose-300">{deleteError}</p>}
+            <div className="mt-6 flex flex-wrap justify-end gap-3">
+              <button type="button" disabled={deleting} onClick={() => setDeleteOpen(false)} className="rounded-lg border border-white/20 px-4 py-2 text-sm font-semibold text-slate-200 disabled:opacity-50">Cancel</button>
+              <button type="button" disabled={deleting || deleteConfirmation !== 'DELETE SOCIAL'} onClick={() => void deleteSocialAccount()} className="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2 text-sm font-bold text-white hover:bg-rose-500 disabled:opacity-40">
+                {deleting && <Loader2 className="h-4 w-4 animate-spin" />}
+                {deleting ? 'Deleting...' : 'Permanently Delete'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </main>

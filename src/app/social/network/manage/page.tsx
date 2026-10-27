@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, BriefcaseBusiness, Check, Loader2, LockKeyhole, RefreshCw, Search, ShieldCheck, UserRound, UsersRound, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, BriefcaseBusiness, Check, Loader2, LockKeyhole, RefreshCw, Search, ShieldCheck, ShieldBan, UserRound, UsersRound, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 type Connection = {
@@ -13,6 +13,7 @@ type Connection = {
   recipient_grants_personal: boolean;
 };
 type Member = { id: string; display_name: string | null; username: string | null };
+type BlockRow = { blocker_id: string; blocked_id: string };
 type Position = { profile_id: string; job_title: string | null; company_name: string | null; is_current: boolean; start_date: string | null };
 
 export default function ManageConnectionsPage() {
@@ -28,6 +29,10 @@ export default function ManageConnectionsPage() {
   const [notice, setNotice] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
   const [confirmRemove, setConfirmRemove] = useState<string | null>(null);
+  const [confirmBlock, setConfirmBlock] = useState<string | null>(null);
+  const [blockedIds, setBlockedIds] = useState<string[]>([]);
+  const [blockedMembers, setBlockedMembers] = useState<Member[]>([]);
+  const [blockSearch, setBlockSearch] = useState("");
 
   useEffect(() => {
     let alive = true;
@@ -50,7 +55,14 @@ export default function ManageConnectionsPage() {
           .or(`requester_id.eq.${mine.id},recipient_id.eq.${mine.id}`);
         if (rowsError) throw rowsError;
         const accepted = (rows ?? []) as Connection[];
-        const ids = [...new Set(accepted.map(c => c.requester_id === mine.id ? c.recipient_id : c.requester_id))];
+        const { data: blockRows, error: blocksError } = await supabase.from("social_user_blocks")
+          .select("blocker_id, blocked_id").or(`blocker_id.eq.${mine.id},blocked_id.eq.${mine.id}`);
+        if (blocksError) throw blocksError;
+        const allBlocks = (blockRows ?? []) as BlockRow[];
+        const mineBlocked = allBlocks.filter(b => b.blocker_id === mine.id).map(b => b.blocked_id);
+        const excluded = new Set(allBlocks.map(b => b.blocker_id === mine.id ? b.blocked_id : b.blocker_id));
+        const visibleConnections = accepted.filter(c => !excluded.has(c.requester_id === mine.id ? c.recipient_id : c.requester_id));
+        const ids = [...new Set([...visibleConnections.map(c => c.requester_id === mine.id ? c.recipient_id : c.requester_id), ...mineBlocked])];
         let people: Member[] = [];
         let jobs: Position[] = [];
         if (ids.length) {
@@ -67,7 +79,9 @@ export default function ManageConnectionsPage() {
         }
         if (!alive) return;
         setMyId(mine.id);
-        setConnections(accepted);
+        setConnections(visibleConnections);
+        setBlockedIds(mineBlocked);
+        setBlockedMembers(people.filter(person => mineBlocked.includes(person.id)));
         setMembers(people);
         setPositions(jobs);
       } catch (err) {
@@ -101,6 +115,62 @@ export default function ManageConnectionsPage() {
     });
   }, [connections, myId, search, memberById, jobById]);
   const personalCount = connections.filter(c => c.requester_id === myId ? c.requester_grants_personal : c.recipient_grants_personal).length;
+  const filteredBlocked = blockedMembers.filter(person =>
+    [person.display_name, person.username].some(value => (value ?? "").toLowerCase().includes(blockSearch.trim().toLowerCase().replace(/^@/, "")))
+  );
+
+  async function blockMember(otherId: string) {
+    if (!myId || busyId || otherId === myId) return;
+    setBusyId(otherId);
+    setError(""); setNotice("");
+    try {
+      const { error: blockError } = await supabase.from("social_user_blocks")
+        .upsert({ blocker_id: myId, blocked_id: otherId }, { onConflict: "blocker_id,blocked_id" });
+      if (blockError) throw blockError;
+      // Disconnect after blocking so unblocking cannot restore personal sharing.
+      const connection = connections.find(c => c.requester_id === otherId || c.recipient_id === otherId);
+      if (connection) {
+        const { data, error: removeError } = await supabase.rpc("social_remove_connection", { p_connection_id: connection.id });
+        if (removeError || data !== true) {
+          setNotice("Member blocked, but their old connection could not be removed. Unblock will require connection cleanup.");
+        } else {
+          setNotice("Member blocked and connection removed.");
+        }
+      } else setNotice("Member blocked.");
+      setRefresh(n => n + 1);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to block this member.");
+    } finally {
+      setConfirmBlock(null);
+      setBusyId(null);
+    }
+  }
+
+  async function unblockMember(otherId: string) {
+    if (!myId || busyId) return;
+    setBusyId(otherId);
+    setError(""); setNotice("");
+    try {
+      // A previous profile-page block may have left a connection in place.
+      // Remove it before unblocking so personal access is never restored automatically.
+      const { data: existing, error: lookupError } = await supabase.from("social_connections")
+        .select("id").or(`and(requester_id.eq.${myId},recipient_id.eq.${otherId}),and(requester_id.eq.${otherId},recipient_id.eq.${myId})`);
+      if (lookupError) throw lookupError;
+      for (const connection of existing ?? []) {
+        const { data, error: removeError } = await supabase.rpc("social_remove_connection", { p_connection_id: connection.id });
+        if (removeError || data !== true) throw removeError ?? new Error("Could not remove the previous connection.");
+      }
+      const { error: unblockError } = await supabase.from("social_user_blocks")
+        .delete().eq("blocker_id", myId).eq("blocked_id", otherId);
+      if (unblockError) throw unblockError;
+      setBlockedIds(current => current.filter(id => id !== otherId));
+      setBlockedMembers(current => current.filter(person => person.id !== otherId));
+      setNotice("Member unblocked. Previous connections and personal access have not been restored.");
+      setRefresh(n => n + 1);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to unblock this member.");
+    } finally { setBusyId(null); }
+  }
 
   async function change(connection: Connection, action: "remove" | "grant" | "revoke") {
     if (busyId) return;
@@ -147,6 +217,7 @@ export default function ManageConnectionsPage() {
           <div className="flex flex-wrap gap-3 text-sm text-slate-300">
             <span className="rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2"><BriefcaseBusiness className="mr-2 inline h-4 w-4 text-violet-300" />{connections.length} professional</span>
             <span className="rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2"><LockKeyhole className="mr-2 inline h-4 w-4 text-violet-300" />{personalCount} personal access</span>
+            <span className="rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2"><ShieldBan className="mr-2 inline h-4 w-4 text-rose-300" />{blockedIds.length} blocked</span>
           </div>
           <button type="button" disabled={loading || !!busyId} onClick={() => { setNotice(""); setRefresh(n => n + 1); }} className="inline-flex items-center gap-2 rounded-lg border border-white/20 px-3 py-2 text-sm font-semibold hover:bg-white/10 disabled:opacity-50"><RefreshCw className="h-4 w-4" /> Refresh</button>
         </div>
@@ -178,6 +249,7 @@ export default function ManageConnectionsPage() {
               </Link>
               <div className="flex items-center gap-2 md:justify-start">
                 <span className="inline-flex items-center gap-1 rounded-lg border border-emerald-400/20 bg-emerald-500/10 px-2.5 py-2 text-xs font-semibold text-emerald-200"><Check className="h-3.5 w-3.5" /> Connected</span>
+                <button type="button" disabled={!!busyId} onClick={() => setConfirmBlock(otherId)} aria-label={`Block ${member?.display_name || "member"}`} title="Block member" className="rounded-lg border border-rose-400/20 p-2 text-rose-300 transition hover:bg-rose-500/10 disabled:opacity-50"><ShieldBan className="h-4 w-4" /></button>
                 <button type="button" disabled={!!busyId} onClick={() => setConfirmRemove(connection.id)} aria-label={`Remove professional connection with ${member?.display_name || "member"}`} title="Remove professional connection" className="rounded-lg border border-rose-400/20 p-2 text-rose-300 transition hover:bg-rose-500/10 disabled:opacity-50"><X className="h-4 w-4" /></button>
               </div>
               <div className="flex items-center gap-2">
@@ -185,6 +257,11 @@ export default function ManageConnectionsPage() {
                   <button type="button" disabled={!!busyId} onClick={() => void change(connection, "revoke")} aria-label={`Revoke personal access for ${member?.display_name || "member"}`} title="Revoke personal access" className="rounded-lg border border-rose-400/20 p-2 text-rose-300 hover:bg-rose-500/10 disabled:opacity-50">{busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4" />}</button></>
                   : <button type="button" disabled={!!busyId} onClick={() => void change(connection, "grant")} className="inline-flex items-center gap-2 rounded-lg border border-white/20 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-white/10 disabled:opacity-50">{busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <LockKeyhole className="h-4 w-4" />} Grant access</button>}
               </div>
+              {confirmBlock === otherId && <div className="rounded-xl border border-rose-400/30 bg-rose-500/10 p-3 text-sm md:col-span-3">
+                <p className="font-semibold text-rose-100">Block {member?.display_name || "this member"}?</p>
+                <p className="mt-1 text-rose-100/80">They will disappear from your network. Your connection and personal sharing will end.</p>
+                <div className="mt-3 flex gap-2"><button type="button" disabled={!!busyId} onClick={() => void blockMember(otherId)} className="rounded-lg bg-rose-600 px-3 py-2 font-semibold text-white hover:bg-rose-500 disabled:opacity-50">Block member</button><button type="button" onClick={() => setConfirmBlock(null)} className="rounded-lg border border-white/20 px-3 py-2 hover:bg-white/10">Cancel</button></div>
+              </div>}
               {confirmRemove === connection.id && <div className="rounded-xl border border-rose-400/30 bg-rose-500/10 p-3 text-sm md:col-span-3">
                 <p className="font-semibold text-rose-100">Remove {member?.display_name || "this member"} from your professional connections?</p>
                 <p className="mt-1 text-rose-100/80">This also ends personal access between you. You can reconnect later.</p>
@@ -194,6 +271,21 @@ export default function ManageConnectionsPage() {
           })}
         </div>
         <p className="mt-4 text-xs leading-5 text-slate-400">Professional removal ends the connection. Personal access controls only what you share with that person; their sharing permissions are independent.</p>
+      </section>
+      <section className="mt-5 rounded-2xl border border-white/10 bg-[#101b30] p-5 shadow-xl sm:p-7">
+        <h2 className="flex items-center gap-2 text-lg font-bold"><ShieldBan className="h-5 w-5 text-rose-300" /> Blocked Users</h2>
+        <p className="mt-2 text-sm text-slate-400">People you've blocked. Unblocking does not restore professional connections or personal access.</p>
+        <div className="relative mt-4">
+          <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+          <input type="search" value={blockSearch} onChange={event => setBlockSearch(event.target.value)} placeholder="Search blocked users" aria-label="Search blocked users" className="w-full rounded-xl border border-white/20 bg-slate-950/70 py-3 pl-12 pr-4 text-sm text-white placeholder:text-slate-500 outline-none focus:border-violet-400" />
+        </div>
+        {loading ? <p className="mt-5 flex items-center gap-2 text-sm text-slate-400"><Loader2 className="h-4 w-4 animate-spin" /> Loading blocked users...</p>
+          : blockedIds.length === 0 ? <p className="mt-5 rounded-xl border border-white/10 p-4 text-sm text-slate-400">No blocked users.</p>
+          : filteredBlocked.length === 0 ? <p className="mt-5 text-sm text-slate-400">No blocked users match your search.</p>
+          : <div className="mt-4 space-y-3">{filteredBlocked.map(person => <div key={person.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.035] p-4">
+            <div className="flex min-w-0 items-center gap-3"><UserRound className="h-6 w-6 shrink-0 text-rose-300" /><span className="min-w-0"><span className="block truncate font-semibold">{person.display_name || "Aether Social Member"}</span><span className="block truncate text-xs text-slate-400">{person.username ? `@${person.username}` : "Blocked member"}</span></span></div>
+            <button type="button" disabled={!!busyId} onClick={() => void unblockMember(person.id)} className="inline-flex items-center gap-2 rounded-lg border border-white/20 px-4 py-2 text-sm font-semibold hover:bg-white/10 disabled:opacity-50">{busyId === person.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />} Unblock</button>
+          </div>)}</div>}
       </section>
     </main>
   );

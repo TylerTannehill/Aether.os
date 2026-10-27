@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useParams, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useSocialExperience } from '@/components/layout/social-shell'
-import { ArrowLeft, ArrowRight, AtSign, BriefcaseBusiness, Check, Heart, LockKeyhole, Loader2, MessageCircle, Music2, Pause, Play, Send, ShieldCheck, UserRound, UserRoundPlus, X } from 'lucide-react'
+import { ArrowLeft, ArrowRight, AtSign, BriefcaseBusiness, Check, Heart, LockKeyhole, Loader2, MessageCircle, MoreHorizontal, Music2, Pause, Play, Send, ShieldCheck, UserRound, UserRoundPlus, X } from 'lucide-react'
 
 type PublicProfile = {
   id: string
@@ -152,6 +152,13 @@ export default function SocialPublicProfilePage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [myProfileId, setMyProfileId] = useState<string | null>(null)
+  const [blockChecking, setBlockChecking] = useState(true)
+  const [isBlocked, setIsBlocked] = useState(false)
+  const [moderationMenuOpen, setModerationMenuOpen] = useState(false)
+  const [reportOpen, setReportOpen] = useState(false)
+  const [reportReason, setReportReason] = useState('')
+  const [moderationBusy, setModerationBusy] = useState(false)
+  const [moderationError, setModerationError] = useState('')
   const [connection, setConnection] = useState<Connection | null>(null)
   const [connectionLoading, setConnectionLoading] = useState(false)
   const [connectionBusy, setConnectionBusy] = useState(false)
@@ -194,6 +201,11 @@ export default function SocialPublicProfilePage() {
       setOwnProfile(false)
       setHasMyProfile(false)
       setMyProfileId(null)
+      setBlockChecking(true)
+      setIsBlocked(false)
+      setModerationMenuOpen(false)
+      setReportOpen(false)
+      setModerationError('')
       setConnection(null)
       setConnectionError('')
       setConnectionNotice('')
@@ -259,11 +271,26 @@ export default function SocialPublicProfilePage() {
           .maybeSingle()
         if (!active) return
         if (mineError) {
+          setBlockChecking(false)
           setError('We could not check your Social identity right now.')
         } else {
           setHasMyProfile(Boolean(mine))
           setOwnProfile(mine?.id === data.id)
           setMyProfileId(mine?.id ?? null)
+          if (mine?.id && mine.id !== data.id) {
+            const { data: blocks, error: blockError } = await supabase
+              .from('social_user_blocks')
+              .select('id')
+              .or(`and(blocker_id.eq.${mine.id},blocked_id.eq.${data.id}),and(blocker_id.eq.${data.id},blocked_id.eq.${mine.id})`)
+              .limit(1)
+            if (!active) return
+            if (blockError) {
+              setError('Could not check block status. Please refresh this page.')
+            } else {
+              setIsBlocked(Boolean(blocks?.length))
+            }
+          }
+          setBlockChecking(false)
           if (isIndividual && mine?.id && mine.id !== data.id) {
             setConnectionLoading(true)
             const { data: relationships, error: connectionFetchError } = await supabase
@@ -328,7 +355,7 @@ export default function SocialPublicProfilePage() {
 
   useEffect(() => {
     let active = true
-    if (!profile || loading || !isIndividual && !isEmployer) return
+    if (!profile || loading || isBlocked || blockChecking || !isIndividual && !isEmployer) return
     if (context === 'personal' && !canViewPersonal) {
       setPosts([])
       setPersonalDetails(null)
@@ -373,11 +400,11 @@ export default function SocialPublicProfilePage() {
     }
     void loadPosts()
     return () => { active = false }
-  }, [supabase, profile, loading, context, canViewPersonal, isIndividual, isEmployer])
+  }, [supabase, profile, loading, context, canViewPersonal, isIndividual, isEmployer, isBlocked, blockChecking])
 
   useEffect(() => {
     let active = true
-    if (!profile || loading || !isIndividual || context !== 'personal' || !canViewPersonal) {
+    if (!profile || loading || isBlocked || blockChecking || !isIndividual || context !== 'personal' || !canViewPersonal) {
       setPersonalDetails(null)
       setPersonalError('')
       return
@@ -393,7 +420,7 @@ export default function SocialPublicProfilePage() {
     }
     void loadPersonal()
     return () => { active = false }
-  }, [supabase, profile, loading, context, canViewPersonal, isIndividual, isEmployer])
+  }, [supabase, profile, loading, context, canViewPersonal, isIndividual, isEmployer, isBlocked, blockChecking])
 
   useEffect(() => {
     const url = context === 'personal' && canViewPersonal ? personalDetails?.jam_url?.trim() : null
@@ -504,6 +531,43 @@ export default function SocialPublicProfilePage() {
     }
   }
 
+  async function blockProfile(report: boolean) {
+    if (!isIndividual || !myProfileId || !profile || ownProfile || moderationBusy) return
+    const reason = reportReason.trim()
+    if (report && (!reason || reason.length > 2000)) {
+      setModerationError('Enter a reason (up to 2,000 characters).')
+      return
+    }
+    setModerationBusy(true)
+    setModerationError('')
+    try {
+      const { data: auth, error: authError } = await supabase.auth.getSession()
+      if (authError || !auth.session?.access_token) throw new Error('Please sign in again.')
+      // Reporting first ensures a failed email does not masquerade as a completed report.
+      if (report) {
+        const response = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${auth.session.access_token}` },
+          body: JSON.stringify({ type: 'social_report', profileId: profile.id, reason }),
+        })
+        const result = await response.json().catch(() => ({})) as { error?: string }
+        if (!response.ok) throw new Error(result.error || 'Could not send report.')
+      }
+      const { error: insertError } = await supabase.from('social_user_blocks')
+        .upsert({ blocker_id: myProfileId, blocked_id: profile.id }, { onConflict: 'blocker_id,blocked_id', ignoreDuplicates: true })
+      if (insertError) throw new Error(insertError.message)
+      setIsBlocked(true)
+      setReportOpen(false)
+      setModerationMenuOpen(false)
+      setPosts([])
+      setPersonalDetails(null)
+    } catch (err) {
+      setModerationError(err instanceof Error ? err.message : 'Could not complete action.')
+    } finally {
+      setModerationBusy(false)
+    }
+  }
+
   async function toggleLike(postId: string) {
     if (!isIndividual || !myProfileId || engagementBusy || (context === 'personal' && !canViewPersonal)) return
     setEngagementBusy(postId)
@@ -572,9 +636,18 @@ export default function SocialPublicProfilePage() {
           <p className="mt-3 text-sm text-slate-300">{error}</p>
           <Link href="/social/network" className="mt-5 inline-block text-sm font-semibold text-violet-300 hover:underline">Return to Network</Link>
         </div>
+      ) : profile && blockChecking ? (
+        <div className="rounded-2xl border border-white/10 bg-[#101b30] p-8 text-slate-300">Checking profile access...</div>
+      ) : profile && isBlocked ? (
+        <section className="rounded-2xl border border-white/10 bg-[#101b30] p-8 text-center">
+          <ShieldCheck className="mx-auto h-8 w-8 text-violet-300" />
+          <h1 className="mt-3 text-xl font-bold">Profile unavailable</h1>
+          <p className="mt-2 text-sm text-slate-300">You cannot view or interact with this member while a block is active.</p>
+          <Link href="/social/network" className="mt-5 inline-block rounded-xl bg-violet-600 px-4 py-2 text-sm font-semibold text-white">Return to Network</Link>
+        </section>
       ) : profile ? (
         <div className="space-y-5">
-          <article className="overflow-hidden rounded-2xl border border-white/10 bg-[#101b30] shadow-xl">
+          <article className="rounded-2xl border border-white/10 bg-[#101b30] shadow-xl">
             <div className={`flex h-16 items-center justify-end px-3 sm:h-20 sm:px-5 ${context === 'personal' ? 'bg-gradient-to-r from-fuchsia-800 via-violet-800 to-indigo-800' : 'bg-gradient-to-r from-violet-700 via-indigo-700 to-blue-800'}`}>
               <div className="inline-flex rounded-xl border border-slate-300 bg-white p-1 shadow-sm" role="group" aria-label="Profile context">
                 <button type="button" onClick={() => setContext('professional')} aria-pressed={context === 'professional'} className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold ${context === 'professional' ? 'bg-violet-700 text-white' : 'text-slate-600 hover:bg-slate-100'}`}><BriefcaseBusiness className="h-4 w-4" /> Professional</button>
@@ -635,6 +708,16 @@ export default function SocialPublicProfilePage() {
                     <AtSign className="h-3.5 w-3.5" /> My Socials
                   </button>
                   {ownProfile && <Link href="/social/profile" className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/20 px-3 py-2 text-xs font-semibold transition hover:bg-white/10">My Profile <ArrowRight className="h-3.5 w-3.5" /></Link>}
+                </div>
+              )}
+              {isIndividual && !ownProfile && myProfileId && (
+                <div className="relative self-start pt-3">
+                  <button type="button" onClick={() => setModerationMenuOpen(open => !open)} aria-label="Profile options" aria-expanded={moderationMenuOpen}
+                    className="rounded-lg border border-white/20 p-2 text-slate-200 hover:bg-white/10"><MoreHorizontal className="h-5 w-5" /></button>
+                  {moderationMenuOpen && <div className="absolute right-0 top-14 z-20 w-48 rounded-xl border border-white/20 bg-[#17243a] p-1 shadow-xl">
+                    <button type="button" disabled={moderationBusy} onClick={() => void blockProfile(false)} className="block w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-white/10">Block User</button>
+                    <button type="button" onClick={() => { setReportOpen(true); setModerationMenuOpen(false); setModerationError('') }} className="block w-full rounded-lg px-3 py-2 text-left text-sm text-rose-200 hover:bg-white/10">Report &amp; Block</button>
+                  </div>}
                 </div>
               )}
               {isIndividual && ownProfile && context !== 'personal' && <Link href="/social/profile" className="inline-flex shrink-0 items-center gap-2 self-start rounded-lg border border-white/20 px-3 py-2 text-xs font-semibold transition hover:bg-white/10">My Profile <ArrowRight className="h-3.5 w-3.5" /></Link>}
@@ -881,6 +964,22 @@ export default function SocialPublicProfilePage() {
           )}
         </div>
       ) : null}
+       {moderationError && !reportOpen && !isBlocked && <p role="alert" className="mt-3 text-sm text-rose-300">{moderationError}</p>}
+       {reportOpen && profile && !ownProfile && (
+         <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 p-4">
+           <section role="dialog" aria-modal="true" aria-labelledby="report-profile-title" className="w-full max-w-md rounded-2xl border border-white/20 bg-[#101b30] p-6 shadow-2xl">
+             <h2 id="report-profile-title" className="text-xl font-bold">Report &amp; Block Member</h2>
+             <p className="mt-2 text-sm text-slate-300">Tell Aether Social why you are reporting this profile. This will also block the member.</p>
+             <textarea value={reportReason} onChange={event => setReportReason(event.target.value)} maxLength={2000} rows={4} placeholder="Reason for reporting..."
+               className="mt-4 w-full rounded-xl border border-white/20 bg-[#16233a] p-3 text-sm text-white" />
+             {moderationError && <p role="alert" className="mt-2 text-sm text-rose-300">{moderationError}</p>}
+             <div className="mt-4 flex justify-end gap-2">
+               <button type="button" disabled={moderationBusy} onClick={() => { setReportOpen(false); setModerationError('') }} className="rounded-xl border border-white/20 px-4 py-2 text-sm">Cancel</button>
+               <button type="button" disabled={moderationBusy || !reportReason.trim()} onClick={() => void blockProfile(true)} className="rounded-xl bg-violet-600 px-4 py-2 text-sm font-semibold disabled:opacity-50">{moderationBusy ? 'Sending...' : 'Report & Block'}</button>
+             </div>
+           </section>
+         </div>
+       )}
        {expandedImage && (context === 'professional' || canViewPersonal) && (
          <div role="dialog" aria-modal="true" aria-label="Enlarged post image"
            className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 p-5"

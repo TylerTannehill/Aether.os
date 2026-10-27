@@ -21,6 +21,9 @@ import {
   Search,
   Sparkles,
   Sun,
+  Ellipsis,
+  Ban,
+  Flag,
 } from "lucide-react";
 
 type SocialContext = "professional" | "personal";
@@ -69,6 +72,13 @@ export default function SocialHomePage() {
   const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>({});
   const [engagementBusy, setEngagementBusy] = useState<string | null>(null);
   const [engagementError, setEngagementError] = useState<Record<string, string>>({});
+  const [blockedIds, setBlockedIds] = useState<string[]>([]);
+  const [openPostMenu, setOpenPostMenu] = useState<string | null>(null);
+  const [reportPost, setReportPost] = useState<FeedPost | null>(null);
+  const [reportReason, setReportReason] = useState("");
+  const [moderationBusy, setModerationBusy] = useState(false);
+  const [moderationError, setModerationError] = useState<string | null>(null);
+  const [moderationNotice, setModerationNotice] = useState<string | null>(null);
 
   const avatarUrl = (path: string | null | undefined) => path
     ? supabase.storage.from("social-avatars").getPublicUrl(path).data.publicUrl
@@ -136,9 +146,31 @@ export default function SocialHomePage() {
     setCommentAuthors({});
     const { data, error: postsError } = await supabase.from("social_posts")
       .select("id, author_id, employer_id, job_id, context, content, image_path, created_at")
-      .eq("context", selected).order("created_at", { ascending: false }).limit(100);
+      .eq("context", selected)
+      .eq("moderation_status", "visible")
+      .order("created_at", { ascending: false })
+      .limit(100);
     if (postsError) { setFeedError(postsError.message); setLoading(false); return; }
-    const records = (data ?? []) as SocialPost[];
+    let records = (data ?? []) as SocialPost[];
+    // Load both directions: people I blocked, and people who blocked me.
+    // Do not show posts while block visibility is unknown.
+    if (experience === "individual") {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) { setFeedError("Sign in to load your feed."); setLoading(false); return; }
+      const { data: ownProfile, error: ownProfileError } = await supabase.from("social_profiles")
+        .select("id").eq("auth_user_id", user.id).maybeSingle();
+      if (ownProfileError || !ownProfile) { setFeedError("Could not verify your Social profile."); setLoading(false); return; }
+      const { data: blocks, error: blocksError } = await supabase.from("social_user_blocks")
+        .select("blocker_id, blocked_id")
+        .or(`blocker_id.eq.${ownProfile.id},blocked_id.eq.${ownProfile.id}`);
+      if (blocksError) { setFeedError("Could not load your blocked users: " + blocksError.message); setLoading(false); return; }
+      const excluded = new Set<string>();
+      for (const block of blocks ?? []) {
+        excluded.add(block.blocker_id === ownProfile.id ? block.blocked_id : block.blocker_id);
+      }
+      setBlockedIds([...excluded]);
+      records = records.filter(post => !post.author_id || !excluded.has(post.author_id));
+    }
     if (!records.length) { setImageUrls({}); setLoading(false); return; }
     await loadImageUrls(records);
     const ids = [...new Set(records.map((post) => post.author_id).filter((id): id is string => Boolean(id)))];
@@ -244,6 +276,78 @@ export default function SocialHomePage() {
   }
 
 
+  async function blockAuthor(authorId: string) {
+    if (!me || authorId === me.id) throw new Error("You cannot block your own account.");
+    const { error: blockError } = await supabase.from("social_user_blocks")
+      .upsert({ blocker_id: me.id, blocked_id: authorId }, { onConflict: "blocker_id,blocked_id", ignoreDuplicates: true });
+    if (blockError) throw new Error(blockError.message);
+    setBlockedIds(previous => [...new Set([...previous, authorId])]);
+    setPosts(previous => previous.filter(post => post.author_id !== authorId));
+    setOpenPostMenu(null);
+  }
+
+  async function performBlock(authorId: string) {
+    if (moderationBusy) return;
+    setModerationBusy(true);
+    setModerationError(null);
+    setModerationNotice(null);
+    try {
+      await blockAuthor(authorId);
+      setModerationNotice("User blocked. Their posts have been hidden.");
+    } catch (err) {
+      setModerationError(err instanceof Error ? err.message : "Could not block user.");
+    } finally { setModerationBusy(false); }
+  }
+
+  async function performReport() {
+    if (!reportPost?.author_id || !reportReason.trim() || moderationBusy) return;
+    setModerationBusy(true);
+    setModerationError(null);
+    setModerationNotice(null);
+    const target = reportPost;
+    const authorId = target.author_id;
+    if (!authorId) { setModerationBusy(false); return; }
+    let blocked = false;
+    let reportSaved = false;
+    try {
+      // Blocking immediately hides the author for the reporting user.
+      await blockAuthor(authorId);
+      blocked = true;
+
+      // Only Professional reports count toward the two-report moderation threshold.
+      if (target.context === "professional") {
+        if (!me) throw new Error("Your Social profile could not be verified.");
+        const { error: saveError } = await supabase.from("social_post_reports")
+          .insert({ post_id: target.id, reporter_id: me.id, reason: reportReason.trim() });
+        if (saveError) {
+          if (saveError.code === "23505") throw new Error("You have already reported this post.");
+          throw new Error("Could not save the report: " + saveError.message);
+        }
+        reportSaved = true;
+      }
+
+      // Preserve the existing Team Aether email notification.
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session?.access_token) throw new Error("Sign in again to notify Team Aether.");
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ type: "social_report", postId: target.id, reason: reportReason.trim() }),
+      });
+      const result = await response.json().catch(() => null);
+      if (!response.ok || !result?.success) throw new Error(result?.error || "The report email could not be sent.");
+      setReportPost(null);
+      setReportReason("");
+      setModerationNotice("User blocked and report sent to Aether Social.");
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : "Unknown error";
+      const prefix = reportSaved
+        ? "Report saved and user blocked, but Team Aether notification failed: "
+        : blocked ? "User blocked, but report was not saved/sent: " : "Could not block or report: ";
+      setModerationError(prefix + detail);
+    } finally { setModerationBusy(false); }
+  }
+
   async function toggleLike(postId: string) {
     if (isEmployer || !me || engagementBusy) return;
     setEngagementBusy(postId);
@@ -326,6 +430,7 @@ export default function SocialHomePage() {
         </div>}
       </div>
 
+      {(moderationError || moderationNotice) && <div role="status" className={`rounded-xl border px-4 py-3 text-sm ${moderationError ? "border-rose-200 bg-rose-50 text-rose-800" : "border-emerald-200 bg-emerald-50 text-emerald-800"}`}>{moderationError || moderationNotice}</div>}
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_290px]">
         <div className="space-y-5">
           {!isEmployer && <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
@@ -385,7 +490,7 @@ export default function SocialHomePage() {
             <section className="rounded-3xl border border-rose-200 bg-white p-6 text-sm text-rose-700 shadow-sm" role="alert">Could not load posts: {feedError}</section>
           ) : posts.length ? (
             <div className="space-y-4">
-              {posts.map((post) => {
+              {posts.filter(post => !post.author_id || !blockedIds.includes(post.author_id)).map((post) => {
                 const employerPost = Boolean(post.employer_id);
                 const picture = employerPost ? null : avatarUrl(professional ? post.author?.avatar_path : post.personalAvatarPath);
                 return <article key={post.id} className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
@@ -414,6 +519,21 @@ export default function SocialHomePage() {
                       })()}
                       <p className="text-xs text-slate-500">{employerPost ? "Professional · Job Opportunity" : professional ? "Professional" : "Personal"} · {new Date(post.created_at).toLocaleString()}</p>
                     </div>
+                    {!isEmployer && post.author_id && me && post.author_id !== me.id && !employerPost && (
+                      <div className="relative shrink-0">
+                        <button type="button" aria-label="Post options" aria-expanded={openPostMenu === post.id}
+                          onClick={() => setOpenPostMenu(previous => previous === post.id ? null : post.id)}
+                          className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-900">
+                          <Ellipsis className="h-5 w-5" />
+                        </button>
+                        {openPostMenu === post.id && <div className="absolute right-0 top-10 z-20 w-48 rounded-xl border border-slate-200 bg-white p-1 shadow-lg">
+                          <button type="button" disabled={moderationBusy} onClick={() => void performBlock(post.author_id!)}
+                            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-100 disabled:opacity-50"><Ban className="h-4 w-4" /> Block user</button>
+                          <button type="button" disabled={moderationBusy} onClick={() => { setReportPost(post); setReportReason(""); setModerationError(null); setOpenPostMenu(null); }}
+                            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-rose-700 hover:bg-rose-50 disabled:opacity-50"><Flag className="h-4 w-4" /> Report &amp; block</button>
+                        </div>}
+                      </div>
+                    )}
                   </div>
                   {employerPost && post.job_id ? (
                     <div className="mt-5 overflow-hidden rounded-2xl border border-violet-200 bg-violet-50/40">
@@ -457,7 +577,7 @@ export default function SocialHomePage() {
                       {engagementError[post.id] && <p role="alert" className="mt-2 text-xs text-rose-700">{engagementError[post.id]}</p>}
                       {expandedComments[post.id] && (
                         <div className="mt-3 space-y-3 border-t border-slate-100 pt-4">
-                          {comments.filter(comment => comment.post_id === post.id).map(comment => {
+                          {comments.filter(comment => comment.post_id === post.id && !blockedIds.includes(comment.profile_id)).map(comment => {
                             const commenter = commentAuthors[comment.profile_id];
                             return <div key={comment.id} className="rounded-xl bg-slate-50 px-4 py-3">
                               <div className="flex items-center justify-between gap-2">
@@ -539,6 +659,24 @@ export default function SocialHomePage() {
           </Link>
         </aside>
       </div>
+      {reportPost && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" role="presentation"
+          onMouseDown={event => { if (event.target === event.currentTarget && !moderationBusy) setReportPost(null); }}>
+          <div role="dialog" aria-modal="true" aria-label="Report and block user" className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+            <h2 className="text-lg font-bold text-slate-950">Report &amp; block user</h2>
+            <p className="mt-2 text-sm text-slate-600">This will block the author and send this post and your reason to Aether Social for review.</p>
+            <textarea aria-label="Reason for reporting" maxLength={2000} rows={4} value={reportReason}
+              onChange={event => setReportReason(event.target.value)} placeholder="Tell us what happened..."
+              className="mt-4 w-full rounded-xl border border-slate-300 p-3 text-sm text-slate-900" />
+            {moderationError && <p role="alert" className="mt-2 text-sm text-rose-700">{moderationError}</p>}
+            <div className="mt-4 flex justify-end gap-2">
+              <button type="button" disabled={moderationBusy} onClick={() => { setReportPost(null); setModerationError(null); }} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold">Cancel</button>
+              <button type="button" disabled={moderationBusy || !reportReason.trim()} onClick={() => void performReport()}
+                className="rounded-lg bg-rose-700 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">{moderationBusy ? "Submitting..." : "Report & block"}</button>
+            </div>
+          </div>
+        </div>
+      )}
       {expandedImage && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
           onMouseDown={event => { if (event.target === event.currentTarget) setExpandedImage(null); }}>

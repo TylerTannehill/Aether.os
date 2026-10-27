@@ -18,12 +18,12 @@ export default function TermsPage() {
           <h1 className="text-5xl font-black tracking-tight lg:text-4xl">Terms of Service</h1>
 
           <p className="mt-4 text-sm font-semibold uppercase tracking-[0.2em] text-violet-300 lg:mt-3 lg:text-xs">
-            Last updated: October 9, 2026
+            Last updated: October 27, 2026
           </p>
 
           <p className="mt-6 text-lg leading-8 text-slate-300 lg:mt-4 lg:text-base lg:leading-7">
             These Terms of Service (&quot;Terms&quot;) govern access to and use of Aether&apos;s
-            websites, applications, Political and Business operating systems, mobile software, integrations,
+            websites, applications, Political and Business operating systems, Aether Social, mobile software, integrations,
             and related services (collectively, the &quot;Services&quot;).
           </p>
 
@@ -203,6 +203,70 @@ export default function TermsPage() {
                   Aether&apos;s ability to operate the platform.
                 </li>
               </ul>
+            </section>
+
+            <section>
+              <h2 className="text-2xl font-bold lg:text-xl">8A. Aether Social — Community Standards and Member Controls</h2>
+              <p className="mt-4 leading-8 text-slate-300 lg:mt-3 lg:text-sm lg:leading-6">
+                Aether Social is a space for personal and professional connections. Members retain ownership of
+                the original content they share, subject to the limited rights Aether needs to display, deliver,
+                protect, and moderate that content. Members are responsible for what they publish or send and
+                for respecting the rights and safety of others.
+              </p>
+              <h3 className="mt-6 text-lg font-bold text-white lg:text-base">Content that is not permitted</h3>
+              <p className="mt-3 leading-8 text-slate-300 lg:text-sm lg:leading-6">
+                Aether Social prohibits child sexual abuse or exploitation material, sexual exploitation or
+                nonconsensual intimate imagery, unlawful sexual content, explicit sexual material prohibited
+                by Aether&apos;s public-content standards, extreme graphic depictions of real-world violence,
+                credible threats, targeted harassment, doxxing intended to threaten or intimidate, fraud,
+                and other unlawful or seriously abusive content. Fictional violence in movies, games, or
+                artistic works is not automatically treated as real-world graphic violence. Context matters.
+                Ordinary disagreement, criticism, lawful political expression, and profanity are not, by
+                themselves, violations of these standards.
+              </p>
+              <h3 className="mt-6 text-lg font-bold text-white lg:text-base">Reporting, blocking, and review</h3>
+              <p className="mt-3 leading-8 text-slate-300 lg:text-sm lg:leading-6">
+                Members can block other members and report posts, profiles, or direct messages. Blocking is
+                intended to stop unwanted interactions and remove the blocked member&apos;s content from the
+                blocking member&apos;s experience. Reports are submitted to Aether for review; a report is
+                not, by itself, proof that a violation occurred. Aether determines appropriate action based
+                on the content, context, applicable law, and these Terms, including restoring content,
+                restricting visibility, removing content, or suspending or terminating an account.
+              </p>
+              <h3 className="mt-6 text-lg font-bold text-white lg:text-base">Professional Feed visibility</h3>
+              <p className="mt-3 leading-8 text-slate-300 lg:text-sm lg:leading-6">
+                Aether may temporarily remove a Professional Feed post from general discovery after reports
+                from two distinct members, pending review. This is a visibility measure, not a finding of
+                wrongdoing. A single credible report involving apparently prohibited or dangerous content
+                may prompt immediate restriction while Aether investigates. Content confirmed to violate
+                these standards may be removed entirely and will not be made available through a restricted
+                viewing area. Aether may act sooner when required to protect people or comply with law.
+              </p>
+              <h3 className="mt-6 text-lg font-bold text-white lg:text-base">Restricted reported-content viewing</h3>
+              <p className="mt-3 leading-8 text-slate-300 lg:text-sm lg:leading-6">
+                Some reported content that has not been determined to violate these standards may be
+                accessible outside the main Professional Feed through a restricted viewing experience.
+                Where this feature is offered, members must verify their identity again and affirmatively
+                acknowledge that they may encounter disturbing or offensive material before proceeding.
+                This choice does not permit illegal content, waive anyone&apos;s legal rights, or relieve
+                Aether of its responsibilities. Access may be limited or withdrawn at any time.
+              </p>
+              <h3 className="mt-6 text-lg font-bold text-white lg:text-base">Private conversations and member choice</h3>
+              <p className="mt-3 leading-8 text-slate-300 lg:text-sm lg:leading-6">
+                Direct messaging is intended for members with mutual Personal access. A lawful adult-content
+                link shared in a consensual private conversation is not automatically a violation solely
+                because it concerns adult material. Consent, legality, exploitation, harassment, and the
+                surrounding circumstances remain relevant. Members may end access, block, or report unwanted
+                interactions. Aether may investigate and act on serious abuse in private communications.
+              </p>
+              <h3 className="mt-6 text-lg font-bold text-white lg:text-base">Social account deletion</h3>
+              <p className="mt-3 leading-8 text-slate-300 lg:text-sm lg:leading-6">
+                Members may request deletion of their Aether Social account through the account settings
+                when the deletion feature is available. Deletion is distinct from temporary deactivation.
+                Some information may need to be retained where required by law, for security, to resolve
+                disputes, or to protect other users. Social account deletion does not automatically cancel
+                an unrelated Political or Business organization&apos;s services.
+              </p>
             </section>
 
             <section>
