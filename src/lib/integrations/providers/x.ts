@@ -186,17 +186,6 @@ async function getAuthenticatedUser(
   return payload.data;
 }
 
-function parseDate(value?: string) {
-  if (!value) return null;
-
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? null : date;
-}
-
-function isoSeconds(date: Date) {
-  return date.toISOString().replace(/\.\d{3}Z$/, "Z");
-}
-
 export class XProvider implements AnalyticsProvider {
   readonly id = "x";
   readonly name = "X";
@@ -245,30 +234,12 @@ export class XProvider implements AnalyticsProvider {
     const accessToken = requireAccessToken(freshConnection);
     const user = await getAuthenticatedUser(accessToken);
 
-    const now = new Date();
-    const requestedStart = parseDate(options?.startDate);
-    const requestedEnd = parseDate(options?.endDate);
-
-    const defaultStart = new Date(now);
-    defaultStart.setUTCDate(defaultStart.getUTCDate() - 30);
-
-    let startDate = requestedStart || defaultStart;
-    let endDate = requestedEnd || now;
-
-    if (startDate.getTime() >= endDate.getTime()) {
-      startDate = defaultStart;
-      endDate = now;
-    }
-
-    if (endDate.getTime() > now.getTime()) {
-      endDate = now;
-    }
-
+    // Refresh metrics for the available post history, not just posts
+    // created within the analytics sync's rolling 30-day window.
+    // X may still limit how far back this timeline endpoint can retrieve.
     const params = new URLSearchParams({
       max_results: "100",
       "tweet.fields": "id,text,created_at,public_metrics",
-      start_time: isoSeconds(startDate),
-      end_time: isoSeconds(endDate),
     });
 
     const posts: XPost[] = [];
