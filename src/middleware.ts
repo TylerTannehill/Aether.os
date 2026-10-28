@@ -12,6 +12,8 @@ export async function middleware(request: NextRequest) {
   const publicRoutes = [
     '/',
     '/tyler',
+    '/mike',
+    '/robby',
     '/login',
     '/login-social',
     '/login-social/employer-login',

@@ -18,7 +18,7 @@ export default function TylerCardPage() {
       "TITLE:Founder & CEO - The Architect",
       "TEL;TYPE=CELL:+13312232374",
       "EMAIL;TYPE=WORK:team@aetheros.pro",
-      `URL:${CARD_URL}`,
+      "URL:https://aetheros.pro",
       "END:VCARD",
     ].join("\r\n") + "\r\n";
     const blob = new Blob([vcard], { type: "text/vcard;charset=utf-8" });
