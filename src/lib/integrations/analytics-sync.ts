@@ -15,12 +15,30 @@ export type AnalyticsSyncResult = {
   provider: AnalyticsProvider;
   success: boolean;
   imported: number;
+  inserted?: number;
+  updated?: number;
+  unchanged?: number;
   skipped?: boolean;
   message?: string;
   error?: string;
 };
 
 type AnalyticsEventRow = ReturnType<typeof normalizeAnalyticsEvents>[number];
+
+type AnalyticsWriteCounts = {
+  imported: number;
+  inserted: number;
+  updated: number;
+  unchanged: number;
+};
+
+function parseWriteCount(value: unknown, field: string): number {
+  const parsed = typeof value === "number" ? value : Number(value);
+  if (!Number.isSafeInteger(parsed) || parsed < 0) {
+    throw new Error(`Analytics RPC returned an invalid ${field} count: ${String(value)}`);
+  }
+  return parsed;
+}
 
 type OrganizationIntegrationRow = {
   organization_id: string;
@@ -108,7 +126,7 @@ function getSyncWindow(provider: AnalyticsProvider) {
 
 async function upsertRows(rows: AnalyticsEventRow[]) {
   if (rows.length === 0) {
-    return 0;
+    return { imported: 0, inserted: 0, updated: 0, unchanged: 0 };
   }
 
   const rowsWithIdentity = rows.filter(
@@ -143,18 +161,37 @@ async function upsertRows(rows: AnalyticsEventRow[]) {
 
   const supabase = getAdminClient();
 
-  const { data, error } = await supabase
-    .from("analytics_events")
-    .upsert(deduplicatedRows, {
-      onConflict: "organization_id,source,platform,external_id",
-    })
-    .select("id");
+  const { data, error } = await supabase.rpc(
+    "upsert_analytics_events_if_changed",
+    { p_rows: deduplicatedRows }
+  );
 
   if (error) {
-    throw new Error(`Analytics upsert failed: ${error.message}`);
+    throw new Error(`Analytics conditional upsert failed: ${error.message}`);
   }
 
-  return data?.length ?? deduplicatedRows.length;
+  // A RETURNS TABLE function is exposed as an array by PostgREST.
+  // Fail closed if its response shape changes rather than silently reporting success.
+  if (!Array.isArray(data) || data.length !== 1 || !data[0]) {
+    throw new Error("Analytics conditional upsert returned an unexpected response.");
+  }
+
+  const counts = data[0] as Record<string, unknown>;
+  const inserted = parseWriteCount(counts.inserted, "inserted");
+  const updated = parseWriteCount(counts.updated, "updated");
+  const unchanged = parseWriteCount(counts.unchanged, "unchanged");
+
+  if (inserted + updated + unchanged !== deduplicatedRows.length) {
+    throw new Error("Analytics conditional upsert counts do not match the input batch.");
+  }
+
+  return {
+    // Preserve the existing 'imported' meaning: accepted, deduplicated records.
+    imported: deduplicatedRows.length,
+    inserted,
+    updated,
+    unchanged,
+  } satisfies AnalyticsWriteCounts;
 }
 
 async function getConnectedIntegration(
@@ -242,15 +279,24 @@ export async function syncAnalyticsProviderForOrganization(
     }
 
     const writeStartedAt = Date.now();
-    const imported = await upsertRows(rows);
+    const writeCounts = await upsertRows(rows);
     const writeMs = Date.now() - writeStartedAt;
-    console.info("Analytics provider timing", { provider, organizationId, fetched: payload.length, normalized: rows.length, imported, fetchMs, normalizeMs, writeMs });
+    console.info("Analytics provider timing", {
+      provider,
+      organizationId,
+      fetched: payload.length,
+      normalized: rows.length,
+      ...writeCounts,
+      fetchMs,
+      normalizeMs,
+      writeMs,
+    });
 
     return {
       organizationId,
       provider,
       success: true,
-      imported,
+      ...writeCounts,
     };
   } catch (error: any) {
     console.error(
