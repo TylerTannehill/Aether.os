@@ -214,12 +214,16 @@ export async function syncAnalyticsProviderForOrganization(
     const providerClient = getProvider(provider);
     const window = getSyncWindow(provider);
 
+    const fetchStartedAt = Date.now();
     const payload = await providerClient.fetchAnalytics(connection, {
       startDate: window.startDate,
       endDate: window.endDate,
     });
 
+    const fetchMs = Date.now() - fetchStartedAt;
+    const normalizeStartedAt = Date.now();
     const rows = normalizeAnalyticsEvents(payload, organizationId);
+    const normalizeMs = Date.now() - normalizeStartedAt;
 
     /*
      * Each provider row now carries a stable external_id. Existing rows are
@@ -227,6 +231,7 @@ export async function syncAnalyticsProviderForOrganization(
      * deletes and rebuilds the active analytics window.
      */
     if (rows.length === 0) {
+      console.info("Analytics provider timing", { provider, organizationId, fetched: payload.length, fetchMs, normalizeMs, writeMs: 0 });
       return {
         organizationId,
         provider,
@@ -236,7 +241,10 @@ export async function syncAnalyticsProviderForOrganization(
       };
     }
 
+    const writeStartedAt = Date.now();
     const imported = await upsertRows(rows);
+    const writeMs = Date.now() - writeStartedAt;
+    console.info("Analytics provider timing", { provider, organizationId, fetched: payload.length, normalized: rows.length, imported, fetchMs, normalizeMs, writeMs });
 
     return {
       organizationId,
