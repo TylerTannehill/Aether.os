@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { getSharedCurrentContext } from "@/lib/auth/current-context-client";
 import { Activity, BarChart3, Settings, Sparkles, UserRound } from "lucide-react";
 
 type BusinessTrendDepartment = "CRM" | "Marketing" | "Inventory" | "Dispatch" | "Finance";
@@ -137,10 +138,8 @@ export default function BusinessDashboardPage() {
 
     async function loadCrmInteractions() {
       try {
-        const contextResponse = await fetch("/api/auth/current-context", { cache: "no-store" });
+        const { response: contextResponse, data: context } = await getSharedCurrentContext();
         if (!contextResponse.ok) return;
-
-        const context = await contextResponse.json();
         const organizationId = context?.organization?.id;
         if (!organizationId) return;
 

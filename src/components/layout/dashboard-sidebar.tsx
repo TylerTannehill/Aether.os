@@ -23,6 +23,7 @@ import {
 
 import { cn } from "@/lib/utils";
 import { getOrgContextTheme } from "@/lib/org-context-theme";
+import { getSharedCurrentContext } from "@/lib/auth/current-context-client";
 
 type DepartmentKey = "field" | "outreach" | "digital" | "finance" | "print";
 
@@ -295,11 +296,9 @@ export function DashboardSidebar() {
         setRoleLoading(true);
         setRoleError("");
 
-        const response = await fetch("/api/auth/current-context", {
-          method: "GET",
-        });
+        const { response, data: contextData } = await getSharedCurrentContext();
 
-        const data = (await response.json()) as CurrentContextResponse;
+        const data = contextData as CurrentContextResponse;
 
         if (!response.ok) {
           throw new Error(data.error || "Failed to load workspace context.");

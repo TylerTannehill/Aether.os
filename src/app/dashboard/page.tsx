@@ -93,6 +93,7 @@ import {
   type AbeCampaignStage,
 } from "@/lib/abe/abe-strategy";
 import { getOrgContextTheme } from "@/lib/org-context-theme";
+import { getSharedCurrentContext } from "@/lib/auth/current-context-client";
 
 function normalizeTaskStatus(status?: string | null) {
   const value = (status || "").trim().toLowerCase();
@@ -967,8 +968,8 @@ export default function DashboardPage() {
       // Resolve campaign context once, then reuse the organization ID across
       // the core dashboard helpers. This prevents each department helper from
       // independently calling /api/auth/current-context during startup.
-      const contextResponse = await fetch("/api/auth/current-context");
-      const contextResult = await contextResponse.json();
+      const { response: contextResponse, data: contextResult } =
+        await getSharedCurrentContext();
 
       if (!contextResponse.ok) {
         throw new Error(
