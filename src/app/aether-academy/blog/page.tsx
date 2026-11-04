@@ -32,6 +32,106 @@ export default function BlogPage() {
         <details className="group mt-10 rounded-2xl border border-white/10 bg-[#10233e]/75 shadow-xl shadow-black/20 lg:mt-7 lg:rounded-xl">
           <summary className="cursor-pointer list-none px-10 py-7 text-lg font-semibold text-white [&::-webkit-details-marker]:hidden lg:px-7 lg:py-5 lg:text-base">
             <span className="flex items-center justify-between gap-4 lg:gap-3">
+              <span>November 1st 2026 - Note from Team Aether</span>
+              <span aria-hidden="true" className="text-violet-300 transition group-open:rotate-180">⌄</span>
+            </span>
+          </summary>
+          <div className="border-t border-white/10 px-10 pb-10 pt-8 lg:px-7 lg:pb-7 lg:pt-6">
+            <div className="space-y-6 text-slate-300 leading-8 lg:space-y-4 lg:text-sm lg:leading-6">
+              <h1 className="text-5xl font-bold text-white lg:text-4xl">Two Months In (Welcome to the Circus)</h1>
+              <p>Two months ago, Aether launched as a political campaign operating system.</p>
+              <p>Thirty days later, we wrote about the challenges of building a company around a product, learning how to market something from scratch, and discovering that getting people to notice your work can be considerably harder than building it in the first place.</p>
+              <p>We ended that article wondering what October might bring.</p>
+              <p>Well.</p>
+              <p>Apparently, October brought an entire circus.</p>
+              <p>And somewhere along the way, we decided to build a few more tents.</p>
+              <h2 className="pt-6 text-3xl font-semibold text-white lg:pt-4 lg:text-2xl">One Idea, Several New Directions</h2>
+              <p>When we launched Aether Political in September, our mission was straightforward: make campaign operations simpler, more organized, and more effective.</p>
+              <p>That mission hasn't changed.</p>
+              <p>What changed was our understanding of where the underlying technology could go.</p>
+              <p>Early in October, we began building Aether Business, taking many of the principles behind our political platform and applying them to the everyday challenges of running a business.</p>
+              <p>Customer relationships, inventory, dispatch, marketing, finance, and the countless moving pieces that business owners and their teams manage every day. Different industries, different workflows, but a familiar problem: too much information scattered across too many places.</p>
+              <p>We saw an opportunity to bring some clarity to that chaos.</p>
+              <p>And so, Aether Business became real.</p>
+              <p>Then, because apparently we hadn't given ourselves enough to do, we started building Aether Social.</p>
+              <p>Social represents a different side of the ecosystem. Rather than helping organizations manage operations, it's about helping people connect, share, and build relationships through personal and professional networks.</p>
+              <p>Two very different products, built during the same thirty-day stretch, both connected by the same underlying philosophy.</p>
+              <p>Technology should make life easier.</p>
+              <p>Not more complicated.</p>
+              <p>And somewhere between building these new platforms, improving Aether Political, expanding Aether Academy, and keeping everything running, we started to realize something.</p>
+              <p className="text-xl font-semibold text-white lg:text-lg">Aether was becoming considerably bigger than the product we originally set out to build.</p>
+              <h2 className="pt-6 text-3xl font-semibold text-white lg:pt-4 lg:text-2xl">The Second Thirty Days</h2>
+              <p>Here's something October taught us.</p>
+              <p>Marketing does not magically get easier after your first month.</p>
+              <p>We checked.</p>
+              <p>In September, we were learning how to introduce one product to the world.</p>
+              <p>In October, we found ourselves with several different audiences, several different conversations to start, and several different reasons someone might want to explore what we’re building.</p>
+              <p>On paper, that sounds like an improvement.</p>
+              <p>And in many ways, it is.</p>
+              <p>Aether Business opens the door to an entirely different market. Aether Social gives us another way to introduce people to the ecosystem. Aether Political continues to serve the mission that started all of this.</p>
+              <p>We've created more opportunities for the company to grow and, eventually, generate revenue.</p>
+              <p>But opportunity and execution are two different things.</p>
+              <p>Building a product doesn't automatically create an audience for it. Opening another market doesn't mean customers suddenly appear. And having more things to talk about doesn't necessarily make it easier to figure out what to say, who to say it to, or how to get their attention.</p>
+              <p>If anything, October reminded us that growth requires more than simply creating something worth using.</p>
+              <p>It requires consistency.</p>
+              <p>It requires patience.</p>
+              <p>And it requires the discipline to spend time building the company, not just building the software.</p>
+              <p>We're still learning that balance.</p>
+              <h2 className="pt-6 text-3xl font-semibold text-white lg:pt-4 lg:text-2xl">Building the Ecosystem</h2>
+              <p>While Political, Business, and Social were taking shape, another part of Aether was evolving alongside them.</p>
+              <p className="text-xl font-semibold text-white lg:text-lg">Aether Academy.</p>
+              <p>What began as a place to help people understand our political platform is growing into a broader educational resource for the entire ecosystem.</p>
+              <p>Training materials, documentation, articles, updates, and resources intended to help people understand not only how to use Aether, but why we've designed it the way we have.</p>
+              <p>We don't want someone to need a technical background to understand our products.</p>
+              <p>We don't want a business owner to feel overwhelmed by software that's supposed to make their work easier.</p>
+              <p>And we certainly don't want campaign staff spending more time learning their tools than using them.</p>
+              <p>As the ecosystem grows, Academy will grow with it.</p>
+              <p>Because building software is only part of the job.</p>
+              <p>Helping people feel comfortable using it matters just as much.</p>
+              <h2 className="pt-6 text-3xl font-semibold text-white lg:pt-4 lg:text-2xl">What's on the Horizon?</h2>
+              <p>If September was about launching and October was about expanding, November needs to be about something equally important.</p>
+              <p className="text-xl font-semibold text-white lg:text-lg">Getting organized about how we grow.</p>
+              <p>We're working toward a more consistent, deliberate marketing approach across Aether Political and Aether Business.</p>
+              <p>Different audiences need different conversations. Campaign teams and business owners face different challenges, even when the philosophy behind our solutions is similar.</p>
+              <p>We want to do a better job of reaching both.</p>
+              <p>We also want to introduce more people to Aether Social, explain what makes it different, and begin building the community that will ultimately give the platform its purpose.</p>
+              <p>And we're not finished expanding.</p>
+              <p>Aether Personal is in development, bringing the ideas behind the ecosystem closer to the individual.</p>
+              <p>We've spent months thinking about how technology can help organizations make sense of information, coordinate activity, and focus on what matters.</p>
+              <p>Personal asks what happens when we begin applying that same thinking to everyday life.</p>
+              <p>There's plenty more to share about that as development continues.</p>
+              <p>And because apparently three people building an entire software ecosystem still isn't quite enough excitement...</p>
+              <p className="text-xl font-semibold text-white lg:text-lg">There's one more surprise coming to Aether.</p>
+              <p>We're keeping that one to ourselves for now.</p>
+              <p>But it represents another piece of the larger vision we've been working toward, and we're looking forward to sharing it when the time is right.</p>
+              <h2 className="pt-6 text-3xl font-semibold text-white lg:pt-4 lg:text-2xl">Two Months Down</h2>
+              <p>Looking back, October was a strange month.</p>
+              <p>We built more than we expected. We expanded into markets we hadn't originally planned to enter this quickly. We continued improving the product that started everything.</p>
+              <p>We also discovered that having more opportunities doesn't automatically make the difficult parts of running a company any easier.</p>
+              <p>There are still people we need to reach.</p>
+              <p>Still lessons we need to learn.</p>
+              <p>Still products we need to refine.</p>
+              <p>But two months into this adventure, one thing has become increasingly clear.</p>
+              <p>We're not simply building a campaign platform anymore.</p>
+              <p className="text-xl font-semibold text-white lg:text-lg">We're building an ecosystem.</p>
+              <p>One that we hope can make organizations more effective, help people connect, make knowledge more accessible, and eventually bring that same clarity into everyday life.</p>
+              <p>It's ambitious.</p>
+              <p>It's occasionally ridiculous.</p>
+              <p>And we're still three people trying to figure out how to do all of it.</p>
+              <p>But we're enjoying the ride.</p>
+              <div className="rounded-2xl border border-violet-400/20 bg-gradient-to-r from-violet-400/10 to-transparent p-6 lg:rounded-xl lg:p-[18px]">
+                <p className="text-2xl font-black text-white lg:text-xl">Welcome to the circus.</p>
+                <p className="mt-3 text-xl font-semibold text-white lg:text-lg">Two months down.</p>
+                <p className="mt-4 text-xl font-semibold text-white lg:mt-3 lg:text-lg">Clarity. Focus. Execution.</p>
+              </div>
+              <p className="font-semibold text-white">— Team Aether</p>
+            </div>
+          </div>
+        </details>
+
+        <details className="group mt-10 rounded-2xl border border-white/10 bg-[#10233e]/75 shadow-xl shadow-black/20 lg:mt-7 lg:rounded-xl">
+          <summary className="cursor-pointer list-none px-10 py-7 text-lg font-semibold text-white [&::-webkit-details-marker]:hidden lg:px-7 lg:py-5 lg:text-base">
+            <span className="flex items-center justify-between gap-4 lg:gap-3">
               <span>October 1st 2026 - Note from Team Aether</span>
               <span aria-hidden="true" className="text-violet-300 transition group-open:rotate-180">⌄</span>
             </span>

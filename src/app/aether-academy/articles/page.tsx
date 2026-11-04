@@ -1,5 +1,8 @@
 import Link from "next/link";
 
+const interviewUrl =
+  "https://medium.com/@team_71369/an-interview-with-the-ceo-of-aether-systems-llc-036f42e70c6d";
+
 export default function ArticlesPage() {
   return (
     <main className="min-h-screen bg-[linear-gradient(180deg,#10233e_0%,#0a1728_45%,#07111f_100%)] text-white">
@@ -15,64 +18,54 @@ export default function ArticlesPage() {
 
         <h1 className="text-4xl font-bold lg:text-3xl">Articles</h1>
         <p className="mt-3 text-lg text-slate-300 lg:mt-2 lg:text-base">
-          Public articles about Aether.
+          Conversations, ideas, and stories from the Aether ecosystem.
         </p>
 
-        <section className="mt-10 rounded-2xl border border-white/10 bg-[#10233e]/75 p-8 shadow-xl shadow-black/20 lg:mt-7 lg:rounded-xl lg:p-6">
-          <p className="text-slate-300 leading-7 lg:text-sm lg:leading-6">
-            As Aether grows, we'll publish articles covering major milestones,
-            product announcements, customer stories, development insights, and
-            other updates worth sharing.
-          </p>
-
-          <p className="mt-6 text-slate-300 leading-7 lg:mt-4 lg:text-sm lg:leading-6">
-            Today, there simply isn't anything we'd consider article-worthy—and
-            we're okay with that.
-          </p>
-        </section>
-
         <section className="mt-10 lg:mt-7">
-          <h2 className="text-2xl font-semibold lg:text-xl">Why isn't there anything here?</h2>
+          <h2 className="mb-5 text-2xl font-semibold lg:mb-4 lg:text-xl">
+            Featured Article
+          </h2>
 
-          <p className="mt-4 text-slate-300 leading-7 lg:mt-3 lg:text-sm lg:leading-6">
-            We're still building.
-          </p>
-
-          <p className="mt-4 text-slate-300 leading-7 lg:mt-3 lg:text-sm lg:leading-6">
-            Rather than publishing content simply to have a blog, we'd rather
-            wait until we have something genuinely useful or interesting to
-            share.
-          </p>
-
-          <p className="mt-4 text-slate-300 leading-7 lg:mt-3 lg:text-sm lg:leading-6">
-            When the time comes, this is where you'll find articles about:
-          </p>
-
-          <ul className="mt-4 list-disc space-y-2 pl-6 text-slate-300 lg:mt-3 lg:space-y-1.5 lg:text-sm">
-            <li>Major platform updates</li>
-            <li>New feature announcements</li>
-            <li>Customer stories and campaign successes</li>
-            <li>Development insights from Team Aether</li>
-            <li>Industry observations</li>
-            <li>Behind-the-scenes looks at how Aether is evolving</li>
-          </ul>
+          <article className="rounded-2xl border border-violet-400/25 bg-[#10233e]/75 p-8 shadow-xl shadow-black/20 lg:rounded-xl lg:p-6">
+            <p className="text-sm font-semibold uppercase tracking-wider text-violet-300">
+              Founder Interview · Medium
+            </p>
+            <h3 className="mt-4 text-3xl font-bold leading-tight text-white lg:text-2xl">
+              An Interview With the CEO of Aether Systems LLC
+            </h3>
+            <p className="mt-3 text-sm text-slate-400">
+              November 2026 · Tyler Tannehill, Founder &amp; CEO
+            </p>
+            <p className="mt-6 leading-8 text-slate-300 lg:mt-4 lg:text-sm lg:leading-6">
+              What connects Aether Political, Business, Social, Academy, and the
+              vision for Aether Personal? In a candid conversation about building
+              software, navigating life, and the role of artificial intelligence,
+              Aether&apos;s founder explores how an idea became an ecosystem.
+            </p>
+            <p className="mt-4 leading-8 text-slate-300 lg:text-sm lg:leading-6">
+              And there&apos;s something unusual about the interviewer.
+            </p>
+            <a
+              href={interviewUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-7 inline-flex items-center justify-center rounded-xl border border-violet-400/40 bg-violet-400/10 px-6 py-3 font-semibold text-violet-300 transition hover:-translate-y-0.5 hover:border-violet-300 hover:bg-violet-400/15 lg:mt-5 lg:px-5 lg:py-2.5 lg:text-sm"
+            >
+              Read the Interview on Medium ↗
+            </a>
+          </article>
         </section>
 
-        <section className="mt-12 rounded-2xl border border-white/10 bg-[#10233e]/75 p-8 shadow-xl shadow-black/20 lg:mt-8 lg:rounded-xl lg:p-6">
-          <h2 className="text-2xl font-semibold lg:text-xl">Quality over quantity.</h2>
-
-          <p className="mt-4 text-slate-300 leading-7 lg:mt-3 lg:text-sm lg:leading-6">
-            We don't believe every software company needs to publish an article
-            every week.
+        <section className="mt-10 rounded-2xl border border-white/10 bg-[#10233e]/75 p-8 shadow-xl shadow-black/20 lg:mt-7 lg:rounded-xl lg:p-6">
+          <h2 className="text-2xl font-semibold lg:text-xl">More to Come</h2>
+          <p className="mt-4 leading-8 text-slate-300 lg:mt-3 lg:text-sm lg:leading-6">
+            As Aether grows, we&apos;ll share thoughtful articles about our
+            products, development, the people behind the work, and the ideas
+            shaping what comes next.
           </p>
-
-          <p className="mt-4 text-slate-300 leading-7 lg:mt-3 lg:text-sm lg:leading-6">
-            When we have something meaningful to say, we'll say it.
-          </p>
-
-          <p className="mt-4 text-slate-300 leading-7 lg:mt-3 lg:text-sm lg:leading-6">
-            Until then, we'd rather spend our time building Aether than writing
-            about it.
+          <p className="mt-4 leading-8 text-slate-300 lg:mt-3 lg:text-sm lg:leading-6">
+            We believe in quality over quantity. When we have something
+            meaningful to say, you&apos;ll find it here.
           </p>
         </section>
       </div>
