@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Building2, GraduationCap, Landmark, Sparkles, Users, UserRound, X, ArrowRight } from "lucide-react";
 
@@ -48,7 +49,7 @@ const footerGroups = [
 
 export default function HomePage() {
   const [infographicClicks, setInfographicClicks] = useState(0);
-  const [personalPreviewOpen, setPersonalPreviewOpen] = useState(false);
+  const router = useRouter();
   const [comingSoon, setComingSoon] = useState<"Social" | "Personal" | null>(null);
   const [easterEggClicks, setEasterEggClicks] = useState(0);
   const [easterEggOpen, setEasterEggOpen] = useState(false);
@@ -57,7 +58,7 @@ export default function HomePage() {
     const nextClicks = infographicClicks + 1;
     if (nextClicks >= 3) {
       setInfographicClicks(0);
-      setPersonalPreviewOpen(true);
+      router.push("/personal-public");
       return;
     }
     setInfographicClicks(nextClicks);
@@ -250,17 +251,6 @@ export default function HomePage() {
         </footer>
       </div>
 
-      {personalPreviewOpen && (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/75 px-5 backdrop-blur-sm" onClick={() => setPersonalPreviewOpen(false)}>
-          <div role="dialog" aria-modal="true" aria-labelledby="personal-preview-title" className="relative w-full max-w-md rounded-[2rem] border border-violet-400/30 bg-[#0B1629] p-10 text-center shadow-2xl" onClick={(event) => event.stopPropagation()}>
-            <button type="button" aria-label="Close" onClick={() => setPersonalPreviewOpen(false)} className="absolute right-5 top-5 text-slate-400 transition hover:text-white"><X className="h-5 w-5" /></button>
-            <Sparkles className="mx-auto h-9 w-9 text-violet-300" />
-            <h2 id="personal-preview-title" className="mt-5 text-3xl font-black">Aether Personal is on the way...</h2>
-            <p className="mt-4 leading-7 text-slate-300">The next chapter of the Aether ecosystem is taking shape. Stay tuned.</p>
-            <button type="button" onClick={() => setPersonalPreviewOpen(false)} className="mt-7 rounded-xl bg-violet-600 px-6 py-3 font-bold transition hover:bg-violet-500">Close</button>
-          </div>
-        </div>
-      )}
       {comingSoon && <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/75 px-5 backdrop-blur-sm" onClick={() => setComingSoon(null)}><div role="dialog" aria-modal="true" aria-labelledby="coming-soon-title" className="relative w-full max-w-md rounded-[2rem] border border-violet-400/30 bg-[#0B1629] p-10 text-center shadow-2xl" onClick={(event) => event.stopPropagation()}><button type="button" aria-label="Close" onClick={() => setComingSoon(null)} className="absolute right-5 top-5 text-slate-400 hover:text-white"><X className="h-5 w-5" /></button><Sparkles className="mx-auto h-8 w-8 text-violet-300" /><h2 id="coming-soon-title" className="mt-5 text-3xl font-black">{comingSoon} Coming Soon</h2><p className="mt-4 leading-7 text-slate-300">This part of the Aether ecosystem is still in development. Stay tuned.</p><button type="button" onClick={() => setComingSoon(null)} className="mt-7 rounded-xl bg-violet-600 px-6 py-3 font-bold hover:bg-violet-500">Close</button></div></div>}
       {easterEggOpen && (
         <div

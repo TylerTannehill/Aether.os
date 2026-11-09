@@ -86,6 +86,51 @@ export async function POST(request: Request) {
       return response;
     }
 
+    // Personal is an individual product identity, separate from Social and organizations.
+    // Leave all existing organization and Social selection cookies untouched.
+    if (body?.context === "personal") {
+      if (!adminClient) {
+        return NextResponse.json(
+          { error: "Personal account provisioning is unavailable" },
+          { status: 503 }
+        );
+      }
+
+      const displayName =
+        typeof authenticatedUser.user_metadata?.display_name === "string"
+          ? authenticatedUser.user_metadata.display_name.trim() || null
+          : null;
+
+      const { error: insertError } = await adminClient
+        .from("personal_profiles")
+        .upsert(
+          { auth_user_id: authenticatedUser.id, display_name: displayName },
+          { onConflict: "auth_user_id", ignoreDuplicates: true }
+        );
+
+      if (insertError) {
+        return NextResponse.json(
+          { error: insertError.message },
+          { status: 500 }
+        );
+      }
+
+      const { data: personalProfile, error: profileError } = await adminClient
+        .from("personal_profiles")
+        .select("id, auth_user_id, display_name")
+        .eq("auth_user_id", authenticatedUser.id)
+        .single();
+
+      if (profileError || !personalProfile) {
+        return NextResponse.json(
+          { error: profileError?.message || "Unable to load Personal account" },
+          { status: 500 }
+        );
+      }
+
+      return NextResponse.json({ context: "personal", profile: personalProfile });
+    }
+
     const normalizedCampaign = normalizeCampaign(body?.campaign);
     const requestedContext = body?.context === "employer" ? "employer" : "organization";
 

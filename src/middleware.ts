@@ -16,6 +16,7 @@ export async function middleware(request: NextRequest) {
     '/robby',
     '/login',
     '/login-social',
+    '/login-personal',
     '/login-social/employer-login',
     '/login-social/ad-purchasing',
     '/social-public',
@@ -50,6 +51,7 @@ export async function middleware(request: NextRequest) {
   ]
 
   const isSocialRoute = pathname === '/social' || pathname.startsWith('/social/')
+  const isPersonalRoute = pathname === '/personal' || pathname.startsWith('/personal/')
 
   const isPublicApiRoute =
     pathname === '/api/contact' ||
@@ -64,7 +66,9 @@ export async function middleware(request: NextRequest) {
     pathname === '/business-public' ||
     pathname.startsWith('/business-public/') ||
     pathname === '/political-public' ||
-    pathname.startsWith('/political-public/')
+    pathname.startsWith('/political-public/') ||
+    pathname === '/personal-public' ||
+    pathname.startsWith('/personal-public/')
 
   const isPublicAsset =
     pathname.startsWith('/_next') ||
@@ -98,12 +102,16 @@ export async function middleware(request: NextRequest) {
 
   if (!user && !isPublicRoute) {
     const url = request.nextUrl.clone()
-    url.pathname = isSocialRoute ? '/login-social' : '/login'
+    url.pathname = isPersonalRoute
+      ? '/login-personal'
+      : isSocialRoute
+        ? '/login-social'
+        : '/login'
     return NextResponse.redirect(url)
   }
 
 
-  if (user && !isPublicRoute && !isSocialRoute) {
+  if (user && !isPublicRoute && !isSocialRoute && !isPersonalRoute) {
     const organizationId = request.cookies.get('active_organization_id')?.value
 
     if (organizationId) {
