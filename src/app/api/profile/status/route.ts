@@ -122,27 +122,13 @@ export async function PATCH(request: Request) {
       );
     }
 
-    const currentPotatoCount =
-      Number(membership.potato_status_count ?? 0) || 0;
-    const nextPotatoCount =
-      nextStatus === "potato" ? currentPotatoCount + 1 : currentPotatoCount;
-    const nextPotatoEasterEggUnlocked =
-      Boolean(membership.potato_easter_egg_unlocked) ||
-      nextPotatoCount >= 23;
-
+    // The database function records completed status periods and updates
+    // the membership (including Potato counts) in one transaction.
     const { data: updatedMembership, error: updateError } =
-      await serviceSupabase
-        .from("organization_members")
-        .update({
-          profile_status: nextStatus,
-          potato_status_count: nextPotatoCount,
-          potato_easter_egg_unlocked: nextPotatoEasterEggUnlocked,
-        })
-        .eq("id", membership.id)
-        .select(
-          "id, user_id, organization_id, profile_status, potato_status_count, potato_easter_egg_unlocked"
-        )
-        .maybeSingle();
+      await serviceSupabase.rpc("update_member_profile_status", {
+        p_member_id: membership.id,
+        p_next_status: nextStatus,
+      });
 
     if (updateError) {
       return NextResponse.json(

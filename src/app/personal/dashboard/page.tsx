@@ -3,11 +3,57 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
-import { ArrowUpRight, BookOpen, BriefcaseBusiness, GraduationCap, MessageCircle, Plus, Save, Trash2, Users, Landmark, Sparkles, Target, NotebookPen, CheckCircle2 } from 'lucide-react'
+import { BookOpen, BriefcaseBusiness, GraduationCap, MessageCircle, Plus, Save, Trash2, Users, Landmark, Sparkles, Target, NotebookPen, CheckCircle2, BrainCircuit, Mail, Heart, MessageSquare, FileUser, RefreshCw } from 'lucide-react'
 
 type Goal = { id: string; text: string; progress: number }
 type PersonalConnection = { id: string; product: 'Political' | 'Business'; role: string; connected_at: string }
 type SocialConnection = { id: string; social_profile_id: string; username: string | null; display_name: string | null; connected_at: string }
+type StatusSummary = {
+  membership_id: string
+  current_status: string
+  current_duration_seconds: number
+  last_24h_seconds: Record<string, number>
+}
+type StatusResponse = { memberships?: StatusSummary[]; error?: string }
+type SocialAggregatesResponse = {
+  connected: boolean
+  social_aggregates: { likes_received: number; comments_received: number; unread_dms: number; refreshed_at: string; unread_refreshed_at: string } | null
+  error?: string
+}
+type ProfessionalEntry = Record<string, unknown>
+type ProfessionalContext = {
+  display_name?: string | null
+  username?: string | null
+  bio?: string | null
+  experience?: ProfessionalEntry[]
+  education?: ProfessionalEntry[]
+  certifications?: ProfessionalEntry[]
+}
+type ProfessionalContextResponse = {
+  connected?: boolean
+  professional_context?: ProfessionalContext | null
+  error?: string
+}
+function resumeText(value: unknown): string {
+  return typeof value === 'string' ? value.trim() : ''
+}
+function resumeDate(value: unknown): string {
+  const text = resumeText(value)
+  return /^\\d{4}-\\d{2}/.test(text) ? text.slice(0, 7) : text
+}
+function resumeDateRange(entry: ProfessionalEntry): string {
+  const start = resumeDate(entry.start_date)
+  const end = entry.is_current === true ? 'Present' : resumeDate(entry.end_date)
+  return [start, end].filter(Boolean).join(' – ')
+}
+const STATUS_KEYS = ['active', 'busy', 'inactive', 'break', 'lunch', 'potato'] as const
+function formatDuration(seconds: number) {
+  const total = Math.max(0, Math.round(seconds))
+  const hours = Math.floor(total / 3600)
+  const minutes = Math.floor((total % 3600) / 60)
+  const remainder = total % 60
+  return hours ? `${hours}h ${minutes}m` : minutes ? `${minutes}m ${remainder}s` : `${remainder}s`
+}
 const supabase = createClient()
 
 const connections = [
@@ -42,6 +88,18 @@ export default function PersonalDashboardPage() {
   const [socialModalOpen, setSocialModalOpen] = useState(false)
   const [socialEmail, setSocialEmail] = useState('')
   const [socialPassword, setSocialPassword] = useState('')
+  const [politicalStatuses, setPoliticalStatuses] = useState<StatusSummary[]>([])
+  const [businessStatuses, setBusinessStatuses] = useState<StatusSummary[]>([])
+  const [socialAggregates, setSocialAggregates] = useState<SocialAggregatesResponse['social_aggregates']>(null)
+  const [contextLoading, setContextLoading] = useState(true)
+  const [contextErrors, setContextErrors] = useState<Record<string, string>>({})
+  const [contextUpdatedAt, setContextUpdatedAt] = useState<string | null>(null)
+  const [contextRefresh, setContextRefresh] = useState(0)
+  const [resumeOpen, setResumeOpen] = useState(false)
+  const [professionalContext, setProfessionalContext] = useState<ProfessionalContext | null>(null)
+  const [professionalError, setProfessionalError] = useState('')
+  const [professionalLoading, setProfessionalLoading] = useState(false)
+
 
   useEffect(() => {
     let cancelled = false
@@ -122,6 +180,53 @@ export default function PersonalDashboardPage() {
     void loadSocialConnection()
     return () => { cancelled = true }
   }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    async function loadContext() {
+      setContextLoading(true)
+      setProfessionalLoading(true)
+      const endpoints = [
+        ['/api/personal/political-status', 'political'],
+        ['/api/personal/business-status', 'business'],
+        ['/api/personal/social-aggregates', 'social'],
+        ['/api/personal/social-context', 'professional'],
+      ] as const
+      const results = await Promise.all(endpoints.map(async ([url, key]) => {
+        try {
+          const response = await fetch(url, { cache: 'no-store' })
+          const payload = await response.json()
+          if (!response.ok) throw new Error(payload.error || `Unable to load ${key} context.`)
+          return { key, payload, error: '' }
+        } catch (err) {
+          return { key, payload: null, error: err instanceof Error ? err.message : 'Unable to load context.' }
+        }
+      }))
+      if (cancelled) return
+      const errors: Record<string, string> = {}
+      for (const result of results) {
+        if (result.error) errors[result.key] = result.error
+        if (result.key === 'political') setPoliticalStatuses((result.payload as StatusResponse | null)?.memberships ?? [])
+        if (result.key === 'business') setBusinessStatuses((result.payload as StatusResponse | null)?.memberships ?? [])
+        if (result.key === 'social') setSocialAggregates((result.payload as SocialAggregatesResponse | null)?.social_aggregates ?? null)
+        if (result.key === 'professional') {
+          const professional = result.payload as ProfessionalContextResponse | null
+          setProfessionalContext(professional?.connected ? professional.professional_context ?? null : null)
+          setProfessionalError(result.error || professional?.error || '')
+        }
+      }
+      setContextErrors(errors)
+      setContextUpdatedAt(new Date().toISOString())
+      setContextLoading(false)
+      setProfessionalLoading(false)
+    }
+    void loadContext()
+    return () => { cancelled = true }
+  }, [contextRefresh, linkedAccounts, socialConnection])
+
+  function totalStatusTime(memberships: StatusSummary[]) {
+    return memberships.reduce((sum, membership) => sum + STATUS_KEYS.reduce((n, status) => n + (Number(membership.last_24h_seconds?.[status]) || 0), 0), 0)
+  }
 
   async function connectSocial(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -357,7 +462,7 @@ export default function PersonalDashboardPage() {
                     <p className="mt-1 text-xs text-slate-400">{description}</p>
                     {name === 'Aether Academy' ? (
                       <a href="https://aetheros.pro/aether-academy" target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-violet-700 to-indigo-600 px-3 py-2 text-xs font-bold text-white transition hover:brightness-110">
-                        Enter Academy <ArrowUpRight className="h-3.5 w-3.5" />
+                        Enter Academy
                       </a>
                     ) : name === 'Aether Social' ? (
                       <div className="mt-3 space-y-2">
@@ -375,6 +480,7 @@ export default function PersonalDashboardPage() {
                             <button type="button" disabled={socialBusy} onClick={() => { setSocialError(''); setSocialEmail(''); setSocialPassword(''); setSocialModalOpen(true) }} className="rounded-lg bg-gradient-to-r from-violet-700 to-indigo-600 px-3 py-2 text-xs font-bold text-white transition hover:brightness-110 disabled:opacity-50">Connect</button>
                           </>
                         )}
+                        <a href="https://aetheros.pro/social-public" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-violet-700 to-indigo-600 px-3 py-2 text-xs font-bold text-white transition hover:brightness-110">Enter Social</a>
                       </div>
                     ) : product ? (
                       <div className="mt-3 space-y-2">
@@ -388,9 +494,10 @@ export default function PersonalDashboardPage() {
                               </div>
                             ))}
                             {matches.length === 0 && <p className="text-[11px] font-semibold text-violet-300/80">Not connected</p>}
-                            <button type="button" disabled={connectionBusy} onClick={() => { setConnectingProduct(product); setOrganizationSlug(''); setWorkEmail(''); setConnectionsError('') }} className="rounded-lg bg-gradient-to-r from-violet-700 to-indigo-600 px-3 py-2 text-xs font-bold text-white transition hover:brightness-110 disabled:opacity-50">
-                              {matches.length ? 'Connect another' : 'Connect'}
-                            </button>
+                            {matches.length === 0 && (
+                              <button type="button" disabled={connectionBusy} onClick={() => { setConnectingProduct(product); setOrganizationSlug(''); setWorkEmail(''); setConnectionsError('') }} className="rounded-lg bg-gradient-to-r from-violet-700 to-indigo-600 px-3 py-2 text-xs font-bold text-white transition hover:brightness-110 disabled:opacity-50">Connect</button>
+                            )}
+                            <a href={product === 'Political' ? 'https://aetheros.pro/political-public' : 'https://aetheros.pro/business-public'} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-violet-700 to-indigo-600 px-3 py-2 text-xs font-bold text-white transition hover:brightness-110">Enter {product}</a>
                           </>
                         )}
                       </div>
@@ -402,6 +509,135 @@ export default function PersonalDashboardPage() {
               })}
             </div>
           </section>
+          <section className="mt-5 rounded-[22px] border border-white/10 bg-white/[0.055] p-5 shadow-xl backdrop-blur-lg">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <span className="rounded-xl bg-violet-500/15 p-2.5 text-violet-300"><BrainCircuit className="h-5 w-5" /></span>
+                <div><h2 className="text-xl font-black">You</h2><p className="mt-1 text-xs text-slate-400">Your connected world, at a glance.</p></div>
+              </div>
+              <button type="button" onClick={() => setContextRefresh(n => n + 1)} disabled={contextLoading} className="inline-flex items-center gap-2 rounded-lg border border-violet-400/25 px-3 py-2 text-xs font-semibold text-violet-200 transition hover:bg-violet-500/10 disabled:opacity-50"><RefreshCw className="h-3.5 w-3.5" /> {contextLoading ? 'Loading…' : 'Refresh context'}</button>
+            </div>
+            <div className="grid gap-3 lg:grid-cols-3">
+              {([
+                { name: 'Political', icon: Landmark, memberships: politicalStatuses, connected: linkedAccounts.some(a => a.product === 'Political'), error: contextErrors.political },
+                { name: 'Business', icon: BriefcaseBusiness, memberships: businessStatuses, connected: linkedAccounts.some(a => a.product === 'Business'), error: contextErrors.business },
+              ] as const).map(({ name, icon: Icon, memberships, connected, error }) => (
+                <div key={name} className="rounded-2xl border border-violet-400/15 bg-[#16172e] p-4">
+                  <div className="mb-3 flex items-center gap-2"><Icon className="h-5 w-5 text-violet-300" /><h3 className="text-sm font-bold">{name}</h3></div>
+                  {error ? <p className="text-xs text-rose-300">{error}</p> : contextLoading && !contextUpdatedAt ? <p className="text-xs text-slate-400">Loading status…</p> : !connected ? <p className="text-xs text-slate-400">Connect your {name} account above to see status time.</p> : memberships.length === 0 ? <p className="text-xs text-slate-400">No tracked memberships available.</p> : (
+                    <>
+                      <p className="text-2xl font-black text-white">{formatDuration(totalStatusTime(memberships))}</p>
+                      <p className="mt-1 text-[11px] text-slate-400">Selected status time · rolling 24 hours</p>
+                      <p className="mt-3 text-xs text-violet-200">Current: {memberships.map(m => m.current_status).join(', ')}</p>
+                      <div className="mt-3 space-y-1.5 border-t border-white/10 pt-3">
+                        {STATUS_KEYS.map(status => {
+                          const seconds = memberships.reduce((sum, m) => sum + (Number(m.last_24h_seconds?.[status]) || 0), 0)
+                          return <div key={status} className="flex justify-between gap-2 text-[11px]"><span className="capitalize text-slate-400">{status}</span><span className="font-semibold text-slate-200">{formatDuration(seconds)}</span></div>
+                        })}
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
+              <div className="rounded-2xl border border-violet-400/15 bg-[#16172e] p-4">
+                <div className="mb-3 flex items-center gap-2"><Users className="h-5 w-5 text-violet-300" /><h3 className="text-sm font-bold">Social</h3></div>
+                {contextErrors.social ? <p className="text-xs text-rose-300">{contextErrors.social}</p> : contextLoading && !contextUpdatedAt ? <p className="text-xs text-slate-400">Loading activity…</p> : !socialConnection ? <p className="text-xs text-slate-400">Connect Aether Social above to see activity.</p> : !socialAggregates ? <p className="text-xs text-slate-400">Social activity is unavailable.</p> : (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between"><span className="flex items-center gap-2 text-xs text-slate-300"><Mail className="h-4 w-4 text-violet-300" /> Unread DMs</span><span className="text-xl font-black">{socialAggregates.unread_dms}</span></div>
+                    <div className="flex items-center justify-between"><span className="flex items-center gap-2 text-xs text-slate-300"><Heart className="h-4 w-4 text-violet-300" /> Likes received</span><span className="text-xl font-black">{socialAggregates.likes_received}</span></div>
+                    <div className="flex items-center justify-between"><span className="flex items-center gap-2 text-xs text-slate-300"><MessageSquare className="h-4 w-4 text-violet-300" /> Comments received</span><span className="text-xl font-black">{socialAggregates.comments_received}</span></div>
+                    <p className="text-[11px] text-slate-500">Likes and comments are lifetime totals, refreshed up to every 2 hours. Unread DMs are checked on request.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-violet-400/15 bg-[#16172e] p-4">
+              <div className="flex items-center gap-3"><FileUser className="h-6 w-6 text-violet-300" /><div><h3 className="text-sm font-bold">Your AI Context Resume</h3><p className="mt-1 text-xs text-slate-400">Preview the context available for future intelligence integration.</p></div></div>
+              <button type="button" onClick={() => setResumeOpen(true)} className="rounded-lg bg-gradient-to-r from-violet-700 to-indigo-600 px-4 py-2.5 text-xs font-bold text-white transition hover:brightness-110">View context preview</button>
+            </div>
+            {contextUpdatedAt && <p className="mt-3 text-[11px] text-slate-500">Dashboard context last checked: {new Date(contextUpdatedAt).toLocaleString()}</p>}
+          </section>
+          {resumeOpen && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4" onMouseDown={event => { if (event.target === event.currentTarget) setResumeOpen(false) }}>
+              <div role="dialog" aria-modal="true" aria-labelledby="context-preview-title" className="max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-[22px] border border-violet-400/25 bg-[#16172e] p-6 shadow-2xl">
+                <div className="flex items-start justify-between gap-4"><div><h2 id="context-preview-title" className="text-xl font-black">Your Context Preview</h2><p className="mt-2 text-sm text-slate-400">A human-readable preview of connected information. The AI conversation payload is not wired yet; this is not a record of what an AI has seen.</p></div><button type="button" onClick={() => setResumeOpen(false)} aria-label="Close context preview" className="rounded-lg px-2 py-1 text-slate-300 hover:bg-white/10">✕</button></div>
+                <div className="mt-5 space-y-4 text-sm">
+                  <div><h3 className="font-bold text-violet-200">Personal</h3><p className="mt-1 text-slate-300">{goals.length} goals · {average}% average progress · {notes.trim() ? 'Notes to Self available' : 'No notes entered'}</p></div>
+                  <div><h3 className="font-bold text-violet-200">Political</h3><p className="mt-1 text-slate-300">{linkedAccounts.some(a => a.product === 'Political') ? `${politicalStatuses.length} tracked membership(s) · ${formatDuration(totalStatusTime(politicalStatuses))} in the rolling 24-hour window` : 'Not connected'}</p></div>
+                  <div><h3 className="font-bold text-violet-200">Business</h3><p className="mt-1 text-slate-300">{linkedAccounts.some(a => a.product === 'Business') ? `${businessStatuses.length} tracked membership(s) · ${formatDuration(totalStatusTime(businessStatuses))} in the rolling 24-hour window` : 'Not connected'}</p></div>
+                  <div><h3 className="font-bold text-violet-200">Social</h3><p className="mt-1 text-slate-300">{socialConnection ? socialAggregates ? `${socialAggregates.unread_dms} unread DMs · ${socialAggregates.likes_received} likes received · ${socialAggregates.comments_received} comments received` : 'Connected; activity unavailable' : 'Not connected'}</p></div>
+                </div>
+                <section className="mt-6 border-t border-white/10 pt-5">
+                  <div className="mb-4 flex items-center gap-2">
+                    <BriefcaseBusiness className="h-5 w-5 text-violet-300" />
+                    <h3 className="text-base font-black text-white">Professional Background</h3>
+                  </div>
+                  {!socialConnection ? (
+                    <p className="text-sm text-slate-400">Connect Aether Social to view your professional resume.</p>
+                  ) : professionalLoading && !professionalContext ? (
+                    <p className="text-sm text-slate-400">Loading professional background…</p>
+                  ) : professionalError ? (
+                    <p role="alert" className="text-sm text-rose-300">Unable to load professional background: {professionalError}</p>
+                  ) : !professionalContext ? (
+                    <p className="text-sm text-slate-400">No professional background was returned by Social.</p>
+                  ) : (
+                    <div className="space-y-6 text-sm">
+                      <div>
+                        <p className="text-lg font-bold text-white">{professionalContext.display_name || professionalContext.username || 'Professional profile'}</p>
+                        {professionalContext.username && <p className="text-xs text-violet-300">@{professionalContext.username}</p>}
+                        {professionalContext.bio && <p className="mt-2 whitespace-pre-wrap text-slate-300">{professionalContext.bio}</p>}
+                      </div>
+                      <div>
+                        <h4 className="mb-3 font-bold text-violet-200">Work Experience</h4>
+                        {Array.isArray(professionalContext.experience) && professionalContext.experience.length ? (
+                          <div className="space-y-3">
+                            {professionalContext.experience.map((entry, index) => (
+                              <div key={index} className="rounded-xl border border-white/10 bg-[#101328] p-4">
+                                <p className="font-bold text-white">{resumeText(entry.job_title) || 'Position'}</p>
+                                <p className="mt-1 text-slate-300">{resumeText(entry.company_name)}</p>
+                                <p className="mt-1 text-xs text-slate-400">{[resumeDateRange(entry), resumeText(entry.employment_type), resumeText(entry.location)].filter(Boolean).join(' · ')}</p>
+                                {resumeText(entry.description) && <p className="mt-3 whitespace-pre-wrap break-words leading-6 text-slate-300">{resumeText(entry.description)}</p>}
+                              </div>
+                            ))}
+                          </div>
+                        ) : <p className="text-slate-400">No work experience listed.</p>}
+                      </div>
+                      <div>
+                        <h4 className="mb-3 font-bold text-violet-200">Education</h4>
+                        {Array.isArray(professionalContext.education) && professionalContext.education.length ? (
+                          <div className="space-y-3">
+                            {professionalContext.education.map((entry, index) => (
+                              <div key={index} className="rounded-xl border border-white/10 bg-[#101328] p-4">
+                                <p className="font-bold text-white">{resumeText(entry.school_name) || resumeText(entry.institution_name) || resumeText(entry.institution) || 'Education'}</p>
+                                <p className="mt-1 text-slate-300">{[resumeText(entry.degree), resumeText(entry.field_of_study)].filter(Boolean).join(' · ')}</p>
+                                <p className="mt-1 text-xs text-slate-400">{resumeDateRange(entry)}</p>
+                                {resumeText(entry.description) && <p className="mt-2 whitespace-pre-wrap text-slate-300">{resumeText(entry.description)}</p>}
+                              </div>
+                            ))}
+                          </div>
+                        ) : <p className="text-slate-400">No education listed.</p>}
+                      </div>
+                      <div>
+                        <h4 className="mb-3 font-bold text-violet-200">Certifications</h4>
+                        {Array.isArray(professionalContext.certifications) && professionalContext.certifications.length ? (
+                          <div className="space-y-3">
+                            {professionalContext.certifications.map((entry, index) => (
+                              <div key={index} className="rounded-xl border border-white/10 bg-[#101328] p-4">
+                                <p className="font-bold text-white">{resumeText(entry.name) || resumeText(entry.credential_name) || 'Certification'}</p>
+                                <p className="mt-1 text-slate-300">{resumeText(entry.issuer) || resumeText(entry.issuing_organization)}</p>
+                                <p className="mt-1 text-xs text-slate-400">{[resumeDate(entry.issue_date), resumeDate(entry.expiration_date) ? `Expires ${resumeDate(entry.expiration_date)}` : ''].filter(Boolean).join(' · ')}</p>
+                              </div>
+                            ))}
+                          </div>
+                        ) : <p className="text-slate-400">No certifications listed.</p>}
+                      </div>
+                    </div>
+                  )}
+                </section>
+                <p className="mt-5 border-t border-white/10 pt-4 text-xs text-slate-400">This preview excludes private messages, posts, campaign records, and business operational records. Professional background comes from your connected Social profile. The AI conversation payload is not yet wired.</p>
+              </div>
+            </div>
+          )}
           {socialModalOpen && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4" onMouseDown={event => { if (event.target === event.currentTarget && !socialBusy) { setSocialModalOpen(false); setSocialPassword(''); setSocialError('') } }}>
               <div role="dialog" aria-modal="true" aria-labelledby="social-connect-title" className="w-full max-w-md rounded-[22px] border border-violet-400/25 bg-[#16172e] p-6 shadow-2xl">

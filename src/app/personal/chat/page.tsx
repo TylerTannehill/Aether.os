@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Target, NotebookPen, MessageCircle, Send, CheckCircle2, AlertCircle } from 'lucide-react'
 
 type Goal = { id: string; text: string; progress: number }
+type ChatMessage = { role: 'user' | 'assistant'; content: string }
 const supabase = createClient()
 
 export default function PersonalConversationsPage() {
@@ -17,7 +18,11 @@ export default function PersonalConversationsPage() {
   const [loading, setLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
   const [messageDraft, setMessageDraft] = useState('')
-  const [showChatNotice, setShowChatNotice] = useState(false)
+  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [sending, setSending] = useState(false)
+  const [chatError, setChatError] = useState('')
+  const chatBottomRef = useRef<HTMLDivElement | null>(null)
+  const sendingRef = useRef(false)
   const saveVersion = useRef(0)
   const noteContent = useRef('')
 
@@ -72,6 +77,41 @@ export default function PersonalConversationsPage() {
     return () => window.clearTimeout(timeout)
   }, [notes, notesReady, profileId])
 
+  useEffect(() => {
+    chatBottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+  }, [messages, sending])
+
+  async function sendMessage(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const message = messageDraft.trim()
+    if (!message || sendingRef.current || !profileId) return
+    sendingRef.current = true
+    setSending(true)
+    setChatError('')
+    const history = messages.slice(-10)
+    setMessages(previous => [...previous, { role: 'user', content: message }])
+    setMessageDraft('')
+    try {
+      const response = await fetch('/api/personal/lyra', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message, history }),
+      })
+      const data: unknown = await response.json()
+      const result = data as { reply?: unknown; error?: unknown }
+      if (!response.ok || typeof result.reply !== 'string' || !result.reply.trim()) {
+        throw new Error(typeof result.error === 'string' ? result.error : 'Lyra could not respond. Please try again.')
+      }
+      setMessages(previous => [...previous, { role: 'assistant', content: result.reply as string }])
+    } catch (error) {
+      setChatError(error instanceof Error ? error.message : 'Unable to reach Lyra.')
+      // Keep the failed message visible so it can be copied and retried.
+    } finally {
+      sendingRef.current = false
+      setSending(false)
+    }
+  }
+
   const average = goals.length
     ? Math.round(goals.reduce((sum, goal) => sum + goal.progress, 0) / goals.length)
     : 0
@@ -111,22 +151,36 @@ export default function PersonalConversationsPage() {
               <Link href="/personal/dashboard" className="mt-5 inline-block text-xs font-bold text-violet-300 hover:text-white">Manage goals on dashboard →</Link>
             </section>
 
-            <section className="flex min-h-[530px] flex-col rounded-[22px] border border-violet-400/15 bg-white/[0.055] p-5 shadow-xl backdrop-blur-lg">
+            <section className="flex min-h-[530px] min-w-0 flex-col rounded-[22px] border border-violet-400/15 bg-white/[0.055] p-5 shadow-xl backdrop-blur-lg">
               <div className="mb-4 flex items-center gap-3 border-b border-white/10 pb-4">
                 <span className="rounded-xl bg-violet-500/15 p-2.5 text-violet-300"><MessageCircle className="h-5 w-5" /></span>
-                <div><h2 className="text-lg font-black">Conversation</h2><p className="text-xs text-slate-400">AI conversation integration is next</p></div>
+                <div><h2 className="text-lg font-black">Conversation with Lyra</h2><p className="text-xs text-slate-400">Powered by your Personal context</p></div>
               </div>
-              <div className="flex flex-1 flex-col items-center justify-center px-4 text-center">
-                <span className="mb-4 rounded-2xl border border-violet-400/20 bg-violet-500/10 p-4 text-violet-300"><MessageCircle className="h-8 w-8" /></span>
-                <h3 className="text-xl font-black">What's on your mind?</h3>
-                <p className="mt-2 max-w-sm text-sm leading-6 text-slate-400">This is your conversation space. Next, we'll connect it to AI and save your conversation history to Personal.</p>
-                {showChatNotice && <p role="status" className="mt-4 rounded-xl border border-violet-400/20 bg-violet-500/10 px-4 py-3 text-xs text-violet-200">Messages aren't sent or saved yet. AI chat is the next phase.</p>}
+              <div aria-live="polite" className="flex max-h-[62vh] min-h-[320px] flex-1 flex-col gap-4 overflow-y-auto pr-1">
+                {messages.length === 0 && (
+                  <div className="flex flex-1 flex-col items-center justify-center px-4 text-center">
+                    <span className="mb-4 rounded-2xl border border-violet-400/20 bg-violet-500/10 p-4 text-violet-300"><MessageCircle className="h-8 w-8" /></span>
+                    <h3 className="text-xl font-black">What's on your mind?</h3>
+                    <p className="mt-2 max-w-sm text-sm leading-6 text-slate-400">Lyra is ready. She receives her personality, Aether instructions, and your connected You context with every message.</p>
+                  </div>
+                )}
+                {messages.map((item, index) => (
+                  <div key={index} className={`flex ${item.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[90%] rounded-2xl px-4 py-3 text-sm leading-6 ${item.role === 'user' ? 'bg-gradient-to-r from-violet-700 to-indigo-600 text-white' : 'border border-white/10 bg-[#11182e] text-slate-100'}`}>
+                      <p className="mb-1 text-[11px] font-bold uppercase tracking-wide text-violet-200">{item.role === 'user' ? 'You' : 'Lyra'}</p>
+                      <p className="whitespace-pre-wrap break-words">{item.content}</p>
+                    </div>
+                  </div>
+                ))}
+                {sending && <p role="status" className="text-sm text-violet-200">Lyra is thinking…</p>}
+                <div ref={chatBottomRef} />
               </div>
-              <form onSubmit={e => { e.preventDefault(); if (messageDraft.trim()) setShowChatNotice(true) }} className="mt-4 flex items-end gap-2 rounded-xl border border-white/10 bg-[#0c1327] p-2">
-                <textarea aria-label="Message draft" rows={2} value={messageDraft} onChange={e => { setMessageDraft(e.target.value); setShowChatNotice(false) }} placeholder="Message Aether Personal..." className="max-h-36 min-h-[54px] min-w-0 flex-1 resize-y bg-transparent px-2 py-2 text-sm text-white outline-none placeholder:text-slate-500" />
-                <button type="submit" aria-label="Check message availability" disabled={!messageDraft.trim()} className="rounded-lg bg-gradient-to-r from-violet-700 to-indigo-600 p-3 text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"><Send className="h-4 w-4" /></button>
+              {chatError && <p role="alert" className="mt-3 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-200">{chatError}</p>}
+              <form onSubmit={sendMessage} className="mt-4 flex items-end gap-2 rounded-xl border border-white/10 bg-[#0c1327] p-2">
+                <textarea aria-label="Message Lyra" rows={2} maxLength={4000} value={messageDraft} onChange={e => setMessageDraft(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); e.currentTarget.form?.requestSubmit() } }} placeholder="Message Lyra..." className="max-h-36 min-h-[54px] min-w-0 flex-1 resize-y bg-transparent px-2 py-2 text-sm text-white outline-none placeholder:text-slate-500" />
+                <button type="submit" aria-label="Send message to Lyra" disabled={!messageDraft.trim() || sending || !profileId} className="rounded-lg bg-gradient-to-r from-violet-700 to-indigo-600 p-3 text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"><Send className="h-4 w-4" /></button>
               </form>
-              <p className="mt-2 text-center text-[11px] text-slate-500">Preview only — messages are not sent or stored.</p>
+              <p className="mt-2 text-center text-[11px] text-slate-500">Testing on localhost · Chat messages aren't saved to Personal yet.</p>
             </section>
 
             <section className="flex flex-col rounded-[22px] border border-white/10 bg-white/[0.055] p-5 shadow-xl backdrop-blur-lg">
