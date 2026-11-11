@@ -3,9 +3,9 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "The Aether Ecosystem | Political, Business, Academy & Social",
+  title: "The Aether Ecosystem | Political, Business, Social, Academy & Personal",
   description:
-    "Explore Aether Political, Aether Business, Aether Academy, Aether Social, and the future of the Aether ecosystem.",
+    "Explore Aether Political, Business, Social, Academy, and Personal — connected experiences for work, community, and everyday life.",
   alternates: { canonical: "/ecosystem" },
 };
 
@@ -42,36 +42,30 @@ const products = [
   },
 ];
 
-const future = [
-  {
-    id: "personal",
-    name: "Aether Personal",
-    eyebrow: "Your Personal Operating System",
-    description:
-      "Aether Personal is envisioned as a place to organize personal responsibilities, priorities, goals, and everyday life. The vision is to bring clarity and continuity to individual work and life while keeping personal information and control in the individual's hands.",
-  },
-];
-
 export default function EcosystemPage() {
   return (
     <main className="min-h-screen overflow-x-hidden bg-[#07111f] text-white">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[520px] bg-[radial-gradient(ellipse_at_top,rgba(112,65,208,0.18),transparent_65%)]" />
-      <header className="relative mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-6 sm:px-8">
-        <div className="flex min-w-0 items-center gap-3 sm:gap-6">
-          <Link href="/" aria-label="Aether homepage" className="inline-flex shrink-0 items-center">
-            <Image src="/aether-logo-full.png" alt="Aether" width={175} height={100} className="h-auto w-28 sm:w-44" priority />
+      <header className="relative mx-auto flex max-w-6xl flex-col gap-5 px-5 py-6 sm:px-8 lg:flex-row lg:items-center lg:justify-between">
+        {/* Equal-sized logo spaces keep the three brands visually balanced. */}
+        <div className="grid w-full grid-cols-3 items-center gap-3 sm:gap-6 lg:max-w-[690px]">
+          <Link href="/" aria-label="Aether homepage" className="flex h-20 min-w-0 items-center justify-center rounded-xl transition hover:opacity-85 sm:h-28">
+            <Image src="/aether-logo-full.png" alt="Aether" width={175} height={100} className="h-full w-full scale-[1.45] object-contain" priority />
           </Link>
-          <Link href="/social-public" aria-label="Explore Aether Social" className="inline-flex min-w-0 items-center transition hover:opacity-90">
-            <Image src="/social-branding-transparent.png" alt="Aether Social" width={230} height={105} className="h-auto w-32 object-contain sm:w-52" />
+          <Link href="/social-public" aria-label="Explore Aether Social" className="flex h-20 min-w-0 items-center justify-center rounded-xl transition hover:opacity-85 sm:h-28">
+            <Image src="/social-branding-transparent.png" alt="Aether Social" width={230} height={105} className="h-full w-full object-contain" />
+          </Link>
+          <Link href="/personal-public" aria-label="Explore Aether Personal" className="flex h-20 min-w-0 items-center justify-center rounded-xl transition hover:opacity-85 sm:h-28">
+            <Image src="/aether-personal-logo.png" alt="Aether Personal" width={230} height={154} className="h-full w-full object-contain" />
           </Link>
         </div>
-        <Link href="/" className="rounded-xl border border-white/20 bg-white/5 px-4 py-2.5 text-sm font-semibold text-slate-200 transition hover:border-violet-400/50 hover:bg-white/10">← Back to Aether</Link>
+        <Link href="/" className="self-end whitespace-nowrap rounded-xl border border-white/20 bg-white/5 px-4 py-2.5 text-sm font-semibold text-slate-200 transition hover:border-violet-400/50 hover:bg-white/10 lg:self-auto">← Back to Aether</Link>
       </header>
 
       <section className="relative mx-auto max-w-5xl px-5 pb-14 pt-12 text-center sm:px-8 sm:pb-20 sm:pt-20">
         <p className="text-xs font-bold uppercase tracking-[0.32em] text-violet-300">Aether Systems LLC</p>
         <h1 className="mt-5 text-4xl font-black tracking-tight sm:text-6xl">One philosophy. <span className="bg-gradient-to-r from-violet-300 via-blue-300 to-violet-400 bg-clip-text text-transparent">An expanding ecosystem.</span></h1>
-        <p className="mx-auto mt-7 max-w-3xl text-base leading-8 text-slate-300 sm:text-lg">Different products, built for different parts of work and life. A shared commitment to clarity, focus, and execution — without treating every product or its data as one and the same.</p>
+        <p className="mx-auto mt-7 max-w-3xl text-base leading-8 text-slate-300 sm:text-lg">Different products for different parts of life. Aether Personal brings a new possibility into focus: AI conversations informed by the context you choose to connect, without treating every product or its data as one and the same.</p>
         <nav aria-label="Explore ecosystem sections" className="mt-9 flex flex-wrap justify-center gap-2">
           {[["Political", "#political"], ["Business", "#business"], ["Academy", "#academy"], ["Social", "#social"], ["Personal", "#personal"]].map(([label, href]) => (
             <a key={href} href={href} className="rounded-full border border-white/15 bg-white/[0.055] px-4 py-2 text-sm text-slate-200 transition hover:border-violet-400/50 hover:text-white">{label}</a>
@@ -137,21 +131,28 @@ export default function EcosystemPage() {
           </div>
         </section>
 
-        <section aria-labelledby="future-title" className="pt-5">
-          <div className="mb-7 text-center">
-            <p className="text-xs font-bold uppercase tracking-[0.24em] text-violet-300">Looking Ahead</p>
-            <h2 id="future-title" className="mt-3 text-3xl font-black sm:text-4xl">The ecosystem is still growing.</h2>
-            <p className="mx-auto mt-4 max-w-2xl text-slate-400">Aether Personal remains a future part of our ecosystem vision. It is not available to use today.</p>
+        <section id="personal" className="scroll-mt-8 overflow-hidden rounded-3xl border border-violet-400/20 bg-gradient-to-br from-violet-500/[0.12] via-white/[0.035] to-blue-500/[0.07] p-6 shadow-xl shadow-black/20 sm:p-10">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.24em] text-violet-300">Your Personal Operating System</p>
+              <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">Aether Personal</h2>
+            </div>
+            <span aria-hidden="true" className="text-5xl font-black text-white/[0.07] sm:text-7xl">05</span>
           </div>
-          <div className="mx-auto grid max-w-3xl gap-5">
-            {future.map((item) => (
-              <article key={item.id} id={item.id} className="scroll-mt-8 rounded-3xl border border-white/10 bg-white/[0.035] p-7 sm:p-8">
-                <span className="inline-flex rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-slate-300">In Development</span>
-                <p className="mt-7 text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">{item.eyebrow}</p>
-                <h3 className="mt-2 text-2xl font-black">{item.name}</h3>
-                <p className="mt-5 leading-8 text-slate-300">{item.description}</p>
-              </article>
+          <p className="mt-7 max-w-4xl text-2xl font-bold leading-snug text-white sm:text-3xl">Your life is more than a conversation. Your AI should understand the context.</p>
+          <div className="mt-6 flex flex-wrap gap-2">
+            {["Personal Goals", "Progress Tracking", "Notes to Self", "Connected Context", "AI Conversations"].map((tag) => (
+              <span key={tag} className="rounded-full border border-violet-400/20 bg-violet-400/[0.08] px-3 py-1 text-xs font-medium text-violet-200">{tag}</span>
             ))}
+          </div>
+          <div className="mt-8 max-w-4xl space-y-5 text-[15px] leading-8 text-slate-300 sm:text-base">
+            <p>Most AI conversations begin with an introduction. You explain what you do, what matters to you, and what you are working toward. Aether Personal changes that experience. Lyra can begin a conversation with relevant context you have already chosen to share, so you can spend less time repeating yourself and more time making progress.</p>
+            <p>Aether Personal gives individuals a dedicated place for goals, progress, and notes, alongside conversations with Lyra, its AI assistant. With connected Aether accounts, Personal can use permitted, limited context from other parts of the ecosystem to make those conversations more relevant. Instead of treating your professional world, social connections, and personal priorities as unrelated fragments, it can help you see how they fit together.</p>
+            <p>That does not mean handing an AI unrestricted access to your life. Connections are intentional, and the experience is designed around selected context rather than copying every record from Political, Business, or Social into Personal. The aim is clarity through connection, with the individual in control of what they choose to connect.</p>
+            <p>Aether Personal brings your goals, progress tracking, notes, connected account context, and conversations with Lyra into one experience. Persistent conversation history and long-term memory give those conversations continuity, so you can return to what matters without starting from scratch. Lyra combines the context you choose to connect with what you share over time, helping you see the bigger picture and move forward with clarity.</p>
+          </div>
+          <div className="mt-9 flex flex-wrap items-center gap-4 border-t border-white/10 pt-7">
+            <Link href="/personal-public" className="inline-flex items-center justify-center rounded-xl border border-violet-400/40 bg-violet-500/20 px-6 py-3 font-bold text-white transition hover:-translate-y-0.5 hover:bg-violet-500/30">Explore Aether Personal <span aria-hidden="true" className="ml-2">→</span></Link>
           </div>
         </section>
       </div>

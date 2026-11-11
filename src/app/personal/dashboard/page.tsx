@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
-import { BookOpen, BriefcaseBusiness, GraduationCap, MessageCircle, Plus, Save, Trash2, Users, Landmark, Sparkles, Target, NotebookPen, CheckCircle2, BrainCircuit, Mail, Heart, MessageSquare, FileUser, RefreshCw } from 'lucide-react'
+import { BookOpen, BriefcaseBusiness, GraduationCap, MessageCircle, Plus, Save, Trash2, Users, Landmark, Sparkles, Target, NotebookPen, CheckCircle2, BrainCircuit, Mail, Heart, MessageSquare, FileUser, RefreshCw, LogOut } from 'lucide-react'
 
 type Goal = { id: string; text: string; progress: number }
 type PersonalConnection = { id: string; product: 'Political' | 'Business'; role: string; connected_at: string }
@@ -99,6 +99,8 @@ export default function PersonalDashboardPage() {
   const [professionalContext, setProfessionalContext] = useState<ProfessionalContext | null>(null)
   const [professionalError, setProfessionalError] = useState('')
   const [professionalLoading, setProfessionalLoading] = useState(false)
+  const [loggingOut, setLoggingOut] = useState(false)
+  const [logoutError, setLogoutError] = useState('')
 
 
   useEffect(() => {
@@ -330,6 +332,19 @@ export default function PersonalDashboardPage() {
     return () => window.clearTimeout(timeout)
   }, [notes, profileId, notesReady])
 
+  async function handleLogout() {
+    if (loggingOut) return
+    setLoggingOut(true)
+    setLogoutError('')
+    const { error } = await supabase.auth.signOut()
+    if (error) {
+      setLogoutError('Unable to log out. Please try again.')
+      setLoggingOut(false)
+      return
+    }
+    window.location.replace('/login-personal')
+  }
+
   async function addGoal() {
     const text = draft.trim()
     if (!text || !profileId || saving) return
@@ -372,9 +387,17 @@ export default function PersonalDashboardPage() {
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_10%_10%,rgba(66,86,220,0.18),transparent_40%),radial-gradient(ellipse_at_92%_82%,rgba(177,41,190,0.14),transparent_46%)]" />
       <div className="relative mx-auto flex min-h-[100svh] w-full max-w-[1500px] flex-col px-5 py-5 sm:px-8 lg:px-10">
         <header className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-4">
-          <Link href="/personal/dashboard" aria-label="Aether Personal dashboard" className="block">
-            <img src="/aether-personal-logo.png" alt="Aether Personal" className="h-20 w-auto max-w-[230px] object-contain sm:h-24" />
-          </Link>
+          <div className="flex items-center gap-5 sm:gap-8">
+            <Link href="/personal/dashboard" aria-label="Aether Personal dashboard" className="block">
+              <img src="/aether-personal-logo.png" alt="Aether Personal" className="h-20 w-auto max-w-[230px] object-contain sm:h-24" />
+            </Link>
+            <div className="flex flex-col items-start gap-1">
+              <button type="button" onClick={() => void handleLogout()} disabled={loggingOut} className="inline-flex items-center gap-2 rounded-xl border border-violet-400/25 bg-[#18172d] px-4 py-2.5 text-sm font-semibold text-violet-200 transition hover:border-violet-400/50 hover:bg-violet-500/15 disabled:cursor-not-allowed disabled:opacity-50">
+                <LogOut className="h-4 w-4" /> {loggingOut ? 'Logging out…' : 'Log Out'}
+              </button>
+              {logoutError && <p role="alert" className="max-w-[220px] text-xs text-rose-300">{logoutError}</p>}
+            </div>
+          </div>
           <nav aria-label="Personal pages" className="inline-flex rounded-xl border border-violet-400/20 bg-[#18172d] p-1">
             <Link href="/personal/dashboard" aria-current="page" className="rounded-lg bg-gradient-to-r from-violet-700 to-indigo-600 px-3 py-2.5 text-xs font-bold text-white shadow-md sm:px-5 sm:text-sm">Personal Dashboard</Link>
             <Link href="/personal/chat" className="rounded-lg px-3 py-2.5 text-xs font-bold text-slate-300 transition hover:bg-white/10 hover:text-white sm:px-5 sm:text-sm">Personal Conversations</Link>
